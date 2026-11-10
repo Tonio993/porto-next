@@ -4,7 +4,7 @@ Data: 10 novembre 2026. Baseline esaminata: `acc012e`.
 
 Questo piano prepara il primo rilascio funzionale di Porto Next. Organizza il lavoro in task assegnabili a un agente, con dipendenze, risultati verificabili e indicazioni per le chat. La pianificazione non avvia l'implementazione delle funzionalità.
 
-P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01 e [P02](p02/numeri-e-tempo.md) sono completati; lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
+P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01, [P02](p02/numeri-e-tempo.md) e [P03](p03/porti.md) sono completati; lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
 
 ## 1. Fonti e decisioni di perimetro
 
@@ -285,6 +285,8 @@ La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dip
 **Accettazione:** `0,01 × 0,5` produce una base arrotondata di `0,01`; un'ora locale inesistente è respinta, una ambigua richiede scelta. Cambiare il fuso del computer non cambia i risultati.
 
 ### P03 — Creare e consultare un porto
+
+**Stato:** completato. Percorso, schema e verifiche in [Creare e consultare un porto](p03/porti.md) e nel registro.
 
 **Consegna:** primo percorso completo UI → IPC → caso d'uso → SQLite → rilettura.
 
@@ -607,4 +609,4 @@ Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) co
 - difetti aperti e loro impatto;
 - prossimo task e dipendenze effettivamente integrate.
 
-Il prossimo passo è **P03**, in una nuova chat con ragionamento `medium`, usando le decisioni P00, il [contesto applicativo P01](p01/contesto-applicativo.md) e i [valori e contratti P02](p02/numeri-e-tempo.md).
+Il prossimo passo è **P04**, continuando la chat P03 con ragionamento consigliato `high`, usando le decisioni P00, il [contesto applicativo P01](p01/contesto-applicativo.md), i [valori e contratti P02](p02/numeri-e-tempo.md) e il [percorso porti P03](p03/porti.md).

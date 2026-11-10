@@ -4,7 +4,8 @@ import { app, BrowserWindow, dialog, Menu } from 'electron'
 import type { ArchiveState } from '../shared/contracts/archive'
 import { archiveChannels } from '../shared/contracts/archive'
 import { ArchiveController, type ArchiveAction } from './archive-controller'
-import { registerArchiveIpc, registerTimeIpc } from './ipc/register'
+import { registerArchiveIpc, registerTimeIpc, registerPortIpc } from './ipc/register'
+import { PortService } from '../backend/application/ports/port-service'
 import { ArchiveService } from '../backend/application/archives/archive-service'
 import { ArchiveCoordinator } from '../backend/application/archives/archive-coordinator'
 import { TimeService } from '../backend/application/time/time-service'
@@ -103,6 +104,7 @@ if (ownsInstance) {
       )
       registerArchiveIpc(controller, () => window)
       registerTimeIpc(new TimeService(archives.coordinator), () => window)
+      registerPortIpc(new PortService(archives.coordinator), () => window)
       Menu.setApplicationMenu(
         Menu.buildFromTemplate([
           {

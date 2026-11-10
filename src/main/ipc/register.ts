@@ -4,6 +4,8 @@ import { ArchiveController, type ArchiveAction } from '../archive-controller'
 import type { TimeService } from '../../backend/application/time/time-service'
 import type { TimeApi } from '../../shared/contracts/values'
 import { timeChannels } from '../../shared/contracts/values'
+import { portChannels, type PortApi } from '../../shared/contracts/ports'
+import type { PortService } from '../../backend/application/ports/port-service'
 
 export function registerArchiveIpc(
   controller: ArchiveController,
@@ -62,6 +64,30 @@ export function registerTimeIpc(service: TimeService, window: () => BrowserWindo
           context: null,
         }
       // The coordinator and each use case validate the unknown input at runtime.
+      return service[action](input as never)
+    })
+  }
+}
+
+export function registerPortIpc(service: PortService, window: () => BrowserWindow | null): void {
+  for (const action of Object.keys(portChannels) as (keyof PortApi)[]) {
+    ipcMain.handle(portChannels[action], (event, input: unknown) => {
+      const owner = window()
+      if (
+        !owner ||
+        event.sender !== owner.webContents ||
+        event.senderFrame !== owner.webContents.mainFrame
+      )
+        return {
+          ok: false,
+          error: {
+            code: 'INVALID_INPUT',
+            message: 'Richiesta non autorizzata.',
+            fields: [],
+            conflicts: [],
+          },
+          context: null,
+        }
       return service[action](input as never)
     })
   }

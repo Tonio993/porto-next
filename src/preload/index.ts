@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type { ArchiveApi, ArchiveState } from '../shared/contracts/archive'
 import { archiveChannels } from '../shared/contracts/archive'
 import { timeChannels, type TimeApi } from '../shared/contracts/values'
+import { portChannels, type PortApi } from '../shared/contracts/ports'
 
 const api: ArchiveApi = {
   getState: () => ipcRenderer.invoke(archiveChannels.state),
@@ -28,3 +29,10 @@ const time: TimeApi = {
   resolveCompanyMoment: (request) => ipcRenderer.invoke(timeChannels.resolveCompanyMoment, request),
 }
 contextBridge.exposeInMainWorld('time', time)
+
+const ports: PortApi = {
+  create: (request) => ipcRenderer.invoke(portChannels.create, request),
+  list: (request) => ipcRenderer.invoke(portChannels.list, request),
+  get: (request) => ipcRenderer.invoke(portChannels.get, request),
+}
+contextBridge.exposeInMainWorld('ports', ports)

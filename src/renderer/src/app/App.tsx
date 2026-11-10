@@ -19,6 +19,7 @@ import {
 } from '@tabler/icons-react'
 import { useArchives } from '../api/use-archives'
 import { TimeSettings } from './TimeSettings'
+import { Ports } from './Ports'
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat('it-IT', {
@@ -156,7 +157,9 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
               </h1>
               <p className="page-description">
                 {active
-                  ? 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
+                  ? section === 'Anagrafiche'
+                    ? 'Prepara e consulta i porti del tuo archivio.'
+                    : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
                   : 'Crea un archivio o aprine uno esistente per iniziare.'}
               </p>
             </div>
@@ -195,6 +198,8 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
 
           {section === 'Riferimenti temporali' && state.context ? (
             <TimeSettings archives={archives} />
+          ) : section === 'Anagrafiche' && state.context ? (
+            <Ports archives={archives} />
           ) : section !== 'Archivi' ? (
             <section className="archive-panel">
               <h2>Sezione in preparazione</h2>

@@ -5,7 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BrowserWindow, dialog, ipcMain } from 'electron'
 import { ArchiveController } from '../../src/main/archive-controller'
 import { DatabaseSession } from '../../src/backend/infrastructure/database/database-session'
-import { registerArchiveIpc, registerTimeIpc } from '../../src/main/ipc/register'
+import { registerArchiveIpc, registerTimeIpc, registerPortIpc } from '../../src/main/ipc/register'
+import { PortService } from '../../src/backend/application/ports/port-service'
+import { portChannels } from '../../src/shared/contracts/ports'
 import { TimeService } from '../../src/backend/application/time/time-service'
 import { ArchiveCoordinator } from '../../src/backend/application/archives/archive-coordinator'
 import { timeChannels } from '../../src/shared/contracts/values'
@@ -144,6 +146,46 @@ describe('controller archivi e menu', () => {
 })
 
 describe('confine IPC', () => {
+  it('protegge tutti i canali dei porti da altri mittenti, frame secondari e finestre assenti', async () => {
+    const service = new PortService(new ArchiveCoordinator())
+    let available = true
+    registerPortIpc(service, () => (available ? owner : null))
+    for (const action of Object.keys(portChannels) as (keyof typeof portChannels)[]) {
+      const execute = vi.spyOn(service, action)
+      const handler = vi
+        .mocked(ipcMain.handle)
+        .mock.calls.find(([channel]) => channel === portChannels[action])![1]
+      for (const event of [
+        { sender: {}, senderFrame: owner.webContents.mainFrame },
+        { sender: owner.webContents, senderFrame: {} },
+      ])
+        expect(await handler(event as Electron.IpcMainInvokeEvent, null)).toMatchObject({
+          ok: false,
+          context: null,
+          error: { code: 'INVALID_INPUT' },
+        })
+      available = false
+      expect(
+        await handler(
+          {
+            sender: owner.webContents,
+            senderFrame: owner.webContents.mainFrame,
+          } as Electron.IpcMainInvokeEvent,
+          null,
+        ),
+      ).toMatchObject({ ok: false, error: { code: 'INVALID_INPUT' } })
+      available = true
+      expect(execute).not.toHaveBeenCalled()
+      await handler(
+        {
+          sender: owner.webContents,
+          senderFrame: owner.webContents.mainFrame,
+        } as Electron.IpcMainInvokeEvent,
+        null,
+      )
+      expect(execute).toHaveBeenCalledOnce()
+    }
+  })
   it('protegge tutti i canali temporali prima di invocare il servizio', async () => {
     const service = new TimeService(new ArchiveCoordinator())
     registerTimeIpc(service, () => owner)

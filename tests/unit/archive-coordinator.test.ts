@@ -279,17 +279,17 @@ describe('migrazione da v1', () => {
     sqlite.close()
   }
 
-  it('aggiorna a v3 conservando metadati e copia preventiva in formato v1', async () => {
+  it('aggiorna a v4 conservando metadati e copia preventiva in formato v1', async () => {
     createV1()
     const info = await service.open(file('v1'))
     expect(info).toMatchObject({
       name: 'Archivio storico',
-      schemaVersion: 3,
+      schemaVersion: 4,
       createdAt: '2020-01-01T00:00:00.000Z',
       updatedAt: '2021-01-01T00:00:00.000Z',
     })
     expect(context().revision).toBe('0')
-    const backup = readdirSync(folder).find((name) => name.includes('.prima-v3-'))!
+    const backup = readdirSync(folder).find((name) => name.includes('.prima-v4-'))!
     const snapshot = new Database(join(folder, backup), { readonly: true })
     try {
       expect(snapshot.pragma('user_version', { simple: true })).toBe(1)
@@ -305,7 +305,7 @@ describe('migrazione da v1', () => {
     }
     await service.close()
     await service.open(file('v1'))
-    expect(readdirSync(folder).filter((name) => name.includes('.prima-v3-'))).toHaveLength(1)
+    expect(readdirSync(folder).filter((name) => name.includes('.prima-v4-'))).toHaveLength(1)
   })
 
   it('una migrazione fallita non altera il v1 e conserva la sessione precedente', async () => {

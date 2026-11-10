@@ -175,7 +175,7 @@ describe('configurazione temporale per archivio', () => {
   })
 })
 
-describe('migrazione temporale v2 → v3', () => {
+describe('migrazione da v2 allo schema corrente', () => {
   function createV2(collidingTable = false) {
     const sqlite = new Database(file('v2'))
     sqlite.exec(readFileSync('migrations/0001_archive.sql', 'utf8'))
@@ -198,7 +198,7 @@ describe('migrazione temporale v2 → v3', () => {
   it('inizializza la versione senza decorrenza conservando metadati, revisione e copia v2', async () => {
     createV2()
     expect(await archives.open(file('v2'))).toMatchObject({
-      schemaVersion: 3,
+      schemaVersion: 4,
       createdAt: '2020-01-01T00:00:00.000Z',
       updatedAt: '2021-01-01T00:00:00.000Z',
     })
@@ -214,7 +214,7 @@ describe('migrazione temporale v2 → v3', () => {
         .pluck()
         .get(),
     ).toBeNull()
-    const backup = readdirSync(folder).find((name) => name.includes('.prima-v3-'))!
+    const backup = readdirSync(folder).find((name) => name.includes('.prima-v4-'))!
     const snapshot = new Database(join(folder, backup), { readonly: true })
     try {
       expect(snapshot.pragma('user_version', { simple: true })).toBe(2)

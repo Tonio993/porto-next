@@ -57,7 +57,7 @@ src/
     api/                  Accesso ai contratti del preload
   backend/
     application/archives/ Gestione del ciclo di vita degli archivi
-    domain/               Spazio per il futuro dominio
+    domain/values/        Numeri esatti e risoluzione dei momenti
     infrastructure/
       database/           Connessione, schema e migrazioni
       preferences/        Elenco dei file recenti
@@ -83,7 +83,9 @@ I file SQL sono importati nella build con `?raw`: non dipendono dalla directory 
 
 ## Piano funzionale e specifica P00
 
-Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza i task successivi. P00 ha prodotto le [decisioni iniziali](doc/p00/decisioni-iniziali.md), i contratti e gli esempi. P01 introduce il [contesto applicativo dell’archivio](doc/p01/contesto-applicativo.md), la revisione nello schema v2 e la navigazione minima. Il [registro](doc/stato-implementazione-prestazioni.md) indica lo stato effettivo; le sezioni funzionali restano in preparazione.
+Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza i task successivi. P00 ha prodotto le [decisioni iniziali](doc/p00/decisioni-iniziali.md), i contratti e gli esempi. P01 introduce il [contesto applicativo dell’archivio](doc/p01/contesto-applicativo.md), la revisione e la navigazione minima. P02 adotta [numeri esatti e momenti](doc/p02/numeri-e-tempo.md), con schema v3 e configurazione del fuso iniziale per archivio. Il [registro](doc/stato-implementazione-prestazioni.md) indica lo stato effettivo; le funzioni operative restano in preparazione.
+
+Con un archivio aperto, **Riferimenti temporali** permette di confermare il fuso aziendale iniziale (proposto `Europe/Rome`) e verificare un orario locale, scegliendo l'occorrenza durante il cambio dell'ora. La verifica non registra attività. Dopo la conferma il fuso non è modificabile in questo rilascio; la configurazione resta nel file, anche nelle copie e nei backup.
 
 Lo spike P00 usa dipendenze di sviluppo isolate e verifica numeri/fusi senza introdurre funzionalità applicative. Dopo `npm ci`, prepararlo ed eseguirlo con:
 

@@ -4,7 +4,7 @@ Data: 10 novembre 2026. Baseline esaminata: `acc012e`.
 
 Questo piano prepara il primo rilascio funzionale di Porto Next. Organizza il lavoro in task assegnabili a un agente, con dipendenze, risultati verificabili e indicazioni per le chat. La pianificazione non avvia l'implementazione delle funzionalità.
 
-P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01 è completato; lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
+P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01 e [P02](p02/numeri-e-tempo.md) sono completati; lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
 
 ## 1. Fonti e decisioni di perimetro
 
@@ -272,6 +272,8 @@ La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dip
 **Accettazione:** una richiesta rimasta in coda per l'archivio A non legge né modifica B. La protezione vale anche dopo «Salva con nome», benché l'ID interno coincida. Gli attuali flussi di backup, apertura e chiusura continuano a funzionare.
 
 ### P02 — Numeri e tempo
+
+**Stato:** completato. Contratti, adattatori, configurazione per archivio e verifiche sono descritti in [Numeri e tempo](p02/numeri-e-tempo.md) e nel registro.
 
 **Consegna:** tipi di dominio e adattatori verificati per denaro, fattori decimali, momenti e configurazione temporale iniziale per archivio.
 
@@ -605,4 +607,4 @@ Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) co
 - difetti aperti e loro impatto;
 - prossimo task e dipendenze effettivamente integrate.
 
-Il prossimo passo è **P02**, in una nuova chat con ragionamento `high`, usando le decisioni P00 e il [contesto applicativo P01](p01/contesto-applicativo.md).
+Il prossimo passo è **P03**, in una nuova chat con ragionamento `medium`, usando le decisioni P00, il [contesto applicativo P01](p01/contesto-applicativo.md) e i [valori e contratti P02](p02/numeri-e-tempo.md).

@@ -7,10 +7,10 @@ const api: ArchiveApi = {
   create: (name) => ipcRenderer.invoke(archiveChannels.create, name),
   open: () => ipcRenderer.invoke(archiveChannels.open),
   openRecent: (path) => ipcRenderer.invoke(archiveChannels.openRecent, path),
-  saveAs: () => ipcRenderer.invoke(archiveChannels.saveAs),
-  backup: () => ipcRenderer.invoke(archiveChannels.backup),
-  close: () => ipcRenderer.invoke(archiveChannels.close),
-  rename: (name) => ipcRenderer.invoke(archiveChannels.rename, name),
+  saveAs: (request) => ipcRenderer.invoke(archiveChannels.saveAs, request),
+  backup: (request) => ipcRenderer.invoke(archiveChannels.backup, request),
+  close: (request) => ipcRenderer.invoke(archiveChannels.close, request),
+  rename: (input) => ipcRenderer.invoke(archiveChannels.rename, input),
   onChanged: (callback) => {
     const listener = (_event: Electron.IpcRendererEvent, state: ArchiveState) => callback(state)
     ipcRenderer.on(archiveChannels.changed, listener)

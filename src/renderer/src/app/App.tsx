@@ -26,16 +26,31 @@ const formatDate = (value: string) =>
   }).format(new Date(value))
 
 export function App() {
-  const { state, busy, error, notice, setError, setNotice, run, update } = useArchives()
+  const archives = useArchives()
+  // Remount forms, selections and future previews at every actual activation.
+  return (
+    <ArchiveWorkspace key={archives.state.context?.sessionId ?? 'closed'} archives={archives} />
+  )
+}
+
+function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchives> }) {
+  const { state, busy, error, notice, setError, setNotice, run, update } = archives
+  const [section, setSection] = useState('Archivi')
   const [createOpened, setCreateOpened] = useState(false)
   const [aboutOpened, setAboutOpened] = useState(false)
   const [newName, setNewName] = useState('')
-  const [name, setName] = useState('')
+  const [name, setName] = useState(state.active?.name ?? '')
+  const [nameContext, setNameContext] = useState(state.context)
+  const [nameDirty, setNameDirty] = useState(false)
   const active = state.active
+  const request = state.context ? { context: state.context, payload: null } : undefined
 
   useEffect(() => {
-    setName(active?.name ?? '')
-  }, [active?.name, active?.path])
+    if (!nameDirty) {
+      setName(active?.name ?? '')
+      setNameContext(state.context)
+    }
+  }, [active?.name, state.context, nameDirty])
 
   async function create(event: FormEvent) {
     event.preventDefault()
@@ -48,12 +63,17 @@ export function App() {
 
   async function rename(event: FormEvent) {
     event.preventDefault()
-    const next = await update(() => window.archives.rename(name))
-    if (next) setNotice('Nome dell’archivio aggiornato.')
+    if (!nameContext) return
+    const renameRequest = { context: nameContext, payload: { name } }
+    const next = await update(() => window.archives.rename(renameRequest))
+    if (next) {
+      setNameDirty(false)
+      setNotice('Nome dell’archivio aggiornato.')
+    }
   }
 
   async function backup() {
-    const result = await run(() => window.archives.backup())
+    const result = await run(() => window.archives.backup(request))
     if (result?.path) setNotice(`Copia di backup creata: ${result.path}`)
   }
 
@@ -70,11 +90,26 @@ export function App() {
           </div>
         </div>
         <div className="sidebar-section-label">SPAZIO DI LAVORO</div>
-        <div className="nav-item" aria-current="page">
+        <button
+          className="nav-item"
+          aria-current={section === 'Archivi' ? 'page' : undefined}
+          onClick={() => setSection('Archivi')}
+        >
           <IconDatabase size={19} />
           Archivi
           <IconChevronRight size={15} />
-        </div>
+        </button>
+        {['Anagrafiche', 'Catalogo e tariffe', 'Operazioni nave', 'Prestazioni'].map((label) => (
+          <button
+            key={label}
+            className="nav-item"
+            disabled={!active || busy}
+            aria-current={section === label ? 'page' : undefined}
+            onClick={() => setSection(label)}
+          >
+            {label}
+          </button>
+        ))}
         <div className="sidebar-local">
           <span className="status-dot" />
           Applicazione locale
@@ -94,7 +129,7 @@ export function App() {
         <header className="topbar">
           <div>
             Spazio di lavoro<span className="breadcrumb-separator">/</span>
-            <strong>Archivi</strong>
+            <strong>{section}</strong>
           </div>
           <span className="local-label">
             <IconDeviceDesktop size={16} />
@@ -105,7 +140,13 @@ export function App() {
           <div className="page-heading">
             <div>
               <p className="eyebrow">IL TUO SPAZIO DI LAVORO</p>
-              <h1>{active ? 'Il tuo archivio' : 'Benvenuto a bordo.'}</h1>
+              <h1>
+                {section !== 'Archivi'
+                  ? section
+                  : active
+                    ? 'Il tuo archivio'
+                    : 'Benvenuto a bordo.'}
+              </h1>
               <p className="page-description">
                 {active
                   ? 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
@@ -145,7 +186,15 @@ export function App() {
             </div>
           )}
 
-          {!active ? (
+          {section !== 'Archivi' ? (
+            <section className="archive-panel">
+              <h2>Sezione in preparazione</h2>
+              <p>Le funzioni di {section.toLowerCase()} non sono ancora disponibili.</p>
+              <Button variant="light" onClick={() => setSection('Archivi')}>
+                Torna all’archivio
+              </Button>
+            </section>
+          ) : !active ? (
             <>
               <div className="action-grid">
                 <section className="action-card create-card">
@@ -258,7 +307,11 @@ export function App() {
                   label="Nome dell’archivio"
                   description="Il nome visualizzato nell’app. Il nome del file rimane invariato."
                   value={name}
-                  onChange={(event) => setName(event.currentTarget.value)}
+                  onChange={(event) => {
+                    if (!nameDirty) setNameContext(state.context)
+                    setName(event.currentTarget.value)
+                    setNameDirty(event.currentTarget.value !== active.name)
+                  }}
                   maxLength={120}
                   disabled={busy}
                   required
@@ -270,12 +323,26 @@ export function App() {
                 >
                   Aggiorna nome
                 </Button>
+                {nameDirty && nameContext?.revision !== state.context?.revision && (
+                  <Button
+                    variant="subtle"
+                    disabled={busy}
+                    onClick={() => {
+                      setName(active.name)
+                      setNameContext(state.context)
+                      setNameDirty(false)
+                      setError(null)
+                    }}
+                  >
+                    Ricarica nome
+                  </Button>
+                )}
               </form>
               <div className="archive-actions">
                 <Button
                   disabled={busy}
                   leftSection={<IconCopy size={17} />}
-                  onClick={() => void update(() => window.archives.saveAs())}
+                  onClick={() => void update(() => window.archives.saveAs(request))}
                 >
                   Salva con nome
                 </Button>
@@ -291,7 +358,7 @@ export function App() {
                   disabled={busy}
                   variant="subtle"
                   color="gray"
-                  onClick={() => void update(() => window.archives.close())}
+                  onClick={() => void update(() => window.archives.close(request))}
                 >
                   Chiudi archivio
                 </Button>

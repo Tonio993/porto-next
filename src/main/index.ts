@@ -5,6 +5,8 @@ import type { ArchiveState } from '../shared/contracts/archive'
 import { archiveChannels } from '../shared/contracts/archive'
 import { ArchiveController, type ArchiveAction } from './archive-controller'
 import { registerArchiveIpc } from './ipc/register'
+import { ArchiveService } from '../backend/application/archives/archive-service'
+import { ArchiveCoordinator } from '../backend/application/archives/archive-coordinator'
 
 app.setName('Porto Next')
 if (process.env.PORTO_TEST_USER_DATA) app.setPath('userData', process.env.PORTO_TEST_USER_DATA)
@@ -90,7 +92,14 @@ if (ownsInstance) {
   void app
     .whenReady()
     .then(() => {
-      controller = new ArchiveController(app.getPath('userData'), () => window, publish, log)
+      const archives = new ArchiveService(new ArchiveCoordinator(log))
+      controller = new ArchiveController(
+        app.getPath('userData'),
+        () => window,
+        publish,
+        log,
+        archives,
+      )
       registerArchiveIpc(controller, () => window)
       Menu.setApplicationMenu(
         Menu.buildFromTemplate([

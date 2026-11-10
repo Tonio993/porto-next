@@ -1,11 +1,15 @@
 import type Database from 'better-sqlite3'
 import initialSql from '../../../../migrations/0001_archive.sql?raw'
+import revisionSql from '../../../../migrations/0002_archive_revision.sql?raw'
 import { ArchiveError } from '../../../shared/errors/archive-error'
 
 export const APPLICATION_ID = 0x504f5254
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
-const migrations = [{ version: 1, sql: initialSql }]
+const migrations = [
+  { version: 1, sql: initialSql },
+  { version: 2, sql: revisionSql },
+]
 
 export function migrate(database: Database.Database, fromVersion: number): void {
   if (fromVersion > SCHEMA_VERSION)

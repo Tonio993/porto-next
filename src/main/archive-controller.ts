@@ -1,5 +1,12 @@
 import { basename, join } from 'node:path'
 import { BrowserWindow, dialog } from 'electron'
+import type { ArchiveContextDto } from '../shared/contracts/application'
+import type { ArchiveFileOperations } from '../backend/application/archives/archive-files'
+import {
+  record,
+  validateContext,
+  validateFileRequest,
+} from '../backend/application/archives/context-validation'
 import { ArchiveService } from '../backend/application/archives/archive-service'
 import { RecentStore } from '../backend/infrastructure/preferences/recent-store'
 import type { ArchiveState, Result } from '../shared/contracts/archive'
@@ -10,23 +17,38 @@ export type ArchiveAction =
 const filters = [{ name: 'Archivio Porto Next', extensions: ['ormeggi'] }]
 
 export class ArchiveController {
-  private readonly archives = new ArchiveService()
   private readonly recent: RecentStore
-  private pending: Promise<void> = Promise.resolve()
 
   constructor(
     userDataPath: string,
     private readonly window: () => BrowserWindow | null,
     private readonly publish: (state: ArchiveState) => void,
     private readonly log: (error: unknown) => void,
+    private readonly archives = new ArchiveService(),
   ) {
     this.recent = new RecentStore(join(userDataPath, 'recent-archives.json'))
   }
 
   execute(action: ArchiveAction, input?: unknown): Promise<Result<unknown>> {
-    const result = this.pending.then(async (): Promise<Result<unknown>> => {
+    // Capture the menu/legacy target now, before waiting in the shared queue or a dialog.
+    const targeted = ['rename', 'saveAs', 'backup', 'close'].includes(action)
+    const legacy = input === undefined || (action === 'rename' && typeof input === 'string')
+    const captured = targeted && legacy ? this.archives.context() : null
+    return this.archives.withFiles(async (files): Promise<Result<unknown>> => {
       try {
-        const value = await this.perform(action, input)
+        let expected = captured
+        let valueInput = input
+        if (action === 'rename' && input !== undefined && typeof input !== 'string') {
+          const parameters = record(input, ['context', 'payload'])
+          const payload = record(parameters.payload, ['name'])
+          valueInput = this.text(payload.name)
+          expected = validateContext(parameters.context)
+        } else if (targeted && action !== 'rename' && input !== undefined) {
+          expected = validateFileRequest(input)
+        }
+        if (action === 'rename') valueInput = this.text(valueInput)
+        if (targeted) this.archives.coordinator.assertContext(expected)
+        const value = await this.perform(files, action, valueInput, expected)
         const active = this.archives.current()
         if (active && action !== 'state' && action !== 'backup') {
           try {
@@ -37,39 +59,54 @@ export class ArchiveController {
         }
         const state = this.state()
         if (action !== 'state') this.publish(state)
-        return { ok: true, value: action === 'backup' ? value : state }
+        return { ok: true, value: action === 'backup' ? value : state, context: state.context }
       } catch (error) {
         this.log(error)
         const known = asArchiveError(error)
-        return { ok: false, error: { code: known.code, message: known.message } }
+        return {
+          ok: false,
+          error: {
+            code: known.code,
+            message: known.message,
+            fields: known.fields,
+            conflicts: known.conflicts,
+          },
+          context: ['NO_ARCHIVE', 'ARCHIVE_SESSION_CHANGED', 'VALIDATION_ERROR'].includes(
+            known.code,
+          )
+            ? null
+            : this.archives.context(),
+        }
       }
     })
-    this.pending = result.then(
-      () => undefined,
-      () => undefined,
-    )
-    return result
   }
 
   async shutdown(): Promise<void> {
-    await this.pending
-    await this.archives.close()
+    await this.archives.shutdown()
   }
-
   private state(): ArchiveState {
-    return { active: this.archives.current(), recent: this.recent.list() }
+    return {
+      active: this.archives.current(),
+      recent: this.recent.list(),
+      context: this.archives.context(),
+    }
   }
 
-  private async perform(action: ArchiveAction, input?: unknown): Promise<unknown> {
+  private async perform(
+    files: ArchiveFileOperations,
+    action: ArchiveAction,
+    input: unknown,
+    expected: ArchiveContextDto | null,
+  ): Promise<unknown> {
     const window = this.window()
     if (action === 'state') return this.state()
-    if (action === 'close') return this.archives.close()
-    if (action === 'rename') return this.archives.rename(this.text(input))
+    if (action === 'close') return files.close()
+    if (action === 'rename') return files.rename(this.text(input), expected)
     if (action === 'openRecent') {
       const path = this.text(input)
       if (!this.recent.list().some((item) => item.path === path))
         throw new ArchiveError('INVALID_INPUT', 'Seleziona un archivio dall’elenco dei recenti.')
-      return this.archives.open(path)
+      return files.open(path)
     }
     if (!window || window.isDestroyed())
       throw new ArchiveError('UNEXPECTED', 'La finestra dell’applicazione non è disponibile.')
@@ -80,7 +117,7 @@ export class ArchiveController {
         filters,
         properties: ['openFile'],
       })
-      if (!result.canceled && result.filePaths[0]) await this.archives.open(result.filePaths[0])
+      if (!result.canceled && result.filePaths[0]) await files.open(result.filePaths[0])
       return
     }
     if (action === 'create') {
@@ -95,7 +132,7 @@ export class ArchiveController {
         defaultPath: `${filename}.ormeggi`,
         filters,
       })
-      if (!result.canceled && result.filePath) await this.archives.create(result.filePath, name)
+      if (!result.canceled && result.filePath) await files.create(result.filePath, name)
       return
     }
 
@@ -112,8 +149,9 @@ export class ArchiveController {
       filters,
     })
     if (result.canceled || !result.filePath) return { path: null }
-    if (backup) return { path: await this.archives.backup(result.filePath) }
-    return this.archives.saveAs(result.filePath)
+    this.archives.coordinator.assertContext(expected)
+    if (backup) return { path: await files.backup(result.filePath) }
+    return files.saveAs(result.filePath)
   }
 
   private text(input: unknown): string {

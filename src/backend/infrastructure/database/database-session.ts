@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
+import { sql } from 'drizzle-orm'
 import { ArchiveError } from '../../../shared/errors/archive-error'
 import { APPLICATION_ID, SCHEMA_VERSION } from './migrations'
 import * as schema from './schema'
@@ -47,13 +48,28 @@ export class DatabaseSession {
     this.sqlite.pragma('trusted_schema = OFF')
   }
 
-  metadata() {
-    const row = this.db.select().from(schema.archiveMetadata).get()
+  metadata(version = SCHEMA_VERSION) {
+    const metadata = schema.archiveMetadata
+    const row = this.db
+      .select({
+        singleton: metadata.singleton,
+        id: metadata.id,
+        name: metadata.name,
+        createdAt: metadata.createdAt,
+        updatedAt: metadata.updatedAt,
+        revision:
+          version === 1 ? sql<string>`'0'` : sql<string>`CAST(${metadata.revision} AS TEXT)`,
+      })
+      .from(metadata)
+      .get()
     if (
       !row ||
       row.singleton !== 1 ||
       !row.id ||
       !row.name ||
+      typeof row.revision !== 'string' ||
+      !/^(0|[1-9][0-9]*)$/.test(row.revision) ||
+      BigInt(row.revision) > 9223372036854775807n ||
       !Number.isFinite(Date.parse(row.createdAt)) ||
       !Number.isFinite(Date.parse(row.updatedAt))
     )

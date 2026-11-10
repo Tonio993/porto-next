@@ -26,7 +26,13 @@ export function registerArchiveIpc(
       )
         return {
           ok: false,
-          error: { code: 'INVALID_INPUT', message: 'Richiesta non autorizzata.' },
+          error: {
+            code: 'INVALID_INPUT',
+            message: 'Richiesta non autorizzata.',
+            fields: [],
+            conflicts: [],
+          },
+          context: null,
         }
       return controller.execute(action, input)
     })

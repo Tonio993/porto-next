@@ -1,9 +1,11 @@
-import type { ErrorCode } from '../contracts/archive'
+import type { ApplicationErrorCode, FieldIssueDto, ConflictDto } from '../contracts/application'
 
 export class ArchiveError extends Error {
   constructor(
-    public readonly code: ErrorCode,
+    public readonly code: ApplicationErrorCode,
     message: string,
+    public readonly fields: readonly FieldIssueDto[] = [],
+    public readonly conflicts: readonly ConflictDto[] = [],
   ) {
     super(message)
     this.name = 'ArchiveError'

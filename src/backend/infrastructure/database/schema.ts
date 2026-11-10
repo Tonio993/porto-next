@@ -6,4 +6,6 @@ export const archiveMetadata = sqliteTable('archive_metadata', {
   name: text('name').notNull(),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
+  // Read this int64 through CAST AS TEXT; Drizzle's number mapping would lose precision.
+  revision: integer('revision').notNull().default(0),
 })

@@ -1,3 +1,5 @@
+import type { ApplicationErrorDto, ArchiveContextDto, CommandRequest } from './application'
+
 export interface ArchiveInfo {
   id: string
   name: string
@@ -16,6 +18,7 @@ export interface RecentArchive {
 export interface ArchiveState {
   active: ArchiveInfo | null
   recent: RecentArchive[]
+  context: ArchiveContextDto | null
 }
 
 export const archiveChannels = {
@@ -42,16 +45,17 @@ export type ErrorCode =
   | 'UNEXPECTED'
 
 export type Result<T> =
-  { ok: true; value: T } | { ok: false; error: { code: ErrorCode; message: string } }
+  | { ok: true; value: T; context?: ArchiveContextDto | null }
+  | { ok: false; error: ApplicationErrorDto; context?: ArchiveContextDto | null }
 
 export interface ArchiveApi {
   getState(): Promise<Result<ArchiveState>>
   create(name: string): Promise<Result<ArchiveState>>
   open(): Promise<Result<ArchiveState>>
   openRecent(path: string): Promise<Result<ArchiveState>>
-  saveAs(): Promise<Result<ArchiveState>>
-  backup(): Promise<Result<{ path: string | null }>>
-  close(): Promise<Result<ArchiveState>>
-  rename(name: string): Promise<Result<ArchiveState>>
+  saveAs(request?: CommandRequest<null>): Promise<Result<ArchiveState>>
+  backup(request?: CommandRequest<null>): Promise<Result<{ path: string | null }>>
+  close(request?: CommandRequest<null>): Promise<Result<ArchiveState>>
+  rename(input: string | CommandRequest<{ name: string }>): Promise<Result<ArchiveState>>
   onChanged(callback: (state: ArchiveState) => void): () => void
 }

@@ -2,7 +2,7 @@
 
 Riferimento: [piano di implementazione](piano-implementazione-prestazioni.md).
 
-Ultimo aggiornamento: 10 novembre 2026, completamento P03.
+Ultimo aggiornamento: 10 novembre 2026, completamento P04.
 
 ## Baseline
 
@@ -10,36 +10,36 @@ Ultimo aggiornamento: 10 novembre 2026, completamento P03.
 - Stack presente: Electron, React, TypeScript, SQLite, better-sqlite3 e Drizzle.
 - Funzioni presenti: creazione/apertura archivi, recenti, nome dell'archivio, copia, backup e chiusura.
 - I documenti in `legacy/` descrivono il dominio e un precedente percorso tecnologico. Le dichiarazioni di implementazione Java/Angular non costituiscono avanzamento di questo repository.
-- P00–P03 sono completati. P03 introduce creazione e consultazione dei porti e porta lo schema a v4; i task da P04 in avanti non sono stati avviati.
+- P00–P04 sono completati. P04 completa versioni e ciclo di vita del porto e porta lo schema a v5; i task da P05 in avanti non sono stati avviati.
 
 ## Avanzamento
 
-| Task | Stato      | Revisione/commit           | Note                                                                                                       |
-| ---- | ---------- | -------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| P00  | Completato | Commit di introduzione P00 | [Decisioni](p00/decisioni-iniziali.md), contratti, scenari e spike numerico/temporale.                     |
-| P01  | Completato | `f9b3dbb`                  | [Contesto applicativo](p01/contesto-applicativo.md); schema v2, contratti e navigazione verificati.        |
-| P02  | Completato | `4235f71`                  | [Numeri e tempo](p02/numeri-e-tempo.md); schema v3 e flussi verificati anche nel pacchetto Windows.        |
-| P03  | Completato | `5a6fa8c`                  | [Creazione e consultazione porti](p03/porti.md); schema v4, flusso verificato anche nel pacchetto Windows. |
-| P04  | Da avviare | —                          | Versioni e ciclo di vita porto.                                                                            |
-| P05  | Da avviare | —                          | Banchine.                                                                                                  |
-| P06  | Da avviare | —                          | Clienti e agenzie.                                                                                         |
-| P07  | Da avviare | —                          | Navi.                                                                                                      |
-| P08  | Da avviare | —                          | Catalogo e pesi iniziali.                                                                                  |
-| P09  | Da avviare | —                          | Tariffe complete e calcolo base.                                                                           |
-| P10  | Da avviare | —                          | Entrata, uscita e permanenze.                                                                              |
-| P11  | Da avviare | —                          | Spostamento interno.                                                                                       |
-| P12  | Da avviare | —                          | Spostamento tra porti.                                                                                     |
-| P13  | Da avviare | —                          | Soggetti effettivi e fonti.                                                                                |
-| P14  | Da avviare | —                          | Prestazione libera.                                                                                        |
-| P15  | Da avviare | —                          | Prestazione da catalogo.                                                                                   |
-| P16  | Da avviare | —                          | Ciclo di vita e ricerca prestazioni.                                                                       |
-| P17A | Da avviare | —                          | Consuntivazione operazioni e replay.                                                                       |
-| P17B | Da avviare | —                          | Operazioni retroattive.                                                                                    |
-| P17C | Da avviare | —                          | Correzione operazioni.                                                                                     |
-| P17D | Da avviare | —                          | Eliminazione operazioni.                                                                                   |
-| P18  | Da avviare | —                          | Correzione ed eliminazione tariffe.                                                                        |
-| P19  | Da avviare | —                          | Versioni dei pesi.                                                                                         |
-| P20  | Da avviare | —                          | Revisione indipendente e rilascio.                                                                         |
+| Task | Stato      | Revisione/commit           | Note                                                                                                                            |
+| ---- | ---------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| P00  | Completato | Commit di introduzione P00 | [Decisioni](p00/decisioni-iniziali.md), contratti, scenari e spike numerico/temporale.                                          |
+| P01  | Completato | `f9b3dbb`                  | [Contesto applicativo](p01/contesto-applicativo.md); schema v2, contratti e navigazione verificati.                             |
+| P02  | Completato | `4235f71`                  | [Numeri e tempo](p02/numeri-e-tempo.md); schema v3 e flussi verificati anche nel pacchetto Windows.                             |
+| P03  | Completato | `5a6fa8c`                  | [Creazione e consultazione porti](p03/porti.md); schema v4, flusso verificato anche nel pacchetto Windows.                      |
+| P04  | Completato | `0be600d`                  | [Versioni e ciclo di vita porto](p04/versioni-e-ciclo-di-vita.md); schema v5 e percorsi verificati anche nel pacchetto Windows. |
+| P05  | Da avviare | —                          | Banchine.                                                                                                                       |
+| P06  | Da avviare | —                          | Clienti e agenzie.                                                                                                              |
+| P07  | Da avviare | —                          | Navi.                                                                                                                           |
+| P08  | Da avviare | —                          | Catalogo e pesi iniziali.                                                                                                       |
+| P09  | Da avviare | —                          | Tariffe complete e calcolo base.                                                                                                |
+| P10  | Da avviare | —                          | Entrata, uscita e permanenze.                                                                                                   |
+| P11  | Da avviare | —                          | Spostamento interno.                                                                                                            |
+| P12  | Da avviare | —                          | Spostamento tra porti.                                                                                                          |
+| P13  | Da avviare | —                          | Soggetti effettivi e fonti.                                                                                                     |
+| P14  | Da avviare | —                          | Prestazione libera.                                                                                                             |
+| P15  | Da avviare | —                          | Prestazione da catalogo.                                                                                                        |
+| P16  | Da avviare | —                          | Ciclo di vita e ricerca prestazioni.                                                                                            |
+| P17A | Da avviare | —                          | Consuntivazione operazioni e replay.                                                                                            |
+| P17B | Da avviare | —                          | Operazioni retroattive.                                                                                                         |
+| P17C | Da avviare | —                          | Correzione operazioni.                                                                                                          |
+| P17D | Da avviare | —                          | Eliminazione operazioni.                                                                                                        |
+| P18  | Da avviare | —                          | Correzione ed eliminazione tariffe.                                                                                             |
+| P19  | Da avviare | —                          | Versioni dei pesi.                                                                                                              |
+| P20  | Da avviare | —                          | Revisione indipendente e rilascio.                                                                                              |
 
 Stati utilizzabili: `Da avviare`, `In corso`, `Implementato, da verificare`, `Completato`, `Bloccato` con motivo concreto. Un task parzialmente implementato non viene marcato completato.
 
@@ -121,7 +121,7 @@ Limiti di perimetro: la verifica degli orari non registra attività; i porti sar
 
 Prossimo task: **P03**, nuova chat con ragionamento `medium`, partendo dai risultati P00–P02. Leggere il contesto P01 e la nota P02; usare il coordinatore condiviso e creare identità, progressivo, versione iniziale, prenotazione e fuso autonomo del porto nella stessa transazione.
 
-## Ultimo passaggio di consegne — P03
+## Passaggio precedente — P03
 
 Attività: creazione, ricerca, elenco paginato e dettaglio dei porti. Base integrata `675d429`; implementazione nel commit `5a6fa8c`. Dettagli e istruzioni per P04 in [Creare e consultare un porto](p03/porti.md).
 
@@ -149,3 +149,34 @@ Le verifiche desktop richiedono l'esecuzione fuori dalla sandbox dell'agente per
 Limiti: la parte di `CU-ANA-01`–`03` relativa ai porti è disponibile; cronologia, nuove versioni, correzioni, stato ed eliminazione restano P04. Non sono introdotte variazioni dei fusi, banchine o attività operative. La generazione dell'installer e l'installazione non fanno parte di P03.
 
 Prossimo task: **P04**, nella stessa chat P03, ragionamento consigliato `high`. Riutilizzare convenzioni e transazione del primo flusso completo, conservare le prenotazioni storiche e separare sempre le versioni descrittive dalla configurazione del fuso. P04 non è stato avviato.
+
+## Ultimo passaggio di consegne — P04
+
+Attività: versioni e ciclo di vita del porto, con riordino frontend circoscritto. Base integrata `ec92739`; implementazione nel commit `0be600d`. Stato: completato e verificato anche nel pacchetto Windows. Dettagli e convenzioni per P05–P07 in [Versioni e ciclo di vita del porto](p04/versioni-e-ciclo-di-vita.md).
+
+Artefatti principali:
+
+- `PortLifecycleService`, dominio della sequenza temporale, repository esteso e analisi delle FK realmente presenti. Cronologia, versioni, stato ed eliminazione con conservazione delle prenotazioni storiche e del contatore.
+- `PreviewStore` nello scope di sessione, callback dopo commit nel coordinatore e API specifiche nel contratto/preload/IPC. Anteprime server con scadenza, limite, paginazione, metodo e contesto verificati.
+- Migrazione `0005_port_version_moments.sql`, schema v5 e runner; locale, fuso, offset e UTC delle decorrenze conservati insieme. Migrazioni precedenti invariate; nessuna nuova dipendenza.
+- `App` separata da `ArchivePage`; navigazione anagrafiche in `MasterDataPage`. `usePorts` separato da elenco, dettaglio, form descrittivo, cronologia, editor e conferma.
+- `ResponseScope`, `useApplicationRequest`, errori per campo e scelta delle occorrenze riusati nei casi reali. Operazioni sui file, comandi applicativi e caricamenti delle query distinti; envelope contestuali conservati. Nessun motore CRUD, nuova libreria di stato/routing o modifica CSS globale.
+- Test di ciclo di vita SQLite, store delle anteprime, risposte asincrone e due nuovi percorsi desktop; regressioni P00–P03 mantenute.
+
+Decisioni: decorrenze nel fuso del porto con tupla storica conservata nelle correzioni descrittive; istante di osservazione unico per le letture correlate. Le versioni future diventano correnti mediante aggiornamento delle viste, senza scritture o aggiornamento automatico della revisione delle bozze. Anteprime consumate solo dopo commit; no-op senza incremento di revisione. I riferimenti esterni reali sono esposti come blocchi prima di un'eliminazione o di una correzione di versione che richiederebbe integrazione applicativa; nessun dato operativo o consolidamento fittizio.
+
+Verifiche effettuate:
+
+- `npm test`: **93 test passati su 10 file** nel runtime Electron con SQLite reale. Coperti intervalli e versioni passate/intermedie/future, osservazione coerente al confine durante la lettura, versione iniziale, prenotazioni, tuple storiche, progressivi, conferme e no-op, scadenza/consumo/capienza delle anteprime, richieste obsolete, blocchi da FK, rollback dopo prenotazione e dopo eliminazione dei componenti, paginazione completa degli effetti e migrazione v4 → v5. Le regressioni v1/v2/v3 e i controlli IPC rimangono passati.
+- `npm run test:e2e`: **5 percorsi desktop passati** sulla build con il riordino frontend e la correzione dell'invalidazione dell'editor: archivi 42,5 s, risposte asincrone/confine temporale 23,3 s, ciclo di vita circa 1,1 minuti, creazione/consultazione 35,7 s e riferimenti temporali 31,5 s; totale 3,3 minuti. Il successivo aggiustamento dell'istante unico di osservazione è coperto dal test SQLite dedicato e dalla nuova build `npm run build`; la prova finale del pacchetto usa quest'ultima build.
+- Il percorso asincrono ritarda deliberatamente una risposta dopo il cambio selezione e una risoluzione temporale dopo la chiusura dell'editor. Verifica anche futuro → corrente con orologi controllati soltanto nei processi di test, senza modifiche a revisione o dati.
+- `npm run check`: TypeScript ed ESLint passati. Il solo Prettier globale segnala i cinque documenti `doc/legacy/00`–`04`, preesistenti e non modificati. Formattazione dei file interessati verificata separatamente.
+- Schermata della cronologia sulla build ispezionata; documenti, collegamenti locali e differenze Git controllati. Percorsi guidati tramite Playwright, con dati temporanei e renderer offline; nessuna sessione manuale umana.
+
+Confezionamento Windows e test sull'eseguibile completati: `node scripts/package.mjs --dir` ha generato il pacchetto dalla build finale; `node scripts/test-packaged.mjs` ha superato **5 percorsi su 5** sullo stesso eseguibile (archivi circa 1,1 minuti, risposte asincrone/confine 23,4 s, ciclo di vita circa 1,1 minuti, creazione/consultazione 34,5 s, tempo 32,4 s; totale 3,8 minuti). Il confezionamento è stato ripetuto dopo le correzioni emerse nella revisione per includere il codice effettivamente consegnato. Le ultime modifiche riguardano soltanto i documenti, quindi non richiedono una nuova build.
+
+Le verifiche desktop vengono eseguite fuori dalla sandbox dell'agente per gli ACL Windows delle directory Electron, come nei task precedenti. Il confezionamento usa l'accesso autorizzato alla rete/cache di electron-builder. La sandbox di Electron e gli ACL restano invariati. La sola non conformità statica preesistente è la formattazione legacy. Non sono noti difetti di integrità aperti nel perimetro P04.
+
+Limiti: la copertura di `CU-ANA-01`–`09` riguarda il porto e i riferimenti del perimetro attuale. Banchine, altre anagrafiche, attività operative, ricalcoli delle attività e protezioni derivanti dalle fatture restano nelle rispettive slice. Quando verranno introdotti nuovi riferimenti ricalcolabili occorrerà integrarli nell'analisi già disponibile prima di consentirne le correzioni. Nessuna variazione del fuso è esposta nel form descrittivo.
+
+Prossimo task: **P05**, non avviato. Riutilizzare le convenzioni P04 mantenendo tipizzati contratti e repository; controllare lo stato del porto nelle nuove assegnazioni delle banchine, conservare l'appartenenza immutabile e usare un contatore globale della tipologia banchina. La generazione dell'installer e l'installazione non fanno parte di P04.

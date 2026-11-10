@@ -4,7 +4,7 @@ Data: 10 novembre 2026. Baseline esaminata: `acc012e`.
 
 Questo piano prepara il primo rilascio funzionale di Porto Next. Organizza il lavoro in task assegnabili a un agente, con dipendenze, risultati verificabili e indicazioni per le chat. La pianificazione non avvia l'implementazione delle funzionalità.
 
-P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). Il prossimo task è P01; lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
+P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01 è completato; lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
 
 ## 1. Fonti e decisioni di perimetro
 
@@ -605,4 +605,4 @@ Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) co
 - difetti aperti e loro impatto;
 - prossimo task e dipendenze effettivamente integrate.
 
-Il prossimo passo è **P01**, in una nuova chat con ragionamento `high`, usando le decisioni, i contratti e gli esempi prodotti da P00 come contesto iniziale.
+Il prossimo passo è **P02**, in una nuova chat con ragionamento `high`, usando le decisioni P00 e il [contesto applicativo P01](p01/contesto-applicativo.md).

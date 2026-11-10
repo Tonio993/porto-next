@@ -70,7 +70,7 @@ tests/e2e/                Flusso completo nella finestra desktop
 
 Il renderer non può accedere a Node.js, al filesystem o a SQLite. Il preload espone metodi specifici attraverso `contextBridge`; gli handler verificano il mittente e gli input. Sandbox e isolamento del contesto sono attivi. Navigazione esterna, nuove finestre e permessi non necessari sono disabilitati. La build di produzione imposta una Content Security Policy senza connessioni di rete.
 
-`ArchiveService` crea una sessione per l’archivio attivo e serializza le operazioni, così un cambio di archivio non può interrompere una copia in corso. Una nuova sessione diventa attiva solo dopo i controlli. Il processo principale resta il coordinatore delle operazioni brevi; elaborazioni pesanti future andranno spostate in un worker o utility process.
+`ArchiveCoordinator` possiede la sessione attiva e la coda condivisa da gestione file e casi d’uso. `ArchiveService` espone la gestione degli archivi; le primitive di `ArchiveFileOperations` non si riaccodano. Una nuova sessione diventa attiva solo dopo i controlli e riceve un token distinto anche con «Salva con nome». Le scritture incrementano una revisione persistente e aggiornano i metadati nella stessa transazione; backup e operazioni senza scritture la conservano. Il processo principale resta il coordinatore delle operazioni brevi; elaborazioni pesanti future andranno spostate in un worker o utility process.
 
 ## Evoluzione dello schema
 
@@ -83,7 +83,7 @@ I file SQL sono importati nella build con `?raw`: non dipendono dalla directory 
 
 ## Piano funzionale e specifica P00
 
-Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza i task successivi. P00 ha prodotto le [decisioni iniziali](doc/p00/decisioni-iniziali.md), i contratti e gli esempi; il [registro](doc/stato-implementazione-prestazioni.md) indica lo stato effettivo.
+Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza i task successivi. P00 ha prodotto le [decisioni iniziali](doc/p00/decisioni-iniziali.md), i contratti e gli esempi. P01 introduce il [contesto applicativo dell’archivio](doc/p01/contesto-applicativo.md), la revisione nello schema v2 e la navigazione minima. Il [registro](doc/stato-implementazione-prestazioni.md) indica lo stato effettivo; le sezioni funzionali restano in preparazione.
 
 Lo spike P00 usa dipendenze di sviluppo isolate e verifica numeri/fusi senza introdurre funzionalità applicative. Dopo `npm ci`, prepararlo ed eseguirlo con:
 

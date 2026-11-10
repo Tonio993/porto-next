@@ -4,10 +4,11 @@ import revisionSql from '../../../../migrations/0002_archive_revision.sql?raw'
 import timeZoneSql from '../../../../migrations/0003_company_time_zone.sql?raw'
 import portsSql from '../../../../migrations/0004_ports.sql?raw'
 import portMomentsSql from '../../../../migrations/0005_port_version_moments.sql?raw'
+import berthsSql from '../../../../migrations/0006_berths.sql?raw'
 import { ArchiveError } from '../../../shared/errors/archive-error'
 
 export const APPLICATION_ID = 0x504f5254
-export const SCHEMA_VERSION = 5
+export const SCHEMA_VERSION = 6
 
 const migrations = [
   { version: 1, sql: initialSql },
@@ -15,6 +16,7 @@ const migrations = [
   { version: 3, sql: timeZoneSql },
   { version: 4, sql: portsSql },
   { version: 5, sql: portMomentsSql },
+  { version: 6, sql: berthsSql },
 ]
 
 export function migrate(database: Database.Database, fromVersion: number): void {

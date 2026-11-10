@@ -5,7 +5,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BrowserWindow, dialog, ipcMain } from 'electron'
 import { ArchiveController } from '../../src/main/archive-controller'
 import { DatabaseSession } from '../../src/backend/infrastructure/database/database-session'
-import { registerArchiveIpc, registerTimeIpc, registerPortIpc } from '../../src/main/ipc/register'
+import {
+  registerArchiveIpc,
+  registerTimeIpc,
+  registerPortIpc,
+  registerBerthIpc,
+} from '../../src/main/ipc/register'
+import { BerthService } from '../../src/backend/application/berths/berth-service'
+import { berthChannels } from '../../src/shared/contracts/berths'
 import { PortService } from '../../src/backend/application/ports/port-service'
 import { portChannels } from '../../src/shared/contracts/ports'
 import { TimeService } from '../../src/backend/application/time/time-service'
@@ -155,6 +162,46 @@ describe('confine IPC', () => {
       const handler = vi
         .mocked(ipcMain.handle)
         .mock.calls.find(([channel]) => channel === portChannels[action])![1]
+      for (const event of [
+        { sender: {}, senderFrame: owner.webContents.mainFrame },
+        { sender: owner.webContents, senderFrame: {} },
+      ])
+        expect(await handler(event as Electron.IpcMainInvokeEvent, null)).toMatchObject({
+          ok: false,
+          context: null,
+          error: { code: 'INVALID_INPUT' },
+        })
+      available = false
+      expect(
+        await handler(
+          {
+            sender: owner.webContents,
+            senderFrame: owner.webContents.mainFrame,
+          } as Electron.IpcMainInvokeEvent,
+          null,
+        ),
+      ).toMatchObject({ ok: false, error: { code: 'INVALID_INPUT' } })
+      available = true
+      expect(execute).not.toHaveBeenCalled()
+      await handler(
+        {
+          sender: owner.webContents,
+          senderFrame: owner.webContents.mainFrame,
+        } as Electron.IpcMainInvokeEvent,
+        null,
+      )
+      expect(execute).toHaveBeenCalledOnce()
+    }
+  })
+  it('protegge tutti i canali delle banchine da altri mittenti, frame secondari e finestre assenti', async () => {
+    const service = new BerthService(new ArchiveCoordinator())
+    let available = true
+    registerBerthIpc(service, () => (available ? owner : null))
+    for (const action of Object.keys(berthChannels) as (keyof typeof berthChannels)[]) {
+      const execute = vi.spyOn(service, action)
+      const handler = vi
+        .mocked(ipcMain.handle)
+        .mock.calls.find(([channel]) => channel === berthChannels[action])![1]
       for (const event of [
         { sender: {}, senderFrame: owner.webContents.mainFrame },
         { sender: owner.webContents, senderFrame: {} },

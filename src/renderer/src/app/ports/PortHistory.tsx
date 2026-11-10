@@ -1,5 +1,6 @@
-import { Badge, Button, Group, Stack } from '@mantine/core'
+import { Button, Group, Stack } from '@mantine/core'
 import type { PortHistoryDto, PortVersionDto } from '../../../../shared/contracts/ports'
+import { VersionCard } from './VersionCard'
 export function PortHistory({
   history,
   loading,
@@ -24,64 +25,14 @@ export function PortHistory({
       </p>
       <Stack>
         {versions.items.map((version) => (
-          <article
+          <VersionCard
             key={version.id}
-            className="port-version"
-            data-phase={version.phase}
-            aria-label={`Versione ${version.effectiveFrom ?? 'iniziale'}`}
-          >
-            <h3>
-              {version.effectiveFrom === null ? 'Versione iniziale' : 'Versione con decorrenza'} ·{' '}
-              {version.phase === 'CURRENT'
-                ? 'Corrente'
-                : version.phase === 'FUTURE'
-                  ? 'Futura'
-                  : 'Storica'}
-            </h3>
-            <Badge
-              variant="outline"
-              color={
-                version.phase === 'CURRENT' ? 'teal' : version.phase === 'FUTURE' ? 'blue' : 'gray'
-              }
-            >
-              {version.phase === 'CURRENT'
-                ? 'In uso ora'
-                : version.phase === 'FUTURE'
-                  ? 'Programmata'
-                  : 'Non più in uso'}
-            </Badge>
-            <p>
-              {version.name} · {version.locality} · {version.countryCode}
-            </p>
-            <p>
-              {version.effectiveMoment
-                ? `Dal ${version.effectiveMoment.localDateTime.replace('T', ' ')} · ${version.effectiveMoment.zoneId} · offset ${version.effectiveMoment.offset} · UTC ${version.effectiveFrom}`
-                : 'Da sempre (nessun limite inferiore)'}
-            </p>
-            <p>
-              {version.effectiveTo
-                ? `Fino a ${version.effectiveTo} UTC (escluso)`
-                : 'Senza limite finale'}
-            </p>
-            <Group gap="xs">
-              <Button variant="light" disabled={disabled} onClick={() => onEdit(version)}>
-                Correggi versione
-              </Button>
-              <Button
-                color="red"
-                variant="subtle"
-                disabled={disabled || version.effectiveFrom === null}
-                onClick={() => onDelete(version.id)}
-              >
-                Elimina versione
-              </Button>
-            </Group>
-            {version.effectiveFrom === null && (
-              <p className="panel-description">
-                La versione iniziale può essere corretta, ma non eliminata.
-              </p>
-            )}
-          </article>
+            version={version}
+            description={`${version.name} · ${version.locality} · ${version.countryCode}`}
+            disabled={disabled}
+            onEdit={() => onEdit(version)}
+            onDelete={() => onDelete(version.id)}
+          />
         ))}
       </Stack>
       <Group mt="sm">

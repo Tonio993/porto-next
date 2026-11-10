@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Button, Group, Table } from '@mantine/core'
-import type { PortPreviewDto } from '../../../../shared/contracts/ports'
+import type { ChangePreviewDto } from '../../../../shared/contracts/master-data'
 import { StateMessage } from '../StateMessage'
 const labels: Record<string, string> = {
   name: 'Nome',
@@ -10,6 +10,8 @@ const labels: Record<string, string> = {
   effectiveTo: 'Fine esclusa (UTC)',
   status: 'Stato',
   port: 'Porto',
+  berth: 'Banchina',
+  selectable: 'Selezionabile',
 }
 export function PortConfirmation({
   preview,
@@ -19,7 +21,7 @@ export function PortConfirmation({
   onCancel,
   onPage,
 }: {
-  preview: PortPreviewDto
+  preview: ChangePreviewDto
   disabled: boolean
   revision: string
   onConfirm: () => void
@@ -136,7 +138,8 @@ export function PortConfirmation({
         </Button>
         <Button
           color={
-            preview.operation === 'DELETE_PORT' || preview.operation === 'DELETE_VERSION'
+            ['DELETE_PORT', 'DELETE_BERTH'].includes(preview.operation) ||
+            preview.operation === 'DELETE_VERSION'
               ? 'red'
               : undefined
           }

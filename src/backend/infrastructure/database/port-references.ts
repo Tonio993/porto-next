@@ -1,43 +1,91 @@
-import type { ConflictDto } from '../../../shared/contracts/application'
+import type { ConflictDto, EntityReferenceDto } from '../../../shared/contracts/application'
 import type { DatabaseSession } from './database-session'
 
 const quote = (name: string) => `"${name.replaceAll('"', '""')}"`
-/** Inspect actual foreign keys. Owned rows are deleted explicitly, never external rows. */
+
+export function berthReferencesToPort(database: DatabaseSession, portId: string) {
+  const rows = database.sqlite
+    .prepare('SELECT id, code, status FROM berths WHERE port_id = ? ORDER BY code')
+    .all(portId) as { id: string; code: number; status: 'ACTIVE' | 'INACTIVE' }[]
+  return rows.map(({ id, code, status }) => ({
+    status,
+    reference: { kind: 'BERTH', id, label: `Banchina ${code}` } satisfies EntityReferenceDto,
+  }))
+}
+
 export function portReferences(
   database: DatabaseSession,
-  portId: string,
+  id: string,
   versionIds: readonly string[],
-  deletingPort: boolean,
+  deleting: boolean,
 ): ConflictDto[] {
-  const owned = new Set(['port_versions', 'port_time_zones', 'port_identifier_reservations'])
+  return foreignReferences(
+    database,
+    { kind: 'PORT', id, label: '' },
+    deleting ? 'ports' : null,
+    'port_versions',
+    versionIds,
+    ['berths', 'port_versions', 'port_time_zones', 'port_identifier_reservations'],
+  )
+}
+
+export function berthReferences(
+  database: DatabaseSession,
+  id: string,
+  versionIds: readonly string[],
+  deleting: boolean,
+): ConflictDto[] {
+  return foreignReferences(
+    database,
+    { kind: 'BERTH', id, label: '' },
+    deleting ? 'berths' : null,
+    'berth_versions',
+    versionIds,
+    ['berth_versions', 'berth_identifier_reservations'],
+  )
+}
+
+/** Inspect actual foreign keys, including external rows configured with CASCADE. */
+function foreignReferences(
+  database: DatabaseSession,
+  reference: EntityReferenceDto,
+  identityTable: string | null,
+  versionTable: string,
+  versionIds: readonly string[],
+  owned: readonly string[],
+): ConflictDto[] {
   const tables = database.sqlite
     .prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")
     .all() as { name: string }[]
   const blockers: ConflictDto[] = []
   for (const { name } of tables) {
-    if (owned.has(name)) continue
+    if (owned.includes(name)) continue
     const keys = database.sqlite.prepare(`PRAGMA foreign_key_list(${quote(name)})`).all() as {
+      id: number
       table: string
       from: string
-      to: string
+      to: string | null
     }[]
-    for (const key of keys) {
+    for (const constraint of new Set(keys.map(({ id }) => id))) {
+      const columns = keys.filter(({ id }) => id === constraint)
+      const [key] = columns
+      const target = key.table.toLowerCase()
       const ids =
-        key.table === 'ports' && deletingPort
-          ? [portId]
-          : key.table === 'port_versions'
-            ? versionIds
-            : []
+        target === identityTable ? [reference.id] : target === versionTable ? versionIds : []
       if (!ids.length) continue
+      const matches = columns
+        .map(({ from, to }) => `parent.${quote(to ?? 'id')} = child.${quote(from)}`)
+        .join(' AND ')
       const count = database.sqlite
         .prepare(
-          `SELECT count(*) FROM ${quote(name)} WHERE ${quote(key.from)} IN (${ids.map(() => '?').join(',')})`,
+          `SELECT count(*) FROM ${quote(name)} child WHERE EXISTS (
+          SELECT 1 FROM ${quote(key.table)} parent WHERE parent.id IN (SELECT value FROM json_each(?)) AND ${matches})`,
         )
         .pluck()
-        .get(...ids) as number
+        .get(JSON.stringify(ids)) as number
       if (count)
         blockers.push({
-          reference: { kind: 'PORT', id: portId, label: `${name}: ${count} riferimenti` },
+          reference: { ...reference, label: `${name}: ${count} riferimenti` },
           reason:
             'Il riferimento persistente deve essere gestito prima della modifica; nessun elemento collegato verrà eliminato automaticamente.',
         })

@@ -1,10 +1,11 @@
-import type { PortDescriptionDto, PortVersionDto } from '../../../shared/contracts/ports'
+import type { PortDescriptionDto } from '../../../shared/contracts/ports'
+import type { VersionIntervalDto } from '../../../shared/contracts/master-data'
 import { ArchiveError } from '../../../shared/errors/archive-error'
 
-export function versionSequence(
-  versions: readonly PortVersionDto[],
+export function versionSequence<T extends VersionIntervalDto>(
+  versions: readonly T[],
   now: string,
-): PortVersionDto[] {
+): T[] {
   const ordered = versions
     .map((version) => ({ ...version }))
     .sort((a, b) =>

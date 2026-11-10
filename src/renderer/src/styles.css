@@ -887,3 +887,19 @@ footer {
     padding: 16px;
   }
 }
+
+.berth-list-entry {
+  height: auto;
+  min-height: 36px;
+  padding-block: 6px;
+}
+
+.berth-list-entry .mantine-Button-inner {
+  justify-content: flex-start;
+}
+
+.berth-list-entry .mantine-Button-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: start;
+}

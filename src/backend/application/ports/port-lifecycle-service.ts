@@ -7,7 +7,6 @@ import type {
   PortChangeOperation,
   PortVersionDto,
   PortPreviewDto,
-  PortChangeEffectDto,
 } from '../../../shared/contracts/ports'
 import type { MomentInputDto } from '../../../shared/contracts/values'
 import { ArchiveError } from '../../../shared/errors/archive-error'
@@ -16,7 +15,11 @@ import { record } from '../archives/context-validation'
 import { sameDescription, versionSequence } from '../../domain/ports/version-sequence'
 import { resolveMoment } from '../../domain/values/moments'
 import { PortRepository } from '../../infrastructure/database/port-repository'
-import { portReferences } from '../../infrastructure/database/port-references'
+import {
+  berthReferencesToPort,
+  portReferences,
+} from '../../infrastructure/database/port-references'
+import { insertVersion, versionEffects, versionMoment } from './version-change'
 import { entityId, pagination, portDescription } from './port-input'
 
 interface Change {
@@ -158,41 +161,7 @@ export class PortLifecycleService {
       let version: PortVersionDto | null = null
       if (operation === 'INSERT_VERSION' || operation === 'UPDATE_VERSION') {
         const description = portDescription(input)
-        let effectiveMoment = existing?.effectiveMoment ?? null
-        if (operation === 'UPDATE_VERSION' && existing!.effectiveFrom === null) {
-          if (input.moment !== null)
-            throw new ArchiveError(
-              'VALIDATION_ERROR',
-              'La versione iniziale non può ricevere una decorrenza.',
-            )
-        } else {
-          const moment = record(input.moment, ['localDateTime', 'selectedOffset'])
-          // Descriptive corrections retain the stored tuple even after IANA updates.
-          if (
-            !effectiveMoment ||
-            moment.localDateTime !== effectiveMoment.localDateTime ||
-            moment.selectedOffset !== effectiveMoment.offset
-          ) {
-            const resolved = resolveMoment(
-              moment.localDateTime,
-              port.initialZoneId,
-              moment.selectedOffset,
-            )
-            if (resolved.status !== 'RESOLVED')
-              throw new ArchiveError(
-                'LOCAL_TIME_AMBIGUOUS',
-                'Scegli l’occorrenza della decorrenza.',
-                [
-                  {
-                    path: ['moment'],
-                    code: 'CHOICE_REQUIRED',
-                    message: 'Verifica la decorrenza e scegli l’occorrenza.',
-                  },
-                ],
-              )
-            effectiveMoment = resolved.moment
-          }
-        }
+        const effectiveMoment = versionMoment(existing, input.moment, port.initialZoneId)
         version = {
           ...description,
           id: versionId!,
@@ -238,13 +207,7 @@ export class PortLifecycleService {
     const before = repository.versions(change.portId)
     let after = before
     if (change.operation === 'INSERT_VERSION') {
-      after = versionSequence([...before, change.version!], this.now())
-      const index = after.findIndex((version) => version.id === change.versionId)
-      if (index < 1 || sameDescription(after[index - 1], change.version!))
-        throw new ArchiveError(
-          'VALIDATION_ERROR',
-          'La nuova versione deve differire dalla precedente.',
-        )
+      after = insertVersion(before, change.version!, this.now(), sameDescription)
     } else if (change.operation === 'UPDATE_VERSION') {
       after = versionSequence(
         before.map((version) => (version.id === change.versionId ? change.version! : version)),
@@ -259,40 +222,32 @@ export class PortLifecycleService {
       )
     } else if (change.operation === 'DELETE_PORT') after = []
     if (change.version) repository.assertAvailable(change.portId, change.version)
-    const effects: PortChangeEffectDto[] = []
-    for (const id of new Set([
-      ...before.map((version) => version.id),
-      ...after.map((version) => version.id),
-    ])) {
-      const previous = before.find((version) => version.id === id)
-      const next = after.find((version) => version.id === id)
-      const fields = ['name', 'locality', 'countryCode', 'effectiveFrom', 'effectiveTo'] as const
-      const changes = fields
-        .filter((field) => (previous?.[field] ?? null) !== (next?.[field] ?? null))
-        .map((field) => ({
-          field,
-          before: previous?.[field] ?? null,
-          after: next?.[field] ?? null,
-        }))
-      if (changes.length || !next || !previous)
-        effects.push({
-          versionId: id,
-          reference: {
-            kind: 'PORT',
-            id: port.id,
-            label: `Porto ${port.code} · ${next?.name ?? previous?.name} · versione`,
-          },
-          action: !previous ? 'CREATE' : !next ? 'DELETE' : 'UPDATE',
-          changes,
-        })
-    }
-    if (change.operation === 'DEACTIVATE_PORT' && port.status !== 'INACTIVE')
+    const effects = versionEffects(
+      before,
+      after,
+      ['name', 'locality', 'countryCode', 'effectiveFrom', 'effectiveTo'],
+      (name) => ({ kind: 'PORT', id: port.id, label: `Porto ${port.code} · ${name} · versione` }),
+    )
+    const berths =
+      change.operation === 'DELETE_PORT' ||
+      (change.operation === 'DEACTIVATE_PORT' && port.status === 'ACTIVE')
+        ? berthReferencesToPort(session.database, port.id)
+        : []
+    if (change.operation === 'DEACTIVATE_PORT' && port.status === 'ACTIVE') {
       effects.push({
         versionId: null,
         reference: { kind: 'PORT', id: port.id, label: `Porto ${port.code}` },
         action: 'UPDATE',
         changes: [{ field: 'status', before: port.status, after: 'INACTIVE' }],
       })
+      for (const berth of berths.filter(({ status }) => status === 'ACTIVE'))
+        effects.push({
+          versionId: null,
+          reference: berth.reference,
+          action: 'UPDATE',
+          changes: [{ field: 'selectable', before: 'Sì', after: 'No' }],
+        })
+    }
     if (change.operation === 'DELETE_PORT')
       effects.push({
         versionId: null,
@@ -306,7 +261,21 @@ export class PortLifecycleService {
     const blockers =
       change.operation === 'DEACTIVATE_PORT'
         ? []
-        : portReferences(session.database, port.id, changedIds, change.operation === 'DELETE_PORT')
+        : [
+            ...(change.operation === 'DELETE_PORT'
+              ? berths.map(({ reference }) => ({
+                  reference,
+                  reason:
+                    'La banchina appartiene a questo porto. Eliminala esplicitamente se priva di riferimenti.',
+                }))
+              : []),
+            ...portReferences(
+              session.database,
+              port.id,
+              changedIds,
+              change.operation === 'DELETE_PORT',
+            ),
+          ]
     const warnings =
       change.operation === 'DELETE_PORT'
         ? [
@@ -314,7 +283,7 @@ export class PortLifecycleService {
           ]
         : change.operation === 'DEACTIVATE_PORT'
           ? [
-              'Il porto non sarà selezionabile per nuovi riferimenti. I riferimenti esistenti restano validi. Le eventuali banchine saranno nascoste senza cambiarne lo stato.',
+              'Il porto non sarà selezionabile per nuovi riferimenti. I riferimenti esistenti restano validi. Le banchine attive non saranno selezionabili. Il loro stato individuale sarà conservato.',
             ]
           : [
               'Le chiavi identificative storiche restano riservate a questo porto. Il fuso operativo non cambia.',

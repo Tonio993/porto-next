@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type { ArchiveApi, ArchiveState } from '../shared/contracts/archive'
 import { archiveChannels } from '../shared/contracts/archive'
 import { timeChannels, type TimeApi } from '../shared/contracts/values'
+import { berthChannels, type BerthApi } from '../shared/contracts/berths'
 import { portChannels, type PortApi } from '../shared/contracts/ports'
 
 const api: ArchiveApi = {
@@ -50,3 +51,16 @@ const ports: PortApi = {
   get: (request) => ipcRenderer.invoke(portChannels.get, request),
 }
 contextBridge.exposeInMainWorld('ports', ports)
+
+const berths: BerthApi = {
+  create: (request) => ipcRenderer.invoke(berthChannels.create, request),
+  list: (request) => ipcRenderer.invoke(berthChannels.list, request),
+  history: (request) => ipcRenderer.invoke(berthChannels.history, request),
+  resolveVersionMoment: (request) =>
+    ipcRenderer.invoke(berthChannels.resolveVersionMoment, request),
+  preview: (request) => ipcRenderer.invoke(berthChannels.preview, request),
+  confirm: (request) => ipcRenderer.invoke(berthChannels.confirm, request),
+  reactivate: (request) => ipcRenderer.invoke(berthChannels.reactivate, request),
+  previewEffects: (request) => ipcRenderer.invoke(berthChannels.previewEffects, request),
+}
+contextBridge.exposeInMainWorld('berths', berths)

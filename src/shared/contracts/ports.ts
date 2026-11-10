@@ -1,5 +1,5 @@
 import type { ApplicationResult, CommandRequest, QueryRequest } from './application'
-import type { ArchiveContextDto, ConflictDto } from './application'
+import type { ChangeEffectDto, ChangePreviewDto, VersionIntervalDto } from './master-data'
 import type { MomentInputDto, MomentResolutionDto, ResolvedMomentDto } from './values'
 
 export interface CreatePortDto {
@@ -25,13 +25,7 @@ export interface PortDto {
 }
 
 export type PortDescriptionDto = Pick<CreatePortDto, 'name' | 'locality' | 'countryCode'>
-export interface PortVersionDto extends PortDescriptionDto {
-  id: string
-  effectiveFrom: string | null
-  effectiveMoment: ResolvedMomentDto | null
-  effectiveTo: string | null
-  phase: 'HISTORICAL' | 'CURRENT' | 'FUTURE'
-}
+export type PortVersionDto = PortDescriptionDto & VersionIntervalDto
 export interface PortHistoryDto {
   port: PortDto
   versions: { items: readonly PortVersionDto[]; total: number; page: number; pageSize: number }
@@ -51,34 +45,14 @@ export interface PortVersionTargetDto {
 }
 export type PortChangeOperation =
   'INSERT_VERSION' | 'UPDATE_VERSION' | 'DELETE_VERSION' | 'DEACTIVATE_PORT' | 'DELETE_PORT'
-export interface PortChangeEffectDto {
-  versionId: string | null
-  reference: { kind: 'PORT'; id: string; label: string }
-  action: 'CREATE' | 'UPDATE' | 'DELETE'
-  changes: readonly { field: string; before: string | null; after: string | null }[]
-}
-export interface PortPreviewDto {
-  previewId: string
+export type PortChangeEffectDto = ChangeEffectDto
+export interface PortPreviewDto extends ChangePreviewDto {
   operation: PortChangeOperation
-  context: ArchiveContextDto
-  generatedAtUtc: string
-  expiresAtUtc: string
-  status: 'READY' | 'BLOCKED'
   resolved: {
     portId: string
     versionId: string | null
     effectiveMoment: ResolvedMomentDto | null
   } | null
-  summary: {
-    created: number
-    updated: number
-    deleted: number
-    reattributed: number
-    recalculated: number
-  }
-  effects: { items: readonly PortChangeEffectDto[]; total: number; page: number; pageSize: number }
-  warnings: readonly string[]
-  blockers: readonly ConflictDto[]
 }
 
 export interface PortListQueryDto {

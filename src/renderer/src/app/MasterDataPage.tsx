@@ -15,7 +15,7 @@ export function MasterDataPage({
         <Button variant="light" aria-pressed>
           Porti
         </Button>
-        {['Banchine', 'Clienti', 'Agenzie', 'Navi'].map((name) => (
+        {['Clienti', 'Agenzie', 'Navi'].map((name) => (
           <Button key={name} variant="default" disabled>
             {name}
           </Button>

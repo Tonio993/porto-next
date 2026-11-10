@@ -250,7 +250,7 @@ describe('creazione e consultazione porti', () => {
   })
 })
 
-describe('migrazione porti v3 → v4', () => {
+describe('migrazione porti da v3 allo schema corrente', () => {
   function createV3(collision = false) {
     const db = new Database(file('v3'))
     for (const name of [
@@ -275,12 +275,12 @@ describe('migrazione porti v3 → v4', () => {
   it('conserva metadati e copia preventiva v3 e crea porti dopo la migrazione', async () => {
     createV3()
     expect(await archives.open(file('v3'))).toMatchObject({
-      schemaVersion: 5,
+      schemaVersion: 6,
       createdAt: '2020-01-01T00:00:00.000Z',
       updatedAt: '2021-01-01T00:00:00.000Z',
     })
     expect(context().revision).toBe('9007199254740993')
-    const backup = readdirSync(folder).find((name) => name.includes('.prima-v5-'))!
+    const backup = readdirSync(folder).find((name) => name.includes('.prima-v6-'))!
     const snapshot = new Database(join(folder, backup), { readonly: true })
     try {
       expect(snapshot.pragma('user_version', { simple: true })).toBe(3)

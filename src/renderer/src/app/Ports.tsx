@@ -8,6 +8,7 @@ import { PortDetail } from './ports/PortDetail'
 import { PortHistory } from './ports/PortHistory'
 import { PortVersionForm } from './ports/PortVersionForm'
 import { PortConfirmation } from './ports/PortConfirmation'
+import { Berths } from './berths/Berths'
 import { StateMessage } from './StateMessage'
 
 export function Ports({
@@ -19,6 +20,7 @@ export function Ports({
 }) {
   const ports = usePorts(archives)
   const [creating, setCreating] = useState(false)
+  const [berthDialogOpened, setBerthDialogOpened] = useState(false)
   const dialogTrigger = useRef<HTMLElement | null>(null)
   function openDialog(action: () => void) {
     dialogTrigger.current =
@@ -32,7 +34,7 @@ export function Ports({
       : document.querySelector<HTMLButtonElement>('.port-list-heading button')
     target?.focus()
   }
-  const dialogOpened = creating || !!ports.editor || !!ports.preview
+  const dialogOpened = creating || !!ports.editor || !!ports.preview || berthDialogOpened
   useEffect(() => {
     onDialogChange(dialogOpened)
     return () => onDialogChange(false)
@@ -73,6 +75,12 @@ export function Ports({
                 onDeactivate={() => openDialog(() => void ports.previewPortChange('deactivate'))}
                 onReactivate={() => void ports.reactivate()}
                 onDelete={() => openDialog(() => void ports.previewPortChange('delete'))}
+              />
+              <Berths
+                key={ports.history.port.id}
+                port={ports.history.port}
+                archives={archives}
+                onDialogChange={setBerthDialogOpened}
               />
               <PortHistory
                 history={ports.history}

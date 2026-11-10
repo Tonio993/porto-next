@@ -1,8 +1,8 @@
-import { Button, Group, Stack, TextInput } from '@mantine/core'
+import { Button, Group, Stack } from '@mantine/core'
 import type { VersionDraft } from '../../api/use-ports'
 import type { MomentResolutionDto } from '../../../../shared/contracts/values'
 import { PortDescriptionFields } from './PortDescriptionFields'
-import { MomentChoices } from '../MomentChoices'
+import { VersionMomentFields } from './VersionMomentFields'
 import { StateMessage } from '../StateMessage'
 export function PortVersionForm({
   draft,
@@ -46,55 +46,14 @@ export function PortVersionForm({
             fields={fields}
             disabled={disabled}
           />
-          {draft.moment ? (
-            <>
-              <TextInput
-                label="Decorrenza locale"
-                type="datetime-local"
-                min="0001-01-01T00:00"
-                max="9999-12-31T23:59"
-                step={60}
-                required
-                disabled={disabled}
-                value={draft.moment.localDateTime}
-                error={fields.moment ?? fields.localDateTime}
-                onChange={(event) =>
-                  onChange({
-                    ...draft,
-                    moment: { localDateTime: event.currentTarget.value, selectedOffset: null },
-                  })
-                }
-              />
-              <Button
-                variant="default"
-                disabled={disabled || !draft.moment.localDateTime}
-                onClick={onResolve}
-              >
-                Verifica decorrenza
-              </Button>
-              {resolution?.status === 'CHOICE_REQUIRED' && (
-                <>
-                  <p>Scegli l’occorrenza della decorrenza.</p>
-                  <MomentChoices
-                    choices={resolution.choices}
-                    disabled={disabled}
-                    onChoose={(choice) =>
-                      onChange({
-                        ...draft,
-                        moment: {
-                          localDateTime: choice.localDateTime,
-                          selectedOffset: choice.offset,
-                        },
-                      })
-                    }
-                  />
-                </>
-              )}
-              {draft.moment.selectedOffset && <p>Offset scelto: {draft.moment.selectedOffset}</p>}
-            </>
-          ) : (
-            <p>Versione iniziale: la decorrenza rimane assente.</p>
-          )}
+          <VersionMomentFields
+            moment={draft.moment}
+            fields={fields}
+            disabled={disabled}
+            onResolve={onResolve}
+            resolution={resolution}
+            onChange={(moment) => onChange({ ...draft, moment })}
+          />
           {draft.context.revision !== revision && (
             <StateMessage kind="warning" title="Bozza precedente ai dati attuali">
               La bozza usa una revisione precedente. Riapri la versione per ripartire dai dati

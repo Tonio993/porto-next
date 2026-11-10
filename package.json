@@ -23,7 +23,8 @@
     "pack": "npm run build && node scripts/package.mjs --dir",
     "dist:win": "npm run build && node scripts/package.mjs --win nsis",
     "postinstall": "node node_modules/electron/install.js",
-    "test:packaged": "npm run pack && node scripts/test-packaged.mjs"
+    "test:packaged": "npm run pack && node scripts/test-packaged.mjs",
+    "verify:p00": "tsc --noEmit -p doc/p00/tsconfig.json && node spikes/p00/verify-runtimes.mjs"
   },
   "dependencies": {
     "@mantine/core": "9.8.0",

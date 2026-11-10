@@ -81,6 +81,19 @@ Il renderer non può accedere a Node.js, al filesystem o a SQLite. Il preload es
 
 I file SQL sono importati nella build con `?raw`: non dipendono dalla directory di lavoro del computer di destinazione. `application_id` identifica il formato Porto Next; `user_version` identifica la versione dello schema. Un archivio più recente dell’app viene rifiutato. Per le future migrazioni, il servizio crea una copia prima dell’aggiornamento e applica gli script in transazione.
 
+## Piano funzionale e specifica P00
+
+Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza i task successivi. P00 ha prodotto le [decisioni iniziali](doc/p00/decisioni-iniziali.md), i contratti e gli esempi; il [registro](doc/stato-implementazione-prestazioni.md) indica lo stato effettivo.
+
+Lo spike P00 usa dipendenze di sviluppo isolate e verifica numeri/fusi senza introdurre funzionalità applicative. Dopo `npm ci`, prepararlo ed eseguirlo con:
+
+```powershell
+npm --prefix spikes/p00 ci --ignore-scripts
+npm run verify:p00
+```
+
+Le [istruzioni dello spike](spikes/p00/README.md) distinguono le prove eseguite dagli scenari delle funzionalità future.
+
 ## Verifiche e distribuzione
 
 ```powershell

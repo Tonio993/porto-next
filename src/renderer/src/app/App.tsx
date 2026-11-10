@@ -27,6 +27,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
   const { state, busy, error, notice, setError, setNotice } = archives
   const [section, setSection] = useState('Archivi')
   const [aboutOpened, setAboutOpened] = useState(false)
+  const [feedbackInDialog, setFeedbackInDialog] = useState(false)
   const active = state.active
 
   return (
@@ -41,33 +42,35 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
             <small>GESTIONE ORMEGGIATORI</small>
           </div>
         </div>
-        <div className="sidebar-section-label">SPAZIO DI LAVORO</div>
-        <button
-          className="nav-item"
-          aria-current={section === 'Archivi' ? 'page' : undefined}
-          onClick={() => setSection('Archivi')}
-        >
-          <IconDatabase size={19} />
-          Archivi
-          <IconChevronRight size={15} />
-        </button>
-        {[
-          'Anagrafiche',
-          'Catalogo e tariffe',
-          'Operazioni nave',
-          'Prestazioni',
-          'Riferimenti temporali',
-        ].map((label) => (
+        <nav aria-label="Navigazione principale">
+          <div className="sidebar-section-label">SPAZIO DI LAVORO</div>
           <button
-            key={label}
             className="nav-item"
-            disabled={!active || busy}
-            aria-current={section === label ? 'page' : undefined}
-            onClick={() => setSection(label)}
+            aria-current={section === 'Archivi' ? 'page' : undefined}
+            onClick={() => setSection('Archivi')}
           >
-            {label}
+            <IconDatabase size={19} />
+            Archivi
+            <IconChevronRight size={15} />
           </button>
-        ))}
+          {[
+            'Anagrafiche',
+            'Catalogo e tariffe',
+            'Operazioni nave',
+            'Prestazioni',
+            'Riferimenti temporali',
+          ].map((label) => (
+            <button
+              key={label}
+              className="nav-item"
+              disabled={!active || busy}
+              aria-current={section === label ? 'page' : undefined}
+              onClick={() => setSection(label)}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
         <div className="sidebar-local">
           <span className="status-dot" />
           Applicazione locale
@@ -91,7 +94,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
           </div>
           <span className="local-label">
             <IconDeviceDesktop size={16} />
-            Modalità locale
+            {active?.name ?? 'Modalità locale'}
           </span>
         </header>
         <main>
@@ -107,9 +110,11 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
               </h1>
               <p className="page-description">
                 {active
-                  ? section === 'Anagrafiche'
-                    ? 'Prepara e consulta i porti del tuo archivio.'
-                    : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
+                  ? section === 'Riferimenti temporali'
+                    ? 'Configura il fuso aziendale e verifica gli orari locali.'
+                    : section === 'Anagrafiche'
+                      ? 'Prepara e consulta i porti del tuo archivio.'
+                      : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
                   : 'Crea un archivio o aprine uno esistente per iniziare.'}
               </p>
             </div>
@@ -118,7 +123,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
             </div>
           </div>
 
-          {error && (
+          {error && !feedbackInDialog && (
             <div role="alert" className="message error">
               <IconInfoCircle size={20} />
               <span>{error}</span>
@@ -132,7 +137,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
               </ActionIcon>
             </div>
           )}
-          {notice && (
+          {notice && !feedbackInDialog && (
             <div role="status" className="message success">
               <IconCheck size={20} />
               <span>{notice}</span>
@@ -149,7 +154,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
           {section === 'Riferimenti temporali' && state.context ? (
             <TimeSettings archives={archives} />
           ) : section === 'Anagrafiche' && state.context ? (
-            <MasterDataPage archives={archives} />
+            <MasterDataPage archives={archives} onDialogChange={setFeedbackInDialog} />
           ) : section !== 'Archivi' ? (
             <section className="archive-panel">
               <h2>Sezione in preparazione</h2>
@@ -163,16 +168,18 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
             <ArchivePage archives={archives} />
           </div>
 
-          <div className="privacy-note">
-            <IconLock size={18} stroke={1.6} />
-            <div>
-              <strong>Un file, un archivio. Sempre a tua disposizione.</strong>
-              <p>
-                Ogni archivio è indipendente. Puoi chiuderlo, conservarlo e riaprirlo quando ti
-                serve.
-              </p>
+          {section === 'Archivi' && (
+            <div className="privacy-note">
+              <IconLock size={18} stroke={1.6} />
+              <div>
+                <strong>Un file, un archivio. Sempre a tua disposizione.</strong>
+                <p>
+                  Ogni archivio è indipendente. Puoi chiuderlo, conservarlo e riaprirlo quando ti
+                  serve.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </main>
         <footer>
           <span>

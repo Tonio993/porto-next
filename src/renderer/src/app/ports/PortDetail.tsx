@@ -1,4 +1,4 @@
-import { Button, Group } from '@mantine/core'
+import { Badge, Button, Group } from '@mantine/core'
 import type { PortDto } from '../../../../shared/contracts/ports'
 import { countryName } from './PortDescriptionFields'
 export function PortDetail({
@@ -18,6 +18,7 @@ export function PortDetail({
 }) {
   return (
     <section className="archive-panel" aria-label="Dettaglio porto">
+      <p className="eyebrow">DATI CORRENTI</p>
       <h2>
         Porto {port.code} · {port.version.name}
       </h2>
@@ -25,18 +26,20 @@ export function PortDetail({
         Località: {port.version.locality} · Paese: {countryName(port.version.countryCode)} (
         {port.version.countryCode})
       </p>
-      <p>Stato: {port.status === 'ACTIVE' ? 'Attivo' : 'Disattivato'}</p>
-      <p>
+      <Badge variant="light" color={port.status === 'ACTIVE' ? 'teal' : 'gray'}>
+        Stato: {port.status === 'ACTIVE' ? 'Attivo' : 'Disattivato'}
+      </Badge>
+      <p className="panel-description">
         Versione applicabile:{' '}
         {port.version.effectiveFrom
           ? `dal ${port.version.effectiveFrom} (UTC)`
           : 'iniziale, senza limite temporale inferiore'}
         .
       </p>
-      <p>
+      <p className="panel-description">
         Fuso iniziale del porto: <strong>{port.initialZoneId}</strong>
       </p>
-      <Group>
+      <Group gap="xs" className="detail-actions">
         <Button disabled={disabled} onClick={onAdd}>
           Nuova versione
         </Button>

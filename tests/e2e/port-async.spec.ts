@@ -101,6 +101,9 @@ test('scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza se
         ),
       )
       .toBe(true)
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Caricamento dettaglio…' }),
+    ).toBeVisible()
     await page.getByRole('button', { name: 'Apri porto 2', exact: true }).click()
     const detail = page.getByRole('region', { name: 'Dettaglio porto' })
     await expect(detail).toContainText('Porto 2 · Porto B')
@@ -152,6 +155,7 @@ test('scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza se
         ),
       )
       .toBe(true)
+    await page.getByRole('button', { name: 'Chiudi editor', exact: true }).click()
     await detail.getByRole('button', { name: 'Elimina porto', exact: true }).click()
     const preview = page.getByRole('region', { name: 'Anteprima modifica' })
     await expect(preview).toContainText('Operazione consentita')

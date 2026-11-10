@@ -44,6 +44,7 @@ test('crea e consulta porti offline, li ritrova al riavvio e mantiene le copie i
     await page.getByRole('button', { name: 'Scegli posizione' }).click()
     await page.getByRole('button', { name: 'Anagrafiche', exact: true }).click()
     await expect(page.getByText('Nessun porto trovato.')).toBeVisible()
+    await page.getByRole('button', { name: 'Nuovo porto', exact: true }).click()
     await expect(page.getByLabel('Fuso IANA del porto')).toHaveValue('Europe/Rome')
     await page.getByLabel('Nome del porto').fill('Porto A')
     await page.getByLabel('Località').fill('Genova')
@@ -55,6 +56,7 @@ test('crea e consulta porti offline, li ritrova al riavvio e mantiene le copie i
     const detail = page.getByRole('region', { name: 'Dettaglio porto' })
     await expect(detail).toContainText('Porto 1 · Porto A')
     await expect(detail).toContainText('Asia/Kathmandu')
+    await page.getByRole('button', { name: 'Nuovo porto', exact: true }).click()
     await page.getByLabel('Nome del porto').fill(' PORTO A ')
     await page.getByLabel('Località').fill(' GENOVA ')
     await page.getByRole('button', { name: 'Crea porto', exact: true }).click()
@@ -75,6 +77,7 @@ test('crea e consulta porti offline, li ritrova al riavvio e mantiene le copie i
       return result.value.context
     })
     expect(old.revision).toBe('2')
+    await page.getByRole('button', { name: 'Nuovo porto', exact: true }).click()
     await page.getByLabel('Nome del porto').fill('Bozza da scartare')
     const copy = join(folder, 'copia.ormeggi')
     await app.evaluate(({ dialog }, filePath) => {
@@ -83,6 +86,8 @@ test('crea e consulta porti offline, li ritrova al riavvio e mantiene le copie i
     await page.evaluate(() => window.archives.saveAs())
     await expect(page.getByTestId('archive-path')).toHaveText(copy)
     await page.getByRole('button', { name: 'Anagrafiche', exact: true }).click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Nuovo porto', exact: true }).click()
     await expect(page.getByLabel('Nome del porto')).toHaveValue('')
     await expect(page.getByLabel('Cerca porto')).toHaveValue('')
     await expect(page.getByRole('region', { name: 'Dettaglio porto' })).toHaveCount(0)

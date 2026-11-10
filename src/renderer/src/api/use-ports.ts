@@ -149,6 +149,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
     setResolution(null)
   }
   function select(id: string | null) {
+    if (id === selected.current) return
     details.invalidate()
     cancelPreview()
     selected.current = id
@@ -214,6 +215,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
     select(result.value.id)
     setNotice(`Porto ${result.value.code} creato.`)
     await loadList()
+    return true
   }
   async function resolveVersion() {
     if (!editor?.moment) return

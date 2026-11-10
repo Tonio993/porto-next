@@ -3,6 +3,7 @@ import type { VersionDraft } from '../../api/use-ports'
 import type { MomentResolutionDto } from '../../../../shared/contracts/values'
 import { PortDescriptionFields } from './PortDescriptionFields'
 import { MomentChoices } from '../MomentChoices'
+import { StateMessage } from '../StateMessage'
 export function PortVersionForm({
   draft,
   onChange,
@@ -25,8 +26,13 @@ export function PortVersionForm({
   revision: string
 }) {
   return (
-    <section className="archive-panel" aria-label="Editor versione">
-      <h2>{draft.versionId ? 'Correggi versione' : 'Inserisci versione'}</h2>
+    <section aria-label="Editor versione">
+      <p className="panel-description">
+        {draft.versionId
+          ? 'Correggi i dati della versione selezionata.'
+          : 'Inserisci una nuova versione con la propria decorrenza.'}{' '}
+        Controlla gli effetti nell’anteprima prima di confermare.
+      </p>
       <form
         onSubmit={(event) => {
           event.preventDefault()
@@ -90,17 +96,17 @@ export function PortVersionForm({
             <p>Versione iniziale: la decorrenza rimane assente.</p>
           )}
           {draft.context.revision !== revision && (
-            <p role="status">
+            <StateMessage kind="warning" title="Bozza precedente ai dati attuali">
               La bozza usa una revisione precedente. Riapri la versione per ripartire dai dati
               aggiornati.
-            </p>
+            </StateMessage>
           )}
-          <Group>
-            <Button type="submit" disabled={disabled}>
-              Anteprima versione
-            </Button>
+          <Group className="form-actions">
             <Button variant="subtle" disabled={disabled} onClick={onCancel}>
               Annulla modifica
+            </Button>
+            <Button type="submit" disabled={disabled}>
+              Anteprima versione
             </Button>
           </Group>
         </Stack>

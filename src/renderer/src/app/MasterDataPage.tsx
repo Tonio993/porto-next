@@ -2,10 +2,16 @@ import { Button, Group, Stack } from '@mantine/core'
 import type { useArchives } from '../api/use-archives'
 import { Ports } from './Ports'
 
-export function MasterDataPage({ archives }: { archives: ReturnType<typeof useArchives> }) {
+export function MasterDataPage({
+  archives,
+  onDialogChange,
+}: {
+  archives: ReturnType<typeof useArchives>
+  onDialogChange: (opened: boolean) => void
+}) {
   return (
     <Stack>
-      <Group aria-label="Tipologie anagrafiche">
+      <Group aria-label="Tipologie anagrafiche" className="master-data-nav" gap="xs">
         <Button variant="light" aria-pressed>
           Porti
         </Button>
@@ -15,7 +21,7 @@ export function MasterDataPage({ archives }: { archives: ReturnType<typeof useAr
           </Button>
         ))}
       </Group>
-      <Ports archives={archives} />
+      <Ports archives={archives} onDialogChange={onDialogChange} />
     </Stack>
   )
 }

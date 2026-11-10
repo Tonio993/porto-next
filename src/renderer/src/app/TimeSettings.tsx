@@ -61,8 +61,10 @@ export function TimeSettings({ archives }: { archives: ReturnType<typeof useArch
     if (result) setResolution(result.ok ? result.value : null)
   }
   return (
-    <section className="archive-panel">
+    <section className="archive-panel" aria-busy={loading || resolver.loading}>
       <Stack gap="lg">
+        {loading && <p role="status">Caricamento configurazione…</p>}
+        {resolver.loading && <p role="status">Verifica orario in corso…</p>}
         <div>
           <h2>Fuso aziendale iniziale</h2>
           <p>

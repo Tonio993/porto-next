@@ -21,6 +21,7 @@ export function PortDescriptionFields({
     <>
       <TextInput
         label="Nome del porto"
+        data-autofocus
         required
         disabled={disabled}
         value={value.name}

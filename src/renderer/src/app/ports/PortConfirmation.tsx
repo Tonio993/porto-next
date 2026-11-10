@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button, Group, Table } from '@mantine/core'
 import type { PortPreviewDto } from '../../../../shared/contracts/ports'
+import { StateMessage } from '../StateMessage'
 const labels: Record<string, string> = {
   name: 'Nome',
   locality: 'Località',
@@ -34,10 +35,28 @@ export function PortConfirmation({
   }, [preview.previewId, preview.expiresAtUtc])
   const obsolete = revision !== preview.context.revision
   return (
-    <section className="archive-panel" aria-label="Anteprima modifica">
-      <h2>Anteprima e conferma</h2>
+    <section aria-label="Anteprima modifica">
+      <StateMessage
+        kind={obsolete || expired ? 'warning' : preview.status === 'READY' ? 'success' : 'error'}
+        title={
+          obsolete
+            ? 'Anteprima obsoleta'
+            : expired
+              ? 'Anteprima scaduta'
+              : preview.status === 'READY'
+                ? 'Operazione consentita'
+                : 'Operazione bloccata'
+        }
+      >
+        {obsolete
+          ? 'I dati sono cambiati. Genera una nuova anteprima.'
+          : expired
+            ? 'Anteprima scaduta. Generane una nuova.'
+            : preview.status === 'READY'
+              ? 'Controlla gli effetti prima di confermare.'
+              : 'Risolvi i blocchi prima di procedere.'}
+      </StateMessage>
       <p>
-        {preview.status === 'READY' ? 'Operazione consentita' : 'Operazione bloccata'} ·{' '}
         {preview.summary.created} creazioni, {preview.summary.updated} aggiornamenti,{' '}
         {preview.summary.deleted} eliminazioni.
       </p>
@@ -52,8 +71,14 @@ export function PortConfirmation({
           {blocker.reference.label}: {blocker.reason}
         </p>
       ))}
-      <Table.ScrollContainer minWidth={500}>
-        <Table>
+      <Table.ScrollContainer
+        type="native"
+        minWidth={500}
+        className="preview-effects"
+        tabIndex={0}
+        aria-label="Effetti della modifica"
+      >
+        <Table striped withTableBorder>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Elemento</Table.Th>
@@ -105,18 +130,20 @@ export function PortConfirmation({
           Altri effetti
         </Button>
       </Group>
-      {expired && <p role="status">Anteprima scaduta. Generane una nuova.</p>}
-      {obsolete && <p role="status">I dati sono cambiati. Genera una nuova anteprima.</p>}
-      <Group mt="md">
+      <Group mt="md" className="form-actions">
+        <Button variant="default" disabled={disabled} onClick={onCancel}>
+          Chiudi anteprima
+        </Button>
         <Button
-          color={preview.operation === 'DELETE_PORT' ? 'red' : undefined}
+          color={
+            preview.operation === 'DELETE_PORT' || preview.operation === 'DELETE_VERSION'
+              ? 'red'
+              : undefined
+          }
           disabled={disabled || expired || obsolete || preview.status !== 'READY'}
           onClick={onConfirm}
         >
           Conferma modifica
-        </Button>
-        <Button variant="default" disabled={disabled} onClick={onCancel}>
-          Chiudi anteprima
         </Button>
       </Group>
     </section>

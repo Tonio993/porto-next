@@ -1,4 +1,4 @@
-import { Button, Group, Stack } from '@mantine/core'
+import { Badge, Button, Group, Stack } from '@mantine/core'
 import type { PortHistoryDto, PortVersionDto } from '../../../../shared/contracts/ports'
 export function PortHistory({
   history,
@@ -19,12 +19,15 @@ export function PortHistory({
   return (
     <section className="archive-panel" aria-label="Cronologia porto" aria-busy={loading}>
       <h2>Cronologia</h2>
-      <p>Inizio incluso, fine esclusa. Le versioni future si applicano alla loro decorrenza.</p>
+      <p className="panel-description">
+        Inizio incluso, fine esclusa. Le versioni future si applicano alla loro decorrenza.
+      </p>
       <Stack>
         {versions.items.map((version) => (
           <article
             key={version.id}
             className="port-version"
+            data-phase={version.phase}
             aria-label={`Versione ${version.effectiveFrom ?? 'iniziale'}`}
           >
             <h3>
@@ -35,6 +38,18 @@ export function PortHistory({
                   ? 'Futura'
                   : 'Storica'}
             </h3>
+            <Badge
+              variant="outline"
+              color={
+                version.phase === 'CURRENT' ? 'teal' : version.phase === 'FUTURE' ? 'blue' : 'gray'
+              }
+            >
+              {version.phase === 'CURRENT'
+                ? 'In uso ora'
+                : version.phase === 'FUTURE'
+                  ? 'Programmata'
+                  : 'Non più in uso'}
+            </Badge>
             <p>
               {version.name} · {version.locality} · {version.countryCode}
             </p>
@@ -48,7 +63,7 @@ export function PortHistory({
                 ? `Fino a ${version.effectiveTo} UTC (escluso)`
                 : 'Senza limite finale'}
             </p>
-            <Group>
+            <Group gap="xs">
               <Button variant="light" disabled={disabled} onClick={() => onEdit(version)}>
                 Correggi versione
               </Button>
@@ -61,6 +76,11 @@ export function PortHistory({
                 Elimina versione
               </Button>
             </Group>
+            {version.effectiveFrom === null && (
+              <p className="panel-description">
+                La versione iniziale può essere corretta, ma non eliminata.
+              </p>
+            )}
           </article>
         ))}
       </Stack>

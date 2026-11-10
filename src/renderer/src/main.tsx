@@ -7,6 +7,21 @@ import { App } from './app/App'
 
 const theme = createTheme({
   primaryColor: 'teal',
+  primaryShade: 8,
+  colors: {
+    teal: [
+      '#e6fcf5',
+      '#c3fae8',
+      '#96f2d7',
+      '#63e6be',
+      '#38d9a9',
+      '#20c997',
+      '#12b886',
+      '#0ca678',
+      '#087f5b',
+      '#066448',
+    ],
+  },
   defaultRadius: 'md',
   fontFamily: "'Segoe UI', system-ui, sans-serif",
   headings: { fontFamily: "'Segoe UI', system-ui, sans-serif", fontWeight: '650' },

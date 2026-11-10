@@ -1,14 +1,16 @@
 import type Database from 'better-sqlite3'
 import initialSql from '../../../../migrations/0001_archive.sql?raw'
 import revisionSql from '../../../../migrations/0002_archive_revision.sql?raw'
+import timeZoneSql from '../../../../migrations/0003_company_time_zone.sql?raw'
 import { ArchiveError } from '../../../shared/errors/archive-error'
 
 export const APPLICATION_ID = 0x504f5254
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 
 const migrations = [
   { version: 1, sql: initialSql },
   { version: 2, sql: revisionSql },
+  { version: 3, sql: timeZoneSql },
 ]
 
 export function migrate(database: Database.Database, fromVersion: number): void {

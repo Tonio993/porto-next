@@ -5,7 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BrowserWindow, dialog, ipcMain } from 'electron'
 import { ArchiveController } from '../../src/main/archive-controller'
 import { DatabaseSession } from '../../src/backend/infrastructure/database/database-session'
-import { registerArchiveIpc } from '../../src/main/ipc/register'
+import { registerArchiveIpc, registerTimeIpc } from '../../src/main/ipc/register'
+import { TimeService } from '../../src/backend/application/time/time-service'
+import { ArchiveCoordinator } from '../../src/backend/application/archives/archive-coordinator'
+import { timeChannels } from '../../src/shared/contracts/values'
 import { archiveChannels, type ArchiveState, type Result } from '../../src/shared/contracts/archive'
 import type { ArchiveContextDto } from '../../src/shared/contracts/application'
 
@@ -141,6 +144,27 @@ describe('controller archivi e menu', () => {
 })
 
 describe('confine IPC', () => {
+  it('protegge tutti i canali temporali prima di invocare il servizio', async () => {
+    const service = new TimeService(new ArchiveCoordinator())
+    registerTimeIpc(service, () => owner)
+    for (const action of Object.keys(timeChannels) as (keyof typeof timeChannels)[]) {
+      const execute = vi.spyOn(service, action)
+      const handler = vi
+        .mocked(ipcMain.handle)
+        .mock.calls.find(([channel]) => channel === timeChannels[action])![1]
+      for (const event of [
+        { sender: {}, senderFrame: owner.webContents.mainFrame },
+        { sender: owner.webContents, senderFrame: {} },
+      ]) {
+        expect(await handler(event as Electron.IpcMainInvokeEvent, null)).toMatchObject({
+          ok: false,
+          context: null,
+          error: { code: 'INVALID_INPUT' },
+        })
+      }
+      expect(execute).not.toHaveBeenCalled()
+    }
+  })
   it('rifiuta altri mittenti e frame secondari prima del controller', async () => {
     registerArchiveIpc(controller, () => owner)
     const handler = vi

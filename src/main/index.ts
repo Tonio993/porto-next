@@ -4,9 +4,10 @@ import { app, BrowserWindow, dialog, Menu } from 'electron'
 import type { ArchiveState } from '../shared/contracts/archive'
 import { archiveChannels } from '../shared/contracts/archive'
 import { ArchiveController, type ArchiveAction } from './archive-controller'
-import { registerArchiveIpc } from './ipc/register'
+import { registerArchiveIpc, registerTimeIpc } from './ipc/register'
 import { ArchiveService } from '../backend/application/archives/archive-service'
 import { ArchiveCoordinator } from '../backend/application/archives/archive-coordinator'
+import { TimeService } from '../backend/application/time/time-service'
 
 app.setName('Porto Next')
 if (process.env.PORTO_TEST_USER_DATA) app.setPath('userData', process.env.PORTO_TEST_USER_DATA)
@@ -101,6 +102,7 @@ if (ownsInstance) {
         archives,
       )
       registerArchiveIpc(controller, () => window)
+      registerTimeIpc(new TimeService(archives.coordinator), () => window)
       Menu.setApplicationMenu(
         Menu.buildFromTemplate([
           {

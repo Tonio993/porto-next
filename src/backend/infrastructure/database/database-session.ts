@@ -4,6 +4,8 @@ import { sql } from 'drizzle-orm'
 import { ArchiveError } from '../../../shared/errors/archive-error'
 import { APPLICATION_ID, SCHEMA_VERSION } from './migrations'
 import * as schema from './schema'
+import { timeZoneId } from '../../domain/values/moments'
+import type { CompanyTimeZoneDto } from '../../../shared/contracts/values'
 
 export class DatabaseSession {
   readonly sqlite: Database.Database
@@ -75,6 +77,24 @@ export class DatabaseSession {
     )
       throw new ArchiveError('INVALID_ARCHIVE', 'I metadati dell’archivio non sono validi.')
     return row
+  }
+
+  companyZone(): CompanyTimeZoneDto {
+    try {
+      const row = this.sqlite
+        .prepare(
+          'SELECT zone_id, confirmed, effective_from FROM company_time_zone WHERE singleton = 1',
+        )
+        .get() as { zone_id: unknown; confirmed: unknown; effective_from: unknown } | undefined
+      if (!row || (row.confirmed !== 0 && row.confirmed !== 1) || row.effective_from !== null)
+        throw new Error('Invalid initial zone')
+      return { zoneId: timeZoneId(row.zone_id), confirmed: row.confirmed === 1 }
+    } catch {
+      throw new ArchiveError(
+        'INVALID_ARCHIVE',
+        'La configurazione temporale dell’archivio non è valida.',
+      )
+    }
   }
 
   close(): void {

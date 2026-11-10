@@ -18,6 +18,7 @@ import {
   IconX,
 } from '@tabler/icons-react'
 import { useArchives } from '../api/use-archives'
+import { TimeSettings } from './TimeSettings'
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat('it-IT', {
@@ -99,7 +100,13 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
           Archivi
           <IconChevronRight size={15} />
         </button>
-        {['Anagrafiche', 'Catalogo e tariffe', 'Operazioni nave', 'Prestazioni'].map((label) => (
+        {[
+          'Anagrafiche',
+          'Catalogo e tariffe',
+          'Operazioni nave',
+          'Prestazioni',
+          'Riferimenti temporali',
+        ].map((label) => (
           <button
             key={label}
             className="nav-item"
@@ -186,7 +193,9 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
             </div>
           )}
 
-          {section !== 'Archivi' ? (
+          {section === 'Riferimenti temporali' && state.context ? (
+            <TimeSettings archives={archives} />
+          ) : section !== 'Archivi' ? (
             <section className="archive-panel">
               <h2>Sezione in preparazione</h2>
               <p>Le funzioni di {section.toLowerCase()} non sono ancora disponibili.</p>

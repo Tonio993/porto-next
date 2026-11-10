@@ -9,3 +9,10 @@ export const archiveMetadata = sqliteTable('archive_metadata', {
   // Read this int64 through CAST AS TEXT; Drizzle's number mapping would lose precision.
   revision: integer('revision').notNull().default(0),
 })
+
+export const companyTimeZone = sqliteTable('company_time_zone', {
+  singleton: integer('singleton').primaryKey(),
+  zoneId: text('zone_id').notNull(),
+  effectiveFrom: text('effective_from'),
+  confirmed: integer('confirmed', { mode: 'boolean' }).notNull().default(false),
+})

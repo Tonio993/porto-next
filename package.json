@@ -27,10 +27,12 @@
     "verify:p00": "tsc --noEmit -p doc/p00/tsconfig.json && node spikes/p00/verify-runtimes.mjs"
   },
   "dependencies": {
+    "@js-temporal/polyfill": "0.5.1",
     "@mantine/core": "9.8.0",
     "@mantine/hooks": "9.8.0",
     "@tabler/icons-react": "^3.51.0",
     "better-sqlite3": "^13.0.3",
+    "decimal.js": "10.6.0",
     "drizzle-orm": "^0.45.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"

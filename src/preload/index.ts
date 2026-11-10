@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { ArchiveApi, ArchiveState } from '../shared/contracts/archive'
 import { archiveChannels } from '../shared/contracts/archive'
+import { timeChannels, type TimeApi } from '../shared/contracts/values'
 
 const api: ArchiveApi = {
   getState: () => ipcRenderer.invoke(archiveChannels.state),
@@ -20,3 +21,10 @@ const api: ArchiveApi = {
   },
 }
 contextBridge.exposeInMainWorld('archives', api)
+
+const time: TimeApi = {
+  getCompanyZone: (request) => ipcRenderer.invoke(timeChannels.getCompanyZone, request),
+  configureCompanyZone: (request) => ipcRenderer.invoke(timeChannels.configureCompanyZone, request),
+  resolveCompanyMoment: (request) => ipcRenderer.invoke(timeChannels.resolveCompanyMoment, request),
+}
+contextBridge.exposeInMainWorld('time', time)

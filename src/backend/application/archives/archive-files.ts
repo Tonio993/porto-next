@@ -41,6 +41,7 @@ export class ArchiveFileOperations {
         })
         .run()
       candidate.metadata()
+      candidate.companyZone()
       this.activate(candidate)
       return this.current()!
     } catch (error) {
@@ -60,6 +61,7 @@ export class ArchiveFileOperations {
       const version = candidate.validate()
       try {
         candidate.metadata(version)
+        if (version >= 3) candidate.companyZone()
       } catch {
         throw new ArchiveError('INVALID_ARCHIVE', 'La struttura dell’archivio non è valida.')
       }
@@ -70,6 +72,7 @@ export class ArchiveFileOperations {
         candidate.sqlite.transaction(() => {
           migrate(candidate.sqlite, version)
           candidate.metadata()
+          candidate.companyZone()
         })()
       }
       try {
@@ -96,6 +99,7 @@ export class ArchiveFileOperations {
       candidate.validate()
       candidate.configure()
       candidate.metadata()
+      candidate.companyZone()
       this.activate(candidate)
       return this.current()!
     } catch (error) {

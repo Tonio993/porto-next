@@ -19,6 +19,9 @@
     "src/preload/**/*.ts",
     "src/backend/**/*.ts",
     "src/shared/**/*.ts",
+    "src/renderer/src/api/numeric-input.ts",
+    "doc/p00/contratti.ts",
+    "doc/p00/scenari.mts",
     "tests/**/*.ts"
   ]
 }

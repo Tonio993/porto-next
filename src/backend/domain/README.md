@@ -1,2 +1,6 @@
-Questo spazio è riservato al futuro modello di dominio. Lo scheletro contiene soltanto
-la gestione tecnica degli archivi e nessuna logica operativa della società.
+Il dominio contiene i valori numerici e temporali introdotti da P02 in `values/`:
+denaro EUR e fattori decimali esatti, risoluzione esplicita dei momenti e fuso iniziale
+autonomo del porto. Queste funzioni non accedono a SQLite, IPC o stato globale.
+
+I casi d'uso e le transazioni restano in `application/`; gli adattatori di persistenza
+restano in `infrastructure/`. Le entità operative saranno introdotte dalle slice successive.

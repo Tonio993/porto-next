@@ -37,6 +37,9 @@ export const portVersions = sqliteTable(
       .notNull()
       .references(() => ports.id),
     effectiveFrom: text('effective_from'),
+    effectiveLocalDateTime: text('effective_local_date_time'),
+    effectiveZoneId: text('effective_zone_id'),
+    effectiveUtcOffset: text('effective_utc_offset'),
     name: text('name').notNull(),
     locality: text('locality').notNull(),
     countryCode: text('country_code').notNull(),

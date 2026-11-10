@@ -10,12 +10,14 @@ import { ArchiveError, asArchiveError } from '../../../shared/errors/archive-err
 import { DatabaseSession } from '../../infrastructure/database/database-session'
 import { SCHEMA_VERSION } from '../../infrastructure/database/migrations'
 import { record, validateContext, validateSession } from './context-validation'
+import { PreviewStore } from '../previews/preview-store'
 
 type Synchronous<T> = T extends PromiseLike<unknown> ? never : T
 
 /** One scope per activation. Repositories for future use cases belong to this scope. */
 export class ArchiveApplicationSession {
   readonly sessionId = randomUUID()
+  readonly previews = new PreviewStore()
   constructor(readonly database: DatabaseSession) {}
 
   context(): ArchiveContextDto {
@@ -60,11 +62,13 @@ export class ArchiveCoordinator {
   /** Lifecycle primitives: call only inside run(), never enqueue again from its callback. */
   activate(database: DatabaseSession): void {
     const next = new ArchiveApplicationSession(database)
+    this.active?.previews.clear()
     this.active?.database.close()
     this.active = next
   }
 
   deactivate(): void {
+    this.active?.previews.clear()
     this.active?.database.close()
     this.active = null
   }
@@ -154,12 +158,15 @@ export class ArchiveCoordinator {
   command<T, R>(
     request: CommandRequest<T>,
     execute: (session: ArchiveApplicationSession, payload: T) => Synchronous<R>,
+    afterCommit?: (session: ArchiveApplicationSession, value: R) => void,
   ): Promise<ApplicationResult<R>> {
     return this.run(() =>
       this.result<R>(() => {
         const input = record(request, ['context', 'payload'])
         const context = validateContext(input.context)
-        return this.write<R>(context, (session) => execute(session, input.payload as T))
+        const value = this.write<R>(context, (session) => execute(session, input.payload as T))
+        afterCommit?.(this.requireSession(), value)
+        return value
       }),
     )
   }

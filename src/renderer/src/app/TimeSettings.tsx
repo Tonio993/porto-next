@@ -1,75 +1,65 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Button, Stack, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../shared/contracts/application'
 import type { CompanyTimeZoneDto, MomentResolutionDto } from '../../../shared/contracts/values'
 import type { useArchives } from '../api/use-archives'
+import { useApplicationRequest } from '../api/use-application-request'
+import { MomentChoices } from './MomentChoices'
 
 export function TimeSettings({ archives }: { archives: ReturnType<typeof useArchives> }) {
-  const { state, busy, run, update, setError } = archives
+  const { state, execute, setError } = archives
   const [company, setCompany] = useState<CompanyTimeZoneDto | null>(null)
   const [draftContext, setDraftContext] = useState<ArchiveContextDto | null>(null)
   const [zoneId, setZoneId] = useState('Europe/Rome')
   const [local, setLocal] = useState('')
   const [resolution, setResolution] = useState<MomentResolutionDto | null>(null)
-  const alive = useRef(false)
-  const sequence = useRef(0)
-  const loads = useRef(0)
+  const {
+    request: loadRequest,
+    invalidate: invalidateLoad,
+    loading,
+  } = useApplicationRequest(state.context, setError)
+  const resolver = useApplicationRequest(state.context, setError)
+  const command = useApplicationRequest(state.context, setError)
+  const busy = archives.busy || archives.commandBusy || command.loading
   const sessionId = state.context!.sessionId
-
   const load = useCallback(async () => {
-    const current = ++loads.current
     setError(null)
-    await window.time
-      .getCompanyZone({ context: { sessionId }, query: null })
-      .then((result) => {
-        if (!alive.current || current !== loads.current) return
-        if (result.ok) {
-          setCompany(result.value)
-          setZoneId(result.value.zoneId)
-          setDraftContext(result.context)
-        } else setError(result.error.message)
-      })
-      .catch(() => {
-        if (alive.current && current === loads.current)
-          setError('Non è stato possibile leggere il fuso aziendale.')
-      })
-  }, [sessionId, setError])
-
-  useEffect(() => {
-    alive.current = true
-    void load()
-    return () => {
-      alive.current = false
-      ++loads.current
+    const result = await loadRequest(() =>
+      window.time.getCompanyZone({ context: { sessionId }, query: null }),
+    )
+    if (result?.ok) {
+      setCompany(result.value)
+      setZoneId(result.value.zoneId)
+      setDraftContext(result.context)
     }
+  }, [loadRequest, sessionId, setError])
+  useEffect(() => {
+    void load()
   }, [load])
-
   async function configure(event: FormEvent) {
     event.preventDefault()
     if (!draftContext) return
-    ++loads.current
-    const value = await run(() =>
-      window.time.configureCompanyZone({ context: draftContext, payload: { zoneId } }),
+    invalidateLoad()
+    const result = await command.request(() =>
+      execute(() =>
+        window.time.configureCompanyZone({ context: draftContext, payload: { zoneId } }),
+      ),
     )
-    if (!alive.current) return
-    if (value) {
-      setCompany(value)
-      setZoneId(value.zoneId)
-      await update(() => window.archives.getState())
+    if (result?.ok) {
+      setCompany(result.value)
+      setZoneId(result.value.zoneId)
+      setDraftContext(result.context)
     }
   }
-
   async function resolve(selectedOffset: string | null = null) {
-    const current = ++sequence.current
-    const value = await run(() =>
+    const result = await resolver.request(() =>
       window.time.resolveCompanyMoment({
         context: { sessionId },
         query: { localDateTime: local, selectedOffset },
       }),
     )
-    if (alive.current && current === sequence.current) setResolution(value)
+    if (result) setResolution(result.ok ? result.value : null)
   }
-
   return (
     <section className="archive-panel">
       <Stack gap="lg">
@@ -89,7 +79,7 @@ export function TimeSettings({ archives }: { archives: ReturnType<typeof useArch
                 value={zoneId}
                 onChange={(event) => setZoneId(event.currentTarget.value)}
                 required
-                disabled={busy}
+                disabled={busy || loading || resolver.loading}
                 style={{ width: '100%' }}
               />
               <p>
@@ -128,7 +118,7 @@ export function TimeSettings({ archives }: { archives: ReturnType<typeof useArch
                   required
                   disabled={busy}
                   onChange={(event) => {
-                    ++sequence.current
+                    resolver.invalidate()
                     setLocal(event.currentTarget.value)
                     setResolution(null)
                   }}
@@ -141,16 +131,11 @@ export function TimeSettings({ archives }: { archives: ReturnType<typeof useArch
             {resolution?.status === 'CHOICE_REQUIRED' && (
               <Stack gap="sm" align="flex-start">
                 <p>Quest’ora si presenta due volte. Scegli l’occorrenza.</p>
-                {resolution.choices.map((choice, index) => (
-                  <Button
-                    key={choice.utc}
-                    variant="light"
-                    disabled={busy}
-                    onClick={() => void resolve(choice.offset)}
-                  >
-                    {index === 0 ? 'Prima' : 'Seconda'} occorrenza ({choice.offset})
-                  </Button>
-                ))}
+                <MomentChoices
+                  choices={resolution.choices}
+                  disabled={busy}
+                  onChoose={(choice) => void resolve(choice.offset)}
+                />
               </Stack>
             )}
             {resolution?.status === 'RESOLVED' && (

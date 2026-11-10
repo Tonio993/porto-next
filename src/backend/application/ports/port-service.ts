@@ -1,31 +1,22 @@
+import { PortLifecycleService } from './port-lifecycle-service'
+import { portDescription, entityId } from './port-input'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
 import type { CreatePortDto, PortListQueryDto } from '../../../shared/contracts/ports'
-import { countryCodes } from '../../../shared/contracts/countries'
 import { ArchiveError } from '../../../shared/errors/archive-error'
-import { identifierText } from '../../domain/values/identifiers'
 import { initialPortTimeZone } from '../../domain/values/moments'
 import { PortRepository } from '../../infrastructure/database/port-repository'
 import type { ArchiveCoordinator } from '../archives/archive-coordinator'
-import { record, validateSession } from '../archives/context-validation'
+import { record } from '../archives/context-validation'
 
-export class PortService {
-  constructor(private readonly coordinator: ArchiveCoordinator) {}
+export class PortService extends PortLifecycleService {
+  constructor(coordinator: ArchiveCoordinator, now?: () => string) {
+    super(coordinator, now)
+  }
 
   create(request: CommandRequest<CreatePortDto>) {
     return this.coordinator.command(request, ({ database }, payload) => {
       const input = record(payload, ['name', 'locality', 'countryCode', 'initialZoneId'])
-      const name = identifierText(input.name, 'name')
-      const locality = identifierText(input.locality, 'locality')
-      const countryCode =
-        typeof input.countryCode === 'string' ? input.countryCode.trim().toUpperCase() : ''
-      if (!countryCodes.includes(countryCode))
-        throw new ArchiveError('VALIDATION_ERROR', 'Scegli un paese valido.', [
-          {
-            path: ['countryCode'],
-            code: 'INVALID_COUNTRY',
-            message: 'Scegli un paese ISO alpha-2.',
-          },
-        ])
+      const { name, locality, countryCode } = portDescription(input)
       // The company zone is only a proposal; each new port stores its own choice.
       if (typeof input.initialZoneId !== 'string')
         throw new ArchiveError('VALIDATION_ERROR', 'Scegli il fuso iniziale del porto.')
@@ -40,7 +31,12 @@ export class PortService {
           { path: ['initialZoneId'], code: 'INVALID_TIME_ZONE', message: 'Fuso IANA non valido.' },
         ])
       }
-      return new PortRepository(database).create({ name, locality, countryCode, initialZoneId })
+      return new PortRepository(database, this.now).create({
+        name,
+        locality,
+        countryCode,
+        initialZoneId,
+      })
     })
   }
 
@@ -61,15 +57,15 @@ export class PortService {
         [...search].length > 200
       )
         throw new ArchiveError('VALIDATION_ERROR', 'Ricerca o pagina non valida.')
-      return new PortRepository(database).list({ page, pageSize, search })
+      return new PortRepository(database, this.now).list({ page, pageSize, search })
     })
   }
 
   get(request: QueryRequest<{ id: string }>) {
     return this.coordinator.query(request, ({ database }, query) => {
       const input = record(query, ['id'])
-      const id = validateSession(input.id)
-      return new PortRepository(database).get(id)
+      const id = entityId(input.id, 'id')
+      return new PortRepository(database, this.now).get(id)
     })
   }
 }

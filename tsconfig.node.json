@@ -20,6 +20,7 @@
     "src/backend/**/*.ts",
     "src/shared/**/*.ts",
     "src/renderer/src/api/numeric-input.ts",
+    "src/renderer/src/api/response-scope.ts",
     "doc/p00/contratti.ts",
     "doc/p00/scenari.mts",
     "tests/**/*.ts"

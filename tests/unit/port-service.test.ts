@@ -143,7 +143,9 @@ describe('creazione e consultazione porti', () => {
     const id = result.value.id
     expect(() =>
       sql()
-        .prepare('INSERT INTO port_versions VALUES (?, ?, NULL, ?, ?, ?)')
+        .prepare(
+          'INSERT INTO port_versions (id, port_id, effective_from, name, locality, country_code) VALUES (?, ?, NULL, ?, ?, ?)',
+        )
         .run(randomUUID(), id, 'Altro', 'Genova', 'IT'),
     ).toThrow()
     expect(() =>
@@ -273,12 +275,12 @@ describe('migrazione porti v3 → v4', () => {
   it('conserva metadati e copia preventiva v3 e crea porti dopo la migrazione', async () => {
     createV3()
     expect(await archives.open(file('v3'))).toMatchObject({
-      schemaVersion: 4,
+      schemaVersion: 5,
       createdAt: '2020-01-01T00:00:00.000Z',
       updatedAt: '2021-01-01T00:00:00.000Z',
     })
     expect(context().revision).toBe('9007199254740993')
-    const backup = readdirSync(folder).find((name) => name.includes('.prima-v4-'))!
+    const backup = readdirSync(folder).find((name) => name.includes('.prima-v5-'))!
     const snapshot = new Database(join(folder, backup), { readonly: true })
     try {
       expect(snapshot.pragma('user_version', { simple: true })).toBe(3)

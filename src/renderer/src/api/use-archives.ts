@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ArchiveState, Result } from '../../../shared/contracts/archive'
 import { canApplyArchiveState } from '../../../shared/archive-state-order'
+import type { ApplicationResult } from '../../../shared/contracts/application'
 
 export function useArchives() {
   const [state, setState] = useState<ArchiveState>({ active: null, recent: [], context: null })
@@ -8,6 +9,8 @@ export function useArchives() {
   const epoch = useRef(0)
   const pending = useRef(0)
   const [busy, setBusy] = useState(true)
+  const commands = useRef(0)
+  const [commandBusy, setCommandBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
@@ -100,5 +103,27 @@ export function useArchives() {
     [run, apply],
   )
 
-  return { state, busy, error, notice, setError, setNotice, run, update }
+  // Preserve the envelope for domain forms and previews; file operations keep run/update.
+  const execute = useCallback(
+    async <T>(operation: () => Promise<ApplicationResult<T>>) => {
+      ++commands.current
+      setCommandBusy(true)
+      const session = latest.current.context?.sessionId
+      try {
+        const result = await operation()
+        if (result.ok && latest.current.context?.sessionId === session) {
+          const requestEpoch = epoch.current
+          const next = await window.archives.getState()
+          if (next.ok) apply(next.value, requestEpoch)
+        }
+        return result
+      } finally {
+        --commands.current
+        setCommandBusy(commands.current > 0)
+      }
+    },
+    [apply],
+  )
+
+  return { state, busy, commandBusy, error, notice, setError, setNotice, run, update, execute }
 }

@@ -2,7 +2,7 @@
 
 Riferimento: [piano di implementazione](piano-implementazione-prestazioni.md).
 
-Ultimo aggiornamento: 10 novembre 2026, completamento P04.
+Ultimo aggiornamento: 10 novembre 2026, completamento e verifica della revisione UI01 post P04.
 
 ## Baseline
 
@@ -11,6 +11,7 @@ Ultimo aggiornamento: 10 novembre 2026, completamento P04.
 - Funzioni presenti: creazione/apertura archivi, recenti, nome dell'archivio, copia, backup e chiusura.
 - I documenti in `legacy/` descrivono il dominio e un precedente percorso tecnologico. Le dichiarazioni di implementazione Java/Angular non costituiscono avanzamento di questo repository.
 - P00–P04 sono completati. P04 completa versioni e ciclo di vita del porto e porta lo schema a v5; i task da P05 in avanti non sono stati avviati.
+- UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo task funzionale è P05.
 
 ## Avanzamento
 
@@ -44,6 +45,19 @@ Ultimo aggiornamento: 10 novembre 2026, completamento P04.
 Stati utilizzabili: `Da avviare`, `In corso`, `Implementato, da verificare`, `Completato`, `Bloccato` con motivo concreto. Un task parzialmente implementato non viene marcato completato.
 
 Il riferimento P00 è il commit che introduce `doc/p00/decisioni-iniziali.md`, rintracciabile con `git log --diff-filter=A --oneline -- doc/p00/decisioni-iniziali.md`.
+
+## Revisioni grafiche pianificate
+
+Riferimento: piano §3.5. Queste attività hanno stato separato dai task funzionali già completati; la loro pianificazione non costituisce una verifica grafica dell'applicazione.
+
+| ID   | Stato      | Collocazione                    | Risultato e passaggio di consegne                                                                                               |
+| ---- | ---------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| UI01 | Completato | Dopo P04, prima di P05–P07.     | [Revisione e convenzioni](ui01/revisione-post-p04.md), 24 schermate ispezionate, 6 percorsi desktop passati sulla build finale. |
+| UI02 | Da avviare | Alla chiusura di M1, P00–P08.   | Consolidamento di anagrafiche e catalogo con dati realistici, liste lunghe e stati vuoti.                                       |
+| UI03 | Da avviare | Alla chiusura di M3, P09–P16.   | Revisione dei flussi operativi, ricerca, contesto, soggetti, importi ed errori.                                                 |
+| UI04 | Da avviare | Dentro P20, prima del rilascio. | Controllo finale di leggibilità, accessibilità e dimensioni supportate, anche sul pacchetto Windows.                            |
+
+UI01 ha completato osservazione dell'app Electron, implementazione delle correzioni grafiche e di usabilità, verifica dei percorsi P03–P04 e documentazione. Sessione/revisione, bozze, anteprime e invalidazione delle risposte sono preservate; P05 non è avviato. Le revisioni successive seguono i criteri del piano e non sostituiscono i controlli tecnici già previsti.
 
 ## Decisioni e questioni da mantenere visibili
 
@@ -150,7 +164,7 @@ Limiti: la parte di `CU-ANA-01`–`03` relativa ai porti è disponibile; cronolo
 
 Prossimo task: **P04**, nella stessa chat P03, ragionamento consigliato `high`. Riutilizzare convenzioni e transazione del primo flusso completo, conservare le prenotazioni storiche e separare sempre le versioni descrittive dalla configurazione del fuso. P04 non è stato avviato.
 
-## Ultimo passaggio di consegne — P04
+## Passaggio precedente — P04
 
 Attività: versioni e ciclo di vita del porto, con riordino frontend circoscritto. Base integrata `ec92739`; implementazione nel commit `0be600d`. Stato: completato e verificato anche nel pacchetto Windows. Dettagli e convenzioni per P05–P07 in [Versioni e ciclo di vita del porto](p04/versioni-e-ciclo-di-vita.md).
 
@@ -179,4 +193,24 @@ Le verifiche desktop vengono eseguite fuori dalla sandbox dell'agente per gli AC
 
 Limiti: la copertura di `CU-ANA-01`–`09` riguarda il porto e i riferimenti del perimetro attuale. Banchine, altre anagrafiche, attività operative, ricalcoli delle attività e protezioni derivanti dalle fatture restano nelle rispettive slice. Quando verranno introdotti nuovi riferimenti ricalcolabili occorrerà integrarli nell'analisi già disponibile prima di consentirne le correzioni. Nessuna variazione del fuso è esposta nel form descrittivo.
 
-Prossimo task: **P05**, non avviato. Riutilizzare le convenzioni P04 mantenendo tipizzati contratti e repository; controllare lo stato del porto nelle nuove assegnazioni delle banchine, conservare l'appartenenza immutabile e usare un contatore globale della tipologia banchina. La generazione dell'installer e l'installazione non fanno parte di P04.
+Prossima attività: **UI01 — Revisione grafica iniziale post P04**, non avviata; seguire il piano §3.5 e produrre la nota di revisione con convenzioni visive, schermate ispezionate e verifiche effettive. P04 rimane completato. Dopo UI01 procedere con **P05**, non avviato: riutilizzare le convenzioni funzionali P04 e quelle visive UI01 mantenendo tipizzati contratti e repository; controllare lo stato del porto nelle nuove assegnazioni delle banchine, conservare l'appartenenza immutabile e usare un contatore globale della tipologia banchina. La generazione dell'installer e l'installazione non fanno parte di P04.
+
+## Ultimo passaggio di consegne — UI01
+
+Attività: revisione grafica iniziale di struttura comune e Porti, dopo P04. Base `77ff771`; implementazione `b529c2e`, con le tre modifiche documentali iniziali dell'utente conservate. Stato: **completato e verificato sulla build Electron**. Decisioni, convenzioni per P05–P07, immagini e limiti in [Revisione post P04](ui01/revisione-post-p04.md).
+
+Risultato: elenco e dettaglio affiancati con scorrimenti indipendenti; ricerca, selezione e pagine sempre disponibili nell'elenco. Creazione, editor e anteprima diventano dialoghi Mantine, con focus contenuto e ritorno al comando di origine. Cornice comune più compatta, archivio visibile nell'intestazione, tipografia e contrasto migliorati, stati temporali e di anteprima con testo oltre al colore. `StateMessage` è condiviso dai casi reali di errore, conflitto e anteprima. Corretto il difetto preesistente del secondo clic sul selezionato che svuotava il dettaglio.
+
+File principali: `App`, `MasterDataPage`, `Ports`, componenti `ports/`, `TimeSettings`, tema e stili locali; due aggiustamenti circoscritti a `usePorts` per selezione ripetuta ed esito positivo della creazione. Nuovo percorso `tests/e2e/ui01.spec.ts`; adattati i tre percorsi Porti preservando le asserzioni funzionali e aggiungendo caricamento e focus. Backend, main/preload, contratti, schema v5, migrazioni e dipendenze invariati. Non è introdotto un motore CRUD né avviato P05.
+
+Verifiche effettive:
+
+- `npm run test:e2e`: build riuscita, **6 percorsi su 6 passati** in 5,3 minuti sulla build finale, con renderer offline e dati temporanei. Archivi 31,5 s; asincronia/confine temporale 31,3 s; ciclo di vita circa 1,8 minuti; creazione/consultazione 52,7 s; tempo 31,2 s; UI01 circa un minuto.
+- Il percorso UI01 copre finestre native 960 × 700 e 1440 × 900, archivio vuoto, 28 porti su due pagine, ricerca con/senza risultati, testo lungo, dettaglio e tre fasi della cronologia, creazione e modifica, anteprime pronta/bloccata/obsoleta, errore per campo, tastiera/focus, bozza conservata nella stessa sessione e scartata alla chiusura. Il blocco è prodotto da un riferimento SQLite reale nel solo archivio temporaneo. Le regressioni verificano copie, reset con «Salva con nome», revisioni, risposte tardive e futuro → corrente senza scritture.
+- Contrasto del pulsante verificato dai colori CSS effettivi in Electron: almeno 4,5:1, circa 5:1 normale e 7,18:1 in hover. Ulteriore lettura dei colori di messaggi, campo errato e descrizioni conferma l'applicazione degli stili locali.
+- `npm test`: **93 test passati su 10 file**, nel runtime Electron con SQLite reale. `npm run check`: TypeScript ed ESLint passati; Prettier globale segnala soltanto i cinque documenti legacy preesistenti `00`–`04`. Formattazione dei file interessati, differenze Git e collegamenti locali controllati separatamente.
+- **24 schermate ispezionate dall'agente**, sette prima e diciassette dopo. Interazioni guidate tramite Playwright in Electron reale; **nessuna sessione manuale umana** o certificazione completa di accessibilità. Avvio desktop fuori dalla sandbox dell'agente per gli ACL Windows, senza modificarli né disattivare la sandbox Electron.
+
+Il pacchetto Windows non è rigenerato in UI01, secondo il piano §7.3: nessuna modifica a risorse distribuite separatamente, migrazioni o dipendenze native; verificata la build Electron. La prova sul pacchetto P04 resta storica. Limiti: cronologia lunga ancora scorribile nel proprio pannello, ulteriori configurazioni DPI e prove umane con tecnologie assistive non eseguite. Non sono noti difetti di integrità aperti nel perimetro UI01; resta la sola non conformità statica legacy già presente.
+
+Prossimo task funzionale: **P05 — Banchine**, non avviato. Riutilizzare convenzioni funzionali P04 e visive UI01; preservare appartenenza immutabile, contatore globale della tipologia e controlli autorevoli sullo stato del porto nelle nuove assegnazioni. Integrare immediatamente i nuovi riferimenti nelle anteprime e nei vincoli del porto. P06–P07 seguiranno gli stessi criteri mantenendo contratti e repository tipizzati.

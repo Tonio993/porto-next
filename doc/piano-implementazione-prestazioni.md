@@ -6,6 +6,8 @@ Questo piano prepara il primo rilascio funzionale di Porto Next. Organizza il la
 
 P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01, [P02](p02/numeri-e-tempo.md), [P03](p03/porti.md) e [P04](p04/versioni-e-ciclo-di-vita.md) sono completati; lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
 
+[UI01](ui01/revisione-post-p04.md) è completato: struttura comune e Porti verificati in Electron, con convenzioni visive e schermate prima/dopo. Il prossimo task funzionale è **P05**, non avviato.
+
 ## 1. Fonti e decisioni di perimetro
 
 Sono stati esaminati i cinque documenti di `doc/legacy`, approfondendo le parti necessarie a questo incremento:
@@ -211,6 +213,31 @@ L'analisi espone oggetti creati, modificati o rimossi, attribuzioni, fonti dei s
 
 **Ogni slice che introduce nuovi riferimenti deve integrare immediatamente i controlli e i ricalcoli nei comandi già disponibili.** Per esempio, quando P10 introduce visite ed estremi, una modifica anagrafica deve già aggiornarne le versioni applicate; P14 e P15 estendono lo stesso controllo alle prestazioni. I test trasversali finali verificano questi comportamenti, non sostituiscono la loro implementazione progressiva.
 
+### 3.5 Revisioni grafiche e usabilità del frontend
+
+Le revisioni grafiche sono attività implementative con verifica nell'applicazione Electron. Affiancano le revisioni tecniche della sezione 7.2 e mantengono invariati perimetro funzionale, contratti applicativi e regole di dominio. Gli ID `UI01`–`UI04` non rinumerano i task funzionali e hanno stato autonomo nel registro.
+
+| ID   | Collocazione                          | Risultato atteso                                                                                             |
+| ---- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| UI01 | Dopo P04, prima di P05–P07.           | Struttura comune e percorso Porti come riferimento visivo per le anagrafiche successive.                     |
+| UI02 | Dopo P00–P08, alla chiusura di M1.    | Coerenza di anagrafiche e catalogo, verificata con dati realistici, testi lunghi e liste paginate.           |
+| UI03 | Dopo P09–P16, alla chiusura di M3.    | Revisione dei flussi operativi completi, dalla registrazione alla ricerca e consultazione delle prestazioni. |
+| UI04 | Dentro P20, prima della sua chiusura. | Verifica finale di leggibilità, accessibilità e dimensioni supportate, anche nell'eseguibile confezionato.   |
+
+**UI01 — Revisione grafica iniziale post P04.** Esaminare l'app in esecuzione prima di scegliere il layout. Rivedere struttura della finestra, navigazione anagrafiche, gerarchie, tipografia, spaziature, densità, tabelle, form e azioni. Nel percorso Porti valutare la disposizione di elenco, dettaglio, cronologia, creazione, modifica e conferma, riducendo la necessità di scorrere fra attività correlate. Scegliere pannelli, pagine o dialoghi in base al flusso osservato. Distinguere dati storici, correnti e futuri e azioni principali, secondarie e distruttive; rendere riconoscibili caricamento, assenza di dati, errori e conflitti.
+
+**Stato UI01:** completato. [Revisione e convenzioni](ui01/revisione-post-p04.md): elenco/dettaglio affiancati, dialoghi dedicati, gerarchie e stati uniformati, tastiera/focus e contrasto verificati. Sei percorsi desktop passati sulla build finale; schermate a 960 × 700 e 1440 × 900. Prove automatizzate e ispezione dell'agente, senza sessione manuale umana. Esiti e limiti nel registro e nella nota.
+
+Applicare il risultato alle schermate esistenti coinvolte e documentare poche convenzioni riutilizzabili con Mantine e gli stili locali. Preservare controlli di sessione/revisione, bozze, invalidazione delle risposte, anteprime e passaggio futuro → corrente. Non introdurre un motore CRUD, nuove funzioni anagrafiche o una riscrittura architetturale. P05–P07 adotteranno le convenzioni visive verificate da UI01; le loro dipendenze funzionali restano quelle della tabella.
+
+**UI02 — Consolidamento dopo M1.** Confrontare porti, banchine, clienti, agenzie, navi e catalogo; uniformare navigazione, ricerca, elenchi, dettaglio, cronologie, form e conferme dove i comportamenti coincidono. Verificare uso frequente, liste lunghe, paginazione, testi estesi e stati vuoti. Integrare le convenzioni comuni sulla base delle differenze reali.
+
+**UI03 — Revisione operativa dopo M3.** Verificare inserimento e consultazione di operazioni e prestazioni, ricerca, soggetti ereditati o espliciti, contesto temporale, importi base e spiegazione del calcolo. Rivedere il percorso completo e la gestione degli errori; le correzioni aggiunte in P17–P19 seguiranno le convenzioni risultanti.
+
+**UI04 — Controllo finale in P20.** Verificare l'interfaccia integrata dopo P17–P19: navigazione da tastiera, focus, etichette, contrasto, leggibilità degli stati senza affidarsi al solo colore e assenza di contenuti o comandi irraggiungibili alle dimensioni supportate. Correggere le regressioni visive e di usabilità residue prima del rilascio.
+
+**Criteri comuni:** ispezionare schermate reali con dati temporanei, alla dimensione minima supportata e a una dimensione desktop più ampia; acquisire e ispezionare schermate rappresentative prima e dopo. Per UI01 verificare almeno elenco vuoto/popolato, dettaglio, cronologia storica/corrente/futura, creazione, modifica, anteprima pronta/bloccata/obsoleta, errore per campo e cambio sessione. Verificare tastiera e focus nei percorsi modificati. Eseguire i controlli implementativi e desktop pertinenti della sezione 7.3; aggiornare i test dei flussi modificati senza limitarsi ad asserzioni su classi CSS. Registrare decisioni visive, verifiche effettive, limiti e convenzioni per i task successivi in una nota dedicata (`doc/ui01/revisione-post-p04.md` per UI01) e nel registro. Distinguere ispezione automatizzata e sessione manuale umana. Nessuna revisione è completata sulla sola base della lettura del codice.
+
 ## 4. Task, dipendenze e chat
 
 Ogni riga è un task separato, con un risultato verificabile e almeno un commit coerente quando l'utente autorizza i commit. P17 è articolato in quattro task per limitare il lavoro sulla ricostruzione operativa.
@@ -224,10 +251,12 @@ Ogni riga è un task separato, con un risultato verificabile e almeno un commit 
 | P02  | Valori numerici esatti, momenti e fusi iniziali                | P01                     | Sì                             | `high`       |
 | P03  | Primo flusso verticale: creare e consultare porti              | P02                     | Sì                             | `medium`     |
 | P04  | Versioni e ciclo di vita del porto                             | P03                     | No, continuare P03             | `high`       |
+| UI01 | Revisione grafica iniziale di struttura comune e porti         | P04                     | Sì                             | `high`       |
 | P05  | Banchine nel porto, con versioni e ciclo di vita               | P04                     | Sì                             | `medium`     |
 | P06  | Clienti e agenzie, con versioni e ciclo di vita                | P04                     | Sì                             | `medium`     |
 | P07  | Navi e classificazioni iniziali                                | P04                     | Sì                             | `high`       |
 | P08  | Catalogo e pesi iniziali                                       | P02                     | Sì                             | `medium`     |
+| UI02 | Consolidamento grafico di anagrafiche e catalogo               | UI01, P05–P08           | Sì                             | `high`       |
 | P09  | Tariffe iniziali complete e calcolo base                       | P03, P07, P08           | Sì                             | `high`       |
 | P10  | Entrata, uscita e permanenze persistite                        | P05, P07, P09           | Sì                             | `high`       |
 | P11  | Spostamento nello stesso porto                                 | P10                     | No, continuare P10             | `high`       |
@@ -236,6 +265,7 @@ Ogni riga è un task separato, con un risultato verificabile e almeno un commit 
 | P14  | Registrazione e consultazione di prestazioni libere            | P13                     | Sì                             | `high`       |
 | P15  | Registrazione e consultazione da catalogo                      | P14, P08, P09           | No, continuare P14             | `high`       |
 | P16  | Consuntivazione, modifiche, eliminazione e ricerca prestazioni | P15                     | Sì                             | `high`       |
+| UI03 | Revisione grafica dei flussi operativi completi                | UI02, P09–P16           | Sì                             | `high`       |
 | P17A | Consuntivazione operazioni e primo replay con anteprima        | P16                     | Sì                             | `high`       |
 | P17B | Inserimento retroattivo di operazioni                          | P17A                    | No, continuare P17A            | `high`       |
 | P17C | Correzione delle operazioni esistenti                          | P17B                    | Sì                             | `high`       |
@@ -244,7 +274,7 @@ Ogni riga è un task separato, con un risultato verificabile e almeno un commit 
 | P19  | Variazioni temporali dei pesi e ricalcoli                      | P18                     | No, continuare P18             | `high`       |
 | P20  | Verifica indipendente e rilascio                               | Tutti i task precedenti | Sì, con revisione indipendente | `high`       |
 
-La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dipendenze permettono anche lavoro parallelo controllato, descritto nella sezione 7.
+La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dipendenze permettono anche lavoro parallelo controllato, descritto nella sezione 7. Le schede UI01–UI04 sono nella sezione 3.5; UI04 è parte di P20 e non richiede un task funzionale separato. Completare UI01 prima di replicare l'impostazione visiva nelle anagrafiche P05–P07.
 
 ### P00 — Specifica eseguibile e decisioni
 
@@ -498,6 +528,7 @@ La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dip
 - Eseguire gli scenari della sezione 6 e verificare la copertura dei casi d'uso.
 - Verificare migrazioni, rollback, cambio archivio, copie, riavvio e funzionamento offline.
 - Verificare anche l'eseguibile confezionato; il solo backend o il browser di sviluppo non chiudono il rilascio.
+- Completare UI04, il controllo grafico e di accessibilità finale della sezione 3.5, dopo le revisioni UI01–UI03.
 - Registrare limitazioni residue, risultati dei controlli e passi successivi.
 
 **Accettazione:** tutti i criteri del perimetro sono soddisfatti oppure una funzione risulta esplicitamente rinviata con motivazione e impatto. Un difetto che compromette attribuzione, calcolo o integrità dell'archivio impedisce la chiusura. L'installer viene generato; l'installazione sul computer dell'utente rimane un'azione distinta.
@@ -563,11 +594,13 @@ Una nuova chat deve ricostruire il contesto dai file e dai commit, non da un ria
 
 ### 7.2 Esecuzione e parallelismo
 
-La scelta iniziale consigliata è un agente implementatore per task, in sequenza. Dopo P04, P05, P06 e P07 possono procedere in worktree separati su contratti già fissati; P08 è indipendente dopo P02. Un agente che realizza P09 parte dalla versione integrata che contiene tutte le proprie dipendenze.
+La scelta iniziale consigliata è un agente implementatore per task, in sequenza. Dopo P04 e UI01, P05, P06 e P07 possono procedere in worktree separati su contratti e convenzioni visive già fissati; P08 è indipendente dopo P02. Un agente che realizza P09 parte dalla versione integrata che contiene tutte le proprie dipendenze.
 
 Non lavorare in parallelo sulla stessa directory con writer diversi. Un integratore coordina modifiche a runner e numeri delle migrazioni, schema condiviso, preload, registrazione IPC, shell React, dipendenze e registro di avanzamento. Le migrazioni già integrate non vengono rinumerate o riscritte: si assegna un nuovo numero prima del merge.
 
 P10–P19 condividono sequenza, attribuzioni e ricalcoli: è preferibile integrarli in ordine. Dopo P04, P08, P12 e P16 effettuare una breve revisione trasversale di duplicazioni, contratti e invarianti. La revisione deve produrre correzioni circoscritte, non una riscrittura architetturale.
+
+Le revisioni grafiche UI01, UI02 e UI03 seguono i punti di controllo della sezione 3.5. La revisione tecnica dopo P12 resta prevista; non viene aggiunta una fase grafica separata in quel punto. Riservare UI04 al controllo finale in P20, evitando di rimandare a quel task le scelte visive comuni.
 
 ### 7.3 Criteri comuni di completamento
 
@@ -611,4 +644,4 @@ Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) co
 - difetti aperti e loro impatto;
 - prossimo task e dipendenze effettivamente integrate.
 
-Il prossimo passo è **P05**, in una nuova chat con ragionamento consigliato `medium`, usando le decisioni P00, il [contesto applicativo P01](p01/contesto-applicativo.md), i [valori P02](p02/numeri-e-tempo.md), il [percorso P03](p03/porti.md) e le [convenzioni e il ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md).
+Il prossimo task funzionale è **P05 — Banchine**, non avviato, in una nuova chat. UI01 è completato: usare le [convenzioni visive verificate](ui01/revisione-post-p04.md) e le [convenzioni e il ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md), mantenendo i riferimenti funzionali P00–P04. Controllare lo stato del porto nelle nuove assegnazioni, conservare appartenenza immutabile e contatore globale delle banchine e integrare subito i nuovi riferimenti nei comandi P04.

@@ -4,9 +4,9 @@ Data: 10 novembre 2026. Baseline esaminata: `acc012e`.
 
 Questo piano prepara il primo rilascio funzionale di Porto Next. Organizza il lavoro in task assegnabili a un agente, con dipendenze, risultati verificabili e indicazioni per le chat. La pianificazione non avvia l'implementazione delle funzionalità.
 
-P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01, [P02](p02/numeri-e-tempo.md), [P03](p03/porti.md) e [P04](p04/versioni-e-ciclo-di-vita.md) sono completati; lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
+P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01, [P02](p02/numeri-e-tempo.md), [P03](p03/porti.md) e [P04](p04/versioni-e-ciclo-di-vita.md) sono completati. [P05](p05/banchine.md) è completato e verificato anche nel pacchetto Windows. Lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
 
-[UI01](ui01/revisione-post-p04.md) è completato: struttura comune e Porti verificati in Electron, con convenzioni visive e schermate prima/dopo. Il prossimo task funzionale è **P05**, non avviato.
+[UI01](ui01/revisione-post-p04.md) è completato: struttura comune e Porti verificati in Electron, con convenzioni visive e schermate prima/dopo. Il prossimo task funzionale è **P06 — Clienti e agenzie**.
 
 ## 1. Fonti e decisioni di perimetro
 
@@ -342,6 +342,8 @@ La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dip
 
 ### P05 — Banchine
 
+[Nota di implementazione e verifiche P05](p05/banchine.md).
+
 **Consegna:** gestione delle banchine all'interno del dettaglio del porto, riusando le convenzioni verificate in P04.
 
 - Applicare nome univoco per identità del porto e progressivo globale della tipologia banchina.
@@ -644,4 +646,4 @@ Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) co
 - difetti aperti e loro impatto;
 - prossimo task e dipendenze effettivamente integrate.
 
-Il prossimo task funzionale è **P05 — Banchine**, non avviato, in una nuova chat. UI01 è completato: usare le [convenzioni visive verificate](ui01/revisione-post-p04.md) e le [convenzioni e il ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md), mantenendo i riferimenti funzionali P00–P04. Controllare lo stato del porto nelle nuove assegnazioni, conservare appartenenza immutabile e contatore globale delle banchine e integrare subito i nuovi riferimenti nei comandi P04.
+Il prossimo task funzionale è **P06 — Clienti e agenzie**. Usare le [convenzioni visive UI01](ui01/revisione-post-p04.md), il [ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md) e il [passaggio di consegne P05](p05/banchine.md). Conservare contratti, prenotazioni e contatori distinti per cliente e agenzia.

@@ -2,7 +2,7 @@
 
 Riferimento: [piano di implementazione](piano-implementazione-prestazioni.md).
 
-Ultimo aggiornamento: 10 novembre 2026, completamento e verifica della revisione UI01 post P04.
+Ultimo aggiornamento: 11 novembre 2026, P05 — Banchine.
 
 ## Baseline
 
@@ -10,8 +10,8 @@ Ultimo aggiornamento: 10 novembre 2026, completamento e verifica della revisione
 - Stack presente: Electron, React, TypeScript, SQLite, better-sqlite3 e Drizzle.
 - Funzioni presenti: creazione/apertura archivi, recenti, nome dell'archivio, copia, backup e chiusura.
 - I documenti in `legacy/` descrivono il dominio e un precedente percorso tecnologico. Le dichiarazioni di implementazione Java/Angular non costituiscono avanzamento di questo repository.
-- P00–P04 sono completati. P04 completa versioni e ciclo di vita del porto e porta lo schema a v5; i task da P05 in avanti non sono stati avviati.
-- UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo task funzionale è P05.
+- P00–P04 sono completati. P05 introduce le banchine nel dettaglio del porto e porta lo schema a v6. I task da P06 in avanti restano da avviare.
+- UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo task funzionale è P06.
 
 ## Avanzamento
 
@@ -22,7 +22,7 @@ Ultimo aggiornamento: 10 novembre 2026, completamento e verifica della revisione
 | P02  | Completato | `4235f71`                  | [Numeri e tempo](p02/numeri-e-tempo.md); schema v3 e flussi verificati anche nel pacchetto Windows.                             |
 | P03  | Completato | `5a6fa8c`                  | [Creazione e consultazione porti](p03/porti.md); schema v4, flusso verificato anche nel pacchetto Windows.                      |
 | P04  | Completato | `0be600d`                  | [Versioni e ciclo di vita porto](p04/versioni-e-ciclo-di-vita.md); schema v5 e percorsi verificati anche nel pacchetto Windows. |
-| P05  | Da avviare | —                          | Banchine.                                                                                                                       |
+| P05  | Completato | `f966ba8`                  | [Banchine](p05/banchine.md), schema v6 e verifica sul pacchetto Windows.                                                        |
 | P06  | Da avviare | —                          | Clienti e agenzie.                                                                                                              |
 | P07  | Da avviare | —                          | Navi.                                                                                                                           |
 | P08  | Da avviare | —                          | Catalogo e pesi iniziali.                                                                                                       |
@@ -57,7 +57,7 @@ Riferimento: piano §3.5. Queste attività hanno stato separato dai task funzion
 | UI03 | Da avviare | Alla chiusura di M3, P09–P16.   | Revisione dei flussi operativi, ricerca, contesto, soggetti, importi ed errori.                                                 |
 | UI04 | Da avviare | Dentro P20, prima del rilascio. | Controllo finale di leggibilità, accessibilità e dimensioni supportate, anche sul pacchetto Windows.                            |
 
-UI01 ha completato osservazione dell'app Electron, implementazione delle correzioni grafiche e di usabilità, verifica dei percorsi P03–P04 e documentazione. Sessione/revisione, bozze, anteprime e invalidazione delle risposte sono preservate; P05 non è avviato. Le revisioni successive seguono i criteri del piano e non sostituiscono i controlli tecnici già previsti.
+UI01 ha completato osservazione dell'app Electron, implementazione delle correzioni grafiche e di usabilità, verifica dei percorsi P03–P04 e documentazione. Sessione/revisione, bozze, anteprime e invalidazione delle risposte sono preservate. Le revisioni successive seguono i criteri del piano e non sostituiscono i controlli tecnici già previsti.
 
 ## Decisioni e questioni da mantenere visibili
 
@@ -213,4 +213,16 @@ Verifiche effettive:
 
 Il pacchetto Windows non è rigenerato in UI01, secondo il piano §7.3: nessuna modifica a risorse distribuite separatamente, migrazioni o dipendenze native; verificata la build Electron. La prova sul pacchetto P04 resta storica. Limiti: cronologia lunga ancora scorribile nel proprio pannello, ulteriori configurazioni DPI e prove umane con tecnologie assistive non eseguite. Non sono noti difetti di integrità aperti nel perimetro UI01; resta la sola non conformità statica legacy già presente.
 
-Prossimo task funzionale: **P05 — Banchine**, non avviato. Riutilizzare convenzioni funzionali P04 e visive UI01; preservare appartenenza immutabile, contatore globale della tipologia e controlli autorevoli sullo stato del porto nelle nuove assegnazioni. Integrare immediatamente i nuovi riferimenti nelle anteprime e nei vincoli del porto. P06–P07 seguiranno gli stessi criteri mantenendo contratti e repository tipizzati.
+Il passaggio di consegne da UI01 a **P05 — Banchine** chiedeva di riutilizzare convenzioni funzionali P04 e visive UI01; preservare appartenenza immutabile, contatore globale della tipologia e controlli autorevoli sullo stato del porto nelle nuove assegnazioni. Integrare immediatamente i nuovi riferimenti nelle anteprime e nei vincoli del porto. P06–P07 seguiranno gli stessi criteri mantenendo contratti e repository tipizzati.
+
+## P05 — Banchine
+
+Attività completata dalla base integrata `592af7e` e verificata anche sul pacchetto Windows. La nota documenta le decisioni, il percorso Electron, i contratti e la migrazione v6. [Nota P05](p05/banchine.md).
+
+- Nuova anagrafica subordinata nel dettaglio del porto. L'elenco comprende le banchine disattivate e indica la selezionabilità effettiva. Anteprime e vincoli P04 includono le banchine persistite.
+- `npm test` ha superato **100 test su 11 file** con SQLite reale. Sono verificati migrazione v5 e copia preventiva, rollback della migrazione e dei comandi, progressivi, prenotazioni, appartenenza e blocchi referenziali.
+- Percorso P05 superato sulla build Electron finale, con archivio v5, focus e cambio sessione. Passati tutti e sette i percorsi desktop, compresi archivi, porti, risposte asincrone, riferimenti temporali e UI01. Verifica guidata a 960 × 700 con nome lungo e ispezione delle schermate.
+- Pacchetto Windows x64 in formato directory generato con `node scripts/package.mjs --dir`. I contenuti di main, preload e renderer coincidono con la build. Sull'eseguibile sono passati **2 percorsi su 2**, Banchine con apertura v5 e ciclo di vita del porto.
+- `npm run check` ha superato TypeScript ed ESLint. Prettier globale segnala i cinque documenti legacy `00`–`04` già registrati.
+
+Prossima attività **P06 — Clienti e agenzie**. Applicare le convenzioni di P04, UI01 e P05 alle due anagrafiche, mantenendo le identità e le sequenze separate.

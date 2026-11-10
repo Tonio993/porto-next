@@ -1,0 +1,24 @@
+appId: it.portonext.desktop
+productName: Porto Next
+directories:
+  output: dist
+files:
+  - out/**/*
+  - package.json
+asar: true
+asarUnpack:
+  - '**/*.node'
+# better-sqlite3 13 distribuisce binari N-API, senza ricompilazione per Electron.
+npmRebuild: false
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  artifactName: Porto-Next-${version}-Setup.${ext}
+publish: null

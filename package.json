@@ -1,0 +1,56 @@
+{
+  "name": "porto-next",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gestionale desktop locale per società di ormeggiatori",
+  "author": "Porto Next",
+  "main": "out/main/index.js",
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11"
+  },
+  "scripts": {
+    "dev": "node scripts/desktop.mjs dev",
+    "preview": "node scripts/desktop.mjs preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm run lint && npm run format:check",
+    "test": "node scripts/test.mjs",
+    "test:e2e": "npm run build && playwright test",
+    "build": "npm run typecheck && electron-vite build",
+    "pack": "npm run build && node scripts/package.mjs --dir",
+    "dist:win": "npm run build && node scripts/package.mjs --win nsis",
+    "postinstall": "node node_modules/electron/install.js",
+    "test:packaged": "npm run pack && node scripts/test-packaged.mjs"
+  },
+  "dependencies": {
+    "@mantine/core": "9.8.0",
+    "@mantine/hooks": "9.8.0",
+    "@tabler/icons-react": "^3.51.0",
+    "better-sqlite3": "^13.0.3",
+    "drizzle-orm": "^0.45.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "@playwright/test": "^1.65.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "electron": "45.2.3",
+    "electron-builder": "^26.18.0",
+    "electron-vite": "^6.0.0",
+    "eslint": "^10.14.0",
+    "globals": "^16.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.2",
+    "vite": "^8.3.7",
+    "vitest": "^5.1.0"
+  }
+}

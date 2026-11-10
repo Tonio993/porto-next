@@ -1,0 +1,12 @@
+node_modules/
+out/
+dist/
+coverage/
+test-results/
+playwright-report/
+.local/
+*.log
+*.ormeggi
+*.ormeggi-*
+*.tsbuildinfo
+.DS_Store

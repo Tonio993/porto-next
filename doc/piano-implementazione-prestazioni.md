@@ -6,7 +6,7 @@ Questo piano prepara il primo rilascio funzionale di Porto Next. Organizza il la
 
 P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01, [P02](p02/numeri-e-tempo.md), [P03](p03/porti.md) e [P04](p04/versioni-e-ciclo-di-vita.md) sono completati. [P05](p05/banchine.md) è completato e verificato anche nel pacchetto Windows. Lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
 
-[UI01](ui01/revisione-post-p04.md) è completato: struttura comune e Porti verificati in Electron, con convenzioni visive e schermate prima/dopo. [P06 — Clienti e agenzie](p06/clienti-e-agenzie.md) è completato e verificato anche nel pacchetto Windows, con schema v7. [P07 — Navi](p07/navi.md) è completato e verificato sulla build Electron con schema v8. Il prossimo task funzionale è **P08 — Catalogo e pesi iniziali**, seguito da UI02 e dalla chiusura M1.
+[UI01](ui01/revisione-post-p04.md), [P06 — Clienti e agenzie](p06/clienti-e-agenzie.md), [P07 — Navi](p07/navi.md), [P08 — Catalogo e pesi iniziali](p08/catalogo-e-pesi-iniziali.md) e [UI02](ui02/revisione-anagrafiche-e-catalogo.md) sono completati; schema corrente v9. **M1 è chiusa**, con build integrata e pacchetto Windows verificati: 149 test backend, tutti i 17 percorsi desktop e 17 su 17 sullo stesso eseguibile, incluse migrazioni cumulative e trasferibilità. Rimane la formattazione legacy preesistente. Il prossimo task funzionale è **P09 — Tariffe e calcolatore base**.
 
 ## 1. Fonti e decisioni di perimetro
 
@@ -230,7 +230,7 @@ Le revisioni grafiche sono attività implementative con verifica nell'applicazio
 
 Applicare il risultato alle schermate esistenti coinvolte e documentare poche convenzioni riutilizzabili con Mantine e gli stili locali. Preservare controlli di sessione/revisione, bozze, invalidazione delle risposte, anteprime e passaggio futuro → corrente. Non introdurre un motore CRUD, nuove funzioni anagrafiche o una riscrittura architetturale. P05–P07 adotteranno le convenzioni visive verificate da UI01; le loro dipendenze funzionali restano quelle della tabella.
 
-**UI02 — Consolidamento dopo M1.** Confrontare porti, banchine, clienti, agenzie, navi e catalogo; uniformare navigazione, ricerca, elenchi, dettaglio, cronologie, form e conferme dove i comportamenti coincidono. Verificare uso frequente, liste lunghe, paginazione, testi estesi e stati vuoti. Integrare le convenzioni comuni sulla base delle differenze reali.
+**UI02 — Consolidamento alla chiusura di M1.** Confrontare porti, banchine, clienti, agenzie, navi e catalogo; uniformare navigazione, ricerca, elenchi, dettaglio, cronologie, form e conferme dove i comportamenti coincidono. Verificare uso frequente, liste lunghe, paginazione, testi estesi e stati vuoti. Integrare le convenzioni comuni sulla base delle differenze reali. Esiti e convenzioni in [UI02](ui02/revisione-anagrafiche-e-catalogo.md).
 
 **UI03 — Revisione operativa dopo M3.** Verificare inserimento e consultazione di operazioni e prestazioni, ricerca, soggetti ereditati o espliciti, contesto temporale, importi base e spiegazione del calcolo. Rivedere il percorso completo e la gestione degli errori; le correzioni aggiunte in P17–P19 seguiranno le convenzioni risultanti.
 
@@ -382,7 +382,7 @@ Implementazione e decisioni nella [nota P06](p06/clienti-e-agenzie.md); contratt
 
 **Consegna:** gestione dei tipi configurabili e prima versione del peso per catalogo e tipi operativi fissi.
 
-**Stato:** completato e verificato sulla build Electron con schema v9 dalla base effettiva `75bec7d`; verifiche e revisione tecnica nella [nota P08](p08/catalogo-e-pesi-iniziali.md). Prossimo passaggio UI02, quindi chiusura M1 sul risultato integrato secondo §7.3.
+**Stato:** completato e verificato sulla build Electron con schema v9 dalla base effettiva `75bec7d`; verifiche e revisione tecnica nella [nota P08](p08/catalogo-e-pesi-iniziali.md). Consolidamento successivo completato in [UI02](ui02/revisione-anagrafiche-e-catalogo.md), con registrazione separata della verifica M1 secondo §7.3.
 
 - Creare `rinforzo ormeggio` una sola volta durante l'inizializzazione prevista dalla migrazione.
 - Creare tipo e peso iniziale atomicamente, con valore proposto `1` e vincolo `> 0`.
@@ -676,6 +676,6 @@ Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) co
 - difetti aperti e loro impatto;
 - prossimo task e dipendenze effettivamente integrate.
 
-P08 introduce catalogo e pesi iniziali con schema v9; verifiche e revisione tecnica sono documentate nella [nota P08](p08/catalogo-e-pesi-iniziali.md). Il prossimo passaggio è **UI02**. Riutilizzare le [convenzioni visive UI01](ui01/revisione-post-p04.md), il [ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md) e le slice anagrafiche integrate. Il catalogo mantiene descrizioni correnti riutilizzabili dopo rinomina e il vincolo monotono `hasEverBeenUsed`; P15 dovrà chiamare `CatalogRepository.markUsed` nella stessa transazione della prestazione. Le variazioni successive dei pesi restano P19.
+P00–P08 e **UI02** sono completati, con schema v9; **M1 è chiusa**. Il prossimo task funzionale è **P09 — Tariffe e calcolatore base**. Riutilizzare le [convenzioni UI02](ui02/revisione-anagrafiche-e-catalogo.md), quelle [UI01](ui01/revisione-post-p04.md), il [ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md) e le slice anagrafiche integrate. Il catalogo mantiene descrizioni correnti riutilizzabili dopo rinomina e il vincolo monotono `hasEverBeenUsed`; P15 dovrà chiamare `CatalogRepository.markUsed` nella stessa transazione della prestazione. Le variazioni successive dei pesi restano P19.
 
-Dopo P08 eseguire **UI02**. Chiudere **M1** sulla build integrata finale, comprese le correzioni grafiche: controlli statici, suite backend e desktop complete, migrazioni cumulative e trasferibilità, pacchetto Windows e intera suite sullo stesso eseguibile. P08 aggiunge SQL al runner esistente senza modificarne il caricamento, il confezionamento, il runtime o le dipendenze native: non richiede la verifica anticipata del pacchetto secondo §7.3. M1 resta da chiudere dopo UI02; P09 segue tale consolidamento con le dipendenze P05/P07/P08 integrate.
+**M1 è chiusa** sul risultato integrato UI02 con P05/P07/P08: controlli statici con la sola segnalazione legacy, suite backend e desktop complete, migrazioni cumulative e trasferibilità, pacchetto Windows e intera suite sullo stesso eseguibile. Gli esiti effettivi, il riuso dei controlli secondo §7.3 e le impronte degli artefatti verificati sono nella [nota UI02/M1](ui02/revisione-anagrafiche-e-catalogo.md) e nel [registro](stato-implementazione-prestazioni.md). Le verifiche estese successive restano associate a **M2 dopo P13**; ogni slice esegue i propri controlli secondo §7.3. Restano la revisione tecnica dopo P12, quella dopo P16 e i checkpoint UI03/UI04; installer e installazione rimangono P20.

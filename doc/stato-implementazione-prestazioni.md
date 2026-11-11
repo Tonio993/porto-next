@@ -2,7 +2,7 @@
 
 Riferimento: [piano di implementazione](piano-implementazione-prestazioni.md).
 
-Ultimo aggiornamento: 11 novembre 2026, P08 completato e verificato sulla build Electron; prossimo passaggio UI02, poi M1.
+Ultimo aggiornamento: 11 novembre 2026, P00–P08 e UI02 completati, **M1 chiusa e verificata anche sul pacchetto Windows**, schema v9. Prossimo task funzionale P09 — Tariffe e calcolatore base.
 
 ## Baseline
 
@@ -10,8 +10,8 @@ Ultimo aggiornamento: 11 novembre 2026, P08 completato e verificato sulla build 
 - Stack presente: Electron, React, TypeScript, SQLite, better-sqlite3 e Drizzle.
 - Funzioni presenti: creazione/apertura archivi, recenti, nome dell'archivio, copia, backup e chiusura.
 - I documenti in `legacy/` descrivono il dominio e un precedente percorso tecnologico. Le dichiarazioni di implementazione Java/Angular non costituiscono avanzamento di questo repository.
-- P00–P07 sono completati. P06 introduce clienti e agenzie con schema v7, verificato anche nel pacchetto Windows. P07 introduce Navi con schema v8, verificato sulla build Electron. P08 introduce catalogo e pesi iniziali con schema v9; esiti nella [nota P08](p08/catalogo-e-pesi-iniziali.md). P09–P20 restano da avviare.
-- UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo passaggio è UI02, seguito dalla chiusura M1 sul risultato integrato prima di P09.
+- P00–P08 sono completati. P08 introduce catalogo e pesi iniziali con schema v9; esiti dello step nella [nota P08](p08/catalogo-e-pesi-iniziali.md). P09–P20 restano da avviare.
+- UI01 e [UI02](ui02/revisione-anagrafiche-e-catalogo.md) del piano §3.5 sono completati. **M1 è chiusa**: 149 test backend, tutti i 17 percorsi desktop e 17 su 17 sullo stesso pacchetto Windows, migrazioni cumulative v1–v8 → v9 e trasferibilità verificati. UI03/UI04 restano pianificati. Il prossimo task funzionale è P09.
 
 ## Avanzamento
 
@@ -53,7 +53,7 @@ Riferimento: piano §3.5. Queste attività hanno stato separato dai task funzion
 | ID   | Stato      | Collocazione                       | Risultato e passaggio di consegne                                                                                               |
 | ---- | ---------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | UI01 | Completato | Dopo P04, prima di P05–P07.        | [Revisione e convenzioni](ui01/revisione-post-p04.md), 24 schermate ispezionate, 6 percorsi desktop passati sulla build finale. |
-| UI02 | Da avviare | Dopo P08, prima della chiusura M1. | Consolidamento di anagrafiche e catalogo con dati realistici, liste lunghe e stati vuoti.                                       |
+| UI02 | Completato | Dopo P08, prima della chiusura M1. | [Consolidamento](ui02/revisione-anagrafiche-e-catalogo.md), 26 schermate ispezionate e tutti i 17 percorsi desktop verificati.  |
 | UI03 | Da avviare | Alla chiusura di M3, P09–P16.      | Revisione dei flussi operativi, ricerca, contesto, soggetti, importi ed errori.                                                 |
 | UI04 | Da avviare | Dentro P20, prima del rilascio.    | Controllo finale di leggibilità, accessibilità e dimensioni supportate, anche sul pacchetto Windows.                            |
 
@@ -283,3 +283,26 @@ Base effettiva `75bec7d`, successiva a `3c7f78b` per il solo `AGENTS.md`, tracci
 Non sono noti difetti di integrità aperti nel perimetro P08. Rimane la formattazione legacy preesistente; densità dei filtri alla misura minima e altezze con notifiche sono annotate per UI02.
 
 Il prossimo task è **UI02**. **M1 resta aperta** e va chiusa sulla build integrata finale dopo le sue correzioni, con check, suite backend e desktop complete, migrazioni cumulative, trasferibilità, pacchetto Windows e intera suite sullo stesso eseguibile. Il pacchetto non è anticipato in P08 secondo §7.3; le prove storiche non attestano lo schema v9 nel pacchetto. P09 segue il consolidamento con P05/P07/P08 integrati; prestazioni reali e aggiornamento dell’utilizzo arrivano in P15, variazioni dei pesi in P19. Installer e installazione restano P20.
+
+## UI02 — Consolidamento grafico di anagrafiche e catalogo
+
+Base effettiva `57cf2e3`, branch `main`, copia iniziale pulita. Implementazione nel commit `8d420ac`. **Completato e verificato sulla build Electron**. Problemi osservati, convenzioni, prove e limiti nella [nota UI02](ui02/revisione-anagrafiche-e-catalogo.md). Schema v9 invariato; nessuna modifica a backend, hook asincroni, main/preload, contratti, migrazioni o dipendenze.
+
+- Confrontati Porti, Banchine, Clienti, Agenzie, Navi e Catalogo con dati temporanei realistici, elenchi di 28 elementi, cronologia di 28 versioni su tre pagine, nomi senza spazi e decimale esteso. Finestre native 960 × 700 e 1440 × 900, notifiche aperte, tastiera/focus, stati vuoti, errori e conflitti.
+- Workspace adattato allo spazio residuo, righe di selezione e paginazione condivise nei quattro chiamanti equivalenti, filtri catalogo affiancati, ritorno a capo nei dettagli e colonne stabili negli effetti. Eliminato il nome duplicato nel riepilogo Navi; cronologie complete conservate. Nessuna modifica ai contesti originali di bozze/anteprime o al reset di sessione.
+- **26 schermate ispezionate dall'agente**, sette iniziali e diciannove finali, con riuso di cinque acquisizioni valide della suite integrata. Prove automatizzate Playwright offline, senza sessioni manuali umane.
+- `npm test`: **149 test su 18 file passati**. Esito conservato dopo l'ultima correzione locale di sola presentazione Navi. `npm run check` finale: TypeScript ed ESLint passati; Prettier globale segnala solo i cinque documenti legacy preesistenti `00`–`04`. File modificati formattati separatamente.
+- **Tutti i 17 percorsi desktop verificati**: prima esecuzione completa con 15 passati in 19,5 minuti e due arresti, per selettore Banchine e cattura della finestra nascosta Navi. Sulla build aggiornata passati **5 su 5 in 6,9 minuti**, comprendendo Banchine, migrazioni cumulative, UI02 e i due percorsi Navi. Dodici esiti non coinvolti riusati secondo §7.3. Il selettore è allineato al nuovo ordine codice/stato/nome, preservando le asserzioni funzionali.
+
+Le revisioni tecniche dopo P12/P16 e UI03/UI04 restano pianificate. Il prossimo task funzionale è **P09 — Tariffe e calcolatore base**, dopo la chiusura M1; P05/P07/P08 sono integrati. P15 dovrà aggiornare l'utilizzo monotono del catalogo nella transazione della prestazione; le variazioni dei pesi restano P19.
+
+## M1 — Anagrafiche utilizzabili
+
+Stato: **chiusa e verificata anche sul pacchetto Windows**. La chiusura è distinta dal completamento UI02. Evidenze e impronte complete nella [nota UI02/M1](ui02/revisione-anagrafiche-e-catalogo.md).
+
+- Build finale: main SHA256 `365a246ea4ae480f7d4ce54f73ca68948a4187837996e31378721b3e7d660a2d`, renderer `index-BCkJrz96.js`, CSS `index-DTEK0Ynn.css`. Pacchetto `dist/win-unpacked/Porto Next.exe`, generato dalla stessa build senza ricompilazioni concorrenti; cinque artefatti ASAR confrontati e identici alla build.
+- Impronte del pacchetto: eseguibile SHA256 `2d75363e2d4a51a5ea56a55a7420524ae4544bb935aad362821da266c6df03a5`; `resources/app.asar` SHA256 `b5fbf2a3514dc951b507ce50ab69da463e07f207d5df639550ab099f3c2e2e63`. Manifest locali `.local/m1-build-sha256.json` e `.local/m1-package-sha256.json`.
+- Migrazioni cumulative v1–v8 → v9 con archivi popolati, confronto di tutte le righe preesistenti, metadati e revisioni conservati, copie preventive ancora nella versione originale, integrità e FK SQLite, quattro pesi iniziali, backup, Salva con nome e riapertura dopo trasferimento. Secondo processo con preferenze vuote verificato; nessuna seconda macchina fisica. I rollback dopo DDL parziale restano coperti dalla suite backend completa.
+- `node scripts/package.mjs --dir`: riuscito tramite esecuzione autorizzata dopo il blocco di rete della sandbox sul download Electron. Nessuna modifica ad ACL o sandbox Electron. `node scripts/test-packaged.mjs`: **17 percorsi su 17 passati in 22,6 minuti** sullo stesso eseguibile sopra indicato, con dati temporanei, renderer offline e catture delle finestre nascoste saltate dagli helper. Incluse migrazioni cumulative e trasferimento con preferenze vuote. Eseguibile e ASAR ricontrollati dopo la suite: impronte invariate e contenuti ancora identici alla build. Nessuna ricompilazione o rigenerazione del pacchetto fra i test.
+
+Non sono noti difetti di integrità aperti nel perimetro P00–P08/UI02. Resta la sola non conformità documentale legacy già nota; prove automatizzate e ispezioni dell'agente, senza sessioni manuali umane. Installer e prova d'installazione restano P20. I controlli estesi successivi sono associati a **M2 dopo P13**, insieme ai controlli di ogni slice previsti da §7.3. Prossimo task **P09 — Tariffe e calcolatore base**. Le consegne storiche sopra mantengono il prossimo task dell'epoca; questo è il passaggio corrente.

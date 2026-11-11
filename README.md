@@ -1,6 +1,6 @@
 # Porto Next
 
-Gestionale desktop locale per una società di ormeggiatori, in sviluppo. Sono disponibili gestione degli archivi, configurazione temporale e anagrafiche di porti, banchine, clienti, agenzie e navi, con versioni e ciclo di vita. Il prossimo incremento è P08, catalogo e pesi iniziali, seguito dalla revisione UI02 e dalla verifica di M1.
+Gestionale desktop locale per una società di ormeggiatori, in sviluppo. Sono disponibili gestione degli archivi, configurazione temporale, anagrafiche di porti, banchine, clienti, agenzie e navi con versioni e ciclo di vita, catalogo dei tipi di prestazione e pesi iniziali. Schema v9. Il consolidamento grafico [UI02](doc/ui02/revisione-anagrafiche-e-catalogo.md) è completato e M1 è chiusa, con build integrata e pacchetto Windows verificati. Il prossimo task funzionale è P09 — Tariffe e calcolatore base.
 
 ## Tecnologie
 
@@ -83,7 +83,7 @@ I file SQL sono importati nella build con `?raw`: non dipendono dalla directory 
 
 ## Piano funzionale e specifica P00
 
-Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza gli incrementi. P00–P08 e UI01 sono completati; P08 introduce [catalogo e pesi iniziali](doc/p08/catalogo-e-pesi-iniziali.md), con schema v9 verificato sulla build Electron. Le [decisioni P00](doc/p00/decisioni-iniziali.md), il [contesto applicativo P01](doc/p01/contesto-applicativo.md) e i [valori numerici e temporali P02](doc/p02/numeri-e-tempo.md) costituiscono la base condivisa. P03–P04 introducono [creazione e consultazione dei porti](doc/p03/porti.md) e [versioni e ciclo di vita](doc/p04/versioni-e-ciclo-di-vita.md). P05 aggiunge le [banchine nel dettaglio del porto](doc/p05/banchine.md), portando lo schema a v6. P06 aggiunge [clienti e agenzie](doc/p06/clienti-e-agenzie.md) e la migrazione v7, verificata anche nel pacchetto Windows. P07 aggiunge [Navi](doc/p07/navi.md) e la migrazione v8. La [revisione UI01](doc/ui01/revisione-post-p04.md) definisce le convenzioni visive comuni. Il [registro](doc/stato-implementazione-prestazioni.md) riporta gli esiti effettivi; il prossimo passaggio è UI02, seguito dalla chiusura M1 sulla build integrata e sul pacchetto Windows.
+Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza gli incrementi. P00–P08, UI01 e UI02 sono completati; P08 introduce [catalogo e pesi iniziali](doc/p08/catalogo-e-pesi-iniziali.md), con schema v9. Le [decisioni P00](doc/p00/decisioni-iniziali.md), il [contesto applicativo P01](doc/p01/contesto-applicativo.md) e i [valori numerici e temporali P02](doc/p02/numeri-e-tempo.md) costituiscono la base condivisa. P03–P04 introducono [creazione e consultazione dei porti](doc/p03/porti.md) e [versioni e ciclo di vita](doc/p04/versioni-e-ciclo-di-vita.md). P05 aggiunge le [banchine nel dettaglio del porto](doc/p05/banchine.md), P06 [clienti e agenzie](doc/p06/clienti-e-agenzie.md), P07 [Navi](doc/p07/navi.md). Le revisioni [UI01](doc/ui01/revisione-post-p04.md) e [UI02](doc/ui02/revisione-anagrafiche-e-catalogo.md) definiscono le convenzioni visive comuni. Il [registro](doc/stato-implementazione-prestazioni.md) distingue il completamento UI02 dalla chiusura M1: 149 test backend, tutti i 17 percorsi desktop e 17 su 17 sullo stesso pacchetto Windows verificati, incluse migrazioni cumulative e trasferibilità. Resta la formattazione legacy preesistente; installer e installazione sono previsti in P20. Il prossimo task funzionale è P09 — Tariffe e calcolatore base.
 
 In **Anagrafiche → Porti** sono disponibili ricerca, elenco, dettaglio, cronologia, versioni, disattivazione, riattivazione ed eliminazione consentita. Il dettaglio comprende le banchine del porto, con il proprio ciclo di vita. Un porto con banchine è protetto dall'eliminazione. La selezionabilità della banchina dipende sia dal suo stato sia da quello del porto. Le operazioni che richiedono una conferma espongono un'anteprima degli effetti. Le attività operative e le prestazioni sono previste negli incrementi successivi.
 
@@ -123,7 +123,7 @@ npm run dist:win
 - `test`: test del backend nel runtime Node di Electron, con database temporanei reali.
 - `test:e2e`: build e test su Electron con dialoghi nativi simulati; la finestra di test resta nascosta. Verifica anche il funzionamento offline e la persistenza dopo il riavvio. Non occorre scaricare un browser Playwright separato.
 - `pack`: applicazione non installata in `dist/win-unpacked/`.
-- `test:packaged`: esegue lo stesso test end-to-end sul pacchetto Windows, con dati temporanei isolati.
+- `test:packaged`: esegue l'intera suite desktop sul pacchetto Windows, con dati temporanei isolati.
 - `dist:win`: installer NSIS in `dist/`.
 
 Il test end-to-end sulla build non confezionata salva schermate in `test-results/`. La verifica del pacchetto esegue le stesse operazioni senza catturare schermate della finestra nascosta. I test usano cartelle temporanee e preferenze isolate; non toccano gli archivi dell’utente. Le variabili `PORTO_TEST_USER_DATA` e `PORTO_TEST_HIDDEN` sono riservate alle verifiche locali.

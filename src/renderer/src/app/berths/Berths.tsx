@@ -1,46 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
 import type { PortDto } from '../../../../shared/contracts/ports'
-import type { PageDto } from '../../../../shared/contracts/master-data'
+import { PageControls } from '../PageControls'
 import type { useArchives } from '../../api/use-archives'
 import { useBerths } from '../../api/use-berths'
 import { PortConfirmation } from '../ports/PortConfirmation'
 import { VersionCard } from '../ports/VersionCard'
 import { VersionMomentFields } from '../ports/VersionMomentFields'
 import { StateMessage } from '../StateMessage'
-
-function PageControls({
-  page,
-  disabled,
-  onPage,
-}: {
-  page: PageDto<unknown>
-  disabled: boolean
-  onPage: (number: number) => void
-}) {
-  if (page.total <= page.pageSize && page.page === 1) return null
-  return (
-    <Group gap="xs">
-      <Button
-        variant="default"
-        disabled={disabled || page.page === 1}
-        onClick={() => onPage(page.page - 1)}
-      >
-        Indietro
-      </Button>
-      <span>
-        Pagina {page.page} di {Math.max(1, Math.ceil(page.total / page.pageSize))}
-      </span>
-      <Button
-        variant="default"
-        disabled={disabled || page.page * page.pageSize >= page.total}
-        onClick={() => onPage(page.page + 1)}
-      >
-        Avanti
-      </Button>
-    </Group>
-  )
-}
+import { MasterDataListEntry } from '../MasterDataListEntry'
 
 export function Berths({
   port,
@@ -135,17 +103,15 @@ export function Berths({
             <p className="panel-description">Questo porto non ha banchine.</p>
           )}
           {page?.items.map((berth) => (
-            <Button
+            <MasterDataListEntry
               key={berth.id}
-              className="berth-list-entry"
-              variant={berths.selection === berth.id ? 'light' : 'default'}
-              aria-pressed={berths.selection === berth.id}
+              code={berth.code}
+              name={berth.version.name}
+              status={berth.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
+              selected={berths.selection === berth.id}
               disabled={busy}
               onClick={() => berths.select(berth.id)}
-            >
-              {berth.code} · {berth.version.name} ·{' '}
-              {berth.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
-            </Button>
+            />
           ))}
           {page && (
             <PageControls

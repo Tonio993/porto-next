@@ -41,7 +41,11 @@ export function vesselFormInput(value: VesselFormValue): VesselDescriptionDto | 
 }
 
 export function vesselSummary(value: VesselDescriptionDto): string {
-  return `${value.registeredName} · IMO: ${value.imoNumber ?? 'assente'} · ${vesselTypes.find(({ id }) => id === value.vesselTypeId)!.label} · Dimensione: ${value.size}`
+  return `${value.registeredName} · ${vesselDetails(value)}`
+}
+
+export function vesselDetails(value: VesselDescriptionDto): string {
+  return `IMO: ${value.imoNumber ?? 'assente'} · ${vesselTypes.find(({ id }) => id === value.vesselTypeId)!.label} · Dimensione: ${value.size}`
 }
 
 export function VesselFields({

@@ -1,45 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
-import type { PageDto } from '../../../../shared/contracts/master-data'
+import { PageControls } from '../PageControls'
 import type { useArchives } from '../../api/use-archives'
 import { useCustomers } from '../../api/use-customers'
 import { PortConfirmation } from '../ports/PortConfirmation'
 import { VersionCard } from '../ports/VersionCard'
 import { VersionMomentFields } from '../ports/VersionMomentFields'
 import { StateMessage } from '../StateMessage'
-
-function PageControls({
-  page,
-  disabled,
-  onPage,
-}: {
-  page: PageDto<unknown>
-  disabled: boolean
-  onPage: (number: number) => void
-}) {
-  if (page.total <= page.pageSize && page.page === 1) return null
-  return (
-    <Group gap="xs">
-      <Button
-        variant="default"
-        disabled={disabled || page.page === 1}
-        onClick={() => onPage(page.page - 1)}
-      >
-        Indietro
-      </Button>
-      <span>
-        Pagina {page.page} di {Math.max(1, Math.ceil(page.total / page.pageSize))}
-      </span>
-      <Button
-        variant="default"
-        disabled={disabled || page.page * page.pageSize >= page.total}
-        onClick={() => onPage(page.page + 1)}
-      >
-        Avanti
-      </Button>
-    </Group>
-  )
-}
+import { MasterDataListEntry } from '../MasterDataListEntry'
 
 export function Customers({
   archives,
@@ -139,17 +107,15 @@ export function Customers({
               </p>
             )}
             {page?.items.map((customer) => (
-              <Button
+              <MasterDataListEntry
                 key={customer.id}
-                className="customer-list-entry"
-                variant={customers.selection === customer.id ? 'light' : 'default'}
-                aria-pressed={customers.selection === customer.id}
+                code={customer.code}
+                name={customer.version.businessName}
+                status={customer.status === 'ACTIVE' ? 'Attivo' : 'Disattivato'}
+                selected={customers.selection === customer.id}
                 disabled={busy}
                 onClick={() => customers.select(customer.id)}
-              >
-                {customer.code} · {customer.version.businessName} ·{' '}
-                {customer.status === 'ACTIVE' ? 'Attivo' : 'Disattivato'}
-              </Button>
+              />
             ))}
           </Stack>
           {page && (

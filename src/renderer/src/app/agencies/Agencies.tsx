@@ -1,45 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
-import type { PageDto } from '../../../../shared/contracts/master-data'
+import { PageControls } from '../PageControls'
 import type { useArchives } from '../../api/use-archives'
 import { useAgencies } from '../../api/use-agencies'
 import { PortConfirmation } from '../ports/PortConfirmation'
 import { VersionCard } from '../ports/VersionCard'
 import { VersionMomentFields } from '../ports/VersionMomentFields'
 import { StateMessage } from '../StateMessage'
-
-function PageControls({
-  page,
-  disabled,
-  onPage,
-}: {
-  page: PageDto<unknown>
-  disabled: boolean
-  onPage: (number: number) => void
-}) {
-  if (page.total <= page.pageSize && page.page === 1) return null
-  return (
-    <Group gap="xs">
-      <Button
-        variant="default"
-        disabled={disabled || page.page === 1}
-        onClick={() => onPage(page.page - 1)}
-      >
-        Indietro
-      </Button>
-      <span>
-        Pagina {page.page} di {Math.max(1, Math.ceil(page.total / page.pageSize))}
-      </span>
-      <Button
-        variant="default"
-        disabled={disabled || page.page * page.pageSize >= page.total}
-        onClick={() => onPage(page.page + 1)}
-      >
-        Avanti
-      </Button>
-    </Group>
-  )
-}
+import { MasterDataListEntry } from '../MasterDataListEntry'
 
 export function Agencies({
   archives,
@@ -139,17 +107,15 @@ export function Agencies({
               </p>
             )}
             {page?.items.map((agency) => (
-              <Button
+              <MasterDataListEntry
                 key={agency.id}
-                className="agency-list-entry"
-                variant={agencies.selection === agency.id ? 'light' : 'default'}
-                aria-pressed={agencies.selection === agency.id}
+                code={agency.code}
+                name={agency.version.businessName}
+                status={agency.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
+                selected={agencies.selection === agency.id}
                 disabled={busy}
                 onClick={() => agencies.select(agency.id)}
-              >
-                {agency.code} · {agency.version.businessName} ·{' '}
-                {agency.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
-              </Button>
+              />
             ))}
           </Stack>
           {page && (

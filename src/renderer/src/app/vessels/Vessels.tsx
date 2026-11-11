@@ -1,46 +1,14 @@
-import { VesselFields, vesselSummary } from './VesselFields'
+import { VesselFields, vesselDetails, vesselSummary } from './VesselFields'
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
-import type { PageDto } from '../../../../shared/contracts/master-data'
+import { PageControls } from '../PageControls'
 import type { useArchives } from '../../api/use-archives'
 import { useVessels } from '../../api/use-vessels'
 import { PortConfirmation } from '../ports/PortConfirmation'
 import { VersionCard } from '../ports/VersionCard'
 import { VersionMomentFields } from '../ports/VersionMomentFields'
 import { StateMessage } from '../StateMessage'
-
-function PageControls({
-  page,
-  disabled,
-  onPage,
-}: {
-  page: PageDto<unknown>
-  disabled: boolean
-  onPage: (number: number) => void
-}) {
-  if (page.total <= page.pageSize && page.page === 1) return null
-  return (
-    <Group gap="xs">
-      <Button
-        variant="default"
-        disabled={disabled || page.page === 1}
-        onClick={() => onPage(page.page - 1)}
-      >
-        Indietro
-      </Button>
-      <span>
-        Pagina {page.page} di {Math.max(1, Math.ceil(page.total / page.pageSize))}
-      </span>
-      <Button
-        variant="default"
-        disabled={disabled || page.page * page.pageSize >= page.total}
-        onClick={() => onPage(page.page + 1)}
-      >
-        Avanti
-      </Button>
-    </Group>
-  )
-}
+import { MasterDataListEntry } from '../MasterDataListEntry'
 
 export function Vessels({
   archives,
@@ -140,17 +108,15 @@ export function Vessels({
               </p>
             )}
             {page?.items.map((vessel) => (
-              <Button
+              <MasterDataListEntry
                 key={vessel.id}
-                className="vessel-list-entry"
-                variant={vessels.selection === vessel.id ? 'light' : 'default'}
-                aria-pressed={vessels.selection === vessel.id}
+                code={vessel.code}
+                name={vessel.version.registeredName}
+                status={vessel.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
+                selected={vessels.selection === vessel.id}
                 disabled={busy}
                 onClick={() => vessels.select(vessel.id)}
-              >
-                {vessel.code} · {vessel.version.registeredName} ·{' '}
-                {vessel.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
-              </Button>
+              />
             ))}
           </Stack>
           {page && (
@@ -181,7 +147,7 @@ export function Vessels({
               <h3>
                 Nave {history.vessel.code} · {history.vessel.version.registeredName}
               </h3>
-              <p>{vesselSummary(history.vessel.version)}</p>
+              <p>{vesselDetails(history.vessel.version)}</p>
               <Group gap="xs">
                 <Badge
                   variant="outline"

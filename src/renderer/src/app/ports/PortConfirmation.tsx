@@ -85,12 +85,12 @@ export function PortConfirmation({
       ))}
       <Table.ScrollContainer
         type="native"
-        minWidth={500}
+        minWidth={0}
         className="preview-effects"
         tabIndex={0}
         aria-label="Effetti della modifica"
       >
-        <Table striped withTableBorder>
+        <Table striped withTableBorder style={{ tableLayout: 'fixed', width: '100%' }}>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Elemento</Table.Th>

@@ -688,8 +688,8 @@ h1 {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   gap: 16px;
-  height: calc(100vh - 274px);
-  min-height: 390px;
+  flex: 1;
+  min-height: 0;
 }
 .port-list {
   display: flex;
@@ -732,6 +732,7 @@ h1 {
   cursor: pointer;
   overflow-wrap: anywhere;
   font-size: 12px;
+  flex-shrink: 0;
 }
 .port-list-item strong {
   font-size: 14px;
@@ -827,7 +828,7 @@ h1 {
 }
 .preview-effects td {
   overflow-wrap: anywhere;
-  max-width: 240px;
+  vertical-align: top;
 }
 .preview-effects thead {
   position: sticky;
@@ -888,47 +889,15 @@ footer {
   }
 }
 
-.berth-list-entry {
-  height: auto;
-  min-height: 36px;
-  padding-block: 6px;
-}
-
-.berth-list-entry .mantine-Button-inner {
-  justify-content: flex-start;
-}
-
-.berth-list-entry .mantine-Button-label {
-  white-space: normal;
-  overflow-wrap: anywhere;
-  text-align: start;
-}
-
-.customer-list-entry,
-.agency-list-entry,
-.vessel-list-entry {
-  height: auto;
-  min-height: 36px;
-  padding-block: 6px;
-  flex-shrink: 0;
-}
-.customer-list-entry .mantine-Button-label,
-.agency-list-entry .mantine-Button-label,
-.vessel-list-entry .mantine-Button-label {
-  white-space: normal;
-  overflow-wrap: anywhere;
-  text-align: start;
-}
-.customer-list-entry .mantine-Button-inner,
-.agency-list-entry .mantine-Button-inner,
-.vessel-list-entry .mantine-Button-inner {
-  justify-content: flex-start;
-}
 .subjects-page .port-inspector {
   padding: 16px;
   background: white;
   border: 1px solid #dce5eb;
   border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+.subjects-page .port-inspector > .mantine-Stack-root {
+  min-width: 0;
 }
 
 .catalog-inspector {
@@ -943,4 +912,99 @@ footer {
 .catalog-inspector:focus-visible {
   outline: 2px solid #087f5b;
   outline-offset: 2px;
+}
+
+/* UI02: use the space left by headings and feedback, without hiding paging. */
+.data-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.workspace:has(> .data-main) {
+  height: 100vh;
+  min-height: 0;
+}
+.workspace > footer {
+  flex-shrink: 0;
+}
+.catalog-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px;
+  gap: 8px;
+  align-items: end;
+}
+.catalog-filters > * {
+  min-width: 0;
+}
+.data-main > .page-heading,
+.data-main > .message,
+.data-main > .master-data-nav {
+  flex-shrink: 0;
+}
+.data-main > .page-heading {
+  margin-bottom: 12px;
+}
+.data-main > .message {
+  padding-block: 6px;
+  margin-bottom: 12px;
+}
+.data-main .master-data-nav {
+  padding-bottom: 8px;
+}
+.data-main > .mantine-Stack-root {
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+}
+.data-main > .master-data-nav {
+  margin-bottom: 16px;
+}
+.subjects-page {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.subjects-page > .ports-workspace {
+  min-width: 0;
+}
+.port-list > .mantine-Group-root:first-child {
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.port-list > .mantine-Group-root:first-child h2 {
+  margin: 0;
+}
+.port-list > .mantine-Group-root:first-child .mantine-Button-root {
+  height: 30px;
+  padding-inline: 10px;
+  font-size: 13px;
+}
+.port-list > .port-list-results {
+  margin-top: 8px;
+}
+.port-list > :not(.port-list-results) {
+  flex-shrink: 0;
+}
+.port-list .list-summary {
+  margin: 0;
+  padding-block: 6px;
+}
+.port-list .mantine-Input-input {
+  height: 32px;
+  min-height: 32px;
+}
+.port-list .list-pagination {
+  margin-top: 8px;
+}
+.preview-effects th {
+  width: 25%;
+  overflow-wrap: anywhere;
+}
+.preview-effects th:nth-child(2) {
+  width: 18%;
+}
+.preview-effects th:nth-child(3),
+.preview-effects th:nth-child(4) {
+  width: 28.5%;
 }

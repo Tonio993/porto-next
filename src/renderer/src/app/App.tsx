@@ -98,7 +98,13 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
             {active?.name ?? 'Modalità locale'}
           </span>
         </header>
-        <main>
+        <main
+          className={
+            active && ['Anagrafiche', 'Catalogo e tariffe'].includes(section)
+              ? 'data-main'
+              : undefined
+          }
+        >
           <div className="page-heading">
             <div>
               <p className="eyebrow">IL TUO SPAZIO DI LAVORO</p>

@@ -182,7 +182,7 @@ test('amministra le banchine dal porto e conserva dati e contesto nel percorso E
     )
     expect(stale).toMatchObject({ ok: false, error: { code: 'ARCHIVE_SESSION_CHANGED' } })
     await page.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
-    await list.getByRole('button', { name: /Molo Alfa.*Disattivata/ }).click()
+    await list.getByRole('button', { name: /Disattivata.*Molo Alfa/ }).click()
     await detail.getByRole('button', { name: 'Elimina banchina' }).click()
     await confirm.click()
     await expect(panel.getByText('Questo porto non ha banchine.')).toBeVisible()

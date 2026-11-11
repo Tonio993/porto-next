@@ -220,10 +220,10 @@ export function Catalog({
   }, [draft, context])
   return (
     <>
-      <div className="master-data-nav">
+      <Group className="master-data-nav" gap="xs" aria-label="Sezioni catalogo">
         <Button variant="light">Tipi di prestazione e pesi</Button>
         <Button disabled>Tariffe · in preparazione</Button>
-      </div>
+      </Group>
       {error && (
         <StateMessage kind="error" title="Catalogo non disponibile">
           {error}
@@ -246,9 +246,10 @@ export function Catalog({
       )}
       <div className="ports-workspace">
         <section className="archive-panel port-list" aria-label="Elenco tipi di prestazione">
-          <h2>Tipi di prestazione</h2>
-          <Stack gap="sm">
+          <Group className="port-list-heading" justify="space-between">
+            <h2>Catalogo</h2>
             <Button
+              size="compact-sm"
               ref={newButton}
               disabled={busy}
               onClick={() => {
@@ -267,6 +268,8 @@ export function Catalog({
             >
               Nuovo tipo
             </Button>
+          </Group>
+          <div className="catalog-filters">
             <TextInput
               label="Cerca descrizione"
               value={search}
@@ -291,7 +294,7 @@ export function Catalog({
               }}
               allowDeselect={false}
             />
-          </Stack>
+          </div>
           {listRequest.loading && <p role="status">Caricamento elenco…</p>}
           {list && (
             <p className="list-summary">
@@ -328,6 +331,7 @@ export function Catalog({
           </div>
           {list && (
             <Pagination
+              className="list-pagination"
               size="sm"
               total={Math.max(1, Math.ceil(list.total / list.pageSize))}
               value={page}

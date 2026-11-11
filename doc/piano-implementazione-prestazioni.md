@@ -6,7 +6,7 @@ Questo piano prepara il primo rilascio funzionale di Porto Next. Organizza il la
 
 P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01, [P02](p02/numeri-e-tempo.md), [P03](p03/porti.md) e [P04](p04/versioni-e-ciclo-di-vita.md) sono completati. [P05](p05/banchine.md) è completato e verificato anche nel pacchetto Windows. Lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
 
-[UI01](ui01/revisione-post-p04.md) è completato: struttura comune e Porti verificati in Electron, con convenzioni visive e schermate prima/dopo. Il prossimo task funzionale è **P06 — Clienti e agenzie**.
+[UI01](ui01/revisione-post-p04.md) è completato: struttura comune e Porti verificati in Electron, con convenzioni visive e schermate prima/dopo. [P06 — Clienti e agenzie](p06/clienti-e-agenzie.md) è completato e verificato anche nel pacchetto Windows, con schema v7. Il prossimo task funzionale è **P07 — Navi**.
 
 ## 1. Fonti e decisioni di perimetro
 
@@ -355,6 +355,8 @@ La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dip
 
 ### P06 — Clienti e agenzie
 
+Implementazione e decisioni nella [nota P06](p06/clienti-e-agenzie.md); contratti, prenotazioni e contatori separati, decorrenze nel fuso aziendale confermato, migrazione v6 → v7. Esiti effettivi e stato nel [registro](stato-implementazione-prestazioni.md).
+
 **Consegna:** due anagrafiche tipizzate con ricerca, dettaglio, versioni e gestione del ciclo di vita.
 
 - Usare la sola ragione sociale come dato iniziale previsto.
@@ -646,4 +648,4 @@ Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) co
 - difetti aperti e loro impatto;
 - prossimo task e dipendenze effettivamente integrate.
 
-Il prossimo task funzionale è **P06 — Clienti e agenzie**. Usare le [convenzioni visive UI01](ui01/revisione-post-p04.md), il [ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md) e il [passaggio di consegne P05](p05/banchine.md). Conservare contratti, prenotazioni e contatori distinti per cliente e agenzia.
+Il prossimo task funzionale è **P07 — Navi**. Usare le [convenzioni visive UI01](ui01/revisione-post-p04.md), il [ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md) e i passaggi di consegne [P05](p05/banchine.md) e [P06](p06/clienti-e-agenzie.md). Mantenere contratti e repository della nave tipizzati, prenotazioni storiche di nome/IMO e contatore autonomo; partire dallo schema v7.

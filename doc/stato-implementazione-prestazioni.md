@@ -2,7 +2,7 @@
 
 Riferimento: [piano di implementazione](piano-implementazione-prestazioni.md).
 
-Ultimo aggiornamento: 11 novembre 2026, P05 — Banchine.
+Ultimo aggiornamento: 11 novembre 2026, P06 — Clienti e agenzie.
 
 ## Baseline
 
@@ -10,8 +10,8 @@ Ultimo aggiornamento: 11 novembre 2026, P05 — Banchine.
 - Stack presente: Electron, React, TypeScript, SQLite, better-sqlite3 e Drizzle.
 - Funzioni presenti: creazione/apertura archivi, recenti, nome dell'archivio, copia, backup e chiusura.
 - I documenti in `legacy/` descrivono il dominio e un precedente percorso tecnologico. Le dichiarazioni di implementazione Java/Angular non costituiscono avanzamento di questo repository.
-- P00–P05 sono completati. P05 introduce le banchine nel dettaglio del porto e porta lo schema a v6. I task da P06 in avanti restano da avviare.
-- UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo task funzionale è P06.
+- P00–P06 sono completati. P06 introduce clienti e agenzie con schema v7, verificato anche nel pacchetto Windows. I task da P07 in avanti restano da avviare.
+- UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo task funzionale è P07.
 
 ## Avanzamento
 
@@ -23,7 +23,7 @@ Ultimo aggiornamento: 11 novembre 2026, P05 — Banchine.
 | P03  | Completato | `5a6fa8c`                  | [Creazione e consultazione porti](p03/porti.md); schema v4, flusso verificato anche nel pacchetto Windows.                      |
 | P04  | Completato | `0be600d`                  | [Versioni e ciclo di vita porto](p04/versioni-e-ciclo-di-vita.md); schema v5 e percorsi verificati anche nel pacchetto Windows. |
 | P05  | Completato | `f966ba8`                  | [Banchine](p05/banchine.md), schema v6 e verifica sul pacchetto Windows.                                                        |
-| P06  | Da avviare | —                          | Clienti e agenzie.                                                                                                              |
+| P06  | Completato | `ef6e257`                  | [Clienti e agenzie](p06/clienti-e-agenzie.md), schema v7; verificato anche nel pacchetto Windows.                               |
 | P07  | Da avviare | —                          | Navi.                                                                                                                           |
 | P08  | Da avviare | —                          | Catalogo e pesi iniziali.                                                                                                       |
 | P09  | Da avviare | —                          | Tariffe complete e calcolo base.                                                                                                |
@@ -226,3 +226,21 @@ Attività completata dalla base integrata `592af7e` e verificata anche sul pacch
 - `npm run check` ha superato TypeScript ed ESLint. Prettier globale segnala i cinque documenti legacy `00`–`04` già registrati.
 
 Prossima attività **P06 — Clienti e agenzie**. Applicare le convenzioni di P04, UI01 e P05 alle due anagrafiche, mantenendo le identità e le sequenze separate.
+
+## P06 — Clienti e agenzie
+
+Base rilevata `42275ae`, successiva a `7d182e8` per il solo aggiornamento del README. Copia di lavoro iniziale pulita; aggiornamenti documentali precedenti conservati. Implementazione nel commit `ef6e257`. Decisioni e passaggio di consegne nella [nota P06](p06/clienti-e-agenzie.md).
+
+- Clienti e Agenzie raggiungibili da Anagrafiche, con ragione sociale, ricerca storica/per codice, elenco paginato, dettaglio, cronologia e ciclo di vita completo. Contratti, servizi, repository, identità, contatori e prenotazioni separati. Nuove versioni nel fuso aziendale confermato; risoluzione autorevole backend e tupla storica conservata.
+- Migrazione `0007_customers_agencies.sql`, schema v7. Copia preventiva e conservazione di tutti i dati v6 verificati; rollback completo se fallisce la seconda tipologia. Nessuna migrazione precedente modificata.
+- Coordinatore, transazioni, anteprime e guardie IPC esistenti riutilizzati. `requireSelectable` specifici per i futuri riferimenti; disattivazione conservativa ed eliminazione bloccata dalle FK reali. Nessuna assegnazione operativa o fattura anticipata.
+- `npm test`: **121 test su 14 file passati**. `npm run check`: TypeScript ed ESLint passati, Prettier segnala soltanto i cinque documenti legacy `00`–`04` preesistenti e non modificati.
+- Suite desktop iniziale: **9 percorsi su 9 passati**; **2 prove asincrone P06 su 2 passate**. Dopo gli ultimi ritocchi a paginazione e messaggi, **5 percorsi su 5 passati sulla build finale**, comprendendo i due flussi P06, le due prove asincrone e UI01. Le prove P06 includono v6 → v7, revisioni originali, UTC, FK reali, reset con Salva con nome e persistenza dopo riavvio.
+- Pacchetto Windows finale generato con `node scripts/package.mjs --dir`. Tutti e cinque gli artefatti di main, preload e renderer nell’ASAR coincidono con la build. **Tutti gli 11 percorsi verificati sullo stesso eseguibile**: la suite completa ha superato 10 percorsi in 16,2 minuti, fermandosi sullo screenshot iniziale di UI01 nella finestra nascosta. Il solo helper UI01 è stato allineato alla convenzione del pacchetto, escludendo le catture e mantenendo le asserzioni funzionali. La ripetizione mirata di UI01 ha superato **1 percorso su 1** in 1,4 minuti. Nessuna modifica al prodotto o rigenerazione del pacchetto tra queste verifiche.
+- **16 schermate finali ispezionate**, otto per tipologia, nella nota P06: archivio vuoto, creazione, cronologia futura, anteprime pronta/obsoleta/bloccata, testo lungo a 960 × 700 e 1440 × 900. I due flussi sono stati ripetuti per le acquisizioni finali: **2 su 2 passati** in 5,2 minuti.
+
+Le prove desktop richiedono l’esecuzione fuori dalla sandbox dell’agente per gli ACL Windows; ACL e sandbox di Electron invariati. Le prove sono guidate tramite Playwright con dati temporanei e renderer offline; nessuna sessione manuale umana dichiarata. Installer e installazione fuori perimetro.
+
+P06 è **completato e verificato**. Non sono noti difetti di integrità aperti nel suo perimetro. Gli ultimi aggiornamenti riguardano soltanto test e documentazione; il pacchetto corrisponde al codice applicativo finale. Resta la formattazione legacy preesistente.
+
+Prossima attività **P07 — Navi**, non avviata. Partire dallo schema v7 e dalle convenzioni P04/UI01/P05/P06, con contratti e repository della nave specifici, prenotazioni storiche di nome/IMO e contatore autonomo. Le future scritture operative verso clienti/agenzie devono invocare i rispettivi controlli di selezionabilità nella stessa transazione e integrare i nuovi riferimenti nelle anteprime e nei ricalcoli.

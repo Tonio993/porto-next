@@ -1,6 +1,6 @@
 # Porto Next
 
-Gestionale desktop locale per una società di ormeggiatori, in sviluppo. Sono disponibili gestione degli archivi, configurazione temporale e anagrafiche di porti e banchine, con versioni e ciclo di vita. Il prossimo incremento è P06, Clienti e agenzie.
+Gestionale desktop locale per una società di ormeggiatori, in sviluppo. Sono disponibili gestione degli archivi, configurazione temporale e anagrafiche di porti, banchine, clienti e agenzie, con versioni e ciclo di vita. Il prossimo incremento è P07, Navi.
 
 ## Tecnologie
 
@@ -56,7 +56,7 @@ src/
     app/                  Interfaccia React e schermate
     api/                  Accesso ai contratti del preload
   backend/
-    application/          Casi d'uso per archivi, tempo, porti, banchine e anteprime
+    application/          Casi d'uso per archivi, tempo, anagrafiche e anteprime
     domain/               Valori numerici e temporali, sequenze delle versioni
     infrastructure/
       database/           Connessione, schema e migrazioni
@@ -83,9 +83,11 @@ I file SQL sono importati nella build con `?raw`: non dipendono dalla directory 
 
 ## Piano funzionale e specifica P00
 
-Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza gli incrementi. P00–P05 e UI01 sono completati. Le [decisioni P00](doc/p00/decisioni-iniziali.md), il [contesto applicativo P01](doc/p01/contesto-applicativo.md) e i [valori numerici e temporali P02](doc/p02/numeri-e-tempo.md) costituiscono la base condivisa. P03–P04 introducono [creazione e consultazione dei porti](doc/p03/porti.md) e [versioni e ciclo di vita](doc/p04/versioni-e-ciclo-di-vita.md). P05 aggiunge le [banchine nel dettaglio del porto](doc/p05/banchine.md), portando lo schema a v6. La [revisione UI01](doc/ui01/revisione-post-p04.md) definisce le convenzioni visive comuni. Il [registro](doc/stato-implementazione-prestazioni.md) riporta gli esiti delle verifiche e il passaggio a P06.
+Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza gli incrementi. P00–P06 e UI01 sono completati. Le [decisioni P00](doc/p00/decisioni-iniziali.md), il [contesto applicativo P01](doc/p01/contesto-applicativo.md) e i [valori numerici e temporali P02](doc/p02/numeri-e-tempo.md) costituiscono la base condivisa. P03–P04 introducono [creazione e consultazione dei porti](doc/p03/porti.md) e [versioni e ciclo di vita](doc/p04/versioni-e-ciclo-di-vita.md). P05 aggiunge le [banchine nel dettaglio del porto](doc/p05/banchine.md), portando lo schema a v6. P06 aggiunge [clienti e agenzie](doc/p06/clienti-e-agenzie.md) e la migrazione v7, verificata anche nel pacchetto Windows. La [revisione UI01](doc/ui01/revisione-post-p04.md) definisce le convenzioni visive comuni. Il [registro](doc/stato-implementazione-prestazioni.md) riporta gli esiti delle verifiche e il passaggio a P07.
 
 In **Anagrafiche → Porti** sono disponibili ricerca, elenco, dettaglio, cronologia, versioni, disattivazione, riattivazione ed eliminazione consentita. Il dettaglio comprende le banchine del porto, con il proprio ciclo di vita. Un porto con banchine è protetto dall'eliminazione. La selezionabilità della banchina dipende sia dal suo stato sia da quello del porto. Le operazioni che richiedono una conferma espongono un'anteprima degli effetti. Le attività operative e le prestazioni sono previste negli incrementi successivi.
+
+**Anagrafiche → Clienti / Agenzie** espone due anagrafiche indipendenti, con la sola ragione sociale. Ricerca storica e per codice, elenco paginato, dettaglio, cronologia e ciclo di vita seguono le stesse convenzioni. Una ragione sociale può appartenere a entrambe le tipologie; dentro ciascuna rimane prenotata fino all’eliminazione dell’identità. I progressivi non vengono riutilizzati. Prima di introdurre una versione con decorrenza occorre confermare il fuso aziendale in **Riferimenti temporali**; ore ambigue e inesistenti sono gestite dal backend. La versione iniziale rimane senza decorrenza.
 
 Con un archivio aperto, **Riferimenti temporali** permette di confermare il fuso aziendale iniziale (proposto `Europe/Rome`) e verificare un orario locale, scegliendo l'occorrenza durante il cambio dell'ora. La verifica non registra attività. Dopo la conferma il fuso non è modificabile in questo rilascio; la configurazione resta nel file, anche nelle copie e nei backup.
 

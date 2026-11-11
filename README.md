@@ -102,6 +102,10 @@ Le [istruzioni dello spike](spikes/p00/README.md) distinguono le prove eseguite 
 
 ## Verifiche e distribuzione
 
+La frequenza dei controlli è definita nel [piano §7.3](doc/piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). A chiusura di ogni step eseguire `check`, la suite backend completa e i percorsi desktop nuovi o coinvolti. Le migrazioni ordinarie richiedono test SQLite e apertura nella build Electron. Suite desktop completa e verifica completa del pacchetto si eseguono alle milestone M1–M5. Cambiamenti a confezionamento, caricamento delle risorse, runtime o dipendenze native richiedono una verifica anticipata del pacchetto con copertura adeguata all'impatto. Le revisioni grafiche estese seguono UI01–UI04. L'installer viene generato in P20.
+
+I comandi seguenti sono disponibili per i diversi controlli. Per un percorso desktop mirato usare `npm run test:e2e -- tests/e2e/<file>.spec.ts`. Con una build già verificata, selezionare i test direttamente tramite `node node_modules/@playwright/test/cli.js test tests/e2e/<file>.spec.ts`. Alla milestone è possibile riutilizzare quella build con `node scripts/package.mjs --dir` seguito da `node scripts/test-packaged.mjs`. Registrare gli esiti già validi e i controlli programmati per il traguardo successivo.
+
 ```powershell
 npm run check
 npm test

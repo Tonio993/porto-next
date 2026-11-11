@@ -619,7 +619,29 @@ Un task implementativo è concluso quando:
 7. limiti, decisioni e stato del task sono registrati;
 8. l'applicazione rimane avviabile.
 
-Usare `npm run check` e `npm test` per le modifiche implementative; aggiungere test di integrazione SQLite per persistenza/rollback e un test desktop sul flusso appena introdotto. Eseguire il percorso manuale pertinente. Riservare la verifica completa del pacchetto ai traguardi o alle modifiche che incidono su risorse, migrazioni e dipendenze native. Una modifica soltanto documentale richiede controlli dei documenti, non la ricompilazione dell'applicazione.
+La frequenza dei controlli segue la tabella. Le milestone corrispondono a M1 dopo P08, M2 dopo P13, M3 dopo P16, M4 dopo P19 e M5 in P20. Le verifiche del traguardo usano la build integrata finale, comprese le correzioni delle revisioni grafiche previste in quel punto.
+
+| Controllo                          | Chiusura di ogni step implementativo                                                                                                                                      | Chiusura delle milestone                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| TypeScript, ESLint e formattazione | Eseguire `npm run check` sul codice finale. Distinguere le segnalazioni legacy già registrate.                                                                            | Verificare il risultato integrato finale.                                                                    |
+| Test unitari e SQLite              | Eseguire `npm test`, con suite completa. Aggiungere le prove delle invarianti introdotte o modificate.                                                                    | Eseguire la suite completa sull'integrazione finale.                                                         |
+| Migrazioni                         | Provare l'aggiornamento dalla versione precedente con dati, copia preventiva, conservazione e rollback. Verificare l'apertura dell'archivio migrato nella build Electron. | Verificare cumulativamente le versioni precedenti supportate e la trasferibilità dell'archivio.              |
+| Percorsi desktop Electron          | Eseguire il flusso nuovo o modificato e le regressioni direttamente coinvolte.                                                                                            | Eseguire tutta la suite desktop.                                                                             |
+| Pacchetto Windows                  | Eseguirlo quando cambiano configurazione di confezionamento, inclusione/caricamento di risorse, runtime Electron o dipendenze native.                                     | Generare il pacchetto dalla build finale e verificare tutta la suite sullo stesso eseguibile.                |
+| Grafica e usabilità                | Ispezionare le schermate essenziali delle parti modificate e verificare interazioni e focus pertinenti.                                                                   | Eseguire le revisioni estese nei checkpoint UI della sezione 3.5.                                            |
+| Installer e installazione          | Verificare i comportamenti coinvolti quando cambia la relativa configurazione.                                                                                            | Generare l'installer in P20. Registrare separatamente la prova di installazione sul sistema di destinazione. |
+
+**Selezione delle regressioni.** Valutare i chiamanti e i percorsi coinvolti dalle modifiche condivise. Per coordinatore, ciclo di vita dell'archivio o contesto IPC includere copie, sessioni e revisioni. Per hook asincroni, navigazione o componenti comuni includere le viste che li utilizzano. Ampliare la selezione fino alla suite completa quando l'impatto attraversa l'applicazione o rimangono dubbi concreti sulla copertura. I test SQLite di integrità, riferimenti e rollback pertinenti si eseguono nello step che introduce la modifica.
+
+**Migrazioni e distribuzione.** Una migrazione SQL aggiunta al runner esistente si verifica nello step con SQLite reale e apertura nella build Electron. La prova nel pacchetto è pianificata alla milestone successiva. Se cambia il meccanismo di inclusione o caricamento delle migrazioni, verificare subito anche l'eseguibile confezionato. Applicare lo stesso criterio alle altre risorse distribuite. I controlli pianificati alla milestone consentono la chiusura dello step una volta superate le verifiche previste per quello step.
+
+**Esecuzione e riuso degli esiti.** Durante lo sviluppo usare i test mirati per le modifiche in corso, poi eseguire i controlli finali della tabella. Conservare gli esiti riusciti finché ulteriori modifiche ne mantengono la validità. Dopo una correzione ripetere i controlli falliti e quelli coinvolti dalla correzione. Se la stessa build soddisfa i controlli sia dello step sia della milestone, registrare una sola esecuzione.
+
+Preparare una build stabile e riutilizzarla per i test desktop selezionati e l'eventuale confezionamento. Evitare ricompilazioni concorrenti durante il confezionamento e i test. `npm run test:e2e -- tests/e2e/<file>.spec.ts` compila ed esegue i file selezionati. Sulla build già pronta si possono selezionare i percorsi con `node node_modules/@playwright/test/cli.js test tests/e2e/<file>.spec.ts`. Per confezionare e verificare quella build usare in sequenza `node scripts/package.mjs --dir` e `node scripts/test-packaged.mjs`. Gli script `test:e2e` e `test:packaged` restano disponibili per eseguire l'intera sequenza comprensiva della build.
+
+**Schermate e registrazione.** Acquisire poche schermate rappresentative dei cambiamenti, ampliando l'ispezione durante le revisioni UI. Riutilizzare le acquisizioni già valide. Conservare i log completi localmente e consultare riepiloghi ed errori. Nel passaggio di consegne registrare build o revisione verificata, comandi, esiti, motivi delle regressioni selezionate e controlli pianificati alla milestone successiva. Distinguere interazioni automatizzate e sessioni manuali umane.
+
+Per modifiche soltanto documentali controllare formattazione, collegamenti modificati e differenze Git. Questi controlli sono sufficienti per la consegna documentale.
 
 ### 7.4 Prompt di avvio riutilizzabile
 
@@ -630,6 +652,7 @@ Leggi doc/stato-implementazione-prestazioni.md e verifica codice, branch e stato
 Parti dai risultati integrati delle dipendenze indicate; preserva i file dell'utente.
 Mantieni lo stack Electron/React/TypeScript/SQLite e il funzionamento per archivio locale.
 Realizza il percorso completo previsto, aggiungi le verifiche pertinenti e aggiorna il registro.
+Applica la frequenza dei controlli della sezione 7.3 e registra quelli pianificati alla milestone successiva.
 Non anticipare funzioni dei task successivi. Registra eventuali conflitti funzionali espliciti.
 Nel passaggio di consegne indica file modificati, decisioni, verifiche, limiti e prossimo task.
 ```
@@ -645,6 +668,7 @@ Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) co
 - file e contratti principali;
 - decisioni adottate e divergenze motivate dalle proposte;
 - comandi eseguiti ed esiti, incluse verifiche manuali o ancora da svolgere;
+- build o revisione verificata, regressioni selezionate e controlli pianificati alla milestone successiva secondo la sezione 7.3;
 - difetti aperti e loro impatto;
 - prossimo task e dipendenze effettivamente integrate.
 

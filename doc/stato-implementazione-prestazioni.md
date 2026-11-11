@@ -2,7 +2,7 @@
 
 Riferimento: [piano di implementazione](piano-implementazione-prestazioni.md).
 
-Ultimo aggiornamento: 11 novembre 2026, P06 — Clienti e agenzie.
+Ultimo aggiornamento: 11 novembre 2026, P06 completato e frequenza dei controlli per P07 e milestone successive.
 
 ## Baseline
 
@@ -58,6 +58,14 @@ Riferimento: piano §3.5. Queste attività hanno stato separato dai task funzion
 | UI04 | Da avviare | Dentro P20, prima del rilascio. | Controllo finale di leggibilità, accessibilità e dimensioni supportate, anche sul pacchetto Windows.                            |
 
 UI01 ha completato osservazione dell'app Electron, implementazione delle correzioni grafiche e di usabilità, verifica dei percorsi P03–P04 e documentazione. Sessione/revisione, bozze, anteprime e invalidazione delle risposte sono preservate. Le revisioni successive seguono i criteri del piano e non sostituiscono i controlli tecnici già previsti.
+
+## Frequenza dei controlli dal passaggio P06 → P07
+
+Applicare il piano §7.3. Ogni step comprende `npm run check`, `npm test`, prove SQLite delle invarianti e della migrazione introdotta, apertura dell'archivio migrato nella build Electron e percorsi desktop nuovi o direttamente coinvolti. Le modifiche condivise ampliano la selezione delle regressioni in base ai chiamanti interessati.
+
+Alle milestone M1 dopo P08, M2 dopo P13, M3 dopo P16, M4 dopo P19 e M5 in P20 eseguire suite desktop completa, migrazioni cumulative e verifica completa del pacchetto sulla build integrata finale. I cambiamenti a confezionamento, caricamento delle risorse, runtime o dipendenze native richiedono una verifica anticipata del pacchetto. Le revisioni grafiche estese seguono i checkpoint UI, l'installer P20.
+
+Per P07 la prossima verifica completa di milestone è M1, dopo P08 e le correzioni UI02. Registrare nel passaggio di consegne gli esiti dello step e i controlli pianificati per M1. Le verifiche già completate di P00–P06 restano documentate nelle rispettive note storiche. Riutilizzare una build stabile e i risultati ancora validi, riportando una sola volta comandi, esiti e limiti.
 
 ## Decisioni e questioni da mantenere visibili
 

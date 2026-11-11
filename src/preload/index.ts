@@ -1,3 +1,5 @@
+import { agencyChannels, type AgencyApi } from '../shared/contracts/agencies'
+import { customerChannels, type CustomerApi } from '../shared/contracts/customers'
 import { contextBridge, ipcRenderer } from 'electron'
 import type { ArchiveApi, ArchiveState } from '../shared/contracts/archive'
 import { archiveChannels } from '../shared/contracts/archive'
@@ -64,3 +66,31 @@ const berths: BerthApi = {
   previewEffects: (request) => ipcRenderer.invoke(berthChannels.previewEffects, request),
 }
 contextBridge.exposeInMainWorld('berths', berths)
+
+const customers: CustomerApi = {
+  get: (request) => ipcRenderer.invoke(customerChannels.get, request),
+  create: (request) => ipcRenderer.invoke(customerChannels.create, request),
+  list: (request) => ipcRenderer.invoke(customerChannels.list, request),
+  history: (request) => ipcRenderer.invoke(customerChannels.history, request),
+  resolveVersionMoment: (request) =>
+    ipcRenderer.invoke(customerChannels.resolveVersionMoment, request),
+  preview: (request) => ipcRenderer.invoke(customerChannels.preview, request),
+  confirm: (request) => ipcRenderer.invoke(customerChannels.confirm, request),
+  reactivate: (request) => ipcRenderer.invoke(customerChannels.reactivate, request),
+  previewEffects: (request) => ipcRenderer.invoke(customerChannels.previewEffects, request),
+}
+contextBridge.exposeInMainWorld('customers', customers)
+
+const agencies: AgencyApi = {
+  get: (request) => ipcRenderer.invoke(agencyChannels.get, request),
+  create: (request) => ipcRenderer.invoke(agencyChannels.create, request),
+  list: (request) => ipcRenderer.invoke(agencyChannels.list, request),
+  history: (request) => ipcRenderer.invoke(agencyChannels.history, request),
+  resolveVersionMoment: (request) =>
+    ipcRenderer.invoke(agencyChannels.resolveVersionMoment, request),
+  preview: (request) => ipcRenderer.invoke(agencyChannels.preview, request),
+  confirm: (request) => ipcRenderer.invoke(agencyChannels.confirm, request),
+  reactivate: (request) => ipcRenderer.invoke(agencyChannels.reactivate, request),
+  previewEffects: (request) => ipcRenderer.invoke(agencyChannels.previewEffects, request),
+}
+contextBridge.exposeInMainWorld('agencies', agencies)

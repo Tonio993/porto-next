@@ -166,6 +166,7 @@ export class BerthService implements BerthApi {
       after,
       ['name', 'effectiveFrom', 'effectiveTo'],
       (name) => ({ ...reference, label: `${reference.label} · ${name} · versione` }),
+      (version) => version.name,
     )
     const changedIds = effects.flatMap(({ versionId }) => (versionId ? [versionId] : []))
     const deleting = change.operation === 'DELETE_BERTH'

@@ -113,7 +113,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
                   ? section === 'Riferimenti temporali'
                     ? 'Configura il fuso aziendale e verifica gli orari locali.'
                     : section === 'Anagrafiche'
-                      ? 'Prepara e consulta i porti del tuo archivio.'
+                      ? 'Prepara e consulta le anagrafiche del tuo archivio.'
                       : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
                   : 'Crea un archivio o aprine uno esistente per iniziare.'}
               </p>

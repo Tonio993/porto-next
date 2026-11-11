@@ -7,8 +7,10 @@ import portMomentsSql from '../../../../migrations/0005_port_version_moments.sql
 import berthsSql from '../../../../migrations/0006_berths.sql?raw'
 import { ArchiveError } from '../../../shared/errors/archive-error'
 
+import subjectsSql from '../../../../migrations/0007_customers_agencies.sql?raw'
+
 export const APPLICATION_ID = 0x504f5254
-export const SCHEMA_VERSION = 6
+export const SCHEMA_VERSION = 7
 
 const migrations = [
   { version: 1, sql: initialSql },
@@ -17,6 +19,7 @@ const migrations = [
   { version: 4, sql: portsSql },
   { version: 5, sql: portMomentsSql },
   { version: 6, sql: berthsSql },
+  { version: 7, sql: subjectsSql },
 ]
 
 export function migrate(database: Database.Database, fromVersion: number): void {

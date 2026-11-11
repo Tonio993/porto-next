@@ -1,3 +1,9 @@
+import { AgencyService } from '../../src/backend/application/agencies/agency-service'
+import { agencyChannels } from '../../src/shared/contracts/agencies'
+import { registerAgencyIpc } from '../../src/main/ipc/register'
+import { CustomerService } from '../../src/backend/application/customers/customer-service'
+import { customerChannels } from '../../src/shared/contracts/customers'
+import { registerCustomerIpc } from '../../src/main/ipc/register'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -202,6 +208,126 @@ describe('confine IPC', () => {
       const handler = vi
         .mocked(ipcMain.handle)
         .mock.calls.find(([channel]) => channel === berthChannels[action])![1]
+      for (const event of [
+        { sender: {}, senderFrame: owner.webContents.mainFrame },
+        { sender: owner.webContents, senderFrame: {} },
+      ])
+        expect(await handler(event as Electron.IpcMainInvokeEvent, null)).toMatchObject({
+          ok: false,
+          context: null,
+          error: { code: 'INVALID_INPUT' },
+        })
+      available = false
+      expect(
+        await handler(
+          {
+            sender: owner.webContents,
+            senderFrame: owner.webContents.mainFrame,
+          } as Electron.IpcMainInvokeEvent,
+          null,
+        ),
+      ).toMatchObject({ ok: false, error: { code: 'INVALID_INPUT' } })
+      available = true
+      expect(execute).not.toHaveBeenCalled()
+      await handler(
+        {
+          sender: owner.webContents,
+          senderFrame: owner.webContents.mainFrame,
+        } as Electron.IpcMainInvokeEvent,
+        null,
+      )
+      expect(execute).toHaveBeenCalledOnce()
+    }
+  })
+  it('protegge tutti i canali delle clienti da altri mittenti, frame secondari e finestre assenti', async () => {
+    const service = new CustomerService(new ArchiveCoordinator())
+    let available = true
+    registerCustomerIpc(service, () => (available ? owner : null))
+    for (const action of Object.keys(customerChannels) as (keyof typeof customerChannels)[]) {
+      const execute = vi.spyOn(service, action)
+      const handler = vi
+        .mocked(ipcMain.handle)
+        .mock.calls.find(([channel]) => channel === customerChannels[action])![1]
+      for (const event of [
+        { sender: {}, senderFrame: owner.webContents.mainFrame },
+        { sender: owner.webContents, senderFrame: {} },
+      ])
+        expect(await handler(event as Electron.IpcMainInvokeEvent, null)).toMatchObject({
+          ok: false,
+          context: null,
+          error: { code: 'INVALID_INPUT' },
+        })
+      available = false
+      expect(
+        await handler(
+          {
+            sender: owner.webContents,
+            senderFrame: owner.webContents.mainFrame,
+          } as Electron.IpcMainInvokeEvent,
+          null,
+        ),
+      ).toMatchObject({ ok: false, error: { code: 'INVALID_INPUT' } })
+      available = true
+      expect(execute).not.toHaveBeenCalled()
+      await handler(
+        {
+          sender: owner.webContents,
+          senderFrame: owner.webContents.mainFrame,
+        } as Electron.IpcMainInvokeEvent,
+        null,
+      )
+      expect(execute).toHaveBeenCalledOnce()
+    }
+  })
+  it('protegge tutti i canali delle agenzie da altri mittenti, frame secondari e finestre assenti', async () => {
+    const service = new AgencyService(new ArchiveCoordinator())
+    let available = true
+    registerAgencyIpc(service, () => (available ? owner : null))
+    for (const action of Object.keys(agencyChannels) as (keyof typeof agencyChannels)[]) {
+      const execute = vi.spyOn(service, action)
+      const handler = vi
+        .mocked(ipcMain.handle)
+        .mock.calls.find(([channel]) => channel === agencyChannels[action])![1]
+      for (const event of [
+        { sender: {}, senderFrame: owner.webContents.mainFrame },
+        { sender: owner.webContents, senderFrame: {} },
+      ])
+        expect(await handler(event as Electron.IpcMainInvokeEvent, null)).toMatchObject({
+          ok: false,
+          context: null,
+          error: { code: 'INVALID_INPUT' },
+        })
+      available = false
+      expect(
+        await handler(
+          {
+            sender: owner.webContents,
+            senderFrame: owner.webContents.mainFrame,
+          } as Electron.IpcMainInvokeEvent,
+          null,
+        ),
+      ).toMatchObject({ ok: false, error: { code: 'INVALID_INPUT' } })
+      available = true
+      expect(execute).not.toHaveBeenCalled()
+      await handler(
+        {
+          sender: owner.webContents,
+          senderFrame: owner.webContents.mainFrame,
+        } as Electron.IpcMainInvokeEvent,
+        null,
+      )
+      expect(execute).toHaveBeenCalledOnce()
+    }
+  })
+  it('protegge tutti i canali delle clienti da altri mittenti, frame secondari e finestre assenti', async () => {
+    const service = new CustomerService(new ArchiveCoordinator())
+    let available = true
+    registerCustomerIpc(service, () => (available ? owner : null))
+    for (const action of Object.keys(customerChannels) as (keyof typeof customerChannels)[]) {
+      const execute = vi.spyOn(service, action)
+      const handler = vi
+        .mocked(ipcMain.handle)
+        .mock.calls.find(([channel]) => channel === customerChannels[action])![1]
       for (const event of [
         { sender: {}, senderFrame: owner.webContents.mainFrame },
         { sender: owner.webContents, senderFrame: {} },

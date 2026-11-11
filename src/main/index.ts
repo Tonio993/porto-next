@@ -1,3 +1,7 @@
+import { AgencyService } from '../backend/application/agencies/agency-service'
+import { registerAgencyIpc } from './ipc/register'
+import { CustomerService } from '../backend/application/customers/customer-service'
+import { registerCustomerIpc } from './ipc/register'
 import { appendFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { app, BrowserWindow, dialog, Menu } from 'electron'
@@ -112,6 +116,8 @@ if (ownsInstance) {
       registerTimeIpc(new TimeService(archives.coordinator), () => window)
       registerPortIpc(new PortService(archives.coordinator), () => window)
       registerBerthIpc(new BerthService(archives.coordinator), () => window)
+      registerCustomerIpc(new CustomerService(archives.coordinator), () => window)
+      registerAgencyIpc(new AgencyService(archives.coordinator), () => window)
       Menu.setApplicationMenu(
         Menu.buildFromTemplate([
           {

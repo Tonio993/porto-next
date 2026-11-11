@@ -1,3 +1,7 @@
+import { agencyChannels, type AgencyApi } from '../../shared/contracts/agencies'
+import type { AgencyService } from '../../backend/application/agencies/agency-service'
+import { customerChannels, type CustomerApi } from '../../shared/contracts/customers'
+import type { CustomerService } from '../../backend/application/customers/customer-service'
 import { BrowserWindow, ipcMain } from 'electron'
 import { archiveChannels } from '../../shared/contracts/archive'
 import { ArchiveController, type ArchiveAction } from '../archive-controller'
@@ -71,5 +75,23 @@ export function registerPortIpc(service: PortService, window: () => BrowserWindo
 export function registerBerthIpc(service: BerthService, window: () => BrowserWindow | null): void {
   for (const action of Object.keys(berthChannels) as (keyof BerthApi)[]) {
     registerGuardedIpc(berthChannels[action], window, (input) => service[action](input as never))
+  }
+}
+
+export function registerCustomerIpc(
+  service: CustomerService,
+  window: () => BrowserWindow | null,
+): void {
+  for (const action of Object.keys(customerChannels) as (keyof CustomerApi)[]) {
+    registerGuardedIpc(customerChannels[action], window, (input) => service[action](input as never))
+  }
+}
+
+export function registerAgencyIpc(
+  service: AgencyService,
+  window: () => BrowserWindow | null,
+): void {
+  for (const action of Object.keys(agencyChannels) as (keyof AgencyApi)[]) {
+    registerGuardedIpc(agencyChannels[action], window, (input) => service[action](input as never))
   }
 }

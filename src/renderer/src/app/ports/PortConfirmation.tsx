@@ -4,6 +4,7 @@ import type { ChangePreviewDto } from '../../../../shared/contracts/master-data'
 import { StateMessage } from '../StateMessage'
 const labels: Record<string, string> = {
   name: 'Nome',
+  businessName: 'Ragione sociale',
   locality: 'Località',
   countryCode: 'Paese',
   effectiveFrom: 'Inizio (UTC)',
@@ -11,6 +12,8 @@ const labels: Record<string, string> = {
   status: 'Stato',
   port: 'Porto',
   berth: 'Banchina',
+  customer: 'Cliente',
+  agency: 'Agenzia',
   selectable: 'Selezionabile',
 }
 export function PortConfirmation({
@@ -138,8 +141,9 @@ export function PortConfirmation({
         </Button>
         <Button
           color={
-            ['DELETE_PORT', 'DELETE_BERTH'].includes(preview.operation) ||
-            preview.operation === 'DELETE_VERSION'
+            ['DELETE_PORT', 'DELETE_BERTH', 'DELETE_CUSTOMER', 'DELETE_AGENCY'].includes(
+              preview.operation,
+            ) || preview.operation === 'DELETE_VERSION'
               ? 'red'
               : undefined
           }

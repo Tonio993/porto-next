@@ -61,6 +61,7 @@ test('UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti rea
         await expect(dialog).toHaveCount(1)
         await expect(dialog).toHaveCSS('opacity', '1')
       }
+      if (process.env.PORTO_PACKAGED_EXE) return
       const path = process.env.PORTO_UI01_SCREENSHOTS
         ? resolve('doc/ui01/schermate', `dopo-${name}.png`)
         : testInfo.outputPath(`${name}.png`)

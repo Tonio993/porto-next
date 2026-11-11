@@ -51,11 +51,12 @@ export function insertVersion<T extends VersionIntervalDto>(
   return after
 }
 
-export function versionEffects<T extends VersionIntervalDto & { name: string }>(
+export function versionEffects<T extends VersionIntervalDto>(
   before: readonly T[],
   after: readonly T[],
   fields: readonly { [K in keyof T]: T[K] extends string | null ? K : never }[keyof T][],
   reference: (name: string) => EntityReferenceDto,
+  description: (version: T) => string,
 ): ChangeEffectDto[] {
   const previous = new Map(before.map((item) => [item.id, item]))
   const next = new Map(after.map((item) => [item.id, item]))
@@ -71,7 +72,7 @@ export function versionEffects<T extends VersionIntervalDto & { name: string }>(
     if (changes.length || !oldValue || !newValue)
       effects.push({
         versionId: id,
-        reference: reference((newValue ?? oldValue)!.name),
+        reference: reference(description((newValue ?? oldValue)!)),
         action: !oldValue ? 'CREATE' : !newValue ? 'DELETE' : 'UPDATE',
         changes,
       })

@@ -227,6 +227,7 @@ export class PortLifecycleService {
       after,
       ['name', 'locality', 'countryCode', 'effectiveFrom', 'effectiveTo'],
       (name) => ({ kind: 'PORT', id: port.id, label: `Porto ${port.code} · ${name} · versione` }),
+      (version) => version.name,
     )
     const berths =
       change.operation === 'DELETE_PORT' ||

@@ -46,7 +46,7 @@ export function berthReferences(
 }
 
 /** Inspect actual foreign keys, including external rows configured with CASCADE. */
-function foreignReferences(
+export function foreignReferences(
   database: DatabaseSession,
   reference: EntityReferenceDto,
   identityTable: string | null,

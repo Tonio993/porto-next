@@ -10,7 +10,7 @@ Ultimo aggiornamento: 11 novembre 2026, P05 — Banchine.
 - Stack presente: Electron, React, TypeScript, SQLite, better-sqlite3 e Drizzle.
 - Funzioni presenti: creazione/apertura archivi, recenti, nome dell'archivio, copia, backup e chiusura.
 - I documenti in `legacy/` descrivono il dominio e un precedente percorso tecnologico. Le dichiarazioni di implementazione Java/Angular non costituiscono avanzamento di questo repository.
-- P00–P04 sono completati. P05 introduce le banchine nel dettaglio del porto e porta lo schema a v6. I task da P06 in avanti restano da avviare.
+- P00–P05 sono completati. P05 introduce le banchine nel dettaglio del porto e porta lo schema a v6. I task da P06 in avanti restano da avviare.
 - UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo task funzionale è P06.
 
 ## Avanzamento

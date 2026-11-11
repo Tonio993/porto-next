@@ -20,7 +20,7 @@ Sono stati esaminati i cinque documenti di `doc/legacy`, approfondendo le parti 
 | [Modello dei dati](legacy/03-modello-dati.md)                          | Identità, versioni, prenotazioni dei nomi, struttura operativa e proposta delle prestazioni. |
 | [Sviluppo evolutivo](legacy/04-sviluppo-evolutivo.md)                  | Incrementi verticali, verifiche a ogni incremento e revisioni periodiche.                    |
 
-Le scelte tecnologiche e le dichiarazioni di avanzamento del legacy descrivono un altro progetto: Angular, Java, Spring, HTTP e Flyway. Qui rimangono **Electron, React, TypeScript, IPC, SQLite, better-sqlite3 e Drizzle**. Nel repository attuale esiste la gestione degli archivi; il flusso di creazione dei porti descritto nel vecchio walking skeleton deve ancora essere realizzato.
+Le scelte tecnologiche e le dichiarazioni di avanzamento del legacy descrivono un altro progetto: Angular, Java, Spring, HTTP e Flyway. Qui rimangono **Electron, React, TypeScript, IPC, SQLite, better-sqlite3 e Drizzle**. La baseline esaminata comprendeva la gestione degli archivi. Il repository ha successivamente completato P00–P05 e UI01, inclusi i flussi di porti e banchine, come documentato nel registro.
 
 Le regole funzionali confermate dei documenti 01 e 02 costituiscono la base. Il modello 03 distingue decisioni confermate nei punti 1–5 e proposte da verificare dal punto 6: il relativo schema fisico va verificato durante le slice. Un conflitto funzionale effettivo va registrato nel documento delle decisioni prima di implementare il comportamento controverso; una normale scelta tecnica può essere risolta dall'agente nel perimetro concordato.
 
@@ -164,7 +164,7 @@ Fonti: requisiti §§2.11, 2.14 e 2.15; dominio, precisione e arrotondamento; mo
 
 ### 3.1 Accesso all'archivio attivo
 
-Attualmente `ArchiveService` possiede privatamente una sessione SQLite e una coda per le operazioni sui file. I nuovi servizi devono condividere il coordinamento del ciclo di vita dell'archivio:
+Da P01 `ArchiveCoordinator` possiede la sessione SQLite attiva e la coda condivisa. `ArchiveService` espone i casi d'uso degli archivi. I nuovi servizi devono usare questo coordinamento del ciclo di vita dell'archivio:
 
 1. un solo proprietario della sessione attiva;
 2. una serializzazione coerente di comandi di dominio, cambio archivio, copie e chiusura, evitando code annidate che si attendano reciprocamente;

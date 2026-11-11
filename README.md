@@ -1,6 +1,6 @@
 # Porto Next
 
-Scheletro di un gestionale desktop per una società di ormeggiatori. Include la gestione tecnica degli archivi; le logiche di business sono ancora da implementare.
+Gestionale desktop locale per una società di ormeggiatori, in sviluppo. Sono disponibili gestione degli archivi, configurazione temporale e anagrafiche di porti e banchine, con versioni e ciclo di vita. Il prossimo incremento è P06, Clienti e agenzie.
 
 ## Tecnologie
 
@@ -23,7 +23,7 @@ La prima installazione richiede Internet per scaricare i pacchetti e il runtime 
 
 better-sqlite3 13 include il binario N-API per Windows x64. La ricompilazione automatica di electron-builder è disattivata intenzionalmente: non serve installare Visual Studio per questo progetto. Se si aggiungono altri moduli nativi, occorre rivedere questa scelta. Gli script di distribuzione usano 7-Zip di sistema quando installato nella posizione standard; altrimenti electron-builder scarica il proprio strumento. ? possibile specificare un altro eseguibile con la variabile `ELECTRON_BUILDER_7ZIP_PATH`.
 
-## Funzionalità dello scheletro
+## Gestione degli archivi
 
 - Nuovo archivio: scelta di nome e posizione del file `.ormeggi`.
 - Apertura di un archivio esistente o di un archivio recente.
@@ -56,8 +56,8 @@ src/
     app/                  Interfaccia React e schermate
     api/                  Accesso ai contratti del preload
   backend/
-    application/archives/ Gestione del ciclo di vita degli archivi
-    domain/values/        Numeri esatti e risoluzione dei momenti
+    application/          Casi d'uso per archivi, tempo, porti, banchine e anteprime
+    domain/               Valori numerici e temporali, sequenze delle versioni
     infrastructure/
       database/           Connessione, schema e migrazioni
       preferences/        Elenco dei file recenti
@@ -83,7 +83,9 @@ I file SQL sono importati nella build con `?raw`: non dipendono dalla directory 
 
 ## Piano funzionale e specifica P00
 
-Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza i task successivi. P00 ha prodotto le [decisioni iniziali](doc/p00/decisioni-iniziali.md), i contratti e gli esempi. P01 introduce il [contesto applicativo dell’archivio](doc/p01/contesto-applicativo.md), la revisione e la navigazione minima. P02 adotta [numeri esatti e momenti](doc/p02/numeri-e-tempo.md), con schema v3 e configurazione del fuso iniziale per archivio. Il [registro](doc/stato-implementazione-prestazioni.md) indica lo stato effettivo; le funzioni operative restano in preparazione.
+Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza gli incrementi. P00–P05 e UI01 sono completati. Le [decisioni P00](doc/p00/decisioni-iniziali.md), il [contesto applicativo P01](doc/p01/contesto-applicativo.md) e i [valori numerici e temporali P02](doc/p02/numeri-e-tempo.md) costituiscono la base condivisa. P03–P04 introducono [creazione e consultazione dei porti](doc/p03/porti.md) e [versioni e ciclo di vita](doc/p04/versioni-e-ciclo-di-vita.md). P05 aggiunge le [banchine nel dettaglio del porto](doc/p05/banchine.md), portando lo schema a v6. La [revisione UI01](doc/ui01/revisione-post-p04.md) definisce le convenzioni visive comuni. Il [registro](doc/stato-implementazione-prestazioni.md) riporta gli esiti delle verifiche e il passaggio a P06.
+
+In **Anagrafiche → Porti** sono disponibili ricerca, elenco, dettaglio, cronologia, versioni, disattivazione, riattivazione ed eliminazione consentita. Il dettaglio comprende le banchine del porto, con il proprio ciclo di vita. Un porto con banchine è protetto dall'eliminazione. La selezionabilità della banchina dipende sia dal suo stato sia da quello del porto. Le operazioni che richiedono una conferma espongono un'anteprima degli effetti. Le attività operative e le prestazioni sono previste negli incrementi successivi.
 
 Con un archivio aperto, **Riferimenti temporali** permette di confermare il fuso aziendale iniziale (proposto `Europe/Rome`) e verificare un orario locale, scegliendo l'occorrenza durante il cambio dell'ora. La verifica non registra attività. Dopo la conferma il fuso non è modificabile in questo rilascio; la configurazione resta nel file, anche nelle copie e nei backup.
 

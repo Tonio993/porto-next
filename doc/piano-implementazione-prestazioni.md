@@ -382,6 +382,8 @@ Implementazione e decisioni nella [nota P06](p06/clienti-e-agenzie.md); contratt
 
 **Consegna:** gestione dei tipi configurabili e prima versione del peso per catalogo e tipi operativi fissi.
 
+**Stato:** completato e verificato sulla build Electron con schema v9 dalla base effettiva `75bec7d`; verifiche e revisione tecnica nella [nota P08](p08/catalogo-e-pesi-iniziali.md). Prossimo passaggio UI02, quindi chiusura M1 sul risultato integrato secondo §7.3.
+
 - Creare `rinforzo ormeggio` una sola volta durante l'inizializzazione prevista dalla migrazione.
 - Creare tipo e peso iniziale atomicamente, con valore proposto `1` e vincolo `> 0`.
 - Implementare rinomina, stato, selezionabilità ed eliminazione secondo l'utilizzo storico.
@@ -674,6 +676,6 @@ Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) co
 - difetti aperti e loro impatto;
 - prossimo task e dipendenze effettivamente integrate.
 
-P07 è completato e verificato sulla build Electron con schema v8; le verifiche di chiusura sono documentate nella [nota Navi](p07/navi.md). Il prossimo task funzionale è **P08 — Catalogo e pesi iniziali**. Riutilizzare le [convenzioni visive UI01](ui01/revisione-post-p04.md), il [ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md) e i passaggi di consegne [P05](p05/banchine.md), [P06](p06/clienti-e-agenzie.md) e [P07](p07/navi.md). Il catalogo mantiene descrizioni correnti riutilizzabili dopo rinomina e un vincolo monotono di utilizzo; non eredita le prenotazioni storiche delle anagrafiche. Inizializzare `rinforzo ormeggio` una sola volta e creare atomicamente tipo e peso iniziale. Le variazioni successive dei pesi restano P19.
+P08 introduce catalogo e pesi iniziali con schema v9; verifiche e revisione tecnica sono documentate nella [nota P08](p08/catalogo-e-pesi-iniziali.md). Il prossimo passaggio è **UI02**. Riutilizzare le [convenzioni visive UI01](ui01/revisione-post-p04.md), il [ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md) e le slice anagrafiche integrate. Il catalogo mantiene descrizioni correnti riutilizzabili dopo rinomina e il vincolo monotono `hasEverBeenUsed`; P15 dovrà chiamare `CatalogRepository.markUsed` nella stessa transazione della prestazione. Le variazioni successive dei pesi restano P19.
 
-Dopo P08 eseguire **UI02**. Chiudere **M1** sulla build integrata finale, comprese le correzioni grafiche: controlli statici, suite backend e desktop complete, migrazioni cumulative e trasferibilità, pacchetto Windows e intera suite sullo stesso eseguibile. P07 non modifica confezionamento, caricamento delle risorse, runtime o dipendenze native: non richiede la verifica anticipata del pacchetto secondo §7.3.
+Dopo P08 eseguire **UI02**. Chiudere **M1** sulla build integrata finale, comprese le correzioni grafiche: controlli statici, suite backend e desktop complete, migrazioni cumulative e trasferibilità, pacchetto Windows e intera suite sullo stesso eseguibile. P08 aggiunge SQL al runner esistente senza modificarne il caricamento, il confezionamento, il runtime o le dipendenze native: non richiede la verifica anticipata del pacchetto secondo §7.3. M1 resta da chiudere dopo UI02; P09 segue tale consolidamento con le dipendenze P05/P07/P08 integrate.

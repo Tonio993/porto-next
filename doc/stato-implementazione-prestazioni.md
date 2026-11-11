@@ -2,7 +2,7 @@
 
 Riferimento: [piano di implementazione](piano-implementazione-prestazioni.md).
 
-Ultimo aggiornamento: 11 novembre 2026, P07 completato; prossimo task P08, poi UI02 e M1.
+Ultimo aggiornamento: 11 novembre 2026, P08 completato e verificato sulla build Electron; prossimo passaggio UI02, poi M1.
 
 ## Baseline
 
@@ -10,8 +10,8 @@ Ultimo aggiornamento: 11 novembre 2026, P07 completato; prossimo task P08, poi U
 - Stack presente: Electron, React, TypeScript, SQLite, better-sqlite3 e Drizzle.
 - Funzioni presenti: creazione/apertura archivi, recenti, nome dell'archivio, copia, backup e chiusura.
 - I documenti in `legacy/` descrivono il dominio e un precedente percorso tecnologico. Le dichiarazioni di implementazione Java/Angular non costituiscono avanzamento di questo repository.
-- P00–P07 sono completati. P06 introduce clienti e agenzie con schema v7, verificato anche nel pacchetto Windows. P07 introduce Navi con schema v8, verificato sulla build Electron. I task da P08 in avanti restano da avviare.
-- UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo task funzionale è P08, seguito da UI02 e M1.
+- P00–P07 sono completati. P06 introduce clienti e agenzie con schema v7, verificato anche nel pacchetto Windows. P07 introduce Navi con schema v8, verificato sulla build Electron. P08 introduce catalogo e pesi iniziali con schema v9; esiti nella [nota P08](p08/catalogo-e-pesi-iniziali.md). P09–P20 restano da avviare.
+- UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo passaggio è UI02, seguito dalla chiusura M1 sul risultato integrato prima di P09.
 
 ## Avanzamento
 
@@ -25,7 +25,7 @@ Ultimo aggiornamento: 11 novembre 2026, P07 completato; prossimo task P08, poi U
 | P05  | Completato | `f966ba8`                  | [Banchine](p05/banchine.md), schema v6 e verifica sul pacchetto Windows.                                                        |
 | P06  | Completato | `ef6e257`                  | [Clienti e agenzie](p06/clienti-e-agenzie.md), schema v7; verificato anche nel pacchetto Windows.                               |
 | P07  | Completato | `856bcbc`                  | [Navi](p07/navi.md), schema v8; verificato sulla build Electron.                                                                |
-| P08  | Da avviare | —                          | Catalogo e pesi iniziali.                                                                                                       |
+| P08  | Completato | `0e7fc36`                  | [Catalogo e pesi iniziali](p08/catalogo-e-pesi-iniziali.md), schema v9; verificato sulla build Electron.                        |
 | P09  | Da avviare | —                          | Tariffe complete e calcolo base.                                                                                                |
 | P10  | Da avviare | —                          | Entrata, uscita e permanenze.                                                                                                   |
 | P11  | Da avviare | —                          | Spostamento interno.                                                                                                            |
@@ -50,12 +50,12 @@ Il riferimento P00 è il commit che introduce `doc/p00/decisioni-iniziali.md`, r
 
 Riferimento: piano §3.5. Queste attività hanno stato separato dai task funzionali già completati; la loro pianificazione non costituisce una verifica grafica dell'applicazione.
 
-| ID   | Stato      | Collocazione                    | Risultato e passaggio di consegne                                                                                               |
-| ---- | ---------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| UI01 | Completato | Dopo P04, prima di P05–P07.     | [Revisione e convenzioni](ui01/revisione-post-p04.md), 24 schermate ispezionate, 6 percorsi desktop passati sulla build finale. |
-| UI02 | Da avviare | Alla chiusura di M1, P00–P08.   | Consolidamento di anagrafiche e catalogo con dati realistici, liste lunghe e stati vuoti.                                       |
-| UI03 | Da avviare | Alla chiusura di M3, P09–P16.   | Revisione dei flussi operativi, ricerca, contesto, soggetti, importi ed errori.                                                 |
-| UI04 | Da avviare | Dentro P20, prima del rilascio. | Controllo finale di leggibilità, accessibilità e dimensioni supportate, anche sul pacchetto Windows.                            |
+| ID   | Stato      | Collocazione                       | Risultato e passaggio di consegne                                                                                               |
+| ---- | ---------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| UI01 | Completato | Dopo P04, prima di P05–P07.        | [Revisione e convenzioni](ui01/revisione-post-p04.md), 24 schermate ispezionate, 6 percorsi desktop passati sulla build finale. |
+| UI02 | Da avviare | Dopo P08, prima della chiusura M1. | Consolidamento di anagrafiche e catalogo con dati realistici, liste lunghe e stati vuoti.                                       |
+| UI03 | Da avviare | Alla chiusura di M3, P09–P16.      | Revisione dei flussi operativi, ricerca, contesto, soggetti, importi ed errori.                                                 |
+| UI04 | Da avviare | Dentro P20, prima del rilascio.    | Controllo finale di leggibilità, accessibilità e dimensioni supportate, anche sul pacchetto Windows.                            |
 
 UI01 ha completato osservazione dell'app Electron, implementazione delle correzioni grafiche e di usabilità, verifica dei percorsi P03–P04 e documentazione. Sessione/revisione, bozze, anteprime e invalidazione delle risposte sono preservate. Le revisioni successive seguono i criteri del piano e non sostituiscono i controlli tecnici già previsti.
 
@@ -65,7 +65,7 @@ Applicare il piano §7.3. Ogni step comprende `npm run check`, `npm test`, prove
 
 Alle milestone M1 dopo P08, M2 dopo P13, M3 dopo P16, M4 dopo P19 e M5 in P20 eseguire suite desktop completa, migrazioni cumulative e verifica completa del pacchetto sulla build integrata finale. I cambiamenti a confezionamento, caricamento delle risorse, runtime o dipendenze native richiedono una verifica anticipata del pacchetto. Le revisioni grafiche estese seguono i checkpoint UI, l'installer P20.
 
-Per P07 la prossima verifica completa di milestone è M1, dopo P08 e le correzioni UI02. Registrare nel passaggio di consegne gli esiti dello step e i controlli pianificati per M1. Le verifiche già completate di P00–P06 restano documentate nelle rispettive note storiche. Riutilizzare una build stabile e i risultati ancora validi, riportando una sola volta comandi, esiti e limiti.
+Per P08 la prossima verifica completa di milestone è M1, dopo le correzioni UI02. Registrare nel passaggio di consegne gli esiti dello step e i controlli pianificati per M1. Le verifiche già completate di P00–P07 restano documentate nelle rispettive note storiche. Riutilizzare una build stabile e i risultati ancora validi, riportando una sola volta comandi, esiti e limiti.
 
 ## Decisioni e questioni da mantenere visibili
 
@@ -267,3 +267,19 @@ Base effettiva `093a59b`, implementazione nel commit `856bcbc`; copia di lavoro 
 Non sono noti difetti di integrità aperti nel perimetro P07. Nessuna modifica a dipendenze, runtime, confezionamento o strategia di caricamento delle risorse: secondo §7.3 il pacchetto non viene rigenerato nello step. Le prove P06 del pacchetto restano storiche.
 
 Prossimo task **P08 — Catalogo e pesi iniziali**, seguito da **UI02**. Il catalogo ha descrizioni correnti riutilizzabili dopo rinomina e vincolo monotono di utilizzo; inizializzare `rinforzo ormeggio` una sola volta e creare tipo/peso iniziale atomicamente. Le variazioni successive dei pesi restano P19. Chiudere **M1 sulla build integrata finale dopo le correzioni UI02** con check, suite backend e desktop complete, migrazioni cumulative, trasferibilità, generazione del pacchetto Windows e intera suite sullo stesso eseguibile. Installer e installazione restano P20.
+
+## P08 — Catalogo e pesi iniziali
+
+Base effettiva `75bec7d`, successiva a `3c7f78b` per il solo `AGENTS.md`, tracciato e conservato invariato. Copia iniziale pulita; implementazione nel commit `0e7fc36`. Decisioni, revisione tecnica dopo P08, file e verifiche nella [nota P08](p08/catalogo-e-pesi-iniziali.md).
+
+- Catalogo e tariffe: gestione completa dei tipi configurabili, descrizione corrente, normalizzazione Unicode e limiti P00, ricerca letterale, filtro di stato, elenco paginato, dettaglio, rinomina, disattivazione, riattivazione ed eliminazione consentita con anteprima. La rinomina libera la descrizione precedente; entrata, uscita e spostamento sono riservati.
+- Migrazione `0009_catalog.sql`, schema v9: inizializzazione unica di rinforzo ormeggio e quattro sequenze indipendenti con peso iniziale `1`, senza decorrenza. Tipo, sequenza, peso e metadati sono atomici. Decimali positivi esatti TEXT fino a 256 cifre, vincoli SQLite e indice parziale; nessun uso di REAL.
+- `hasEverBeenUsed` monotono e persistente, protetto da trigger contro azzeramento ed eliminazione. `CatalogRepository.markUsed` richiede una transazione già attiva: P15 dovrà chiamarlo nella transazione della prestazione. Eliminazioni protette anche dalle FK reali verso tipo, sequenza e peso; riesame alla conferma, nessun CASCADE applicativo implicito.
+- `npm test`: **149 test su 18 file passati**, suite completa nel runtime Electron con SQLite reale. Migrazione v8 popolato, conservazione di tutte le righe e metadati, backup ancora v8 e rollback completo dopo DDL parziale verificati; invariate le migrazioni precedenti.
+- `npm run check`: TypeScript ed ESLint passati. Prettier globale segnala soltanto i cinque documenti legacy `00`–`04` preesistenti e non modificati. Formattazione dei file modificati controllata separatamente.
+- Build Electron finale verificata: passati i due percorsi catalogo funzionale/asincrono, inclusa apertura e migrazione v8, copia, riavvio e utilizzo monotono. Riusati i due esiti delle regressioni Porti e asincronia Navi, non coinvolti dai ritocchi successivi locali al catalogo. Quattro percorsi selezionati verificati complessivamente; dettagli e impronte della build nella nota. Quattro schermate finali ispezionate e conservate. Prove con file temporanei e renderer offline, senza sessioni manuali umane. Esecuzione desktop autorizzata fuori dalla sandbox dell’agente per gli ACL Windows già noti, senza modificare ACL o sandbox Electron.
+- Revisione tecnica §7.2 svolta: riusati coordinatore, primitive numeriche, negozio anteprime, guardie e hook; correzioni circoscritte a DTO di anteprima e identità dei blocchi. Nessuna dipendenza, modifica del runtime, architettura CRUD dinamica o variazione del caricamento delle risorse.
+
+Non sono noti difetti di integrità aperti nel perimetro P08. Rimane la formattazione legacy preesistente; densità dei filtri alla misura minima e altezze con notifiche sono annotate per UI02.
+
+Il prossimo task è **UI02**. **M1 resta aperta** e va chiusa sulla build integrata finale dopo le sue correzioni, con check, suite backend e desktop complete, migrazioni cumulative, trasferibilità, pacchetto Windows e intera suite sullo stesso eseguibile. Il pacchetto non è anticipato in P08 secondo §7.3; le prove storiche non attestano lo schema v9 nel pacchetto. P09 segue il consolidamento con P05/P07/P08 integrati; prestazioni reali e aggiornamento dell’utilizzo arrivano in P15, variazioni dei pesi in P19. Installer e installazione restano P20.

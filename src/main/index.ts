@@ -1,3 +1,5 @@
+import { VesselService } from '../backend/application/vessels/vessel-service'
+import { registerVesselIpc } from './ipc/register'
 import { AgencyService } from '../backend/application/agencies/agency-service'
 import { registerAgencyIpc } from './ipc/register'
 import { CustomerService } from '../backend/application/customers/customer-service'
@@ -118,6 +120,7 @@ if (ownsInstance) {
       registerBerthIpc(new BerthService(archives.coordinator), () => window)
       registerCustomerIpc(new CustomerService(archives.coordinator), () => window)
       registerAgencyIpc(new AgencyService(archives.coordinator), () => window)
+      registerVesselIpc(new VesselService(archives.coordinator), () => window)
       Menu.setApplicationMenu(
         Menu.buildFromTemplate([
           {

@@ -275,12 +275,12 @@ describe('migrazione porti da v3 allo schema corrente', () => {
   it('conserva metadati e copia preventiva v3 e crea porti dopo la migrazione', async () => {
     createV3()
     expect(await archives.open(file('v3'))).toMatchObject({
-      schemaVersion: 7,
+      schemaVersion: 8,
       createdAt: '2020-01-01T00:00:00.000Z',
       updatedAt: '2021-01-01T00:00:00.000Z',
     })
     expect(context().revision).toBe('9007199254740993')
-    const backup = readdirSync(folder).find((name) => name.includes('.prima-v7-'))!
+    const backup = readdirSync(folder).find((name) => name.includes('.prima-v8-'))!
     const snapshot = new Database(join(folder, backup), { readonly: true })
     try {
       expect(snapshot.pragma('user_version', { simple: true })).toBe(3)

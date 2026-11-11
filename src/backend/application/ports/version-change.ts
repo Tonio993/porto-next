@@ -54,7 +54,7 @@ export function insertVersion<T extends VersionIntervalDto>(
 export function versionEffects<T extends VersionIntervalDto>(
   before: readonly T[],
   after: readonly T[],
-  fields: readonly { [K in keyof T]: T[K] extends string | null ? K : never }[keyof T][],
+  fields: readonly { [K in keyof T]: T[K] extends string | number | null ? K : never }[keyof T][],
   reference: (name: string) => EntityReferenceDto,
   description: (version: T) => string,
 ): ChangeEffectDto[] {
@@ -65,8 +65,10 @@ export function versionEffects<T extends VersionIntervalDto>(
     const oldValue = previous.get(id)
     const newValue = next.get(id)
     const changes = fields.flatMap((field) => {
-      const before = (oldValue?.[field] ?? null) as string | null
-      const after = (newValue?.[field] ?? null) as string | null
+      const oldField = oldValue?.[field]
+      const newField = newValue?.[field]
+      const before = oldField === null || oldField === undefined ? null : String(oldField)
+      const after = newField === null || newField === undefined ? null : String(newField)
       return before === after ? [] : [{ field: String(field), before, after }]
     })
     if (changes.length || !oldValue || !newValue)

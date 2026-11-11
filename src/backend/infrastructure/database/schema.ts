@@ -182,3 +182,57 @@ export const agencyIdentifierReservations = sqliteTable(
   },
   (table) => [uniqueIndex('agency_reservations_key').on(table.normalizedBusinessName)],
 )
+
+export const vesselTypes = sqliteTable('vessel_types', {
+  id: text('id', { enum: ['STANDARD', 'PASSENGER', 'ADM'] }).primaryKey(),
+})
+
+export const vesselCodeCounter = sqliteTable('vessel_code_counter', {
+  singleton: integer('singleton').primaryKey(),
+  lastCode: integer('last_code').notNull(),
+})
+export const vessels = sqliteTable('vessels', {
+  id: text('id').primaryKey(),
+  code: integer('code').notNull().unique(),
+  status: text('status', { enum: ['ACTIVE', 'INACTIVE'] }).notNull(),
+})
+export const vesselVersions = sqliteTable(
+  'vessel_versions',
+  {
+    id: text('id').primaryKey(),
+    vesselId: text('vessel_id')
+      .notNull()
+      .references(() => vessels.id),
+    registeredName: text('registered_name').notNull(),
+    imoNumber: text('imo_number'),
+    vesselTypeId: text('vessel_type_id', { enum: ['STANDARD', 'PASSENGER', 'ADM'] })
+      .notNull()
+      .references(() => vesselTypes.id),
+    size: integer('size').notNull(),
+    effectiveFrom: text('effective_from'),
+    effectiveLocalDateTime: text('effective_local_date_time'),
+    effectiveZoneId: text('effective_zone_id'),
+    effectiveUtcOffset: text('effective_utc_offset'),
+  },
+  (table) => [
+    uniqueIndex('vessel_versions_initial')
+      .on(table.vesselId)
+      .where(sql`${table.effectiveFrom} IS NULL`),
+    uniqueIndex('vessel_versions_effective')
+      .on(table.vesselId, table.effectiveFrom)
+      .where(sql`${table.effectiveFrom} IS NOT NULL`),
+  ],
+)
+export const vesselIdentifierReservations = sqliteTable(
+  'vessel_identifier_reservations',
+  {
+    id: text('id').primaryKey(),
+    vesselId: text('vessel_id')
+      .notNull()
+      .references(() => vessels.id),
+    kind: text('kind', { enum: ['NAME', 'IMO'] }).notNull(),
+    normalizedValue: text('normalized_value').notNull(),
+    createdAt: text('created_at').notNull(),
+  },
+  (table) => [uniqueIndex('vessel_reservations_key').on(table.kind, table.normalizedValue)],
+)

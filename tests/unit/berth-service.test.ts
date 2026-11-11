@@ -353,7 +353,7 @@ it('migra v5 con copia preventiva e mantiene dati, metadati e contatori distinti
   v5(path)
   await archives.close()
   const opened = await archives.open(path)
-  expect(opened).toMatchObject({ schemaVersion: 7, updatedAt: '2026-01-02T00:00:00.000Z' })
+  expect(opened).toMatchObject({ schemaVersion: 8, updatedAt: '2026-01-02T00:00:00.000Z' })
   expect(context().revision).toBe('12')
   const parent = '00000000-0000-4000-8000-000000000002'
   expect(value(await ports.get({ context: queryContext(), query: { id: parent } })).code).toBe(3)
@@ -375,7 +375,7 @@ it('migra v5 con copia preventiva e mantiene dati, metadati e contatori distinti
   ).toBe('V5 PORTO')
   expect((await list(false, parent)).total).toBe(0)
   expect(value(await create('Prima v6', parent)).code).toBe(1)
-  const copy = readdirSync(folder).find((name) => name.includes('.prima-v7-'))
+  const copy = readdirSync(folder).find((name) => name.includes('.prima-v8-'))
   expect(copy).toBeDefined()
   const snapshot = new Database(join(folder, copy!), { readonly: true })
   try {

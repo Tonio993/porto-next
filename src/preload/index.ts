@@ -1,3 +1,4 @@
+import { vesselChannels, type VesselApi } from '../shared/contracts/vessels'
 import { agencyChannels, type AgencyApi } from '../shared/contracts/agencies'
 import { customerChannels, type CustomerApi } from '../shared/contracts/customers'
 import { contextBridge, ipcRenderer } from 'electron'
@@ -94,3 +95,18 @@ const agencies: AgencyApi = {
   previewEffects: (request) => ipcRenderer.invoke(agencyChannels.previewEffects, request),
 }
 contextBridge.exposeInMainWorld('agencies', agencies)
+
+const vessels: VesselApi = {
+  versionAt: (request) => ipcRenderer.invoke(vesselChannels.versionAt, request),
+  get: (request) => ipcRenderer.invoke(vesselChannels.get, request),
+  create: (request) => ipcRenderer.invoke(vesselChannels.create, request),
+  list: (request) => ipcRenderer.invoke(vesselChannels.list, request),
+  history: (request) => ipcRenderer.invoke(vesselChannels.history, request),
+  resolveVersionMoment: (request) =>
+    ipcRenderer.invoke(vesselChannels.resolveVersionMoment, request),
+  preview: (request) => ipcRenderer.invoke(vesselChannels.preview, request),
+  confirm: (request) => ipcRenderer.invoke(vesselChannels.confirm, request),
+  reactivate: (request) => ipcRenderer.invoke(vesselChannels.reactivate, request),
+  previewEffects: (request) => ipcRenderer.invoke(vesselChannels.previewEffects, request),
+}
+contextBridge.exposeInMainWorld('vessels', vessels)

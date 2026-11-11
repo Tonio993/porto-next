@@ -905,20 +905,23 @@ footer {
 }
 
 .customer-list-entry,
-.agency-list-entry {
+.agency-list-entry,
+.vessel-list-entry {
   height: auto;
   min-height: 36px;
   padding-block: 6px;
   flex-shrink: 0;
 }
 .customer-list-entry .mantine-Button-label,
-.agency-list-entry .mantine-Button-label {
+.agency-list-entry .mantine-Button-label,
+.vessel-list-entry .mantine-Button-label {
   white-space: normal;
   overflow-wrap: anywhere;
   text-align: start;
 }
 .customer-list-entry .mantine-Button-inner,
-.agency-list-entry .mantine-Button-inner {
+.agency-list-entry .mantine-Button-inner,
+.vessel-list-entry .mantine-Button-inner {
   justify-content: flex-start;
 }
 .subjects-page .port-inspector {

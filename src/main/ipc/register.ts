@@ -1,3 +1,5 @@
+import type { VesselService } from '../../backend/application/vessels/vessel-service'
+import { vesselChannels, type VesselApi } from '../../shared/contracts/vessels'
 import { agencyChannels, type AgencyApi } from '../../shared/contracts/agencies'
 import type { AgencyService } from '../../backend/application/agencies/agency-service'
 import { customerChannels, type CustomerApi } from '../../shared/contracts/customers'
@@ -93,5 +95,14 @@ export function registerAgencyIpc(
 ): void {
   for (const action of Object.keys(agencyChannels) as (keyof AgencyApi)[]) {
     registerGuardedIpc(agencyChannels[action], window, (input) => service[action](input as never))
+  }
+}
+
+export function registerVesselIpc(
+  service: VesselService,
+  window: () => BrowserWindow | null,
+): void {
+  for (const action of Object.keys(vesselChannels) as (keyof VesselApi)[]) {
+    registerGuardedIpc(vesselChannels[action], window, (input) => service[action](input as never))
   }
 }

@@ -1,3 +1,4 @@
+import { Vessels } from './vessels/Vessels'
 import { Button, Group, Stack } from '@mantine/core'
 import type { useArchives } from '../api/use-archives'
 import { Ports } from './Ports'
@@ -29,7 +30,7 @@ export function MasterDataPage({
             key={name}
             variant={section === name ? 'light' : 'default'}
             aria-pressed={section === name}
-            disabled={name === 'Navi' || dialogOpened}
+            disabled={dialogOpened}
             onClick={() => setSection(name)}
           >
             {name}
@@ -38,6 +39,7 @@ export function MasterDataPage({
       </Group>
       {section === 'Porti' && <Ports archives={archives} onDialogChange={dialogChange} />}
       {section === 'Clienti' && <Customers archives={archives} onDialogChange={dialogChange} />}
+      {section === 'Navi' && <Vessels archives={archives} onDialogChange={dialogChange} />}
       {section === 'Agenzie' && <Agencies archives={archives} onDialogChange={dialogChange} />}
     </Stack>
   )

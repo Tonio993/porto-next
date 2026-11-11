@@ -60,9 +60,9 @@ test('amministra le banchine dal porto e conserva dati e contesto nel percorso E
     const opened = await page.evaluate(() => window.archives.getState())
     expect(opened).toMatchObject({
       ok: true,
-      value: { active: { schemaVersion: 7, name: 'P05 v5' } },
+      value: { active: { schemaVersion: 8, name: 'P05 v5' } },
     })
-    expect(readdirSync(folder).some((name) => name.includes('.prima-v7-'))).toBe(true)
+    expect(readdirSync(folder).some((name) => name.includes('.prima-v8-'))).toBe(true)
     await page.getByRole('button', { name: 'Anagrafiche', exact: true }).click()
     const portCreation = page.getByRole('region', { name: 'Creazione porto' })
     await page.getByRole('button', { name: 'Nuovo porto', exact: true }).click()

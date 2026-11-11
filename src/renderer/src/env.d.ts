@@ -1,3 +1,4 @@
+import type { VesselApi } from '../../shared/contracts/vessels'
 import type { AgencyApi } from '../../shared/contracts/agencies'
 import type { CustomerApi } from '../../shared/contracts/customers'
 import type { ArchiveApi } from '../../shared/contracts/archive'
@@ -9,6 +10,7 @@ declare global {
   interface Window {
     customers: CustomerApi
     agencies: AgencyApi
+    vessels: VesselApi
     archives: ArchiveApi
     time: TimeApi
     ports: PortApi

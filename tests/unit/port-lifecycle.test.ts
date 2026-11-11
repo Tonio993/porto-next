@@ -526,11 +526,11 @@ it('migra un v4 reale con porto iniziale conservando metadati, copia preventiva 
   db.pragma('user_version = 4')
   db.close()
   const opened = await archives.open(file)
-  expect(opened).toMatchObject({ schemaVersion: 7, updatedAt: '2021-01-01T00:00:00.000Z' })
+  expect(opened).toMatchObject({ schemaVersion: 8, updatedAt: '2021-01-01T00:00:00.000Z' })
   expect(context().revision).toBe('20')
   expect((await history()).versions.items[0].effectiveMoment).toBeNull()
   expect(() =>
     sql().prepare('UPDATE port_versions SET effective_from = ?').run('2025-01-01T00:00:00.000Z'),
   ).toThrow()
-  expect(readdirSync(folder).some((name) => name.includes('.prima-v7-'))).toBe(true)
+  expect(readdirSync(folder).some((name) => name.includes('.prima-v8-'))).toBe(true)
 })

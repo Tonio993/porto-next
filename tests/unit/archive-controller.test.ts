@@ -1,3 +1,6 @@
+import { VesselService } from '../../src/backend/application/vessels/vessel-service'
+import { vesselChannels } from '../../src/shared/contracts/vessels'
+import { registerVesselIpc } from '../../src/main/ipc/register'
 import { AgencyService } from '../../src/backend/application/agencies/agency-service'
 import { agencyChannels } from '../../src/shared/contracts/agencies'
 import { registerAgencyIpc } from '../../src/main/ipc/register'
@@ -248,6 +251,46 @@ describe('confine IPC', () => {
       const handler = vi
         .mocked(ipcMain.handle)
         .mock.calls.find(([channel]) => channel === customerChannels[action])![1]
+      for (const event of [
+        { sender: {}, senderFrame: owner.webContents.mainFrame },
+        { sender: owner.webContents, senderFrame: {} },
+      ])
+        expect(await handler(event as Electron.IpcMainInvokeEvent, null)).toMatchObject({
+          ok: false,
+          context: null,
+          error: { code: 'INVALID_INPUT' },
+        })
+      available = false
+      expect(
+        await handler(
+          {
+            sender: owner.webContents,
+            senderFrame: owner.webContents.mainFrame,
+          } as Electron.IpcMainInvokeEvent,
+          null,
+        ),
+      ).toMatchObject({ ok: false, error: { code: 'INVALID_INPUT' } })
+      available = true
+      expect(execute).not.toHaveBeenCalled()
+      await handler(
+        {
+          sender: owner.webContents,
+          senderFrame: owner.webContents.mainFrame,
+        } as Electron.IpcMainInvokeEvent,
+        null,
+      )
+      expect(execute).toHaveBeenCalledOnce()
+    }
+  })
+  it('protegge tutti i canali delle navi da altri mittenti, frame secondari e finestre assenti', async () => {
+    const service = new VesselService(new ArchiveCoordinator())
+    let available = true
+    registerVesselIpc(service, () => (available ? owner : null))
+    for (const action of Object.keys(vesselChannels) as (keyof typeof vesselChannels)[]) {
+      const execute = vi.spyOn(service, action)
+      const handler = vi
+        .mocked(ipcMain.handle)
+        .mock.calls.find(([channel]) => channel === vesselChannels[action])![1]
       for (const event of [
         { sender: {}, senderFrame: owner.webContents.mainFrame },
         { sender: owner.webContents, senderFrame: {} },

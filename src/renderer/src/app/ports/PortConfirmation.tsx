@@ -5,6 +5,10 @@ import { StateMessage } from '../StateMessage'
 const labels: Record<string, string> = {
   name: 'Nome',
   businessName: 'Ragione sociale',
+  registeredName: 'Nome di registrazione',
+  imoNumber: 'IMO',
+  vesselTypeId: 'Tipologia nave',
+  size: 'Dimensione',
   locality: 'Località',
   countryCode: 'Paese',
   effectiveFrom: 'Inizio (UTC)',
@@ -14,6 +18,7 @@ const labels: Record<string, string> = {
   berth: 'Banchina',
   customer: 'Cliente',
   agency: 'Agenzia',
+  vessel: 'Nave',
   selectable: 'Selezionabile',
 }
 export function PortConfirmation({

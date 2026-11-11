@@ -198,7 +198,7 @@ describe('migrazione da v2 allo schema corrente', () => {
   it('inizializza la versione senza decorrenza conservando metadati, revisione e copia v2', async () => {
     createV2()
     expect(await archives.open(file('v2'))).toMatchObject({
-      schemaVersion: 7,
+      schemaVersion: 8,
       createdAt: '2020-01-01T00:00:00.000Z',
       updatedAt: '2021-01-01T00:00:00.000Z',
     })
@@ -214,7 +214,7 @@ describe('migrazione da v2 allo schema corrente', () => {
         .pluck()
         .get(),
     ).toBeNull()
-    const backup = readdirSync(folder).find((name) => name.includes('.prima-v7-'))!
+    const backup = readdirSync(folder).find((name) => name.includes('.prima-v8-'))!
     const snapshot = new Database(join(folder, backup), { readonly: true })
     try {
       expect(snapshot.pragma('user_version', { simple: true })).toBe(2)

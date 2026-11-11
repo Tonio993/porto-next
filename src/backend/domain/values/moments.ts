@@ -80,3 +80,20 @@ export function resolveMoment(
     choices: choices as [ResolvedMomentDto, ResolvedMomentDto, ...ResolvedMomentDto[]],
   }
 }
+/** Canonical UTC milliseconds within the P00 four-digit year range. */
+export function utcInstant(value: unknown): string {
+  if (
+    typeof value !== 'string' ||
+    !/^(?!0000)[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$/.test(value) ||
+    !Number.isFinite(Date.parse(value)) ||
+    new Date(value).toISOString() !== value
+  )
+    throw new ArchiveError('VALIDATION_ERROR', 'Istante UTC non valido.', [
+      {
+        path: ['instant'],
+        code: 'INVALID_INSTANT',
+        message: 'Usa un istante UTC con millisecondi.',
+      },
+    ])
+  return value
+}

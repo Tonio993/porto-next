@@ -6,7 +6,7 @@ Questo piano prepara il primo rilascio funzionale di Porto Next. Organizza il la
 
 P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01, [P02](p02/numeri-e-tempo.md), [P03](p03/porti.md) e [P04](p04/versioni-e-ciclo-di-vita.md) sono completati. [P05](p05/banchine.md) è completato e verificato anche nel pacchetto Windows. Lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
 
-[UI01](ui01/revisione-post-p04.md) è completato: struttura comune e Porti verificati in Electron, con convenzioni visive e schermate prima/dopo. [P06 — Clienti e agenzie](p06/clienti-e-agenzie.md) è completato e verificato anche nel pacchetto Windows, con schema v7. Il prossimo task funzionale è **P07 — Navi**.
+[UI01](ui01/revisione-post-p04.md) è completato: struttura comune e Porti verificati in Electron, con convenzioni visive e schermate prima/dopo. [P06 — Clienti e agenzie](p06/clienti-e-agenzie.md) è completato e verificato anche nel pacchetto Windows, con schema v7. [P07 — Navi](p07/navi.md) è completato e verificato sulla build Electron con schema v8. Il prossimo task funzionale è **P08 — Catalogo e pesi iniziali**, seguito da UI02 e dalla chiusura M1.
 
 ## 1. Fonti e decisioni di perimetro
 
@@ -369,6 +369,8 @@ Implementazione e decisioni nella [nota P06](p06/clienti-e-agenzie.md); contratt
 
 **Consegna:** gestione completa della nave secondo le convenzioni anagrafiche.
 
+**Stato:** completato e verificato sulla build Electron dalla base `093a59b`; migrazione v7 → v8. Decisioni, verifiche effettive e passaggio a P08/UI02/M1 nella [nota P07](p07/navi.md).
+
 - Inizializzare il catalogo tecnico delle tre tipologie nave, non amministrabile dall'operatore.
 - Gestire nome, IMO facoltativo, tipologia e dimensione intera non negativa.
 - Prenotare nomi e IMO storici per l'identità; usare l'IMO come testo.
@@ -672,4 +674,6 @@ Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) co
 - difetti aperti e loro impatto;
 - prossimo task e dipendenze effettivamente integrate.
 
-Il prossimo task funzionale è **P07 — Navi**. Usare le [convenzioni visive UI01](ui01/revisione-post-p04.md), il [ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md) e i passaggi di consegne [P05](p05/banchine.md) e [P06](p06/clienti-e-agenzie.md). Mantenere contratti e repository della nave tipizzati, prenotazioni storiche di nome/IMO e contatore autonomo; partire dallo schema v7.
+P07 è completato e verificato sulla build Electron con schema v8; le verifiche di chiusura sono documentate nella [nota Navi](p07/navi.md). Il prossimo task funzionale è **P08 — Catalogo e pesi iniziali**. Riutilizzare le [convenzioni visive UI01](ui01/revisione-post-p04.md), il [ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md) e i passaggi di consegne [P05](p05/banchine.md), [P06](p06/clienti-e-agenzie.md) e [P07](p07/navi.md). Il catalogo mantiene descrizioni correnti riutilizzabili dopo rinomina e un vincolo monotono di utilizzo; non eredita le prenotazioni storiche delle anagrafiche. Inizializzare `rinforzo ormeggio` una sola volta e creare atomicamente tipo e peso iniziale. Le variazioni successive dei pesi restano P19.
+
+Dopo P08 eseguire **UI02**. Chiudere **M1** sulla build integrata finale, comprese le correzioni grafiche: controlli statici, suite backend e desktop complete, migrazioni cumulative e trasferibilità, pacchetto Windows e intera suite sullo stesso eseguibile. P07 non modifica confezionamento, caricamento delle risorse, runtime o dipendenze native: non richiede la verifica anticipata del pacchetto secondo §7.3.

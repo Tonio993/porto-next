@@ -2,7 +2,7 @@
 
 Riferimento: [piano di implementazione](piano-implementazione-prestazioni.md).
 
-Ultimo aggiornamento: 11 novembre 2026, P06 completato e frequenza dei controlli per P07 e milestone successive.
+Ultimo aggiornamento: 11 novembre 2026, P07 completato; prossimo task P08, poi UI02 e M1.
 
 ## Baseline
 
@@ -10,8 +10,8 @@ Ultimo aggiornamento: 11 novembre 2026, P06 completato e frequenza dei controlli
 - Stack presente: Electron, React, TypeScript, SQLite, better-sqlite3 e Drizzle.
 - Funzioni presenti: creazione/apertura archivi, recenti, nome dell'archivio, copia, backup e chiusura.
 - I documenti in `legacy/` descrivono il dominio e un precedente percorso tecnologico. Le dichiarazioni di implementazione Java/Angular non costituiscono avanzamento di questo repository.
-- P00–P06 sono completati. P06 introduce clienti e agenzie con schema v7, verificato anche nel pacchetto Windows. I task da P07 in avanti restano da avviare.
-- UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo task funzionale è P07.
+- P00–P07 sono completati. P06 introduce clienti e agenzie con schema v7, verificato anche nel pacchetto Windows. P07 introduce Navi con schema v8, verificato sulla build Electron. I task da P08 in avanti restano da avviare.
+- UI01 del piano §3.5 è completato e verificato sulla build Electron: [revisione, convenzioni e schermate](ui01/revisione-post-p04.md). UI02–UI04 restano da avviare. Il prossimo task funzionale è P08, seguito da UI02 e M1.
 
 ## Avanzamento
 
@@ -24,7 +24,7 @@ Ultimo aggiornamento: 11 novembre 2026, P06 completato e frequenza dei controlli
 | P04  | Completato | `0be600d`                  | [Versioni e ciclo di vita porto](p04/versioni-e-ciclo-di-vita.md); schema v5 e percorsi verificati anche nel pacchetto Windows. |
 | P05  | Completato | `f966ba8`                  | [Banchine](p05/banchine.md), schema v6 e verifica sul pacchetto Windows.                                                        |
 | P06  | Completato | `ef6e257`                  | [Clienti e agenzie](p06/clienti-e-agenzie.md), schema v7; verificato anche nel pacchetto Windows.                               |
-| P07  | Da avviare | —                          | Navi.                                                                                                                           |
+| P07  | Completato | `856bcbc`                  | [Navi](p07/navi.md), schema v8; verificato sulla build Electron.                                                                |
 | P08  | Da avviare | —                          | Catalogo e pesi iniziali.                                                                                                       |
 | P09  | Da avviare | —                          | Tariffe complete e calcolo base.                                                                                                |
 | P10  | Da avviare | —                          | Entrata, uscita e permanenze.                                                                                                   |
@@ -252,3 +252,18 @@ Le prove desktop richiedono l’esecuzione fuori dalla sandbox dell’agente per
 P06 è **completato e verificato**. Non sono noti difetti di integrità aperti nel suo perimetro. Gli ultimi aggiornamenti riguardano soltanto test e documentazione; il pacchetto corrisponde al codice applicativo finale. Resta la formattazione legacy preesistente.
 
 Prossima attività **P07 — Navi**, non avviata. Partire dallo schema v7 e dalle convenzioni P04/UI01/P05/P06, con contratti e repository della nave specifici, prenotazioni storiche di nome/IMO e contatore autonomo. Le future scritture operative verso clienti/agenzie devono invocare i rispettivi controlli di selezionabilità nella stessa transazione e integrare i nuovi riferimenti nelle anteprime e nei ricalcoli.
+
+## P07 — Navi
+
+Base effettiva `093a59b`, implementazione nel commit `856bcbc`; copia di lavoro iniziale pulita e nessun `AGENTS.md` locale. Stato: **completato e verificato sulla build Electron**. Decisioni, file, copertura e schermate nella [nota P07](p07/navi.md).
+
+- Anagrafiche → Navi: ciclo di vita completo, nome di registrazione, IMO facoltativo testuale, tre tipologie tecniche non amministrabili e dimensione intera non negativa entro il limite P00, senza unità. Contratto, servizio e repository specifici, prenotazioni storiche indipendenti di nome/IMO e contatore autonomo mai riutilizzato.
+- Migrazione `0008_vessels.sql`, schema v8. Provati con SQLite reale v7 popolato, conservazione di tutte le righe e metadati, copia preventiva ancora v7 e rollback sull’ultima tabella con sessione precedente conservata. Apertura e migrazione v7 nella build Electron verificate.
+- Coordinatore, guardie IPC, anteprime e controlli delle FK reali riutilizzati; risoluzione della versione a un istante UTC e `requireSelectable` pronti per le slice successive. Decorrenze nel fuso aziendale confermato, tuple storiche conservate. Nessuna attività operativa o protezione delle fatture anticipata.
+- `npm test`: **137 test su 16 file passati**. `npm run check`: TypeScript ed ESLint passati; Prettier segnala soltanto i cinque documenti legacy già registrati e non modificati. File P07 formattati separatamente; differenze e collegamenti locali controllati.
+- `npm run build` riuscito. **Sei percorsi desktop selezionati verificati sulla stessa build finale**: Banchine, ciclo di vita Porti, asincronia Clienti/Agenzie e i due percorsi Navi. Nella prima selezione cinque percorsi sono passati; corretto il solo test di preparazione dell’IMO, la ripetizione mirata del flusso Navi ha superato **1 su 1**. Nessuna ricompilazione tra questi esiti. Coperti copie/sessioni/revisioni, risposte tardive, futuro → corrente senza scritture, riferimenti, focus e riapertura. Tre schermate Navi finali ispezionate.
+- Desktop eseguito fuori dalla sandbox dell’agente per il blocco ACL Windows già noto, senza cambiare ACL o sandbox Electron. Prove guidate con dati temporanei e renderer offline; nessuna sessione manuale umana dichiarata.
+
+Non sono noti difetti di integrità aperti nel perimetro P07. Nessuna modifica a dipendenze, runtime, confezionamento o strategia di caricamento delle risorse: secondo §7.3 il pacchetto non viene rigenerato nello step. Le prove P06 del pacchetto restano storiche.
+
+Prossimo task **P08 — Catalogo e pesi iniziali**, seguito da **UI02**. Il catalogo ha descrizioni correnti riutilizzabili dopo rinomina e vincolo monotono di utilizzo; inizializzare `rinforzo ormeggio` una sola volta e creare tipo/peso iniziale atomicamente. Le variazioni successive dei pesi restano P19. Chiudere **M1 sulla build integrata finale dopo le correzioni UI02** con check, suite backend e desktop complete, migrazioni cumulative, trasferibilità, generazione del pacchetto Windows e intera suite sullo stesso eseguibile. Installer e installazione restano P20.

@@ -1,3 +1,6 @@
+import { CatalogService } from '../../src/backend/application/catalog/catalog-service'
+import { catalogChannels } from '../../src/shared/contracts/catalog'
+import { registerCatalogIpc } from '../../src/main/ipc/register'
 import { VesselService } from '../../src/backend/application/vessels/vessel-service'
 import { vesselChannels } from '../../src/shared/contracts/vessels'
 import { registerVesselIpc } from '../../src/main/ipc/register'
@@ -291,6 +294,46 @@ describe('confine IPC', () => {
       const handler = vi
         .mocked(ipcMain.handle)
         .mock.calls.find(([channel]) => channel === vesselChannels[action])![1]
+      for (const event of [
+        { sender: {}, senderFrame: owner.webContents.mainFrame },
+        { sender: owner.webContents, senderFrame: {} },
+      ])
+        expect(await handler(event as Electron.IpcMainInvokeEvent, null)).toMatchObject({
+          ok: false,
+          context: null,
+          error: { code: 'INVALID_INPUT' },
+        })
+      available = false
+      expect(
+        await handler(
+          {
+            sender: owner.webContents,
+            senderFrame: owner.webContents.mainFrame,
+          } as Electron.IpcMainInvokeEvent,
+          null,
+        ),
+      ).toMatchObject({ ok: false, error: { code: 'INVALID_INPUT' } })
+      available = true
+      expect(execute).not.toHaveBeenCalled()
+      await handler(
+        {
+          sender: owner.webContents,
+          senderFrame: owner.webContents.mainFrame,
+        } as Electron.IpcMainInvokeEvent,
+        null,
+      )
+      expect(execute).toHaveBeenCalledOnce()
+    }
+  })
+  it('protegge tutti i canali delle catalogo da altri mittenti, frame secondari e finestre assenti', async () => {
+    const service = new CatalogService(new ArchiveCoordinator())
+    let available = true
+    registerCatalogIpc(service, () => (available ? owner : null))
+    for (const action of Object.keys(catalogChannels) as (keyof typeof catalogChannels)[]) {
+      const execute = vi.spyOn(service, action)
+      const handler = vi
+        .mocked(ipcMain.handle)
+        .mock.calls.find(([channel]) => channel === catalogChannels[action])![1]
       for (const event of [
         { sender: {}, senderFrame: owner.webContents.mainFrame },
         { sender: owner.webContents, senderFrame: {} },

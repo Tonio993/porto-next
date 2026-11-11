@@ -1,3 +1,5 @@
+import type { CatalogService } from '../../backend/application/catalog/catalog-service'
+import { catalogChannels, type CatalogApi } from '../../shared/contracts/catalog'
 import type { VesselService } from '../../backend/application/vessels/vessel-service'
 import { vesselChannels, type VesselApi } from '../../shared/contracts/vessels'
 import { agencyChannels, type AgencyApi } from '../../shared/contracts/agencies'
@@ -104,5 +106,14 @@ export function registerVesselIpc(
 ): void {
   for (const action of Object.keys(vesselChannels) as (keyof VesselApi)[]) {
     registerGuardedIpc(vesselChannels[action], window, (input) => service[action](input as never))
+  }
+}
+
+export function registerCatalogIpc(
+  service: CatalogService,
+  window: () => BrowserWindow | null,
+): void {
+  for (const action of Object.keys(catalogChannels) as (keyof CatalogApi)[]) {
+    registerGuardedIpc(catalogChannels[action], window, (input) => service[action](input as never))
   }
 }

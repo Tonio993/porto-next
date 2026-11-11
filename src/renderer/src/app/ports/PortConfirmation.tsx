@@ -3,6 +3,8 @@ import { Button, Group, Table } from '@mantine/core'
 import type { ChangePreviewDto } from '../../../../shared/contracts/master-data'
 import { StateMessage } from '../StateMessage'
 const labels: Record<string, string> = {
+  description: 'Descrizione',
+  weight: 'Peso',
   name: 'Nome',
   businessName: 'Ragione sociale',
   registeredName: 'Nome di registrazione',
@@ -146,9 +148,13 @@ export function PortConfirmation({
         </Button>
         <Button
           color={
-            ['DELETE_PORT', 'DELETE_BERTH', 'DELETE_CUSTOMER', 'DELETE_AGENCY'].includes(
-              preview.operation,
-            ) || preview.operation === 'DELETE_VERSION'
+            [
+              'DELETE_PORT',
+              'DELETE_BERTH',
+              'DELETE_CUSTOMER',
+              'DELETE_AGENCY',
+              'CATALOG_DELETE',
+            ].includes(preview.operation) || preview.operation === 'DELETE_VERSION'
               ? 'red'
               : undefined
           }

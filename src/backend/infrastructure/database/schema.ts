@@ -236,3 +236,34 @@ export const vesselIdentifierReservations = sqliteTable(
   },
   (table) => [uniqueIndex('vessel_reservations_key').on(table.kind, table.normalizedValue)],
 )
+
+export const serviceTypes = sqliteTable('service_types', {
+  id: text('id').primaryKey(),
+  description: text('description').notNull(),
+  normalizedDescription: text('normalized_description').notNull().unique(),
+  status: text('status', { enum: ['ACTIVE', 'INACTIVE'] }).notNull(),
+  hasEverBeenUsed: integer('has_ever_been_used', { mode: 'boolean' }).notNull().default(false),
+})
+export const weightSequences = sqliteTable('weight_sequences', {
+  id: text('id').primaryKey(),
+  serviceTypeId: text('service_type_id')
+    .unique()
+    .references(() => serviceTypes.id),
+  operationType: text('operation_type', { enum: ['ENTRY', 'EXIT', 'MOVEMENT'] }).unique(),
+})
+export const weightVersions = sqliteTable(
+  'weight_versions',
+  {
+    id: text('id').primaryKey(),
+    sequenceId: text('sequence_id')
+      .notNull()
+      .references(() => weightSequences.id),
+    effectiveFrom: text('effective_from'),
+    weight: text('weight').notNull(),
+  },
+  (table) => [
+    uniqueIndex('weight_initial_unique')
+      .on(table.sequenceId)
+      .where(sql`${table.effectiveFrom} IS NULL`),
+  ],
+)

@@ -1,3 +1,4 @@
+import { catalogChannels, type CatalogApi } from '../shared/contracts/catalog'
 import { vesselChannels, type VesselApi } from '../shared/contracts/vessels'
 import { agencyChannels, type AgencyApi } from '../shared/contracts/agencies'
 import { customerChannels, type CustomerApi } from '../shared/contracts/customers'
@@ -110,3 +111,15 @@ const vessels: VesselApi = {
   previewEffects: (request) => ipcRenderer.invoke(vesselChannels.previewEffects, request),
 }
 contextBridge.exposeInMainWorld('vessels', vessels)
+
+const catalog: CatalogApi = {
+  list: (request) => ipcRenderer.invoke(catalogChannels.list, request),
+  get: (request) => ipcRenderer.invoke(catalogChannels.get, request),
+  fixedWeights: (request) => ipcRenderer.invoke(catalogChannels.fixedWeights, request),
+  create: (request) => ipcRenderer.invoke(catalogChannels.create, request),
+  preview: (request) => ipcRenderer.invoke(catalogChannels.preview, request),
+  confirm: (request) => ipcRenderer.invoke(catalogChannels.confirm, request),
+  reactivate: (request) => ipcRenderer.invoke(catalogChannels.reactivate, request),
+  previewEffects: (request) => ipcRenderer.invoke(catalogChannels.previewEffects, request),
+}
+contextBridge.exposeInMainWorld('catalog', catalog)

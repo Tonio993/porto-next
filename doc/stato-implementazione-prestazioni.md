@@ -2,7 +2,7 @@
 
 Riferimento: [piano di implementazione](piano-implementazione-prestazioni.md).
 
-Ultimo aggiornamento: 11 novembre 2026, P00–P08 e UI02 completati, **M1 chiusa e verificata anche sul pacchetto Windows**, schema v9. Prossimo task funzionale P09 — Tariffe e calcolatore base.
+Ultimo aggiornamento: 12 novembre 2026, P00–P09 e UI02 completati e verificati sulla build Electron, schema v10. P00–P08/UI02 e M1 restano completati; il pacchetto M1 verificato riguarda lo schema v9. Prossimo task funzionale P10 — Entrata, uscita e permanenze.
 
 ## Baseline
 
@@ -26,7 +26,7 @@ Ultimo aggiornamento: 11 novembre 2026, P00–P08 e UI02 completati, **M1 chiusa
 | P06  | Completato | `ef6e257`                  | [Clienti e agenzie](p06/clienti-e-agenzie.md), schema v7; verificato anche nel pacchetto Windows.                               |
 | P07  | Completato | `856bcbc`                  | [Navi](p07/navi.md), schema v8; verificato sulla build Electron.                                                                |
 | P08  | Completato | `0e7fc36`                  | [Catalogo e pesi iniziali](p08/catalogo-e-pesi-iniziali.md), schema v9; verificato sulla build Electron.                        |
-| P09  | Da avviare | —                          | Tariffe complete e calcolo base.                                                                                                |
+| P09  | Completato | `1b2f4a5`                  | [Tariffe e calcolatore base](p09/tariffe-e-calcolatore-base.md), schema v10.                                                    |
 | P10  | Da avviare | —                          | Entrata, uscita e permanenze.                                                                                                   |
 | P11  | Da avviare | —                          | Spostamento interno.                                                                                                            |
 | P12  | Da avviare | —                          | Spostamento tra porti.                                                                                                          |
@@ -305,4 +305,23 @@ Stato: **chiusa e verificata anche sul pacchetto Windows**. La chiusura è disti
 - Migrazioni cumulative v1–v8 → v9 con archivi popolati, confronto di tutte le righe preesistenti, metadati e revisioni conservati, copie preventive ancora nella versione originale, integrità e FK SQLite, quattro pesi iniziali, backup, Salva con nome e riapertura dopo trasferimento. Secondo processo con preferenze vuote verificato; nessuna seconda macchina fisica. I rollback dopo DDL parziale restano coperti dalla suite backend completa.
 - `node scripts/package.mjs --dir`: riuscito tramite esecuzione autorizzata dopo il blocco di rete della sandbox sul download Electron. Nessuna modifica ad ACL o sandbox Electron. `node scripts/test-packaged.mjs`: **17 percorsi su 17 passati in 22,6 minuti** sullo stesso eseguibile sopra indicato, con dati temporanei, renderer offline e catture delle finestre nascoste saltate dagli helper. Incluse migrazioni cumulative e trasferimento con preferenze vuote. Eseguibile e ASAR ricontrollati dopo la suite: impronte invariate e contenuti ancora identici alla build. Nessuna ricompilazione o rigenerazione del pacchetto fra i test.
 
-Non sono noti difetti di integrità aperti nel perimetro P00–P08/UI02. Resta la sola non conformità documentale legacy già nota; prove automatizzate e ispezioni dell'agente, senza sessioni manuali umane. Installer e prova d'installazione restano P20. I controlli estesi successivi sono associati a **M2 dopo P13**, insieme ai controlli di ogni slice previsti da §7.3. Prossimo task **P09 — Tariffe e calcolatore base**. Le consegne storiche sopra mantengono il prossimo task dell'epoca; questo è il passaggio corrente.
+Non sono noti difetti di integrità aperti nel perimetro P00–P08/UI02. Resta la sola non conformità documentale legacy già nota; prove automatizzate e ispezioni dell'agente, senza sessioni manuali umane. Installer e prova d'installazione restano P20. I controlli estesi successivi sono associati a **M2 dopo P13**, insieme ai controlli di ogni slice previsti da §7.3. Prossimo task **P09 — Tariffe e calcolatore base**. Questo era il passaggio a P09 dopo M1; il passaggio corrente segue nella sezione P09.
+
+## P09 — Tariffe e calcolatore base
+
+Base effettiva `3710ecc`, branch `main`, copia iniziale pulita. Implementazione nel commit `1b2f4a5`. Schema v10, migrazione `0010_tariffs.sql`; script distribuiti precedenti invariati. Decisioni, file, copertura e impronte nella [nota P09](p09/tariffe-e-calcolatore-base.md). Stato: **completato e verificato sulla build Electron**.
+
+- Catalogo e tariffe → Tariffe: creazione completa, copia autonoma anche fra porti, elenco paginato e dettaglio con STANDARD/PASSENGER/ADM, scaglioni ordinari/extra e intervalli storici/correnti/futuri. Anteprima e conferma atomica per tutte le creazioni. Porto immutabile nella bozza; fuso risolto nel backend dal porto, con gap/overlap e tuple storiche.
+- Calcolo sincrono riutilizzabile da P10/P15 e simulazione di sola lettura: versione nave storica, configurazione, scaglione, peso, operandi, extra e identificativi. Numeri esatti P02, extra BigInt e arrotondamento del valore tariffario e poi della base. Esempio verificato: tre extra, 115,00 EUR e base 172,50 EUR. Nessuna tariffa prima della prima decorrenza; la simulazione non registra attività o utilizzo del catalogo.
+- Tabelle normalizzate con FK reali, CHECK e indici univoci. Integrato il blocco di eliminazione dei porti referenziati. Analisi conservativa delle dipendenze reali rieseguita alla conferma; P10 deve aggiungere analisi per intervallo e ricalcoli atomici delle proprie componenti. Nessuna dipendenza operativa fittizia.
+- `npm test`: **169 test su 20 file passati**, suite completa nel runtime Electron con SQLite reale. Migrazione v9 popolata, righe/metadati conservati, backup ancora v9, rollback dopo DDL parziale e sessione precedente conservata. Coperti TAR-01–04, zero, precisione, overflow, configurazioni incomplete, copia indipendente, nave storica, confini temporali, revisioni/sessioni, FK composte/CASCADE e guardie degli otto canali IPC.
+- `npm run check`: TypeScript ed ESLint passati; Prettier globale segnala soltanto i cinque documenti legacy `00`–`04` preesistenti. File modificati formattati separatamente. Build Electron riuscita.
+- **Sei percorsi desktop selezionati passati**: due P09, due Catalogo, ciclo di vita Porti e Navi. Ultime correzioni locali al simulatore e ai nomi degli indici SQL verificate nuovamente con backend completo; ripetizione dei due percorsi P09 sulla build finale: **2 su 2 passati in 3,1 minuti**. Cinque schermate finali ispezionate e conservate nella nota. Quattro regressioni non coinvolte riusate secondo §7.3. Prove Playwright automatizzate offline, senza sessione manuale umana; esecuzione autorizzata fuori dalla sandbox dell’agente per gli ACL Windows già noti, senza cambiare ACL o sandbox Electron.
+
+Non sono noti difetti di integrità aperti nel perimetro P09. Differenze, formattazione dei file modificati e collegamenti locali verificati.
+
+Correzione/eliminazione diretta delle tariffe restano P18, variazioni dei pesi P19. Limite tecnico: 1000 scaglioni per configurazione, senza troncamento. Nessuna modifica a dipendenze, runtime, packaging o meccanismo di caricamento delle risorse.
+
+Prossimo task **P10 — Entrata, uscita e permanenze**, con P05/P07/P08/P09 integrati. Determinare momento/porto economico dal contesto reale e persistere la traccia nella transazione dell’attività; mantenere distinti calcolo tariffario, sostituzione manuale e base effettiva. Integrare immediatamente i nuovi riferimenti nelle anteprime e nei ricalcoli tariffari e anagrafici. P15 aggiornerà l’utilizzo monotono del catalogo.
+
+**M2 dopo P13** raccoglie check, suite backend e desktop complete, migrazioni cumulative, trasferibilità e pacchetto Windows sulla stessa build integrata finale. Il pacchetto M1 resta verificato storicamente sullo schema v9; P09 non attesta lo schema v10 nel pacchetto. Installer e installazione restano P20.

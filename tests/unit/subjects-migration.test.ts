@@ -67,13 +67,13 @@ it('migra v6 con copia preventiva, conserva tutte le righe e inizia due sequenze
   fixture(path)
   const before = rows(path)
   expect(await archives.open(path)).toMatchObject({
-    schemaVersion: 9,
+    schemaVersion: 10,
     updatedAt: '2026-02-01T00:00:00.000Z',
   })
   expect(archives.context()?.revision).toBe('42')
   const after = rows(path)
   for (const [table, contents] of Object.entries(before)) expect(after[table]).toEqual(contents)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v9-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v10-'))!
   expect(rows(join(folder, backup))).toEqual(before)
   const snapshot = new Database(join(folder, backup), { readonly: true })
   try {

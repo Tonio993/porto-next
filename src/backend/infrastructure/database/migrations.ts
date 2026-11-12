@@ -1,3 +1,4 @@
+import tariffsSql from '../../../../migrations/0010_tariffs.sql?raw'
 import catalogSql from '../../../../migrations/0009_catalog.sql?raw'
 import vesselsSql from '../../../../migrations/0008_vessels.sql?raw'
 import type Database from 'better-sqlite3'
@@ -12,7 +13,7 @@ import { ArchiveError } from '../../../shared/errors/archive-error'
 import subjectsSql from '../../../../migrations/0007_customers_agencies.sql?raw'
 
 export const APPLICATION_ID = 0x504f5254
-export const SCHEMA_VERSION = 9
+export const SCHEMA_VERSION = 10
 
 const migrations = [
   { version: 1, sql: initialSql },
@@ -24,6 +25,7 @@ const migrations = [
   { version: 7, sql: subjectsSql },
   { version: 8, sql: vesselsSql },
   { version: 9, sql: catalogSql },
+  { version: 10, sql: tariffsSql },
 ]
 
 export function migrate(database: Database.Database, fromVersion: number): void {

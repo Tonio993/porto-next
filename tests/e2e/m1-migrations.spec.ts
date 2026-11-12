@@ -89,7 +89,7 @@ test('M1: migrazioni cumulative v1–v8, dati conservati, backup, copie e trasfe
       const open = await page.evaluate(() => window.archives.open())
       expect(open).toMatchObject({
         ok: true,
-        value: { active: { schemaVersion: 9 }, context: { revision: version === 1 ? '0' : '42' } },
+        value: { active: { schemaVersion: 10 }, context: { revision: version === 1 ? '0' : '42' } },
       })
       const snapshot = async (path: string) =>
         app.evaluate(({ app }, path) => {
@@ -123,7 +123,9 @@ test('M1: migrazioni cumulative v1–v8, dati conservati, backup, copie e trasfe
       for (const [table, rows] of Object.entries(before))
         expect(after.rows[table]).toMatchObject(rows)
       expect(after.rows.weight_versions).toHaveLength(4)
-      const backup = readdirSync(folder).find((n) => n.startsWith(`v${version}.ormeggi.prima-v9-`))!
+      const backup = readdirSync(folder).find((n) =>
+        n.startsWith(`v${version}.ormeggi.prima-v10-`),
+      )!
       expect(backup).toBeTruthy()
       expect((await snapshot(join(folder, backup))).rows).toEqual(before)
       expect((await snapshot(join(folder, backup))).version).toBe(version)
@@ -184,7 +186,7 @@ test('M1: migrazioni cumulative v1–v8, dati conservati, backup, copie e trasfe
       expect(await otherPage.evaluate(() => window.archives.open())).toMatchObject({
         ok: true,
         value: {
-          active: { schemaVersion: 9, name: 'M1 popolato', updatedAt: '2026-02-01T00:00:00.000Z' },
+          active: { schemaVersion: 10, name: 'M1 popolato', updatedAt: '2026-02-01T00:00:00.000Z' },
           context: { revision: '42' },
         },
       })

@@ -1008,3 +1008,44 @@ footer {
 .preview-effects th:nth-child(4) {
   width: 28.5%;
 }
+
+.tariff-bracket-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.65rem;
+}
+.tariff-extra-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+.tariff-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.tariff-table th,
+.tariff-table td {
+  text-align: left;
+  padding: 0.4rem;
+  border-bottom: 1px solid var(--mantine-color-gray-3);
+  overflow-wrap: anywhere;
+}
+.tariff-long-value,
+.tariff-configuration,
+.tariff-trace {
+  overflow-wrap: anywhere;
+}
+.tariff-trace dd {
+  margin-inline-start: 0;
+}
+.tariff-configuration {
+  margin-top: 1.25rem;
+}
+.tariff-port-picker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 8px;
+  align-items: end;
+}

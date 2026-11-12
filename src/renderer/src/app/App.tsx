@@ -1,4 +1,4 @@
-import { Catalog } from './Catalog'
+import { CatalogPage } from './CatalogPage'
 import { useState } from 'react'
 import { ActionIcon, Button, Modal, Tooltip } from '@mantine/core'
 import {
@@ -122,7 +122,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
                     : section === 'Anagrafiche'
                       ? 'Prepara e consulta le anagrafiche del tuo archivio.'
                       : section === 'Catalogo e tariffe'
-                        ? 'Gestisci i tipi di prestazione e consulta i pesi iniziali.'
+                        ? 'Gestisci catalogo, pesi e tariffe e simula il calcolo base.'
                         : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
                   : 'Crea un archivio o aprine uno esistente per iniziare.'}
               </p>
@@ -165,7 +165,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
           ) : section === 'Anagrafiche' && state.context ? (
             <MasterDataPage archives={archives} onDialogChange={setFeedbackInDialog} />
           ) : section === 'Catalogo e tariffe' && state.context ? (
-            <Catalog archives={archives} onDialogChange={setFeedbackInDialog} />
+            <CatalogPage archives={archives} onDialogChange={setFeedbackInDialog} />
           ) : section !== 'Archivi' ? (
             <section className="archive-panel">
               <h2>Sezione in preparazione</h2>

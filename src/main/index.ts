@@ -1,3 +1,5 @@
+import { TariffService } from '../backend/application/tariffs/tariff-service'
+import { registerTariffIpc } from './ipc/register'
 import { CatalogService } from '../backend/application/catalog/catalog-service'
 import { registerCatalogIpc } from './ipc/register'
 import { VesselService } from '../backend/application/vessels/vessel-service'
@@ -124,6 +126,7 @@ if (ownsInstance) {
       registerAgencyIpc(new AgencyService(archives.coordinator), () => window)
       registerVesselIpc(new VesselService(archives.coordinator), () => window)
       registerCatalogIpc(new CatalogService(archives.coordinator), () => window)
+      registerTariffIpc(new TariffService(archives.coordinator), () => window)
       Menu.setApplicationMenu(
         Menu.buildFromTemplate([
           {

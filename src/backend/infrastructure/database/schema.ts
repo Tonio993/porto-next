@@ -267,3 +267,45 @@ export const weightVersions = sqliteTable(
       .where(sql`${table.effectiveFrom} IS NULL`),
   ],
 )
+
+export const tariffs = sqliteTable(
+  'tariffs',
+  {
+    id: text('id').primaryKey(),
+    portId: text('port_id')
+      .notNull()
+      .references(() => ports.id),
+    effectiveFrom: text('effective_from').notNull(),
+    effectiveLocalDateTime: text('effective_local_date_time').notNull(),
+    effectiveZoneId: text('effective_zone_id').notNull(),
+    effectiveUtcOffset: text('effective_utc_offset').notNull(),
+  },
+  (table) => [uniqueIndex('tariffs_effective').on(table.portId, table.effectiveFrom)],
+)
+export const tariffConfigurations = sqliteTable(
+  'tariff_configurations',
+  {
+    id: text('id').primaryKey(),
+    tariffId: text('tariff_id')
+      .notNull()
+      .references(() => tariffs.id),
+    vesselTypeId: text('vessel_type_id', { enum: ['STANDARD', 'PASSENGER', 'ADM'] })
+      .notNull()
+      .references(() => vesselTypes.id),
+    extraWidth: integer('extra_width').notNull(),
+    extraValue: text('extra_value').notNull(),
+  },
+  (table) => [uniqueIndex('tariff_configuration_type').on(table.tariffId, table.vesselTypeId)],
+)
+export const tariffBrackets = sqliteTable(
+  'tariff_brackets',
+  {
+    id: text('id').primaryKey(),
+    configurationId: text('configuration_id')
+      .notNull()
+      .references(() => tariffConfigurations.id),
+    upperLimit: integer('upper_limit').notNull(),
+    value: text('value').notNull(),
+  },
+  (table) => [uniqueIndex('tariff_bracket_limit').on(table.configurationId, table.upperLimit)],
+)

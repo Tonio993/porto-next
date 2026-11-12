@@ -220,10 +220,6 @@ export function Catalog({
   }, [draft, context])
   return (
     <>
-      <Group className="master-data-nav" gap="xs" aria-label="Sezioni catalogo">
-        <Button variant="light">Tipi di prestazione e pesi</Button>
-        <Button disabled>Tariffe · in preparazione</Button>
-      </Group>
       {error && (
         <StateMessage kind="error" title="Catalogo non disponibile">
           {error}

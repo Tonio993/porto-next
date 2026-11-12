@@ -1,6 +1,6 @@
 # Porto Next
 
-Gestionale desktop locale per una società di ormeggiatori, con archivi indipendenti, anagrafiche storiche, catalogo, tariffe e simulatore base. Per stato delle consegne, schema e prossimo task consultare il [registro](doc/stato-implementazione-prestazioni.md).
+Gestionale desktop locale per una società di ormeggiatori, con archivi indipendenti, anagrafiche storiche, catalogo, tariffe e operazioni nave. Per stato delle consegne, schema e prossimo task consultare il [registro](doc/stato-implementazione-prestazioni.md).
 
 ## Tecnologie
 
@@ -35,6 +35,12 @@ better-sqlite3 13 include il binario N-API per Windows x64. La ricompilazione au
 - Verifica dell’identificativo applicativo, versione dello schema e integrità SQLite.
 
 Creazione, salvataggio con nome e backup richiedono un percorso libero. I file esistenti non vengono sovrascritti, anche se il dialogo nativo permette di selezionarli. L’annullamento del dialogo mantiene lo stato corrente. Se l’apertura di un altro file fallisce, l’archivio attivo rimane utilizzabile.
+
+## Operazioni nave
+
+In **Operazioni nave**, scegli una nave e registra una nuova entrata o uscita. Controlla l'anteprima degli effetti e conferma: l'entrata apre viaggio, visita e ormeggio; l'uscita li chiude. La banchina è facoltativa. Le operazioni previste ed effettuate producono la struttura; quelle mancate richiedono un contesto valido e una tariffa ma non aprono né chiudono permanenze. Lo stato non cambia con il trascorrere del tempo.
+
+Il backend determina fuso, porto e momento economico dal contesto. La consultazione mostra base calcolata, eventuale sostituzione manuale in creazione (anche zero), base effettiva e traccia. Una tariffa intermedia o una variazione delle versioni anagrafiche include nell'anteprima gli effetti sulle attività e li applica atomicamente. Spostamenti, soggetti effettivi, consuntivazione e correzioni operative non sono ancora disponibili.
 
 ## Archivi e salvataggio
 

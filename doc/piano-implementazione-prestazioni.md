@@ -412,6 +412,8 @@ Riuso operativo nella [nota P09](p09/tariffe-e-calcolatore-base.md). Ogni slice 
 
 **Accettazione:** doppia entrata, uscita senza contesto e collisioni del minuto UTC sono respinte; una mancata entrata non apre un viaggio. Una nuova entrata dopo l'uscita crea un altro viaggio. In questa slice i comandi di correzione strutturale restano indisponibili.
 
+Sequenza, componenti e impatti nella [nota P10](p10/entrata-uscita-e-permanenze.md).
+
 ### P11 — Spostamento interno
 
 **Consegna:** registrare uno spostamento nello stesso porto con partenza e arrivo distinti.

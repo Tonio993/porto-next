@@ -1,3 +1,4 @@
+import { masterOperationImpacts, operationTables } from '../operations/operation-impacts'
 import { randomUUID } from 'node:crypto'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
 import type {
@@ -187,7 +188,8 @@ export class PortLifecycleService {
           updated: analysis.effects.filter((effect) => effect.action === 'UPDATE').length,
           deleted: analysis.effects.filter((effect) => effect.action === 'DELETE').length,
           reattributed: 0,
-          recalculated: 0,
+          recalculated: analysis.effects.filter((e) => e.reference.kind === 'OPERATION_CHARGE')
+            .length,
         },
         effects: {
           items: analysis.effects.slice(0, 50),
@@ -256,6 +258,12 @@ export class PortLifecycleService {
         action: 'DELETE',
         changes: [{ field: 'port', before: port.version.name, after: null }],
       })
+    const impacts = ['INSERT_VERSION', 'UPDATE_VERSION', 'DELETE_VERSION'].includes(
+      change.operation,
+    )
+      ? masterOperationImpacts(session.database, { kind: 'PORT', id: port.id, versions: after })
+      : null
+    if (impacts) effects.push(...impacts.effects)
     const changedIds = effects
       .map((effect) => effect.versionId)
       .filter((id): id is string => id !== null)
@@ -275,6 +283,7 @@ export class PortLifecycleService {
               port.id,
               changedIds,
               change.operation === 'DELETE_PORT',
+              change.operation === 'DELETE_PORT' ? [] : operationTables,
             ),
           ]
     const warnings =
@@ -288,9 +297,9 @@ export class PortLifecycleService {
             ]
           : [
               'Le chiavi identificative storiche restano riservate a questo porto. Il fuso operativo non cambia.',
-              'Non sono presenti moduli operativi o fatture da ricalcolare in questo incremento.',
+              'Le versioni applicate alle operazioni e alle permanenze vengono aggiornate atomicamente.',
             ]
-    return { effects, blockers, warnings }
+    return { effects, blockers, warnings, impacts }
   }
 
   private confirm(operation: PortChangeOperation, request: CommandRequest<{ previewId: string }>) {
@@ -324,6 +333,7 @@ export class PortLifecycleService {
             repository.setStatus(change.portId, 'INACTIVE')
           else repository.delete(change.portId)
         }
+        analysis.impacts?.apply()
         consumed = id
         return { portId: change.portId }
       },

@@ -1049,3 +1049,69 @@ footer {
   gap: 8px;
   align-items: end;
 }
+
+.operations-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  gap: 0.55rem;
+  overflow: hidden;
+}
+.operations-page h2,
+.operations-page h3,
+.operations-page p {
+  margin-block: 0.35rem;
+}
+.operations-future {
+  font-size: 0.8rem;
+  color: var(--mantine-color-gray-7);
+}
+.operations-workspace {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.9fr) minmax(0, 1.4fr);
+  flex: 1;
+  min-height: 120px;
+  gap: 1rem;
+}
+.operations-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.operations-rows,
+.operations-detail,
+.operations-stays {
+  overflow: auto;
+  min-height: 0;
+}
+.operations-rows {
+  flex: 1;
+}
+.operations-rows button {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.7rem;
+  border: 1px solid var(--mantine-color-gray-3);
+  background: white;
+  margin-bottom: 0.4rem;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+.operations-rows button[aria-pressed='true'] {
+  border-color: var(--mantine-color-teal-7);
+  background: var(--mantine-color-teal-0);
+}
+.operations-stays {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.operation-voyage {
+  padding: 0.8rem;
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 8px;
+  margin-bottom: 0.7rem;
+}

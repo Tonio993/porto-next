@@ -1,3 +1,4 @@
+import { tariffOperationImpacts } from '../operations/operation-impacts'
 import { randomUUID } from 'node:crypto'
 import type { TariffApi, TariffDto } from '../../../shared/contracts/tariffs'
 import type { ChangeEffectDto } from '../../../shared/contracts/master-data'
@@ -94,7 +95,7 @@ export class TariffService implements TariffApi {
             analysis.blockers,
           )
         const result = new TariffRepository(session.database).insert(tariff)
-        // P10 integrates recalculation of dependent charges in this same transaction.
+        analysis.impacts.apply()
         consumed = id
         return result
       },
@@ -161,7 +162,9 @@ export class TariffService implements TariffApi {
         ],
       })
     const blockers = tariffInsertionBlockers(session.database, previous)
-    return { effects, blockers, next }
+    const impacts = tariffOperationImpacts(session.database, tariff, next)
+    effects.push(...impacts.effects)
+    return { effects, blockers, next, impacts }
   }
   private previewDto(
     session: ArchiveApplicationSession,
@@ -170,7 +173,7 @@ export class TariffService implements TariffApi {
     page: number,
     pageSize: number,
   ) {
-    const { effects, blockers, next } = this.analyze(session, tariff)
+    const { effects, blockers, next, impacts } = this.analyze(session, tariff)
     const now = new Date().toISOString()
     return {
       previewId: entry.previewId,
@@ -184,7 +187,7 @@ export class TariffService implements TariffApi {
         updated: effects.length - 1,
         deleted: 0,
         reattributed: 0,
-        recalculated: 0,
+        recalculated: impacts.recalculated,
       },
       effects: {
         items: effects.slice((page - 1) * pageSize, page * pageSize),
@@ -192,7 +195,9 @@ export class TariffService implements TariffApi {
         page,
         pageSize,
       },
-      warnings: ['Non sono ancora presenti attività operative da ricalcolare.'],
+      warnings: impacts.recalculated
+        ? ['I calcoli teorici vengono aggiornati; le sostituzioni manuali rimangono conservate.']
+        : [],
       blockers,
       tariff: {
         ...tariff,

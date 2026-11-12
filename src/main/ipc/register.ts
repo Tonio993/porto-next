@@ -1,3 +1,5 @@
+import { OperationService } from '../../backend/application/operations/operation-service'
+import { operationChannels, type OperationApi } from '../../shared/contracts/operations'
 import { TariffService } from '../../backend/application/tariffs/tariff-service'
 import { tariffChannels, type TariffApi } from '../../shared/contracts/tariffs'
 import type { CatalogService } from '../../backend/application/catalog/catalog-service'
@@ -126,5 +128,16 @@ export function registerTariffIpc(
 ): void {
   for (const action of Object.keys(tariffChannels) as (keyof TariffApi)[]) {
     registerGuardedIpc(tariffChannels[action], window, (input) => service[action](input as never))
+  }
+}
+
+export function registerOperationIpc(
+  service: OperationService,
+  window: () => BrowserWindow | null,
+): void {
+  for (const action of Object.keys(operationChannels) as (keyof OperationApi)[]) {
+    registerGuardedIpc(operationChannels[action], window, (input) =>
+      service[action](input as never),
+    )
   }
 }

@@ -1,3 +1,4 @@
+import { masterOperationImpacts, operationTables } from '../operations/operation-impacts'
 import { randomUUID } from 'node:crypto'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
 import type {
@@ -197,6 +198,12 @@ export class VesselService implements VesselApi {
       }),
       (version) => version.registeredName,
     )
+    const impacts = ['INSERT_VERSION', 'UPDATE_VERSION', 'DELETE_VERSION'].includes(
+      change.operation,
+    )
+      ? masterOperationImpacts(session.database, { kind: 'VESSEL', id: vessel.id, versions: after })
+      : null
+    if (impacts) effects.push(...impacts.effects)
     const changedIds = effects.flatMap(({ versionId }) => (versionId ? [versionId] : []))
     const deleting = change.operation === 'DELETE_VESSEL'
     const deactivating = change.operation === 'DEACTIVATE_VESSEL'
@@ -225,7 +232,11 @@ export class VesselService implements VesselApi {
           deleting ? 'vessels' : null,
           'vessel_versions',
           changedIds,
-          ['vessel_versions', 'vessel_identifier_reservations'],
+          [
+            'vessel_versions',
+            'vessel_identifier_reservations',
+            ...(deleting ? [] : operationTables),
+          ],
         )
     const warnings = deleting
       ? [
@@ -236,7 +247,7 @@ export class VesselService implements VesselApi {
       : deactivating
         ? ['La nave sarà esclusa dalle nuove selezioni. I riferimenti esistenti restano validi.']
         : ['I nomi e gli IMO storici rimangono riservati a questa nave.']
-    return { repository, vessel, effects, blockers, warnings }
+    return { repository, vessel, effects, blockers, warnings, impacts }
   }
 
   preview(request: CommandRequest<VesselChangeDto>) {
@@ -254,7 +265,7 @@ export class VesselService implements VesselApi {
           created: effects.filter(({ action }) => action === 'CREATE').length,
           updated: effects.filter(({ action }) => action === 'UPDATE').length,
           deleted: effects.filter(({ action }) => action === 'DELETE').length,
-          recalculated: 0,
+          recalculated: effects.filter((e) => e.reference.kind === 'OPERATION_CHARGE').length,
           reattributed: 0,
         },
         effects: { items: effects.slice(0, 50), total: effects.length, page: 1, pageSize: 50 },
@@ -291,7 +302,11 @@ export class VesselService implements VesselApi {
         const input = record(payload, ['previewId'])
         const id = entityId(input.previewId, 'previewId')
         const change = session.previews.get(id, previewNamespace, session.context()).input as Change
-        const { repository, vessel, effects, blockers } = this.analyse(session, change, this.now())
+        const { repository, vessel, effects, blockers, impacts } = this.analyse(
+          session,
+          change,
+          this.now(),
+        )
         if (blockers.length)
           throw new ArchiveError(
             'PREVIEW_BLOCKED',
@@ -308,6 +323,7 @@ export class VesselService implements VesselApi {
             repository.setStatus(vessel.id, 'INACTIVE')
           else repository.delete(vessel.id)
         }
+        impacts?.apply()
         consumed = id
         return { vesselId: vessel.id }
       },

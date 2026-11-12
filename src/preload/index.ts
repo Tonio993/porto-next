@@ -1,3 +1,4 @@
+import { operationChannels, type OperationApi } from '../shared/contracts/operations'
 import { tariffChannels, type TariffApi } from '../shared/contracts/tariffs'
 import { catalogChannels, type CatalogApi } from '../shared/contracts/catalog'
 import { vesselChannels, type VesselApi } from '../shared/contracts/vessels'
@@ -136,3 +137,14 @@ const tariffs: TariffApi = {
   simulateBase: (request) => ipcRenderer.invoke(tariffChannels.simulateBase, request),
 }
 contextBridge.exposeInMainWorld('tariffs', tariffs)
+
+const operations: OperationApi = {
+  list: (request) => ipcRenderer.invoke(operationChannels.list, request),
+  get: (request) => ipcRenderer.invoke(operationChannels.get, request),
+  stays: (request) => ipcRenderer.invoke(operationChannels.stays, request),
+  resolveMoment: (request) => ipcRenderer.invoke(operationChannels.resolveMoment, request),
+  previewCreate: (request) => ipcRenderer.invoke(operationChannels.previewCreate, request),
+  confirmCreate: (request) => ipcRenderer.invoke(operationChannels.confirmCreate, request),
+  previewEffects: (request) => ipcRenderer.invoke(operationChannels.previewEffects, request),
+}
+contextBridge.exposeInMainWorld('operations', operations)

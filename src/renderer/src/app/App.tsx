@@ -1,3 +1,4 @@
+import { Operations } from './operations/Operations'
 import { CatalogPage } from './CatalogPage'
 import { useState } from 'react'
 import { ActionIcon, Button, Modal, Tooltip } from '@mantine/core'
@@ -100,7 +101,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
         </header>
         <main
           className={
-            active && ['Anagrafiche', 'Catalogo e tariffe'].includes(section)
+            active && ['Anagrafiche', 'Catalogo e tariffe', 'Operazioni nave'].includes(section)
               ? 'data-main'
               : undefined
           }
@@ -123,7 +124,9 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
                       ? 'Prepara e consulta le anagrafiche del tuo archivio.'
                       : section === 'Catalogo e tariffe'
                         ? 'Gestisci catalogo, pesi e tariffe e simula il calcolo base.'
-                        : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
+                        : section === 'Operazioni nave'
+                          ? 'Registra entrate e uscite e consulta permanenze e importi base.'
+                          : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
                   : 'Crea un archivio o aprine uno esistente per iniziare.'}
               </p>
             </div>
@@ -166,6 +169,8 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
             <MasterDataPage archives={archives} onDialogChange={setFeedbackInDialog} />
           ) : section === 'Catalogo e tariffe' && state.context ? (
             <CatalogPage archives={archives} onDialogChange={setFeedbackInDialog} />
+          ) : section === 'Operazioni nave' && state.context ? (
+            <Operations archives={archives} onDialogChange={setFeedbackInDialog} />
           ) : section !== 'Archivi' ? (
             <section className="archive-panel">
               <h2>Sezione in preparazione</h2>

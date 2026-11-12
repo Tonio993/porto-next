@@ -1,3 +1,4 @@
+import { masterOperationImpacts, operationTables } from '../operations/operation-impacts'
 import { randomUUID } from 'node:crypto'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
 import type {
@@ -168,6 +169,12 @@ export class BerthService implements BerthApi {
       (name) => ({ ...reference, label: `${reference.label} · ${name} · versione` }),
       (version) => version.name,
     )
+    const impacts = ['INSERT_VERSION', 'UPDATE_VERSION', 'DELETE_VERSION'].includes(
+      change.operation,
+    )
+      ? masterOperationImpacts(session.database, { kind: 'BERTH', id: berth.id, versions: after })
+      : null
+    if (impacts) effects.push(...impacts.effects)
     const changedIds = effects.flatMap(({ versionId }) => (versionId ? [versionId] : []))
     const deleting = change.operation === 'DELETE_BERTH'
     const deactivating = change.operation === 'DEACTIVATE_BERTH'
@@ -190,7 +197,13 @@ export class BerthService implements BerthApi {
       })
     const blockers = deactivating
       ? []
-      : berthReferences(session.database, berth.id, changedIds, deleting)
+      : berthReferences(
+          session.database,
+          berth.id,
+          changedIds,
+          deleting,
+          deleting ? [] : operationTables,
+        )
     const warnings = deleting
       ? [
           blockers.length
@@ -202,7 +215,7 @@ export class BerthService implements BerthApi {
             'La banchina sarà esclusa dalle nuove selezioni. I riferimenti esistenti restano validi.',
           ]
         : ['I nomi storici rimangono riservati a questa banchina.']
-    return { repository, berth, effects, blockers, warnings }
+    return { repository, berth, effects, blockers, warnings, impacts }
   }
 
   preview(request: CommandRequest<BerthChangeDto>) {
@@ -220,7 +233,7 @@ export class BerthService implements BerthApi {
           created: effects.filter(({ action }) => action === 'CREATE').length,
           updated: effects.filter(({ action }) => action === 'UPDATE').length,
           deleted: effects.filter(({ action }) => action === 'DELETE').length,
-          recalculated: 0,
+          recalculated: effects.filter((e) => e.reference.kind === 'OPERATION_CHARGE').length,
           reattributed: 0,
         },
         effects: { items: effects.slice(0, 50), total: effects.length, page: 1, pageSize: 50 },
@@ -257,7 +270,11 @@ export class BerthService implements BerthApi {
         const input = record(payload, ['previewId'])
         const id = entityId(input.previewId, 'previewId')
         const change = session.previews.get(id, previewNamespace, session.context()).input as Change
-        const { repository, berth, effects, blockers } = this.analyse(session, change, this.now())
+        const { repository, berth, effects, blockers, impacts } = this.analyse(
+          session,
+          change,
+          this.now(),
+        )
         if (blockers.length)
           throw new ArchiveError(
             'PREVIEW_BLOCKED',
@@ -274,6 +291,7 @@ export class BerthService implements BerthApi {
             repository.setStatus(berth.id, 'INACTIVE')
           else repository.delete(berth.id)
         }
+        impacts?.apply()
         consumed = id
         return { berthId: berth.id }
       },

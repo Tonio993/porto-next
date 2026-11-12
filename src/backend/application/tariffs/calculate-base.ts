@@ -6,6 +6,8 @@ import { TariffRepository } from '../../infrastructure/database/tariff-repositor
 import { VesselRepository } from '../../infrastructure/database/vessel-repository'
 import type { DatabaseSession } from '../../infrastructure/database/database-session'
 import { ArchiveError } from '../../../shared/errors/archive-error'
+import type { VesselVersionDto } from '../../../shared/contracts/vessels'
+import type { TariffDto } from '../../../shared/contracts/tariffs'
 
 /** Synchronous, read-only; future activity commands call this inside their own transaction.
  * The caller owns context, selectability, economic port/moment and persistence of this trace.
@@ -13,12 +15,16 @@ import { ArchiveError } from '../../../shared/errors/archive-error'
 export function calculateBase(
   database: DatabaseSession,
   input: { portId: string; vesselId: string; moment: ResolvedMomentDto; activity: TariffActivity },
+  simulated: { vesselVersion?: VesselVersionDto; tariff?: TariffDto } = {},
 ): BaseCalculationDto {
-  const vessel = new VesselRepository(database, new Date().toISOString()).versionAt(
-    input.vesselId,
-    input.moment.utc,
-  )
-  const tariff = new TariffRepository(database).at(input.portId, input.moment.utc)
+  const vessel =
+    simulated.vesselVersion ??
+    new VesselRepository(database, new Date().toISOString()).versionAt(
+      input.vesselId,
+      input.moment.utc,
+    )
+  const tariff =
+    simulated.tariff ?? new TariffRepository(database).at(input.portId, input.moment.utc)
   const configuration = tariff.configurations.find((c) => c.vesselTypeId === vessel.vesselTypeId)!
   const catalog = new CatalogRepository(database)
   const activity = input.activity

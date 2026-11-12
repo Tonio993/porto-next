@@ -18,6 +18,7 @@ export function portReferences(
   id: string,
   versionIds: readonly string[],
   deleting: boolean,
+  managed: readonly string[] = [],
 ): ConflictDto[] {
   return foreignReferences(
     database,
@@ -25,7 +26,7 @@ export function portReferences(
     deleting ? 'ports' : null,
     'port_versions',
     versionIds,
-    ['berths', 'port_versions', 'port_time_zones', 'port_identifier_reservations'],
+    ['berths', 'port_versions', 'port_time_zones', 'port_identifier_reservations', ...managed],
   )
 }
 
@@ -34,6 +35,7 @@ export function berthReferences(
   id: string,
   versionIds: readonly string[],
   deleting: boolean,
+  managed: readonly string[] = [],
 ): ConflictDto[] {
   return foreignReferences(
     database,
@@ -41,7 +43,7 @@ export function berthReferences(
     deleting ? 'berths' : null,
     'berth_versions',
     versionIds,
-    ['berth_versions', 'berth_identifier_reservations'],
+    ['berth_versions', 'berth_identifier_reservations', ...managed],
   )
 }
 

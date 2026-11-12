@@ -1,6 +1,6 @@
 # Porto Next
 
-Gestionale desktop locale per una società di ormeggiatori, in sviluppo. Sono disponibili gestione degli archivi, configurazione temporale, anagrafiche di porti, banchine, clienti, agenzie e navi con versioni e ciclo di vita, catalogo dei tipi di prestazione, pesi iniziali, tariffe complete per porto e simulatore del calcolo base. Schema v10. Il consolidamento grafico [UI02](doc/ui02/revisione-anagrafiche-e-catalogo.md) è completato e M1 è chiusa con build e pacchetto Windows dello schema v9 verificati; P09 è completato e verificato sulla build Electron, con distribuzione integrata prevista a M2 dopo P13. Il prossimo task funzionale è P10 — Entrata, uscita e permanenze.
+Gestionale desktop locale per una società di ormeggiatori, con archivi indipendenti, anagrafiche storiche, catalogo, tariffe e simulatore base. Per stato delle consegne, schema e prossimo task consultare il [registro](doc/stato-implementazione-prestazioni.md).
 
 ## Tecnologie
 
@@ -81,11 +81,11 @@ Il renderer non può accedere a Node.js, al filesystem o a SQLite. Il preload es
 
 I file SQL sono importati nella build con `?raw`: non dipendono dalla directory di lavoro del computer di destinazione. `application_id` identifica il formato Porto Next; `user_version` identifica la versione dello schema. Un archivio più recente dell’app viene rifiutato. Per le future migrazioni, il servizio crea una copia prima dell’aggiornamento e applica gli script in transazione.
 
-## Piano funzionale e specifica P00
+## Documentazione
 
-Il [piano delle prestazioni](doc/piano-implementazione-prestazioni.md) organizza gli incrementi. P00–P09, UI01 e UI02 sono completati; [P09](doc/p09/tariffe-e-calcolatore-base.md) aggiunge tariffe e calcolatore base con schema v10. P08 introduce [catalogo e pesi iniziali](doc/p08/catalogo-e-pesi-iniziali.md), con schema v9. Le [decisioni P00](doc/p00/decisioni-iniziali.md), il [contesto applicativo P01](doc/p01/contesto-applicativo.md) e i [valori numerici e temporali P02](doc/p02/numeri-e-tempo.md) costituiscono la base condivisa. P03–P04 introducono [creazione e consultazione dei porti](doc/p03/porti.md) e [versioni e ciclo di vita](doc/p04/versioni-e-ciclo-di-vita.md). P05 aggiunge le [banchine nel dettaglio del porto](doc/p05/banchine.md), P06 [clienti e agenzie](doc/p06/clienti-e-agenzie.md), P07 [Navi](doc/p07/navi.md). Le revisioni [UI01](doc/ui01/revisione-post-p04.md) e [UI02](doc/ui02/revisione-anagrafiche-e-catalogo.md) definiscono le convenzioni visive comuni. Il [registro](doc/stato-implementazione-prestazioni.md) distingue il completamento UI02 dalla chiusura M1: 149 test backend, tutti i 17 percorsi desktop e 17 su 17 sullo stesso pacchetto Windows verificati, incluse migrazioni cumulative e trasferibilità. Resta la formattazione legacy preesistente; installer e installazione sono previsti in P20. Il prossimo task funzionale è P10 — Entrata, uscita e permanenze.
+Il [piano](doc/piano-implementazione-prestazioni.md) definisce requisiti, dipendenze e controlli. Il [registro](doc/stato-implementazione-prestazioni.md) riporta lo stato corrente e collega le note dei task. Per sviluppo e manutenzione seguire [AGENTS](AGENTS.md) e la [guida documentale](doc/guida-documentazione.md), consultando le fonti per argomento.
 
-In **Anagrafiche → Porti** sono disponibili ricerca, elenco, dettaglio, cronologia, versioni, disattivazione, riattivazione ed eliminazione consentita. Il dettaglio comprende le banchine del porto, con il proprio ciclo di vita. Un porto con banchine o tariffe è protetto dall'eliminazione. La selezionabilità della banchina dipende sia dal suo stato sia da quello del porto. Le operazioni che richiedono una conferma espongono un'anteprima degli effetti. Le attività operative e le prestazioni sono previste negli incrementi successivi.
+In **Anagrafiche → Porti** sono disponibili ricerca, elenco, dettaglio, cronologia, versioni, disattivazione, riattivazione ed eliminazione consentita. Il dettaglio comprende le banchine del porto, con il proprio ciclo di vita. Un porto con banchine o tariffe è protetto dall'eliminazione. La selezionabilità della banchina dipende sia dal suo stato sia da quello del porto. Le operazioni che richiedono una conferma espongono un'anteprima degli effetti. La registrazione delle prestazioni è prevista negli incrementi successivi.
 
 **Anagrafiche → Clienti / Agenzie** espone due anagrafiche indipendenti, con la sola ragione sociale. Ricerca storica e per codice, elenco paginato, dettaglio, cronologia e ciclo di vita seguono le stesse convenzioni. Una ragione sociale può appartenere a entrambe le tipologie; dentro ciascuna rimane prenotata fino all’eliminazione dell’identità. I progressivi non vengono riutilizzati. Prima di introdurre una versione con decorrenza occorre confermare il fuso aziendale in **Riferimenti temporali**; ore ambigue e inesistenti sono gestite dal backend. La versione iniziale rimane senza decorrenza.
 
@@ -108,9 +108,7 @@ Le [istruzioni dello spike](spikes/p00/README.md) distinguono le prove eseguite 
 
 ## Verifiche e distribuzione
 
-La frequenza dei controlli è definita nel [piano §7.3](doc/piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). A chiusura di ogni step eseguire `check`, la suite backend completa e i percorsi desktop nuovi o coinvolti. Le migrazioni ordinarie richiedono test SQLite e apertura nella build Electron. Suite desktop completa e verifica completa del pacchetto si eseguono alle milestone M1–M5. Cambiamenti a confezionamento, caricamento delle risorse, runtime o dipendenze native richiedono una verifica anticipata del pacchetto con copertura adeguata all'impatto. Le revisioni grafiche estese seguono UI01–UI04. L'installer viene generato in P20.
-
-I comandi seguenti sono disponibili per i diversi controlli. Per un percorso desktop mirato usare `npm run test:e2e -- tests/e2e/<file>.spec.ts`. Con una build già verificata, selezionare i test direttamente tramite `node node_modules/@playwright/test/cli.js test tests/e2e/<file>.spec.ts`. Alla milestone è possibile riutilizzare quella build con `node scripts/package.mjs --dir` seguito da `node scripts/test-packaged.mjs`. Registrare gli esiti già validi e i controlli programmati per il traguardo successivo.
+Per frequenza, selezione dei test e riuso della build applicare il [piano §7.3](doc/piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). I comandi seguenti coprono i diversi controlli e si scelgono secondo lo step o la milestone da verificare.
 
 ```powershell
 npm run check

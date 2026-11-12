@@ -1,12 +1,8 @@
 # Piano di implementazione: anagrafiche e gestione delle prestazioni
 
-Data: 10 novembre 2026. Baseline esaminata: `acc012e`.
+Baseline di pianificazione del 10 novembre 2026, commit `acc012e`. Il piano contiene perimetro, requisiti, dipendenze, criteri di accettazione e frequenza dei controlli.
 
-Questo piano prepara il primo rilascio funzionale di Porto Next. Organizza il lavoro in task assegnabili a un agente, con dipendenze, risultati verificabili e indicazioni per le chat. La pianificazione non avvia l'implementazione delle funzionalità.
-
-P00 è completato: [decisioni iniziali](p00/decisioni-iniziali.md), [contratti](p00/contratti.ts) ed [esempi riutilizzabili](p00/scenari.mts). P01, [P02](p02/numeri-e-tempo.md), [P03](p03/porti.md) e [P04](p04/versioni-e-ciclo-di-vita.md) sono completati. [P05](p05/banchine.md) è completato e verificato anche nel pacchetto Windows. Lo stato delle funzionalità resta nel [registro di avanzamento](stato-implementazione-prestazioni.md).
-
-[UI01](ui01/revisione-post-p04.md), [P06 — Clienti e agenzie](p06/clienti-e-agenzie.md), [P07 — Navi](p07/navi.md), [P08 — Catalogo e pesi iniziali](p08/catalogo-e-pesi-iniziali.md) e [UI02](ui02/revisione-anagrafiche-e-catalogo.md) sono completati. [P09](p09/tariffe-e-calcolatore-base.md) introduce tariffe complete e calcolatore base; schema corrente v10. **M1 è chiusa**, con build integrata e pacchetto Windows dello schema v9 verificati: 149 test backend, tutti i 17 percorsi desktop e 17 su 17 sullo stesso eseguibile, incluse migrazioni cumulative e trasferibilità. Rimane la formattazione legacy preesistente. Il prossimo task funzionale è **P10 — Entrata, uscita e permanenze**; le verifiche integrate successive sono M2 dopo P13.
+Per task corrente, schema ed esiti consultare il [registro](stato-implementazione-prestazioni.md). Per letture mirate e manutenzione consultare la [guida documentale](guida-documentazione.md). Le [decisioni P00](p00/decisioni-iniziali.md), i [contratti](p00/contratti.ts) e gli [scenari](p00/scenari.mts) precisano le regole da usare nelle sezioni pertinenti.
 
 ## 1. Fonti e decisioni di perimetro
 
@@ -20,7 +16,7 @@ Sono stati esaminati i cinque documenti di `doc/legacy`, approfondendo le parti 
 | [Modello dei dati](legacy/03-modello-dati.md)                          | Identità, versioni, prenotazioni dei nomi, struttura operativa e proposta delle prestazioni. |
 | [Sviluppo evolutivo](legacy/04-sviluppo-evolutivo.md)                  | Incrementi verticali, verifiche a ogni incremento e revisioni periodiche.                    |
 
-Le scelte tecnologiche e le dichiarazioni di avanzamento del legacy descrivono un altro progetto: Angular, Java, Spring, HTTP e Flyway. Qui rimangono **Electron, React, TypeScript, IPC, SQLite, better-sqlite3 e Drizzle**. La baseline esaminata comprendeva la gestione degli archivi. Il repository ha successivamente completato P00–P05 e UI01, inclusi i flussi di porti e banchine, come documentato nel registro.
+Il legacy descrive anche un precedente progetto Angular/Java/Spring/HTTP/Flyway. Lo stack qui adottato è Electron, React, TypeScript, IPC, SQLite, better-sqlite3 e Drizzle. Il registro riporta lo stato effettivo di questo repository.
 
 Le regole funzionali confermate dei documenti 01 e 02 costituiscono la base. Il modello 03 distingue decisioni confermate nei punti 1–5 e proposte da verificare dal punto 6: il relativo schema fisico va verificato durante le slice. Un conflitto funzionale effettivo va registrato nel documento delle decisioni prima di implementare il comportamento controverso; una normale scelta tecnica può essere risolta dall'agente nel perimetro concordato.
 
@@ -226,7 +222,7 @@ Le revisioni grafiche sono attività implementative con verifica nell'applicazio
 
 **UI01 — Revisione grafica iniziale post P04.** Esaminare l'app in esecuzione prima di scegliere il layout. Rivedere struttura della finestra, navigazione anagrafiche, gerarchie, tipografia, spaziature, densità, tabelle, form e azioni. Nel percorso Porti valutare la disposizione di elenco, dettaglio, cronologia, creazione, modifica e conferma, riducendo la necessità di scorrere fra attività correlate. Scegliere pannelli, pagine o dialoghi in base al flusso osservato. Distinguere dati storici, correnti e futuri e azioni principali, secondarie e distruttive; rendere riconoscibili caricamento, assenza di dati, errori e conflitti.
 
-**Stato UI01:** completato. [Revisione e convenzioni](ui01/revisione-post-p04.md): elenco/dettaglio affiancati, dialoghi dedicati, gerarchie e stati uniformati, tastiera/focus e contrasto verificati. Sei percorsi desktop passati sulla build finale; schermate a 960 × 700 e 1440 × 900. Prove automatizzate e ispezione dell'agente, senza sessione manuale umana. Esiti e limiti nel registro e nella nota.
+Convenzioni e verifiche iniziali sono nella [nota UI01](ui01/revisione-post-p04.md).
 
 Applicare il risultato alle schermate esistenti coinvolte e documentare poche convenzioni riutilizzabili con Mantine e gli stili locali. Preservare controlli di sessione/revisione, bozze, invalidazione delle risposte, anteprime e passaggio futuro → corrente. Non introdurre un motore CRUD, nuove funzioni anagrafiche o una riscrittura architetturale. P05–P07 adotteranno le convenzioni visive verificate da UI01; le loro dipendenze funzionali restano quelle della tabella.
 
@@ -278,7 +274,7 @@ La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dip
 
 ### P00 — Specifica eseguibile e decisioni
 
-**Stato:** completato. Esito e prove nello [specifico documento di decisioni](p00/decisioni-iniziali.md).
+Decisioni e prove nella [nota P00](p00/decisioni-iniziali.md).
 
 **Consegna:** un documento breve di decisioni e un insieme di esempi di accettazione riutilizzabili, senza completare in anticipo l'intero modello del gestionale.
 
@@ -303,7 +299,7 @@ La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dip
 
 ### P02 — Numeri e tempo
 
-**Stato:** completato. Contratti, adattatori, configurazione per archivio e verifiche sono descritti in [Numeri e tempo](p02/numeri-e-tempo.md) e nel registro.
+Contratti, adattatori e configurazione nella [nota P02](p02/numeri-e-tempo.md).
 
 **Consegna:** tipi di dominio e adattatori verificati per denaro, fattori decimali, momenti e configurazione temporale iniziale per archivio.
 
@@ -316,7 +312,7 @@ La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dip
 
 ### P03 — Creare e consultare un porto
 
-**Stato:** completato. Percorso, schema e verifiche in [Creare e consultare un porto](p03/porti.md) e nel registro.
+Percorso e schema nella [nota P03](p03/porti.md).
 
 **Consegna:** primo percorso completo UI → IPC → caso d'uso → SQLite → rilettura.
 
@@ -329,7 +325,7 @@ La sequenza della tabella è l'ordine raccomandato in esecuzione singola. Le dip
 
 ### P04 — Versioni e ciclo di vita del porto
 
-**Stato:** completato. Funzioni, riordino frontend, convenzioni e verifiche in [Versioni e ciclo di vita del porto](p04/versioni-e-ciclo-di-vita.md) e nel registro.
+Convenzioni e ciclo di vita nella [nota P04](p04/versioni-e-ciclo-di-vita.md).
 
 **Consegna:** cronologia, inserimento/correzione/eliminazione di versioni, disattivazione, riattivazione ed eliminazione del porto consentita.
 
@@ -369,7 +365,7 @@ Implementazione e decisioni nella [nota P06](p06/clienti-e-agenzie.md); contratt
 
 **Consegna:** gestione completa della nave secondo le convenzioni anagrafiche.
 
-**Stato:** completato e verificato sulla build Electron dalla base `093a59b`; migrazione v7 → v8. Decisioni, verifiche effettive e passaggio a P08/UI02/M1 nella [nota P07](p07/navi.md).
+Decisioni e integrazioni nella [nota P07](p07/navi.md).
 
 - Inizializzare il catalogo tecnico delle tre tipologie nave, non amministrabile dall'operatore.
 - Gestire nome, IMO facoltativo, tipologia e dimensione intera non negativa.
@@ -382,7 +378,7 @@ Implementazione e decisioni nella [nota P06](p06/clienti-e-agenzie.md); contratt
 
 **Consegna:** gestione dei tipi configurabili e prima versione del peso per catalogo e tipi operativi fissi.
 
-**Stato:** completato e verificato sulla build Electron con schema v9 dalla base effettiva `75bec7d`; verifiche e revisione tecnica nella [nota P08](p08/catalogo-e-pesi-iniziali.md). Consolidamento successivo completato in [UI02](ui02/revisione-anagrafiche-e-catalogo.md), con registrazione separata della verifica M1 secondo §7.3.
+Decisioni e integrazioni nella [nota P08](p08/catalogo-e-pesi-iniziali.md).
 
 - Creare `rinforzo ormeggio` una sola volta durante l'inizializzazione prevista dalla migrazione.
 - Creare tipo e peso iniziale atomicamente, con valore proposto `1` e vincolo `> 0`.
@@ -402,7 +398,7 @@ Implementazione e decisioni nella [nota P06](p06/clienti-e-agenzie.md); contratt
 
 **Accettazione:** con ultimo limite `1600`, valore `100 EUR`, dimensione `2100`, ampiezza extra `200`, extra `5 EUR` e peso `1,5`, risultano tre extra, valore tariffario `115 EUR` e base `172,50 EUR`. Una tariffa incompleta e una registrazione tariffata antecedente alla prima tariffa sono respinte. Correzione ed eliminazione diretta delle tariffe verranno esposte in P18.
 
-**Stato P09:** completato e verificato sulla build Electron; 169 test backend e sei percorsi desktop selezionati verificati secondo §7.3. Dettagli nella [nota e verifiche](p09/tariffe-e-calcolatore-base.md). Migrazione ordinaria v9 → v10 nel runner esistente; valori tariffari TEXT esatti, copie autonome, anteprima delle creazioni e simulazione di sola lettura. Le dipendenze operative reali vanno integrate in analisi e ricalcoli da P10, atomicamente con i comandi che le introducono. Distribuzione completa a M2 dopo P13 secondo §7.3.
+Riuso operativo nella [nota P09](p09/tariffe-e-calcolatore-base.md). Ogni slice che introduce componenti reali deve integrarne atomicamente analisi degli intervalli e ricalcoli nella creazione tariffaria.
 
 ### P10 — Entrata, uscita e permanenze
 
@@ -600,7 +596,7 @@ Aggiornare un archivio v1; simulare una migrazione fallita e conservare l'origin
 
 Aprire una nuova chat ai confini indicati nella tabella, dopo aver completato e documentato il task precedente. Riutilizzare la stessa chat per le coppie indicate, perché condividono un modello appena verificato. Se una correzione è ancora aperta, completarla prima di cambiare contesto; se il contesto è diventato poco affidabile, salvare lo stato e ripartire leggendo gli artefatti.
 
-Una nuova chat deve ricostruire il contesto dai file e dai commit, non da un riassunto a memoria. La [documentazione OpenAI sui livelli di ragionamento](https://developers.openai.com/api/docs/guides/deployment-checklist) distingue il lavoro ordinario dai problemi che richiedono più ragionamento. Le assegnazioni `medium`/`high` di questo piano sono valutazioni progettuali; `xhigh` può essere valutato per un problema temporale o transazionale rimasto irrisolto, con un obiettivo di verifica concreto. Non è necessario impostarlo per tutti i task.
+Ricostruire il contesto con il percorso selettivo della guida documentale. Le assegnazioni medium/high della tabella sono raccomandazioni progettuali, da applicare in base a complessità e verifiche richieste.
 
 ### 7.2 Esecuzione e parallelismo
 
@@ -652,32 +648,19 @@ Per modifiche soltanto documentali controllare formattazione, collegamenti modif
 ### 7.4 Prompt di avvio riutilizzabile
 
 ```text
-Implementa soltanto il task Pxx di doc/piano-implementazione-prestazioni.md.
-Leggi le sezioni globali del piano, la scheda Pxx e i riferimenti legacy pertinenti.
-Leggi doc/stato-implementazione-prestazioni.md e verifica codice, branch e stato Git.
-Parti dai risultati integrati delle dipendenze indicate; preserva i file dell'utente.
-Mantieni lo stack Electron/React/TypeScript/SQLite e il funzionamento per archivio locale.
-Realizza il percorso completo previsto, aggiungi le verifiche pertinenti e aggiorna il registro.
-Applica la frequenza dei controlli della sezione 7.3 e registra quelli pianificati alla milestone successiva.
-Non anticipare funzioni dei task successivi. Registra eventuali conflitti funzionali espliciti.
-Nel passaggio di consegne indica file modificati, decisioni, verifiche, limiti e prossimo task.
+Realizza il task Pxx del piano fino alla consegna verificata.
+Applica AGENTS.md e la guida documentale, controllando codice e stato Git.
+Leggi registro corrente, scheda Pxx e passaggio operativo della dipendenza pertinente.
+Consulta le sezioni di dominio e i casi d'uso coinvolti.
+Esegui i controlli selezionati secondo §7.3 e registra quelli pianificati alla milestone.
+Aggiorna in posto stato e nota del task secondo la guida, preservando i file dell'utente.
+Consegna risultato, verifiche, limiti e prossimo passo.
 ```
 
-Per una revisione usare invece: «Revisiona il risultato integrato dei task … rispetto al piano e agli scenari pertinenti. Riporta problemi con evidenze e impatto; applica solo le correzioni comprese nel task assegnato».
+Per una revisione indicare risultato da confrontare, criteri e correzioni comprese nel task. Il prompt aggiunge le attenzioni specifiche rispetto alle istruzioni del repository.
 
 ### 7.5 Passaggio di consegne
 
-Aggiornare [il registro di avanzamento](stato-implementazione-prestazioni.md) con:
+Seguire la [guida documentale](guida-documentazione.md#aggiornamento-a-fine-task). Aggiornare in posto il registro con stato, schema, riferimento alla nota, limiti aperti e prossimo task. La nota conserva decisioni nuove, API/punti d'integrazione, esiti finali, selezione delle regressioni e verifiche pianificate alla milestone.
 
-- task e stato reale, distinguendo implementato da verificato;
-- commit o revisione di riferimento e migrazioni introdotte;
-- file e contratti principali;
-- decisioni adottate e divergenze motivate dalle proposte;
-- comandi eseguiti ed esiti, incluse verifiche manuali o ancora da svolgere;
-- build o revisione verificata, regressioni selezionate e controlli pianificati alla milestone successiva secondo la sezione 7.3;
-- difetti aperti e loro impatto;
-- prossimo task e dipendenze effettivamente integrate.
-
-P00–P09 e **UI02** sono completati, con schema v10; **M1 è chiusa**. Il prossimo task funzionale è **P10 — Entrata, uscita e permanenze**; le verifiche integrate successive sono M2 dopo P13. P10 deve riusare il calcolatore sincrono e integrare le proprie dipendenze e ricalcoli nella creazione tariffaria, come indicato nella [nota P09](p09/tariffe-e-calcolatore-base.md). Riutilizzare le [convenzioni UI02](ui02/revisione-anagrafiche-e-catalogo.md), quelle [UI01](ui01/revisione-post-p04.md), il [ciclo di vita P04](p04/versioni-e-ciclo-di-vita.md) e le slice anagrafiche integrate. Il catalogo mantiene descrizioni correnti riutilizzabili dopo rinomina e il vincolo monotono `hasEverBeenUsed`; P15 dovrà chiamare `CatalogRepository.markUsed` nella stessa transazione della prestazione. Le variazioni successive dei pesi restano P19.
-
-**M1 è chiusa** sul risultato integrato UI02 con P05/P07/P08: controlli statici con la sola segnalazione legacy, suite backend e desktop complete, migrazioni cumulative e trasferibilità, pacchetto Windows e intera suite sullo stesso eseguibile. Gli esiti effettivi, il riuso dei controlli secondo §7.3 e le impronte degli artefatti verificati sono nella [nota UI02/M1](ui02/revisione-anagrafiche-e-catalogo.md) e nel [registro](stato-implementazione-prestazioni.md). Le verifiche estese successive restano associate a **M2 dopo P13**; ogni slice esegue i propri controlli secondo §7.3. Restano la revisione tecnica dopo P12, quella dopo P16 e i checkpoint UI03/UI04; installer e installazione rimangono P20.
+Collegare le regole comuni e le evidenze già disponibili. Gli allegati conservano manifest e diagnostiche necessari alla tracciabilità. Per stato corrente e chiusura delle milestone usare esclusivamente il [registro](stato-implementazione-prestazioni.md).

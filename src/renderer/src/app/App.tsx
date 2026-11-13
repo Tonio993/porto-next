@@ -125,7 +125,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
                       : section === 'Catalogo e tariffe'
                         ? 'Gestisci catalogo, pesi e tariffe e simula il calcolo base.'
                         : section === 'Operazioni nave'
-                          ? 'Registra entrate e uscite e consulta permanenze e importi base.'
+                          ? 'Registra entrate, uscite e spostamenti interni; consulta permanenze e importi base.'
                           : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
                   : 'Crea un archivio o aprine uno esistente per iniziare.'}
               </p>

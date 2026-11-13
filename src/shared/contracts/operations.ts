@@ -7,6 +7,13 @@ export type ExecutionStatus = 'PLANNED' | 'PERFORMED' | 'MISSED'
 export type OperationMomentInput = { vesselId: string; moment: MomentInputDto } & (
   | { operationType: 'ENTRY'; portId: string; berthId: string | null }
   | { operationType: 'EXIT'; interpretationPortId: string | null }
+  | {
+      operationType: 'MOVEMENT'
+      interpretationPortId: string | null
+      destinationPortId: string
+      destinationBerthId: string | null
+      arrivalMoment: MomentInputDto
+    }
 )
 export type CreateOperationDto = OperationMomentInput & {
   executionStatus: ExecutionStatus
@@ -17,11 +24,12 @@ export interface OperationMomentDto {
   portId: string
   berthId: string | null
   resolution: MomentResolutionDto
+  arrivalResolution?: MomentResolutionDto
 }
 export interface OperationChargeDto {
   id: string
-  chargeKind: 'ENTRY' | 'EXIT'
-  economicEndpointRole: 'OCCURRENCE'
+  chargeKind: 'ENTRY' | 'EXIT' | 'MOVEMENT'
+  economicEndpointRole: 'OCCURRENCE' | 'DEPARTURE'
   calculation: BaseCalculationDto
   manualOverrideAmount: string | null
   effectiveBase: string
@@ -30,22 +38,50 @@ export interface VesselOperationDto {
   id: string
   vesselId: string
   vesselVersionId: string
-  operationType: 'ENTRY' | 'EXIT'
+  operationType: 'ENTRY' | 'EXIT' | 'MOVEMENT'
   executionStatus: ExecutionStatus
   notes: string | null
-  endpoint: {
-    id: string
-    role: 'OCCURRENCE'
-    moment: ResolvedMomentDto
-    portId: string
-    portVersionId: string
-    portName: string
-    berthId: string | null
-    berthVersionId: string | null
-    berthName: string | null
-  }
+  endpoint: OperationEndpointDto
+  arrival: OperationEndpointDto | null
   charge: OperationChargeDto
 }
+export interface OperationEndpointDto {
+  id: string
+  role: 'OCCURRENCE' | 'DEPARTURE' | 'ARRIVAL'
+  vesselVersionId: string
+  moment: ResolvedMomentDto
+  portId: string
+  portVersionId: string
+  portName: string
+  berthId: string | null
+  berthVersionId: string | null
+  berthName: string | null
+}
+export type OperationalContextDto =
+  | {
+      status: 'OUTSIDE'
+      voyageId: null
+      portCallId: null
+      berthStayId: null
+      portId: null
+      berthId: null
+    }
+  | {
+      status: 'IN_TRANSFER'
+      voyageId: string
+      portCallId: string
+      berthStayId: null
+      portId: string
+      berthId: null
+    }
+  | {
+      status: 'IN_PORT'
+      voyageId: string
+      portCallId: string
+      berthStayId: string
+      portId: string
+      berthId: string | null
+    }
 export interface StayIntervalDto {
   id: string
   openingOperationId: string
@@ -71,6 +107,9 @@ export interface OperationPreviewDto extends ChangePreviewDto {
   operationValues: VesselOperationDto
 }
 export interface OperationApi {
+  contextAt(
+    request: QueryRequest<{ vesselId: string; instant: string }>,
+  ): Promise<ApplicationResult<OperationalContextDto>>
   list(
     request: QueryRequest<{ vesselId: string; page: number; pageSize: number }>,
   ): Promise<ApplicationResult<PageDto<VesselOperationDto>>>
@@ -92,6 +131,7 @@ export interface OperationApi {
   ): Promise<ApplicationResult<OperationPreviewDto>>
 }
 export const operationChannels = {
+  contextAt: 'operations:context-at',
   list: 'operations:list',
   get: 'operations:get',
   stays: 'operations:stays',

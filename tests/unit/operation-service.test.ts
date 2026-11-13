@@ -728,3 +728,540 @@ it('un errore nell’aggiornamento metadati annulla anche attività e identità 
   ] as const)
     expect(p.effects.items.find((e) => e.reference.kind === kind)?.reference.id).toBe(id)
 })
+
+function movement(
+  departure = '2026-06-02T12:00',
+  arrival = '2026-06-02T13:00',
+  status: CreateOperationDto['executionStatus'] = 'PLANNED',
+): Extract<CreateOperationDto, { operationType: 'MOVEMENT' }> {
+  return {
+    vesselId,
+    operationType: 'MOVEMENT',
+    interpretationPortId: null,
+    moment: moment(departure),
+    arrivalMoment: moment(arrival),
+    destinationPortId: portId,
+    destinationBerthId: null,
+    executionStatus: status,
+    notes: null,
+    manualOverrideAmount: null,
+  }
+}
+const contextAt = async (instant: string) =>
+  value(
+    await operations.contextAt({
+      context: { sessionId: context().sessionId },
+      query: { vesselId, instant },
+    }),
+  )
+it('P11: partenza origine, arrivo destinazione, intervallo aperto senza ormeggio; identità e persistenza', async () => {
+  const entry = await create(),
+    first = stays()[0],
+    old = first.visits[0].stays[0]
+  const p = value(await preview(movement()))
+  expect(p.summary).toMatchObject({ created: 3, updated: 1 })
+  expect(p.operationValues.endpoint).toMatchObject({ role: 'DEPARTURE', portId, berthId })
+  expect(p.operationValues.arrival).toMatchObject({ role: 'ARRIVAL', portId, berthId: null })
+  const proposed = p.effects.items.find(
+    (e) => e.action === 'CREATE' && e.reference.kind === 'BERTH_STAY',
+  )!.reference.id
+  const before = context()
+  const move = value(
+    await operations.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }),
+  )
+  expect(BigInt(context().revision)).toBe(BigInt(before.revision) + 1n)
+  const current = stays()[0],
+    visit = current.visits[0]
+  expect(current.id).toBe(first.id)
+  expect(current.endedAt).toBeNull()
+  expect(visit.id).toBe(first.visits[0].id)
+  expect(visit.stays).toHaveLength(2)
+  expect(visit.stays[0]).toMatchObject({
+    id: old.id,
+    endedAt: move.endpoint.moment.utc,
+    closingOperationId: move.id,
+  })
+  expect(visit.stays[1]).toMatchObject({
+    id: proposed,
+    startedAt: move.arrival!.moment.utc,
+    openingOperationId: move.id,
+    berthId: null,
+  })
+  const base = { voyageId: first.id, portCallId: visit.id, portId }
+  expect(await contextAt(entry.endpoint.moment.utc)).toMatchObject({
+    ...base,
+    status: 'IN_PORT',
+    berthStayId: old.id,
+  })
+  expect(await contextAt(move.endpoint.moment.utc)).toMatchObject({
+    ...base,
+    status: 'IN_PORT',
+    berthStayId: old.id,
+    berthId,
+  })
+  expect(await contextAt('2026-06-02T10:30:00.000Z')).toEqual({
+    ...base,
+    status: 'IN_TRANSFER',
+    berthStayId: null,
+    berthId: null,
+  })
+  expect(await contextAt(move.arrival!.moment.utc)).toMatchObject({
+    ...base,
+    status: 'IN_PORT',
+    berthStayId: proposed,
+    berthId: null,
+  })
+  const exit = await create(input('EXIT', '2026-06-03T12:00'))
+  expect(exit.endpoint.berthId).toBeNull()
+  expect(await contextAt(exit.endpoint.moment.utc)).toMatchObject({
+    status: 'IN_PORT',
+    berthStayId: proposed,
+  })
+  expect(await contextAt('2026-06-03T10:01:00.000Z')).toMatchObject({ status: 'OUTSIDE' })
+  const saved = all(),
+    hierarchy = stays(),
+    revision = context().revision
+  await archives.close()
+  await archives.open(join(folder, 'a.ormeggi'))
+  expect(all()).toEqual(saved)
+  expect(stays()).toEqual(hierarchy)
+  expect(context().revision).toBe(revision)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+  expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
+})
+it('P11: due ormeggi consecutivi senza banchina restano distinti, anche in una visita già chiusa', async () => {
+  await create({ ...input(), operationType: 'ENTRY', portId, berthId: null })
+  await create(input('EXIT', '2026-06-04T12:00'))
+  const first = stays()[0]
+  const move = await create(movement())
+  const current = stays()[0]
+  expect(current.id).toBe(first.id)
+  expect(current.visits[0].id).toBe(first.visits[0].id)
+  expect(current.visits[0].stays).toHaveLength(2)
+  expect(new Set(current.visits[0].stays.map((b) => b.id)).size).toBe(2)
+  expect(current.visits[0].stays.map((b) => b.berthId)).toEqual([null, null])
+  expect(current.visits[0].stays[1]).toMatchObject({
+    openingOperationId: move.id,
+    closingOperationId: first.closingOperationId,
+    endedAt: first.endedAt,
+  })
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+})
+it('P11: MISSED conserva origine e calcolo, non trasferisce e non fornisce un contesto successivo', async () => {
+  expect(await preview(movement(undefined, undefined, 'MISSED'))).toMatchObject(
+    failure('OPERATIONAL_CONTEXT_MISSING'),
+  )
+  await create()
+  const first = stays()
+  const missed = await create({
+    ...movement(undefined, undefined, 'MISSED'),
+    manualOverrideAmount: '0.00',
+  })
+  expect(stays()).toEqual(first)
+  expect(missed.charge).toMatchObject({
+    chargeKind: 'MOVEMENT',
+    economicEndpointRole: 'DEPARTURE',
+    calculation: { base: '115.00' },
+    manualOverrideAmount: '0.00',
+    effectiveBase: '0.00',
+  })
+  expect(await contextAt('2026-06-02T10:30:00.000Z')).toMatchObject({ status: 'IN_PORT', berthId })
+  expect((await create(input('EXIT', '2026-06-02T12:30', 'MISSED'))).endpoint.berthId).toBe(berthId)
+  expect(stays()).toEqual(first)
+  await create(input('EXIT', '2026-06-03T12:00'))
+})
+it('P11: tutti gli estremi, inclusi MISSED, partecipano alle collisioni e alla sequenza completa', async () => {
+  await create()
+  await create(movement())
+  for (const status of ['PLANNED', 'PERFORMED', 'MISSED'] as const) {
+    expect(await preview(movement('2026-06-02T12:30', '2026-06-02T14:00', status))).toMatchObject(
+      failure('OPERATIONAL_CONTEXT_MISSING'),
+    )
+    expect(await preview(input('EXIT', '2026-06-02T12:30', status))).toMatchObject(
+      failure('OPERATIONAL_CONTEXT_MISSING'),
+    )
+    expect(await preview(input('ENTRY', '2026-06-02T12:30', status))).toMatchObject(
+      failure('OPERATIONAL_CONTEXT_MISSING'),
+    )
+    expect(await preview(movement('2026-06-02T13:00', '2026-06-02T14:00', status))).toMatchObject(
+      failure('OPERATION_MINUTE_CONFLICT'),
+    )
+    expect(await preview(movement('2026-06-02T11:00', '2026-06-02T12:00', status))).toMatchObject(
+      failure('OPERATION_MINUTE_CONFLICT'),
+    )
+  }
+  await create(movement('2026-06-03T12:00', '2026-06-03T13:00', 'MISSED'))
+  expect(await preview(movement('2026-06-03T11:00', '2026-06-03T14:00'))).toMatchObject(
+    failure('OPERATIONAL_CONTEXT_MISSING'),
+  )
+  expect(await preview(movement('2026-06-03T11:00', '2026-06-03T13:00', 'MISSED'))).toMatchObject(
+    failure('OPERATION_MINUTE_CONFLICT'),
+  )
+})
+it('P11: vincoli UTC stretti, gap e overlap indipendenti, ordine locale invertito valido', async () => {
+  await create({
+    ...input('ENTRY', '2026-02-01T12:00'),
+    operationType: 'ENTRY',
+    portId,
+    berthId: null,
+  })
+  for (const status of ['PLANNED', 'PERFORMED', 'MISSED'] as const)
+    for (const at of ['2026-06-02T12:00', '2026-06-02T11:59'])
+      expect(await preview(movement('2026-06-02T12:00', at, status))).toMatchObject(
+        failure('OPERATION_TIME_INVALID'),
+      )
+  expect(await preview(movement('2026-03-29T01:30', '2026-03-29T02:30'))).toMatchObject(
+    failure('LOCAL_TIME_NOT_EXISTENT'),
+  )
+  const m = movement('2026-10-25T02:45', '2026-10-25T02:15')
+  expect(await preview(m)).toMatchObject(failure('LOCAL_TIME_AMBIGUOUS'))
+  expect(await preview({ ...m, moment: moment('2026-10-25T02:45', '+02:00') })).toMatchObject(
+    failure('LOCAL_TIME_AMBIGUOUS'),
+  )
+  const result = await create({
+    ...m,
+    moment: moment('2026-10-25T02:45', '+02:00'),
+    arrivalMoment: moment('2026-10-25T02:15', '+01:00'),
+  })
+  expect(result.endpoint.moment.utc).toBe('2026-10-25T00:45:00.000Z')
+  expect(result.arrival!.moment.utc).toBe('2026-10-25T01:15:00.000Z')
+  expect(
+    await preview({
+      ...movement('2026-10-26T12:00', '2026-10-26T13:00'),
+      arrivalMoment: moment('2026-10-26T13:00', '+02:00'),
+    }),
+  ).toMatchObject(failure('INVALID_OFFSET'))
+})
+it('P11: destinazione esplicita nello stesso porto e selezionabile anche MISSED, origine storica conservata', async () => {
+  const other = value(
+    await ports.create({
+      context: context(),
+      payload: {
+        name: 'Altro',
+        locality: 'Altro',
+        countryCode: 'IT',
+        initialZoneId: 'Europe/Rome',
+      },
+    }),
+  ).id
+  const foreign = value(
+    await berths.create({ context: context(), payload: { portId: other, name: 'Altro molo' } }),
+  ).id
+  await create()
+  for (const status of ['PLANNED', 'MISSED'] as const) {
+    expect(
+      await preview({ ...movement(undefined, undefined, status), destinationPortId: other }),
+    ).toMatchObject(failure('OPERATION_DESTINATION_INVALID'))
+    expect(
+      await preview({ ...movement(undefined, undefined, status), destinationBerthId: foreign }),
+    ).toMatchObject(failure('NOT_SELECTABLE'))
+  }
+  sql().prepare("UPDATE berths SET status='INACTIVE' WHERE id=?").run(berthId)
+  expect(await preview({ ...movement(), destinationBerthId: berthId })).toMatchObject(
+    failure('NOT_SELECTABLE'),
+  )
+  const move = await create(movement())
+  expect(move.endpoint.berthId).toBe(berthId)
+  sql().prepare("UPDATE ports SET status='INACTIVE' WHERE id=?").run(portId)
+  expect(await preview(movement('2026-06-03T12:00', '2026-06-03T13:00', 'MISSED'))).toMatchObject(
+    failure('NOT_SELECTABLE'),
+  )
+})
+it('P11: tariffa, peso e versione nave alla sola partenza; ricalcoli atomici e override conservato', async () => {
+  await create()
+  await tariff('2026-06-02T12:30', '200')
+  sql().exec(
+    "UPDATE weight_versions SET weight='1.5' WHERE sequence_id=(SELECT id FROM weight_sequences WHERE operation_type='MOVEMENT')",
+  )
+  const move = await create({ ...movement(), manualOverrideAmount: '0.00' })
+  expect(move.charge.calculation).toMatchObject({
+    base: '172.50',
+    weight: '1.5',
+    ordinaryValue: '100',
+    moment: move.endpoint.moment,
+  })
+  const p = value(
+    await tariffs.previewCreate({
+      context: context(),
+      payload: { portId, moment: moment('2026-06-02T11:00'), configurations: config('300') },
+    }),
+  )
+  expect(p.summary.recalculated).toBe(1)
+  const saved = all(),
+    before = context()
+  sql().exec(
+    "CREATE TRIGGER fail_movement_charge BEFORE UPDATE ON operation_charges BEGIN SELECT RAISE(ABORT,'injected'); END",
+  )
+  expect(
+    (await tariffs.confirmCreate({ context: p.context, payload: { previewId: p.previewId } })).ok,
+  ).toBe(false)
+  expect(all()).toEqual(saved)
+  expect(context()).toEqual(before)
+  sql().exec('DROP TRIGGER fail_movement_charge')
+  value(await tariffs.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }))
+  const updated = all()[1]
+  expect(updated.charge).toMatchObject({
+    id: move.charge.id,
+    manualOverrideAmount: '0.00',
+    effectiveBase: '0.00',
+    calculation: { base: '472.50' },
+  })
+  expect(updated.arrival).toEqual(move.arrival)
+})
+it('P11: anagrafiche ai due estremi, nuove versioni durante il trasferimento e eliminazione senza riferimenti obsoleti', async () => {
+  await create()
+  await new TimeService(archives.coordinator).configureCompanyZone({
+    context: context(),
+    payload: { zoneId: 'Europe/Rome' },
+  })
+  const move = await create({ ...movement(), destinationBerthId: berthId }),
+    first = stays()[0]
+  const p = value(
+    await ports.previewInsertVersion({
+      context: context(),
+      payload: {
+        portId,
+        name: 'Nuovo porto',
+        locality: 'Genova',
+        countryCode: 'IT',
+        moment: moment('2026-06-02T12:30'),
+      },
+    }),
+  )
+  expect(
+    p.effects.items.some(
+      (e) => e.reference.id === move.id && e.reference.label.includes('ARRIVAL'),
+    ),
+  ).toBe(true)
+  value(
+    await ports.confirmInsertVersion({ context: p.context, payload: { previewId: p.previewId } }),
+  )
+  expect(all()[1].endpoint).toEqual(move.endpoint)
+  expect(all()[1].arrival!.portName).toBe('Nuovo porto')
+  const b = value(
+    await berths.preview({
+      context: context(),
+      payload: {
+        operation: 'INSERT_VERSION',
+        berthId,
+        name: 'Nuovo molo',
+        moment: moment('2026-06-02T12:30'),
+      },
+    }),
+  )
+  value(await berths.confirm({ context: b.context, payload: { previewId: b.previewId } }))
+  expect(all()[1].endpoint.berthName).toBe('Molo')
+  expect(all()[1].arrival!.berthName).toBe('Nuovo molo')
+  expect(stays()[0].visits[0].stays[1].berthVersionId).toBe(all()[1].arrival!.berthVersionId)
+  const v = value(
+    await vessels.preview({
+      context: context(),
+      payload: {
+        operation: 'INSERT_VERSION',
+        vesselId,
+        registeredName: 'Nave nuova',
+        imoNumber: null,
+        vesselTypeId: 'STANDARD',
+        size: 5000,
+        moment: moment('2026-06-02T12:30'),
+      },
+    }),
+  )
+  expect(v.summary.recalculated).toBe(0)
+  value(await vessels.confirm({ context: v.context, payload: { previewId: v.previewId } }))
+  expect(all()[1].endpoint.vesselVersionId).toBe(move.endpoint.vesselVersionId)
+  expect(all()[1].arrival!.vesselVersionId).not.toBe(move.arrival!.vesselVersionId)
+  expect(all()[1].charge).toEqual(move.charge)
+  const del = value(
+    await vessels.preview({
+      context: context(),
+      payload: {
+        operation: 'DELETE_VERSION',
+        vesselId,
+        versionId: all()[1].arrival!.vesselVersionId,
+      },
+    }),
+  )
+  expect(del.status).toBe('READY')
+  value(await vessels.confirm({ context: del.context, payload: { previewId: del.previewId } }))
+  expect(all()[1].arrival!.vesselVersionId).toBe(move.arrival!.vesselVersionId)
+  expect(stays()[0].id).toBe(first.id)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+})
+it('P11: rollback dopo chiusura origine e inserimento destinazione; retry della stessa anteprima', async () => {
+  await create()
+  const p = value(await preview(movement())),
+    saved = all(),
+    hierarchy = stays(),
+    before = context(),
+    metadata = db().metadata()
+  sql().exec(
+    "CREATE TRIGGER fail_destination BEFORE INSERT ON berth_stays BEGIN SELECT RAISE(ABORT,'injected'); END",
+  )
+  expect(
+    (await operations.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }))
+      .ok,
+  ).toBe(false)
+  expect(all()).toEqual(saved)
+  expect(stays()).toEqual(hierarchy)
+  expect(context()).toEqual(before)
+  expect(db().metadata()).toEqual(metadata)
+  sql().exec('DROP TRIGGER fail_destination')
+  value(await operations.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }))
+  expect(stays()[0].visits[0].stays).toHaveLength(2)
+})
+it('P11: IPC diretto rifiuta campi inattesi, contesto scaduto e query invalide senza scritture', async () => {
+  await create()
+  for (const extra of [
+    { originPortId: portId },
+    { arrivalMoment: { ...moment('2026-06-02T13:00'), utc: '2026-06-02T11:00:00.000Z' } },
+    { destinationBerthId: undefined },
+  ])
+    expect(
+      await preview({ ...movement(), ...extra } as unknown as CreateOperationDto),
+    ).toMatchObject(failure('VALIDATION_ERROR'))
+  expect(
+    await operations.contextAt({
+      context: { sessionId: context().sessionId },
+      query: { vesselId, instant: '2026-02-30T00:00:00.000Z' },
+    }),
+  ).toMatchObject(failure('VALIDATION_ERROR'))
+  const p = value(await preview(movement()))
+  await create(input('EXIT', '2026-06-05T12:00', 'MISSED'))
+  expect(
+    await operations.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }),
+  ).toMatchObject(failure('REVISION_CONFLICT'))
+})
+
+it('P11: MISSED non introduce trasferimenti neppure oltre una successiva uscita; ricalcolo della sola base teorica', async () => {
+  await create()
+  const missed = await create({
+    ...movement('2026-06-02T12:00', '2026-06-05T13:00', 'MISSED'),
+    manualOverrideAmount: '7.25',
+  })
+  await create(input('EXIT', '2026-06-03T12:00'))
+  const hierarchy = stays()
+  expect(await contextAt('2026-06-04T10:30:00.000Z')).toMatchObject({ status: 'OUTSIDE' })
+  const p = value(
+    await tariffs.previewCreate({
+      context: context(),
+      payload: { portId, moment: moment('2026-06-02T11:00'), configurations: config('200') },
+    }),
+  )
+  expect(p.summary.recalculated).toBe(2)
+  value(await tariffs.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }))
+  expect(all()[1].charge).toMatchObject({
+    id: missed.charge.id,
+    manualOverrideAmount: '7.25',
+    effectiveBase: '7.25',
+    calculation: { base: '215.00' },
+  })
+  expect(stays()).toEqual(hierarchy)
+})
+it('P11: rollback degli impatti di arrivo e cancellazione versioni porto/banchina senza alterare tuple o identità', async () => {
+  await create()
+  const move = await create({ ...movement(), destinationBerthId: berthId })
+  const port = value(
+    await ports.previewInsertVersion({
+      context: context(),
+      payload: {
+        portId,
+        name: 'Porto arrivo',
+        locality: 'Genova',
+        countryCode: 'IT',
+        moment: moment('2026-06-02T12:30'),
+      },
+    }),
+  )
+  const before = context(),
+    saved = all(),
+    hierarchy = stays()
+  sql().exec(
+    "CREATE TRIGGER fail_arrival BEFORE UPDATE ON operation_endpoints WHEN OLD.role='ARRIVAL' BEGIN SELECT RAISE(ABORT,'injected'); END",
+  )
+  expect(
+    (
+      await ports.confirmInsertVersion({
+        context: port.context,
+        payload: { previewId: port.previewId },
+      })
+    ).ok,
+  ).toBe(false)
+  expect(all()).toEqual(saved)
+  expect(stays()).toEqual(hierarchy)
+  expect(context()).toEqual(before)
+  sql().exec('DROP TRIGGER fail_arrival')
+  value(
+    await ports.confirmInsertVersion({
+      context: port.context,
+      payload: { previewId: port.previewId },
+    }),
+  )
+  const pv = all()[1].arrival!.portVersionId
+  expect(all()[1].arrival!.moment).toEqual(move.arrival!.moment)
+  const dp = value(
+    await ports.previewDeleteVersion({ context: context(), payload: { portId, versionId: pv } }),
+  )
+  expect(dp.status).toBe('READY')
+  value(
+    await ports.confirmDeleteVersion({ context: dp.context, payload: { previewId: dp.previewId } }),
+  )
+  expect(all()[1]).toEqual(move)
+  const berth = value(
+    await berths.preview({
+      context: context(),
+      payload: {
+        operation: 'INSERT_VERSION',
+        berthId,
+        name: 'Molo arrivo',
+        moment: moment('2026-06-02T12:30'),
+      },
+    }),
+  )
+  value(await berths.confirm({ context: berth.context, payload: { previewId: berth.previewId } }))
+  const dbv = value(
+    await berths.preview({
+      context: context(),
+      payload: {
+        operation: 'DELETE_VERSION',
+        berthId,
+        versionId: all()[1].arrival!.berthVersionId!,
+      },
+    }),
+  )
+  expect(dbv.status).toBe('READY')
+  value(await berths.confirm({ context: dbv.context, payload: { previewId: dbv.previewId } }))
+  expect(all()[1]).toEqual(move)
+  expect(stays()).toEqual(hierarchy)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+})
+it('P11: SQLite protegge ruoli, ordine dei due estremi, minuto UTC e provenienza della componente', async () => {
+  await create()
+  const move = await create(movement()),
+    saved = all()
+  expect(() =>
+    sql()
+      .prepare("UPDATE operation_endpoints SET role='OCCURRENCE' WHERE id=?")
+      .run(move.arrival!.id),
+  ).toThrow()
+  expect(() =>
+    sql()
+      .prepare('UPDATE operation_endpoints SET utc=? WHERE id=?')
+      .run(move.endpoint.moment.utc, move.arrival!.id),
+  ).toThrow()
+  expect(() =>
+    sql()
+      .prepare("UPDATE operation_charges SET economic_endpoint_role='OCCURRENCE' WHERE id=?")
+      .run(move.charge.id),
+  ).toThrow()
+  expect(() =>
+    sql().prepare("UPDATE operation_charges SET charge_kind='EXIT' WHERE id=?").run(move.charge.id),
+  ).toThrow()
+  expect(() =>
+    sql()
+      .prepare('UPDATE operation_charges SET effective_base_cents=0 WHERE id=?')
+      .run(move.charge.id),
+  ).toThrow()
+  expect(all()).toEqual(saved)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+})

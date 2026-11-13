@@ -139,6 +139,7 @@ const tariffs: TariffApi = {
 contextBridge.exposeInMainWorld('tariffs', tariffs)
 
 const operations: OperationApi = {
+  contextAt: (request) => ipcRenderer.invoke(operationChannels.contextAt, request),
   list: (request) => ipcRenderer.invoke(operationChannels.list, request),
   get: (request) => ipcRenderer.invoke(operationChannels.get, request),
   stays: (request) => ipcRenderer.invoke(operationChannels.stays, request),

@@ -1,5 +1,6 @@
 import type { VesselOperationDto } from '../../../../shared/contracts/operations'
 import { formatMoney } from '../../api/numeric-input'
+export const operationLabels = { ENTRY: 'Entrata', EXIT: 'Uscita', MOVEMENT: 'Spostamento interno' }
 export const executionLabels = { PLANNED: 'Prevista', PERFORMED: 'Effettuata', MISSED: 'Mancata' }
 export function OperationDetail({ operation: o }: { operation: VesselOperationDto }) {
   const e = o.endpoint,
@@ -8,8 +9,9 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
   return (
     <section aria-label="Dettaglio operazione" className="tariff-long-value">
       <h3>
-        {o.operationType === 'ENTRY' ? 'Entrata' : 'Uscita'} · {executionLabels[o.executionStatus]}
+        {operationLabels[o.operationType]} · {executionLabels[o.executionStatus]}
       </h3>
+      {o.arrival && <h4>Partenza · Origine</h4>}
       <p>
         {r.vesselName} · {e.portName} · {e.berthName ?? 'Banchina non specificata'}
       </p>
@@ -18,15 +20,41 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
         <br />
         UTC {e.moment.utc}
       </p>
+      {o.arrival && (
+        <>
+          <h4>Arrivo · Destinazione</h4>
+          <p>
+            {o.arrival.portName} · {o.arrival.berthName ?? 'Banchina non specificata'}
+          </p>
+          <p>
+            {o.arrival.moment.localDateTime} · {o.arrival.moment.zoneId} · offset{' '}
+            {o.arrival.moment.offset}
+            <br />
+            UTC {o.arrival.moment.utc}
+          </p>
+          <details>
+            <summary>Riferimenti di arrivo</summary>
+            <p>
+              Versione nave: {o.arrival.vesselVersionId}
+              <br />
+              Versione porto: {o.arrival.portVersionId}
+              <br />
+              Versione banchina: {o.arrival.berthVersionId ?? '—'}
+            </p>
+          </details>
+        </>
+      )}
       <p>
         {o.executionStatus === 'MISSED'
           ? 'Nessun effetto sulle permanenze.'
           : o.operationType === 'ENTRY'
             ? 'Apre viaggio, visita e ormeggio.'
-            : 'Chiude viaggio, visita e ormeggio.'}{' '}
+            : o.operationType === 'MOVEMENT'
+              ? 'Chiude l’ormeggio di origine e apre quello di destinazione nella stessa visita e nello stesso viaggio.'
+              : 'Chiude viaggio, visita e ormeggio.'}{' '}
         Lo stato non cambia con il trascorrere del tempo.
       </p>
-      <h4>Base economica · EUR</h4>
+      <h4>Base economica · EUR{o.arrival ? ' · MOVEMENT alla partenza' : ''}</h4>
       <p>
         Valore tariffario: {formatMoney(r.tariffValue)} · Peso: {r.weight}
       </p>

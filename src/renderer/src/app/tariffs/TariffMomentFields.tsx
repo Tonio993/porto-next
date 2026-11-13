@@ -9,6 +9,8 @@ export function TariffMomentFields({
   onResolve,
   disabled,
   economic = false,
+  label,
+  resolveLabel,
 }: {
   moment: MomentInputDto
   onChange: (value: MomentInputDto) => void
@@ -16,13 +18,15 @@ export function TariffMomentFields({
   onResolve: () => void
   disabled: boolean
   economic?: boolean
+  label?: string
+  resolveLabel?: string
 }) {
   return (
     <Stack gap="xs">
       <TextInput
         data-autofocus
         type="datetime-local"
-        label={economic ? 'Momento economico locale' : 'Decorrenza locale'}
+        label={label ?? (economic ? 'Momento economico locale' : 'Decorrenza locale')}
         min="0001-01-01T00:00"
         max="9999-12-31T23:59"
         step={60}
@@ -33,7 +37,7 @@ export function TariffMomentFields({
       />
       <Group>
         <Button variant="default" disabled={disabled || !moment.localDateTime} onClick={onResolve}>
-          {economic ? 'Verifica momento' : 'Verifica decorrenza'}
+          {resolveLabel ?? (economic ? 'Verifica momento' : 'Verifica decorrenza')}
         </Button>
       </Group>
       {resolution?.status === 'CHOICE_REQUIRED' && (

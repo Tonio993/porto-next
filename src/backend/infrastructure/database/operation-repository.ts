@@ -2,6 +2,8 @@ import type {
   VesselOperationDto,
   VoyageDto,
   StayIntervalDto,
+  OperationalContextDto,
+  OperationEndpointDto,
 } from '../../../shared/contracts/operations'
 import type { BaseCalculationDto } from '../../../shared/contracts/tariffs'
 import type { PageDto } from '../../../shared/contracts/master-data'
@@ -20,7 +22,7 @@ export interface OpeningIds {
 interface ChargeRow {
   id: string
   operation_id: string
-  charge_kind: 'ENTRY' | 'EXIT'
+  charge_kind: 'ENTRY' | 'EXIT' | 'MOVEMENT'
   tariff_id: string
   configuration_id: string
   bracket_id: string
@@ -53,22 +55,25 @@ export class OperationRepository {
         `SELECT id, vessel_id AS vesselId, vessel_version_id AS vesselVersionId,
       operation_type AS operationType, execution_status AS executionStatus, notes FROM vessel_operations WHERE id = ?`,
       )
-      .get(id) as Omit<VesselOperationDto, 'endpoint' | 'charge'> | undefined
+      .get(id) as Omit<VesselOperationDto, 'endpoint' | 'arrival' | 'charge'> | undefined
     if (!op) throw new ArchiveError('NOT_FOUND', 'L’operazione non esiste.')
-    const end = sql
+    const ends = sql
       .prepare(
         `SELECT e.*, p.name AS port_name, b.name AS berth_name FROM operation_endpoints e
       JOIN port_versions p ON p.id = e.port_version_id LEFT JOIN berth_versions b ON b.id = e.berth_version_id WHERE e.operation_id = ?`,
       )
-      .get(id) as MomentColumns & {
+      .all(id) as (MomentColumns & {
       id: string
+      role: OperationEndpointDto['role']
+      vessel_version_id: string
       port_id: string
       port_version_id: string
       berth_id: string | null
       berth_version_id: string | null
       port_name: string
       berth_name: string | null
-    }
+    })[]
+    const end = ends.find((e) => e.role !== 'ARRIVAL')!
     const c = sql
       .prepare(
         `SELECT c.*, CAST(tariff_value_cents AS TEXT) AS tariff_value_cents,
@@ -80,23 +85,28 @@ export class OperationRepository {
     if (!end || !c) throw new ArchiveError('INVALID_ARCHIVE', 'L’operazione salvata è incompleta.')
     const moment = momentFromColumns(end)
     const money = (cents: string) => Money.fromCents(BigInt(cents)).text
+    const endpoint = (end: (typeof ends)[number]): OperationEndpointDto => ({
+      id: end.id,
+      role: end.role,
+      vesselVersionId: end.vessel_version_id,
+      moment: momentFromColumns(end),
+      portId: end.port_id,
+      portVersionId: end.port_version_id,
+      portName: end.port_name,
+      berthId: end.berth_id,
+      berthVersionId: end.berth_version_id,
+      berthName: end.berth_name,
+    })
     return {
       ...op,
-      endpoint: {
-        id: end.id,
-        role: 'OCCURRENCE',
-        moment,
-        portId: end.port_id,
-        portVersionId: end.port_version_id,
-        portName: end.port_name,
-        berthId: end.berth_id,
-        berthVersionId: end.berth_version_id,
-        berthName: end.berth_name,
-      },
+      endpoint: endpoint(end),
+      arrival: ends.find((e) => e.role === 'ARRIVAL')
+        ? endpoint(ends.find((e) => e.role === 'ARRIVAL')!)
+        : null,
       charge: {
         id: c.id,
         chargeKind: c.charge_kind,
-        economicEndpointRole: 'OCCURRENCE',
+        economicEndpointRole: op.operationType === 'MOVEMENT' ? 'DEPARTURE' : 'OCCURRENCE',
         manualOverrideAmount:
           c.manual_override_cents === null ? null : money(c.manual_override_cents),
         effectiveBase: money(c.effective_base_cents),
@@ -132,7 +142,7 @@ export class OperationRepository {
     const ids = this.database.sqlite
       .prepare(
         `SELECT o.id FROM vessel_operations o JOIN operation_endpoints e ON e.operation_id=o.id
-      ${vesselId ? 'WHERE o.vessel_id=?' : ''} ORDER BY e.utc, o.id`,
+      WHERE e.role <> 'ARRIVAL' ${vesselId ? 'AND o.vessel_id=?' : ''} ORDER BY e.utc, o.id`,
       )
       .all(...(vesselId ? [vesselId] : [])) as { id: string }[]
     return ids.map(({ id }) => this.get(id))
@@ -146,25 +156,70 @@ export class OperationRepository {
     const ids = sql
       .prepare(
         `SELECT o.id FROM vessel_operations o JOIN operation_endpoints e ON e.operation_id=o.id
-      WHERE o.vessel_id=? ORDER BY e.utc DESC LIMIT ? OFFSET ?`,
+      WHERE o.vessel_id=? AND e.role <> 'ARRIVAL' ORDER BY e.utc DESC LIMIT ? OFFSET ?`,
       )
       .all(vesselId, pageSize, (page - 1) * pageSize) as { id: string }[]
     return { items: ids.map(({ id }) => this.get(id)), total, page, pageSize }
   }
-  openIds(vesselId: string, utc: string): OpeningIds {
-    const row = this.database.sqlite
+  contextAt(vesselId: string, utc: string): OperationalContextDto {
+    const sql = this.database.sqlite
+    const voyage = sql
       .prepare(
-        `SELECT v.id AS voyageId,p.id AS portCallId,b.id AS berthStayId
-      FROM voyages v JOIN port_calls p ON p.voyage_id=v.id JOIN berth_stays b ON b.port_call_id=p.id
-      WHERE v.vessel_id=? AND v.started_at < ? AND v.ended_at IS NULL AND p.ended_at IS NULL AND b.ended_at IS NULL`,
+        'SELECT id FROM voyages WHERE vessel_id=? AND started_at<=? AND (ended_at IS NULL OR ended_at>=?)',
       )
-      .get(vesselId, utc) as OpeningIds | undefined
-    if (!row)
+      .get(vesselId, utc, utc) as { id: string } | undefined
+    if (!voyage)
+      return {
+        status: 'OUTSIDE',
+        voyageId: null,
+        portCallId: null,
+        berthStayId: null,
+        portId: null,
+        berthId: null,
+      }
+    const visit = sql
+      .prepare(
+        'SELECT id,port_id FROM port_calls WHERE voyage_id=? AND started_at<=? AND (ended_at IS NULL OR ended_at>=?)',
+      )
+      .get(voyage.id, utc, utc) as { id: string; port_id: string }
+    const stay = sql
+      .prepare(
+        'SELECT id,berth_id FROM berth_stays WHERE port_call_id=? AND started_at<=? AND (ended_at IS NULL OR ended_at>=?)',
+      )
+      .get(visit.id, utc, utc) as { id: string; berth_id: string | null } | undefined
+    return stay
+      ? {
+          status: 'IN_PORT',
+          voyageId: voyage.id,
+          portCallId: visit.id,
+          berthStayId: stay.id,
+          portId: visit.port_id,
+          berthId: stay.berth_id,
+        }
+      : {
+          status: 'IN_TRANSFER',
+          voyageId: voyage.id,
+          portCallId: visit.id,
+          berthStayId: null,
+          portId: visit.port_id,
+          berthId: null,
+        }
+  }
+  openIds(vesselId: string, utc: string): OpeningIds {
+    const context = this.contextAt(vesselId, utc)
+    if (context.status !== 'IN_PORT')
       throw new ArchiveError(
         'OPERATIONAL_CONTEXT_MISSING',
-        'Il contesto aperto da chiudere non esiste.',
+        'Il contesto di origine non esiste o la nave è in trasferimento.',
       )
-    return row
+    return context
+  }
+  stayClosure(id: string): { closingOperationId: string | null; endedAt: string | null } {
+    return this.database.sqlite
+      .prepare(
+        'SELECT closing_operation_id AS closingOperationId,ended_at AS endedAt FROM berth_stays WHERE id=?',
+      )
+      .get(id) as { closingOperationId: string | null; endedAt: string | null }
   }
   insert(op: VesselOperationDto, openingIds: OpeningIds): void {
     const sql = this.database.sqlite,
@@ -181,24 +236,28 @@ export class OperationRepository {
         op.notes,
         new Date().toISOString(),
       )
-    sql
-      .prepare(
-        `INSERT INTO operation_endpoints (id,operation_id,vessel_id,role,port_id,port_version_id,berth_id,berth_version_id,local_date_time,zone_id,utc_offset,utc)
-      VALUES (?,?,?,'OCCURRENCE',?,?,?,?,?,?,?,?)`,
-      )
-      .run(
-        e.id,
-        op.id,
-        op.vesselId,
-        e.portId,
-        e.portVersionId,
-        e.berthId,
-        e.berthVersionId,
-        m.local_date_time,
-        m.zone_id,
-        m.utc_offset,
-        m.utc,
-      )
+    for (const endpoint of [op.endpoint, ...(op.arrival ? [op.arrival] : [])]) {
+      const m = momentToColumns(endpoint.moment)
+      sql
+        .prepare(
+          'INSERT INTO operation_endpoints (id,operation_id,vessel_id,role,vessel_version_id,port_id,port_version_id,berth_id,berth_version_id,local_date_time,zone_id,utc_offset,utc) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        )
+        .run(
+          endpoint.id,
+          op.id,
+          op.vesselId,
+          endpoint.role,
+          endpoint.vesselVersionId,
+          endpoint.portId,
+          endpoint.portVersionId,
+          endpoint.berthId,
+          endpoint.berthVersionId,
+          m.local_date_time,
+          m.zone_id,
+          m.utc_offset,
+          m.utc,
+        )
+    }
     this.saveCharge(op)
     if (op.executionStatus === 'MISSED') return
     if (op.operationType === 'ENTRY') {
@@ -218,6 +277,28 @@ export class OperationRepository {
           'INSERT INTO berth_stays (id,port_call_id,port_id,berth_id,berth_version_id,opening_operation_id,started_at) VALUES (?,?,?,?,?,?,?)',
         )
         .run(berthStayId, callId, e.portId, e.berthId, e.berthVersionId, op.id, m.utc)
+    } else if (op.operationType === 'MOVEMENT') {
+      const ids = this.openIds(op.vesselId, e.moment.utc),
+        arrival = op.arrival!
+      const old = this.stayClosure(ids.berthStayId)
+      sql
+        .prepare('UPDATE berth_stays SET closing_operation_id=?,ended_at=? WHERE id=?')
+        .run(op.id, e.moment.utc, ids.berthStayId)
+      sql
+        .prepare(
+          'INSERT INTO berth_stays (id,port_call_id,port_id,berth_id,berth_version_id,opening_operation_id,started_at,closing_operation_id,ended_at) VALUES (?,?,?,?,?,?,?,?,?)',
+        )
+        .run(
+          openingIds.berthStayId,
+          ids.portCallId,
+          arrival.portId,
+          arrival.berthId,
+          arrival.berthVersionId,
+          op.id,
+          arrival.moment.utc,
+          old.closingOperationId,
+          old.endedAt,
+        )
     } else {
       const voyage = sql
         .prepare('SELECT id FROM voyages WHERE vessel_id=? AND started_at < ? AND ended_at IS NULL')

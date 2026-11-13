@@ -370,7 +370,7 @@ export const vesselOperations = sqliteTable(
     createdAt: text('created_at').notNull(),
   },
   (table) => [
-    check('vessel_operations_check_0', sql`operation_type IN ('ENTRY', 'EXIT')`),
+    check('vessel_operations_check_0', sql`operation_type IN ('ENTRY', 'EXIT', 'MOVEMENT')`),
     check('vessel_operations_check_1', sql`execution_status IN ('PLANNED', 'PERFORMED', 'MISSED')`),
     check('vessel_operations_check_2', sql`notes IS NULL OR length(notes) <= 10000`),
     uniqueIndex('vessel_operations_unique_3').on(table.id, table.vesselId),
@@ -385,7 +385,8 @@ export const operationEndpoints = sqliteTable(
   'operation_endpoints',
   {
     id: text('id').primaryKey().notNull(),
-    operationId: text('operation_id').notNull().unique(),
+    operationId: text('operation_id').notNull(),
+    vesselVersionId: text('vessel_version_id').notNull(),
     vesselId: text('vessel_id').notNull(),
     role: text('role').notNull(),
     portId: text('port_id')
@@ -401,9 +402,14 @@ export const operationEndpoints = sqliteTable(
     utcMinute: text('utc_minute').generatedAlwaysAs(sql`substr(utc,1,16)`, { mode: 'stored' }),
   },
   (table) => [
-    check('operation_endpoints_check_0', sql`role = 'OCCURRENCE'`),
+    check('operation_endpoints_check_0', sql`role IN ('OCCURRENCE', 'DEPARTURE', 'ARRIVAL')`),
     uniqueIndex('operation_endpoints_unique_1').on(table.vesselId, table.utcMinute),
     uniqueIndex('operation_endpoints_unique_2').on(table.operationId, table.utc),
+    uniqueIndex('operation_endpoints_role').on(table.operationId, table.role),
+    foreignKey({
+      columns: [table.vesselVersionId, table.vesselId],
+      foreignColumns: [vesselVersions.id, vesselVersions.vesselId],
+    }),
     check('operation_endpoints_check_3', sql`(berth_id IS NULL) = (berth_version_id IS NULL)`),
     foreignKey({
       columns: [table.operationId, table.vesselId],
@@ -463,8 +469,15 @@ export const operationCharges = sqliteTable(
     calculationSteps: text('calculation_steps').notNull(),
   },
   (table) => [
-    check('operation_charges_check_0', sql`charge_kind IN ('ENTRY', 'EXIT')`),
-    check('operation_charges_check_1', sql`economic_endpoint_role = 'OCCURRENCE'`),
+    check('operation_charges_check_0', sql`charge_kind IN ('ENTRY', 'EXIT', 'MOVEMENT')`),
+    check(
+      'operation_charges_check_1',
+      sql`(charge_kind = 'MOVEMENT' AND economic_endpoint_role = 'DEPARTURE') OR (charge_kind IN ('ENTRY','EXIT') AND economic_endpoint_role = 'OCCURRENCE')`,
+    ),
+    foreignKey({
+      columns: [table.operationId, table.economicEndpointRole],
+      foreignColumns: [operationEndpoints.operationId, operationEndpoints.role],
+    }),
     check('operation_charges_check_2', sql`size >= 0 AND size <= 9007199254740991`),
     check('operation_charges_check_3', sql`upper_limit >= 0`),
     check('operation_charges_check_4', sql`extra_width > 0`),

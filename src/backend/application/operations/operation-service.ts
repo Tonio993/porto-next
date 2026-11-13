@@ -4,11 +4,12 @@ import type {
   OperationMomentInput,
   OperationMomentDto,
   VesselOperationDto,
+  OperationEndpointDto,
 } from '../../../shared/contracts/operations'
 import type { ChangeEffectDto } from '../../../shared/contracts/master-data'
 import { ArchiveError } from '../../../shared/errors/archive-error'
 import { validateOperationSequence } from '../../domain/operations/sequence'
-import { resolveMoment } from '../../domain/values/moments'
+import { resolveMoment, utcInstant } from '../../domain/values/moments'
 import { Money } from '../../domain/values/numbers'
 import {
   OperationRepository,
@@ -27,8 +28,8 @@ const namespace = 'OPERATION_CREATE'
 type PreparedOperation = VesselOperationDto & { openingIds: OpeningIds }
 const kind = (value: unknown) => {
   const type = (value as { operationType?: unknown } | null)?.operationType
-  if (type !== 'ENTRY' && type !== 'EXIT')
-    throw new ArchiveError('VALIDATION_ERROR', 'Scegli entrata o uscita.')
+  if (type !== 'ENTRY' && type !== 'EXIT' && type !== 'MOVEMENT')
+    throw new ArchiveError('VALIDATION_ERROR', 'Scegli entrata, uscita o spostamento interno.')
   return type
 }
 function parseMoment(
@@ -42,32 +43,56 @@ function parseMoment(
     'moment',
     ...extra,
     ...(operationType === 'ENTRY' ? ['portId', 'berthId'] : ['interpretationPortId']),
+    ...(operationType === 'MOVEMENT'
+      ? ['destinationPortId', 'destinationBerthId', 'arrivalMoment']
+      : []),
   ])
   const common = {
-    operationType,
     vesselId: entityId(input.vesselId, 'vesselId'),
     moment: momentInput(input.moment),
   }
-  const target: OperationMomentInput =
-    operationType === 'ENTRY'
-      ? {
-          ...common,
-          operationType,
-          portId: entityId(input.portId, 'portId'),
-          berthId: input.berthId === null ? null : entityId(input.berthId, 'berthId'),
-        }
-      : {
-          ...common,
-          operationType,
-          interpretationPortId:
-            input.interpretationPortId === null
-              ? null
-              : entityId(input.interpretationPortId, 'interpretationPortId'),
-        }
-  return { input, target }
+  if (operationType === 'ENTRY')
+    return {
+      input,
+      target: {
+        ...common,
+        operationType,
+        portId: entityId(input.portId, 'portId'),
+        berthId: input.berthId === null ? null : entityId(input.berthId, 'berthId'),
+      },
+    }
+  const origin = {
+    ...common,
+    interpretationPortId:
+      input.interpretationPortId === null
+        ? null
+        : entityId(input.interpretationPortId, 'interpretationPortId'),
+  }
+  if (operationType === 'EXIT') return { input, target: { ...origin, operationType } }
+  return {
+    input,
+    target: {
+      ...origin,
+      operationType,
+      destinationPortId: entityId(input.destinationPortId, 'destinationPortId'),
+      destinationBerthId:
+        input.destinationBerthId === null
+          ? null
+          : entityId(input.destinationBerthId, 'destinationBerthId'),
+      arrivalMoment: momentInput(input.arrivalMoment),
+    },
+  }
 }
 export class OperationService implements OperationApi {
   constructor(private readonly coordinator: ArchiveCoordinator) {}
+  contextAt: OperationApi['contextAt'] = (request) =>
+    this.coordinator.query(request, (s, q) => {
+      const i = record(q, ['vesselId', 'instant']),
+        id = entityId(i.vesselId, 'vesselId'),
+        instant = utcInstant(i.instant)
+      new VesselRepository(s.database, new Date().toISOString()).get(id)
+      return new OperationRepository(s.database).contextAt(id, instant)
+    })
   list: OperationApi['list'] = (request) =>
     this.coordinator.query(request, (s, q) => {
       const i = record(q, ['vesselId', 'page', 'pageSize']),
@@ -106,7 +131,8 @@ export class OperationService implements OperationApi {
         ),
       }
     }
-    const operations = new OperationRepository(s.database).all(input.vesselId)
+    const repository = new OperationRepository(s.database)
+    const operations = repository.all(input.vesselId)
     const portIds = [
       ...new Set(
         operations
@@ -127,8 +153,10 @@ export class OperationService implements OperationApi {
         const moments = resolution.status === 'RESOLVED' ? [resolution.moment] : resolution.choices
         if (
           resolution.status === 'RESOLVED' &&
-          operations.some(
-            (o) => o.endpoint.moment.utc.slice(0, 16) === resolution.moment.utc.slice(0, 16),
+          operations.some((o) =>
+            [o.endpoint, o.arrival].some(
+              (e) => e?.moment.utc.slice(0, 16) === resolution.moment.utc.slice(0, 16),
+            ),
           )
         )
           throw new ArchiveError(
@@ -136,11 +164,9 @@ export class OperationService implements OperationApi {
             'La nave ha già un estremo operativo nello stesso minuto UTC.',
           )
         const valid = moments.flatMap((moment) => {
-          const previous = operations
-            .filter((o) => o.executionStatus !== 'MISSED' && o.endpoint.moment.utc < moment.utc)
-            .at(-1)
-          return previous?.operationType === 'ENTRY' && previous.endpoint.portId === portId
-            ? [{ moment, berthId: previous.endpoint.berthId }]
+          const context = repository.contextAt(input.vesselId, moment.utc)
+          return context.status === 'IN_PORT' && context.portId === portId
+            ? [{ moment, berthId: context.berthId }]
             : []
         })
         if (valid.length)
@@ -167,19 +193,37 @@ export class OperationService implements OperationApi {
       if (resolutionError && portIds.length === 1) throw resolutionError
       throw new ArchiveError(
         'OPERATIONAL_CONTEXT_MISSING',
-        'Non esiste un viaggio aperto al momento dell’uscita.',
+        'Non esiste un contesto aperto al momento indicato o la nave è in trasferimento.',
       )
     }
-    return candidates[0]
+    const result = candidates[0]
+    if (input.operationType === 'MOVEMENT') {
+      if (input.destinationPortId !== result.portId)
+        throw new ArchiveError(
+          'OPERATION_DESTINATION_INVALID',
+          'Lo spostamento interno richiede lo stesso porto di origine e destinazione.',
+        )
+      result.arrivalResolution = resolveMoment(
+        input.arrivalMoment.localDateTime,
+        ports.get(input.destinationPortId).initialZoneId,
+        input.arrivalMoment.selectedOffset,
+      )
+    }
+    return result
   }
   private validate(s: ArchiveApplicationSession, operation: VesselOperationDto) {
     const now = new Date().toISOString(),
       e = operation.endpoint
     new VesselRepository(s.database, now).requireSelectable(operation.vesselId)
-    if (operation.operationType === 'ENTRY') {
-      if (new PortRepository(s.database, () => now).get(e.portId).status !== 'ACTIVE')
+    if (operation.operationType === 'ENTRY' || operation.operationType === 'MOVEMENT') {
+      const destination = operation.arrival ?? e
+      if (new PortRepository(s.database, () => now).get(destination.portId).status !== 'ACTIVE')
         throw new ArchiveError('NOT_SELECTABLE', 'Il porto non è selezionabile.')
-      if (e.berthId) new BerthRepository(s.database, now).requireSelectable(e.portId, e.berthId)
+      if (destination.berthId)
+        new BerthRepository(s.database, now).requireSelectable(
+          destination.portId,
+          destination.berthId,
+        )
     }
     validateOperationSequence([
       ...new OperationRepository(s.database).all(operation.vesselId),
@@ -190,7 +234,12 @@ export class OperationService implements OperationApi {
     const reference = {
       kind: 'VESSEL_OPERATION' as const,
       id: op.id,
-      label: op.operationType === 'ENTRY' ? 'Entrata' : 'Uscita',
+      label:
+        op.operationType === 'ENTRY'
+          ? 'Entrata'
+          : op.operationType === 'MOVEMENT'
+            ? 'Spostamento interno'
+            : 'Uscita',
     }
     const effects: ChangeEffectDto[] = [
       {
@@ -202,6 +251,13 @@ export class OperationService implements OperationApi {
           { field: 'moment', before: null, after: op.endpoint.moment.utc },
           { field: 'port', before: null, after: op.endpoint.portName },
           { field: 'berth', before: null, after: op.endpoint.berthName },
+          ...(op.arrival
+            ? [
+                { field: 'arrival', before: null, after: op.arrival.moment.utc },
+                { field: 'destinationPort', before: null, after: op.arrival.portName },
+                { field: 'destinationBerth', before: null, after: op.arrival.berthName },
+              ]
+            : []),
         ],
       },
       {
@@ -215,7 +271,38 @@ export class OperationService implements OperationApi {
         ],
       },
     ]
-    if (op.executionStatus !== 'MISSED') {
+    if (op.executionStatus !== 'MISSED' && op.operationType === 'MOVEMENT') {
+      const repository = new OperationRepository(s.database)
+      const ids = repository.openIds(op.vesselId, op.endpoint.moment.utc)
+      const closure = repository.stayClosure(ids.berthStayId)
+      effects.push(
+        {
+          reference: { kind: 'BERTH_STAY', id: ids.berthStayId, label: 'Ormeggio di origine' },
+          versionId: null,
+          action: 'UPDATE',
+          changes: [
+            { field: 'endedAt', before: closure.endedAt, after: op.endpoint.moment.utc },
+            { field: 'closingOperationId', before: closure.closingOperationId, after: op.id },
+          ],
+        },
+        {
+          reference: {
+            kind: 'BERTH_STAY',
+            id: op.openingIds.berthStayId,
+            label: 'Ormeggio di destinazione',
+          },
+          versionId: null,
+          action: 'CREATE',
+          changes: [
+            { field: 'startedAt', before: null, after: op.arrival!.moment.utc },
+            { field: 'portCallId', before: null, after: ids.portCallId },
+            { field: 'berth', before: null, after: op.arrival!.berthName },
+            { field: 'endedAt', before: null, after: closure.endedAt },
+            { field: 'closingOperationId', before: null, after: closure.closingOperationId },
+          ],
+        },
+      )
+    } else if (op.executionStatus !== 'MISSED') {
       const ids =
         op.operationType === 'ENTRY'
           ? op.openingIds
@@ -263,7 +350,10 @@ export class OperationService implements OperationApi {
           ? null
           : Money.parse(input.manualOverrideAmount, 'manualOverrideAmount').text
       const resolved = this.resolve(s, target)
-      if (resolved.resolution.status !== 'RESOLVED')
+      if (
+        resolved.resolution.status !== 'RESOLVED' ||
+        resolved.arrivalResolution?.status === 'CHOICE_REQUIRED'
+      )
         throw new ArchiveError(
           'LOCAL_TIME_AMBIGUOUS',
           'Scegli esplicitamente l’occorrenza del momento operativo.',
@@ -272,41 +362,66 @@ export class OperationService implements OperationApi {
         now = new Date().toISOString()
       const ports = new PortRepository(s.database, () => now),
         berths = new BerthRepository(s.database, now)
-      const portVersion = ports
-        .versions(resolved.portId)
-        .find(
-          (v) =>
-            (!v.effectiveFrom || v.effectiveFrom <= moment.utc) &&
-            (!v.effectiveTo || moment.utc < v.effectiveTo),
-        )!
-      const berthVersion = resolved.berthId
-        ? berths
-            .versions(resolved.berthId)
-            .find(
-              (v) =>
-                (!v.effectiveFrom || v.effectiveFrom <= moment.utc) &&
-                (!v.effectiveTo || moment.utc < v.effectiveTo),
-            )!
-        : null
+      const endpoint = (
+        portId: string,
+        berthId: string | null,
+        moment: OperationEndpointDto['moment'],
+        role: OperationEndpointDto['role'],
+      ): OperationEndpointDto => {
+        const applicable = <T extends { effectiveFrom: string | null; effectiveTo: string | null }>(
+          versions: readonly T[],
+        ) =>
+          versions.find(
+            (v) =>
+              (!v.effectiveFrom || v.effectiveFrom <= moment.utc) &&
+              (!v.effectiveTo || moment.utc < v.effectiveTo),
+          )!
+        const portVersion = applicable(ports.versions(portId)),
+          berthVersion = berthId ? applicable(berths.versions(berthId)) : null
+        const vesselVersion = applicable(
+          new VesselRepository(s.database, now).versions(target.vesselId),
+        )
+        return {
+          id: randomUUID(),
+          role,
+          vesselVersionId: vesselVersion.id,
+          moment,
+          portId,
+          portVersionId: portVersion.id,
+          portName: portVersion.name,
+          berthId,
+          berthVersionId: berthVersion?.id ?? null,
+          berthName: berthVersion?.name ?? null,
+        }
+      }
       const operation: PreparedOperation = {
-        openingIds: { voyageId: randomUUID(), portCallId: randomUUID(), berthStayId: randomUUID() },
+        openingIds: {
+          ...(target.operationType === 'MOVEMENT'
+            ? new OperationRepository(s.database).openIds(target.vesselId, moment.utc)
+            : { voyageId: randomUUID(), portCallId: randomUUID() }),
+          berthStayId: randomUUID(),
+        },
         id: randomUUID(),
         vesselId: target.vesselId,
         vesselVersionId: '',
         operationType: target.operationType,
         executionStatus: input.executionStatus as VesselOperationDto['executionStatus'],
         notes: input.notes as string | null,
-        endpoint: {
-          id: randomUUID(),
-          role: 'OCCURRENCE',
+        endpoint: endpoint(
+          resolved.portId,
+          resolved.berthId,
           moment,
-          portId: resolved.portId,
-          portVersionId: portVersion.id,
-          portName: portVersion.name,
-          berthId: resolved.berthId,
-          berthVersionId: berthVersion?.id ?? null,
-          berthName: berthVersion?.name ?? null,
-        },
+          target.operationType === 'MOVEMENT' ? 'DEPARTURE' : 'OCCURRENCE',
+        ),
+        arrival:
+          target.operationType === 'MOVEMENT' && resolved.arrivalResolution?.status === 'RESOLVED'
+            ? endpoint(
+                target.destinationPortId,
+                target.destinationBerthId,
+                resolved.arrivalResolution.moment,
+                'ARRIVAL',
+              )
+            : null,
         charge: null!,
       }
       this.validate(s, operation)
@@ -320,7 +435,7 @@ export class OperationService implements OperationApi {
       operation.charge = {
         id: randomUUID(),
         chargeKind: target.operationType,
-        economicEndpointRole: 'OCCURRENCE',
+        economicEndpointRole: target.operationType === 'MOVEMENT' ? 'DEPARTURE' : 'OCCURRENCE',
         calculation,
         manualOverrideAmount: override,
         effectiveBase: override ?? calculation.base,
@@ -358,7 +473,7 @@ export class OperationService implements OperationApi {
         pageSize,
       },
       warnings: [
-        'L’importo è una base in EUR. Spostamenti, consuntivazione e correzioni strutturali non sono ancora disponibili.',
+        'L’importo è una base in EUR. Spostamenti tra porti, consuntivazione e correzioni strutturali non sono ancora disponibili.',
       ],
       blockers: [],
       operationValues: {
@@ -369,6 +484,7 @@ export class OperationService implements OperationApi {
         executionStatus: op.executionStatus,
         notes: op.notes,
         endpoint: op.endpoint,
+        arrival: op.arrival,
         charge: op.charge,
       },
     }

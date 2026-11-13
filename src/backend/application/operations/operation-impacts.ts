@@ -123,43 +123,57 @@ export function masterOperationImpacts(database: DatabaseSession, change: Master
         {
           kind: 'OPERATION_CHARGE',
           id: op.charge.id,
-          label: `Componente ${op.operationType} · ${op.endpoint.moment.utc}`,
+          label: 'Componente ' + op.operationType + ' · ' + op.endpoint.moment.utc,
         },
         { ...original.charge.calculation, effectiveBase: original.charge.effectiveBase },
         { ...op.charge.calculation, effectiveBase: op.charge.effectiveBase },
       )
       effects.push(...economic)
       if (economic.length) recalculated++
-    } else if (change.kind === 'PORT' && op.endpoint.portId === change.id) {
-      const version = at(change.versions, op.endpoint.moment.utc)
-      op.endpoint = { ...op.endpoint, portVersionId: version.id, portName: version.name }
-    } else if (change.kind === 'BERTH' && op.endpoint.berthId === change.id) {
-      const version = at(change.versions, op.endpoint.moment.utc)
-      op.endpoint = { ...op.endpoint, berthVersionId: version.id, berthName: version.name }
-    } else continue
-    effects.push(
-      ...diff(
-        {
-          kind: 'VESSEL_OPERATION',
-          id: op.id,
-          label: `Operazione ${op.operationType} · ${op.endpoint.moment.utc}`,
-        },
-        {
-          vesselVersionId: original.vesselVersionId,
-          portVersionId: original.endpoint.portVersionId,
-          port: original.endpoint.portName,
-          berthVersionId: original.endpoint.berthVersionId,
-          berth: original.endpoint.berthName,
-        },
-        {
-          vesselVersionId: op.vesselVersionId,
-          portVersionId: op.endpoint.portVersionId,
-          port: op.endpoint.portName,
-          berthVersionId: op.endpoint.berthVersionId,
-          berth: op.endpoint.berthName,
-        },
-      ),
-    )
+    }
+    for (const endpoint of [op.endpoint, ...(op.arrival ? [op.arrival] : [])]) {
+      const before = { ...endpoint }
+      if (change.kind === 'VESSEL')
+        endpoint.vesselVersionId = at(change.versions, endpoint.moment.utc).id
+      else if (change.kind === 'PORT' && endpoint.portId === change.id) {
+        const version = at(change.versions, endpoint.moment.utc)
+        endpoint.portVersionId = version.id
+        endpoint.portName = version.name
+      } else if (change.kind === 'BERTH' && endpoint.berthId === change.id) {
+        const version = at(change.versions, endpoint.moment.utc)
+        endpoint.berthVersionId = version.id
+        endpoint.berthName = version.name
+      }
+      effects.push(
+        ...diff(
+          {
+            kind: 'VESSEL_OPERATION',
+            id: op.id,
+            label:
+              'Operazione ' +
+              op.operationType +
+              ' · ' +
+              endpoint.role +
+              ' · ' +
+              endpoint.moment.utc,
+          },
+          {
+            vesselVersionId: before.vesselVersionId,
+            portVersionId: before.portVersionId,
+            port: before.portName,
+            berthVersionId: before.berthVersionId,
+            berth: before.berthName,
+          },
+          {
+            vesselVersionId: endpoint.vesselVersionId,
+            portVersionId: endpoint.portVersionId,
+            port: endpoint.portName,
+            berthVersionId: endpoint.berthVersionId,
+            berth: endpoint.berthName,
+          },
+        ),
+      )
+    }
     if (effects.length > effectCount) updates.push(op)
   }
   const [table, column, owner, kind, label] =
@@ -205,12 +219,13 @@ export function masterOperationImpacts(database: DatabaseSession, change: Master
             .prepare('UPDATE vessel_operations SET vessel_version_id=? WHERE id=?')
             .run(op.vesselVersionId, op.id)
           repository.saveCharge(op)
-        } else
+        }
+        for (const e of [op.endpoint, ...(op.arrival ? [op.arrival] : [])])
           sql
             .prepare(
-              'UPDATE operation_endpoints SET port_version_id=?,berth_version_id=? WHERE operation_id=?',
+              'UPDATE operation_endpoints SET vessel_version_id=?,port_version_id=?,berth_version_id=? WHERE id=?',
             )
-            .run(op.endpoint.portVersionId, op.endpoint.berthVersionId, op.id)
+            .run(e.vesselVersionId, e.portVersionId, e.berthVersionId, e.id)
       }
       for (const update of structures)
         sql

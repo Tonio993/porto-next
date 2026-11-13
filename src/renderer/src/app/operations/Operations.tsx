@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Button, Group, Modal, Select, Stack, Textarea, TextInput } from '@mantine/core'
+import { Button, Fieldset, Group, Modal, Select, Stack, Textarea, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
 import type {
   OperationPreviewDto,
@@ -9,6 +9,7 @@ import type {
   ExecutionStatus,
   OperationMomentInput,
   OperationMomentDto,
+  OperationalContextDto,
 } from '../../../../shared/contracts/operations'
 import type { PageDto } from '../../../../shared/contracts/master-data'
 import type { useArchives } from '../../api/use-archives'
@@ -21,7 +22,7 @@ import { PortPicker } from '../tariffs/PortPicker'
 import { TariffMomentFields, emptyMoment } from '../tariffs/TariffMomentFields'
 import { VesselPicker } from './VesselPicker'
 import { BerthPicker } from './BerthPicker'
-import { OperationDetail, executionLabels } from './OperationDetail'
+import { OperationDetail, executionLabels, operationLabels } from './OperationDetail'
 
 type Draft = { context: ArchiveContextDto; values: CreateOperationDto; override: string }
 export function Operations({
@@ -48,13 +49,16 @@ export function Operations({
     [notice, setNotice] = useState<string | null>(null)
   const [view, setView] = useState('operations'),
     [reload, setReload] = useState(0)
+  const [contextInstant, setContextInstant] = useState(''),
+    [operationalContext, setOperationalContext] = useState<OperationalContextDto | null>(null)
   const trigger = useRef<HTMLElement | null>(null)
   const listRequest = useApplicationRequest(context, setError),
     stayRequest = useApplicationRequest(context, setError),
     detailRequest = useApplicationRequest(context, setError),
     momentRequest = useApplicationRequest(context, setDialogError),
     commandRequest = useApplicationRequest(context, setDialogError),
-    effectsRequest = useApplicationRequest(context, setDialogError)
+    effectsRequest = useApplicationRequest(context, setDialogError),
+    contextRequest = useApplicationRequest(context, setError)
   const { request: readList } = listRequest,
     { request: readStays } = stayRequest,
     { request: readDetail } = detailRequest
@@ -93,6 +97,10 @@ export function Operations({
       if (r?.ok) setDetail(r.value)
     })
   }, [readDetail, context.sessionId, context.revision, selected, reload])
+  useEffect(() => {
+    contextRequest.invalidate()
+    setOperationalContext(null)
+  }, [context.revision, contextRequest.invalidate])
   const invalidateEditor = () => {
     momentRequest.invalidate()
     commandRequest.invalidate()
@@ -110,7 +118,7 @@ export function Operations({
     invalidateEditor()
     setOpen(false)
   }
-  const start = (type: 'ENTRY' | 'EXIT') => {
+  const start = (type: 'ENTRY' | 'EXIT' | 'MOVEMENT') => {
     if (!vesselId) return
     trigger.current = document.activeElement as HTMLElement
     invalidateEditor()
@@ -125,12 +133,25 @@ export function Operations({
         notes: null,
         manualOverrideAmount: null,
         ...(type === 'ENTRY' ? { portId: '', berthId: null } : { interpretationPortId: null }),
+        ...(type === 'MOVEMENT'
+          ? { destinationPortId: '', destinationBerthId: null, arrivalMoment: emptyMoment() }
+          : {}),
       } as CreateOperationDto,
     })
     setOpen(true)
   }
   const target = (): OperationMomentInput => {
     const v = draft!.values
+    if (v.operationType === 'MOVEMENT')
+      return {
+        operationType: v.operationType,
+        vesselId: v.vesselId,
+        moment: v.moment,
+        interpretationPortId: v.interpretationPortId,
+        destinationPortId: v.destinationPortId,
+        destinationBerthId: v.destinationBerthId,
+        arrivalMoment: v.arrivalMoment,
+      }
     return v.operationType === 'ENTRY'
       ? {
           operationType: v.operationType,
@@ -205,6 +226,8 @@ export function Operations({
     if (r?.ok) setPreview(r.value)
   }
   const selectedVessel = (id: string | null) => {
+    contextRequest.invalidate()
+    setOperationalContext(null)
     listRequest.invalidate()
     stayRequest.invalidate()
     detailRequest.invalidate()
@@ -228,6 +251,9 @@ export function Operations({
           </Button>
           <Button disabled={!vesselId || busy} variant="light" onClick={() => start('EXIT')}>
             Nuova uscita
+          </Button>
+          <Button disabled={!vesselId || busy} variant="light" onClick={() => start('MOVEMENT')}>
+            Nuovo spostamento interno
           </Button>
           {draft && !open && (
             <Button
@@ -264,12 +290,12 @@ export function Operations({
         </Button>
       </Group>
       <p className="operations-future">
-        Spostamenti interno/tra porti, assegnazioni dei soggetti, consuntivazione e correzioni
-        strutturali: non ancora disponibili.
+        Spostamenti tra porti, assegnazioni dei soggetti, consuntivazione e correzioni strutturali:
+        non ancora disponibili.
       </p>
       {!vesselId ? (
         <StateMessage title="Scegli una nave">
-          Consulta la cronologia e registra un’entrata o un’uscita.
+          Consulta la cronologia e registra un’entrata, un’uscita o uno spostamento interno.
         </StateMessage>
       ) : view === 'operations' ? (
         <div className="operations-workspace">
@@ -294,8 +320,7 @@ export function Operations({
                   }}
                 >
                   <strong>
-                    {o.operationType === 'ENTRY' ? 'Entrata' : 'Uscita'} ·{' '}
-                    {executionLabels[o.executionStatus]}
+                    {operationLabels[o.operationType]} · {executionLabels[o.executionStatus]}
                   </strong>
                   <span>
                     {o.endpoint.moment.localDateTime} · {o.endpoint.portName}
@@ -331,6 +356,64 @@ export function Operations({
           ) : stays?.total === 0 ? (
             <p>Nessuna permanenza. Le operazioni mancate non producono struttura.</p>
           ) : null}
+          <Fieldset legend="Contesto a un istante" p="xs">
+            <Group align="end">
+              <TextInput
+                style={{ flex: 1, minWidth: 200 }}
+                min="0001-01-01T00:00"
+                max="9999-12-31T23:59"
+                step={60}
+                type="datetime-local"
+                label="Istante UTC"
+                value={contextInstant}
+                onChange={(e) => {
+                  contextRequest.invalidate()
+                  setOperationalContext(null)
+                  setContextInstant(e.currentTarget.value)
+                }}
+              />
+              <Button
+                disabled={!contextInstant || !vesselId || contextRequest.loading}
+                onClick={() => {
+                  void contextRequest
+                    .request(() =>
+                      window.operations.contextAt({
+                        context: { sessionId: context.sessionId },
+                        query: { vesselId: vesselId!, instant: contextInstant + ':00.000Z' },
+                      }),
+                    )
+                    .then((r) => {
+                      if (r?.ok) setOperationalContext(r.value)
+                    })
+                }}
+              >
+                Consulta contesto
+              </Button>
+            </Group>
+            {operationalContext && (
+              <div aria-label="Contesto operativo">
+                <p>
+                  {operationalContext.status === 'OUTSIDE'
+                    ? 'Fuori da un viaggio.'
+                    : operationalContext.status === 'IN_TRANSFER'
+                      ? 'In trasferimento: nessun ormeggio applicabile.'
+                      : 'In porto.'}
+                </p>
+                <details>
+                  <summary>Identità del contesto</summary>
+                  <p>
+                    Viaggio: {operationalContext.voyageId ?? '—'}
+                    <br />
+                    Visita: {operationalContext.portCallId ?? '—'}
+                    <br />
+                    Ormeggio: {operationalContext.berthStayId ?? '—'}
+                    <br />
+                    Banchina: {operationalContext.berthId ?? 'Non specificata'}
+                  </p>
+                </details>
+              </div>
+            )}
+          </Fieldset>
           {stays?.items.map((v) => (
             <article key={v.id} className="operation-voyage">
               <h3>Viaggio · {v.endedAt ? 'Chiuso' : 'Aperto'}</h3>
@@ -412,7 +495,9 @@ export function Operations({
             ? 'Anteprima registrazione'
             : draft?.values.operationType === 'ENTRY'
               ? 'Nuova entrata'
-              : 'Nuova uscita'
+              : draft?.values.operationType === 'MOVEMENT'
+                ? 'Nuovo spostamento interno'
+                : 'Nuova uscita'
         }
         size="xl"
         closeOnEscape={!busy}
@@ -503,21 +588,83 @@ export function Operations({
                       label="Porto di interpretazione"
                       value={draft.values.interpretationPortId}
                       onChange={(id) =>
-                        change({ ...draft.values, operationType: 'EXIT', interpretationPortId: id })
+                        change({ ...draft.values, interpretationPortId: id } as CreateOperationDto)
                       }
                       disabled={busy}
                     />
                   </details>
                 </>
               )}
+              {draft.values.operationType === 'MOVEMENT' && (
+                <>
+                  <PortPicker
+                    context={context}
+                    label="Porto di destinazione"
+                    value={draft.values.destinationPortId || null}
+                    disabled={busy}
+                    onChange={(id) =>
+                      change({
+                        ...draft.values,
+                        operationType: 'MOVEMENT',
+                        interpretationPortId:
+                          draft.values.operationType === 'MOVEMENT'
+                            ? draft.values.interpretationPortId
+                            : null,
+                        arrivalMoment:
+                          draft.values.operationType === 'MOVEMENT'
+                            ? draft.values.arrivalMoment
+                            : emptyMoment(),
+                        destinationPortId: id ?? '',
+                        destinationBerthId: null,
+                      })
+                    }
+                  />
+                  {draft.values.destinationPortId && (
+                    <BerthPicker
+                      key={draft.values.destinationPortId}
+                      context={context}
+                      portId={draft.values.destinationPortId}
+                      value={draft.values.destinationBerthId}
+                      disabled={busy}
+                      onChange={(id) => {
+                        if (draft.values.operationType === 'MOVEMENT')
+                          change({ ...draft.values, destinationBerthId: id })
+                      }}
+                    />
+                  )}
+                  <p>
+                    La destinazione deve appartenere allo stesso porto dell’origine. La banchina può
+                    non essere specificata.
+                  </p>
+                </>
+              )}
               <TariffMomentFields
                 economic
+                label={draft.values.operationType === 'MOVEMENT' ? 'Partenza locale' : undefined}
+                resolveLabel={
+                  draft.values.operationType === 'MOVEMENT' ? 'Verifica estremi' : undefined
+                }
                 moment={draft.values.moment}
                 onChange={(m) => change({ ...draft.values, moment: m })}
                 resolution={resolution?.resolution ?? null}
                 onResolve={() => void resolve()}
                 disabled={busy || momentRequest.loading}
               />
+              {draft.values.operationType === 'MOVEMENT' && (
+                <TariffMomentFields
+                  economic
+                  label="Arrivo locale"
+                  resolveLabel="Verifica arrivo"
+                  moment={draft.values.arrivalMoment}
+                  onChange={(m) => {
+                    if (draft.values.operationType === 'MOVEMENT')
+                      change({ ...draft.values, arrivalMoment: m })
+                  }}
+                  resolution={resolution?.arrivalResolution ?? null}
+                  onResolve={() => void resolve()}
+                  disabled={busy || momentRequest.loading}
+                />
+              )}
               <TextInput
                 label="Sostituzione manuale della base (EUR, facoltativa)"
                 description="Anche zero. Il calcolo tariffario resta conservato."
@@ -553,7 +700,10 @@ export function Operations({
                   disabled={
                     busy ||
                     !draft.values.moment.localDateTime ||
-                    (draft.values.operationType === 'ENTRY' && !draft.values.portId)
+                    (draft.values.operationType === 'ENTRY' && !draft.values.portId) ||
+                    (draft.values.operationType === 'MOVEMENT' &&
+                      (!draft.values.destinationPortId ||
+                        !draft.values.arrivalMoment.localDateTime))
                   }
                   loading={commandRequest.loading}
                   onClick={() => void previewCreate()}

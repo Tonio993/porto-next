@@ -1,42 +1,71 @@
-import type { VesselOperationDto } from '../../../shared/contracts/operations'
+import type { OperationEndpointDto, VesselOperationDto } from '../../../shared/contracts/operations'
 import { ArchiveError } from '../../../shared/errors/archive-error'
 
-/** Validate the complete chronology, including informational MISSED events. */
+/** Validate every endpoint before replaying the complete structural chronology. */
 export function validateOperationSequence(operations: readonly VesselOperationDto[]): void {
-  let open: VesselOperationDto | null = null
   const minutes = new Set<string>()
-  for (const operation of [...operations].sort((a, b) =>
+  for (const op of operations) {
+    if (op.operationType === 'MOVEMENT') {
+      if (!op.arrival || op.arrival.moment.utc <= op.endpoint.moment.utc)
+        throw new ArchiveError(
+          'OPERATION_TIME_INVALID',
+          'L’arrivo deve essere strettamente successivo alla partenza in UTC.',
+          [
+            {
+              path: ['arrivalMoment'],
+              code: 'INVALID_ORDER',
+              message: 'Indica un arrivo successivo alla partenza.',
+            },
+          ],
+        )
+      if (op.arrival.portId !== op.endpoint.portId)
+        throw new ArchiveError(
+          'OPERATION_DESTINATION_INVALID',
+          'Lo spostamento interno richiede lo stesso porto di origine e destinazione.',
+        )
+    }
+    for (const end of [op.endpoint, ...(op.arrival ? [op.arrival] : [])]) {
+      const minute = end.moment.utc.slice(0, 16)
+      if (minutes.has(minute))
+        throw new ArchiveError(
+          'OPERATION_MINUTE_CONFLICT',
+          'La nave ha già un estremo operativo nello stesso minuto UTC.',
+        )
+      minutes.add(minute)
+    }
+  }
+  let open: OperationEndpointDto | null = null
+  let availableAt: string | null = null
+  for (const op of [...operations].sort((a, b) =>
     a.endpoint.moment.utc.localeCompare(b.endpoint.moment.utc),
   )) {
-    const minute = operation.endpoint.moment.utc.slice(0, 16)
-    if (minutes.has(minute))
+    if (availableAt && op.endpoint.moment.utc < availableAt)
       throw new ArchiveError(
-        'OPERATION_MINUTE_CONFLICT',
-        'La nave ha già un estremo operativo nello stesso minuto UTC.',
+        'OPERATIONAL_CONTEXT_MISSING',
+        'La nave è in trasferimento: nessuna operazione può iniziare prima dell’arrivo.',
       )
-    minutes.add(minute)
-    if (operation.operationType === 'ENTRY') {
+    if (op.operationType === 'ENTRY') {
       if (open)
         throw new ArchiveError(
           'OPERATION_SEQUENCE_INVALID',
           'La nave ha già un viaggio aperto al momento dell’entrata.',
         )
-      if (operation.executionStatus !== 'MISSED') open = operation
+      if (op.executionStatus !== 'MISSED') open = op.endpoint
     } else {
       if (!open)
         throw new ArchiveError(
           'OPERATIONAL_CONTEXT_MISSING',
-          'L’uscita richiede viaggio, visita e ormeggio aperti al proprio istante.',
+          'L’operazione richiede viaggio, visita e ormeggio aperti al proprio istante.',
         )
-      if (
-        open.endpoint.portId !== operation.endpoint.portId ||
-        open.endpoint.berthId !== operation.endpoint.berthId
-      )
+      if (open.portId !== op.endpoint.portId || open.berthId !== op.endpoint.berthId)
         throw new ArchiveError(
           'OPERATION_SEQUENCE_INVALID',
-          'L’uscita non coincide con il contesto operativo di origine.',
+          'L’operazione non coincide con il contesto operativo di origine.',
         )
-      if (operation.executionStatus !== 'MISSED') open = null
+      if (op.executionStatus !== 'MISSED') {
+        open = op.operationType === 'MOVEMENT' ? op.arrival : null
+        availableAt = op.arrival?.moment.utc ?? null
+      }
     }
   }
 }

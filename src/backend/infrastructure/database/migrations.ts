@@ -1,3 +1,4 @@
+import movementsSql from '../../../../migrations/0012_internal_movements.sql?raw'
 import operationsSql from '../../../../migrations/0011_operations.sql?raw'
 import tariffsSql from '../../../../migrations/0010_tariffs.sql?raw'
 import catalogSql from '../../../../migrations/0009_catalog.sql?raw'
@@ -14,7 +15,7 @@ import { ArchiveError } from '../../../shared/errors/archive-error'
 import subjectsSql from '../../../../migrations/0007_customers_agencies.sql?raw'
 
 export const APPLICATION_ID = 0x504f5254
-export const SCHEMA_VERSION = 11
+export const SCHEMA_VERSION = 12
 
 const migrations = [
   { version: 1, sql: initialSql },
@@ -28,6 +29,7 @@ const migrations = [
   { version: 9, sql: catalogSql },
   { version: 10, sql: tariffsSql },
   { version: 11, sql: operationsSql },
+  { version: 12, sql: movementsSql },
 ]
 
 export function migrate(database: Database.Database, fromVersion: number): void {

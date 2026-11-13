@@ -7,21 +7,22 @@ export const operationFixtureIds = {
   secondVesselId: '00000000-0000-4000-8000-000000000013',
   berthId: '00000000-0000-4000-8000-000000000014',
   tariffId: '00000000-0000-4000-8000-000000000015',
+  entryId: '00000000-0000-4000-8000-000000000016',
 }
-export async function operationFixture(app: ElectronApplication, path: string) {
+export async function operationFixture(app: ElectronApplication, path: string, version = 10) {
   const migrations = readdirSync('migrations')
-    .filter((n) => Number(n.slice(0, 4)) <= 10)
+    .filter((n) => Number(n.slice(0, 4)) <= version)
     .sort()
     .map((n) => readFileSync(join('migrations', n), 'utf8'))
   await app.evaluate(
-    ({ app, dialog }, { path, migrations, ids }) => {
+    ({ app, dialog }, { path, migrations, ids, version }) => {
       const module = process.getBuiltinModule('module') as typeof import('node:module')
       const Database = module.createRequire(app.getAppPath() + '/package.json')('better-sqlite3')
       const db = new Database(path)
       try {
         for (const sql of migrations) db.exec(sql)
         db.pragma('application_id=0x504f5254')
-        db.pragma('user_version=10')
+        db.pragma(`user_version=${version}`)
         db.exec(
           "INSERT INTO archive_metadata VALUES (1,'00000000-0000-4000-8000-000000000001','P10 v10','2026-01-01T00:00:00.000Z','2026-02-01T00:00:00.000Z',42)",
         )
@@ -68,12 +69,33 @@ export async function operationFixture(app: ElectronApplication, path: string) {
             'c' + type,
           )
         }
+        if (version === 11) {
+          const utc = '2026-05-02T10:00:00.000Z'
+          db.prepare(
+            "INSERT INTO vessel_operations VALUES (?,?,?,'ENTRY','PERFORMED','Entrata storica P10',?)",
+          ).run(ids.entryId, ids.vesselId, 'vv0', utc)
+          db.prepare(
+            "INSERT INTO operation_endpoints (id,operation_id,vessel_id,role,port_id,port_version_id,berth_id,berth_version_id,local_date_time,zone_id,utc_offset,utc) VALUES ('endpoint-p10',?,?,'OCCURRENCE',?,'pv',NULL,NULL,'2026-05-02T12:00','Europe/Rome','+02:00',?)",
+          ).run(ids.entryId, ids.vesselId, ids.portId, utc)
+          db.prepare(
+            "INSERT INTO operation_charges SELECT 'charge-p10',?,'ENTRY','OCCURRENCE',?,'cSTANDARD','bSTANDARD',s.id,w.id,'vv0','STANDARD',2100,1600,'100',200,'5',3,w.weight,11500,11500,NULL,11500,'[]' FROM weight_sequences s JOIN weight_versions w ON w.sequence_id=s.id WHERE s.operation_type='ENTRY'",
+          ).run(ids.entryId, ids.tariffId)
+          db.prepare(
+            "INSERT INTO voyages (id,vessel_id,vessel_version_id,opening_operation_id,started_at) VALUES ('voyage-p10',?,'vv0',?,?)",
+          ).run(ids.vesselId, ids.entryId, utc)
+          db.prepare(
+            "INSERT INTO port_calls (id,voyage_id,port_id,port_version_id,opening_operation_id,started_at) VALUES ('visit-p10','voyage-p10',?,'pv',?,?)",
+          ).run(ids.portId, ids.entryId, utc)
+          db.prepare(
+            "INSERT INTO berth_stays (id,port_call_id,port_id,berth_id,berth_version_id,opening_operation_id,started_at) VALUES ('stay-p10','visit-p10',?,NULL,NULL,?,?)",
+          ).run(ids.portId, ids.entryId, utc)
+        }
       } finally {
         db.close()
       }
       dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] })
     },
-    { path, migrations, ids: operationFixtureIds },
+    { path, migrations, ids: operationFixtureIds, version },
   )
 }
 export async function delayOperationResponse(app: ElectronApplication, channel: string) {

@@ -4,10 +4,12 @@ import type {
   StayIntervalDto,
   OperationalContextDto,
   OperationEndpointDto,
+  OperationChargeDto,
 } from '../../../shared/contracts/operations'
 import type { BaseCalculationDto } from '../../../shared/contracts/tariffs'
 import type { PageDto } from '../../../shared/contracts/master-data'
 import { ArchiveError } from '../../../shared/errors/archive-error'
+import { operationTotal } from '../../domain/operations/charges'
 import { Money } from '../../domain/values/numbers'
 import type { DatabaseSession } from './database-session'
 import { momentFromColumns, momentToColumns, type MomentColumns } from './moment-storage'
@@ -23,6 +25,7 @@ interface ChargeRow {
   id: string
   operation_id: string
   charge_kind: 'ENTRY' | 'EXIT' | 'MOVEMENT'
+  economic_endpoint_role: OperationChargeDto['economicEndpointRole']
   tariff_id: string
   configuration_id: string
   bracket_id: string
@@ -55,7 +58,8 @@ export class OperationRepository {
         `SELECT id, vessel_id AS vesselId, vessel_version_id AS vesselVersionId,
       operation_type AS operationType, execution_status AS executionStatus, notes FROM vessel_operations WHERE id = ?`,
       )
-      .get(id) as Omit<VesselOperationDto, 'endpoint' | 'arrival' | 'charge'> | undefined
+      .get(id) as
+      Omit<VesselOperationDto, 'endpoint' | 'arrival' | 'charges' | 'totalBase'> | undefined
     if (!op) throw new ArchiveError('NOT_FOUND', 'L’operazione non esiste.')
     const ends = sql
       .prepare(
@@ -74,16 +78,16 @@ export class OperationRepository {
       berth_name: string | null
     })[]
     const end = ends.find((e) => e.role !== 'ARRIVAL')!
-    const c = sql
+    const charges = sql
       .prepare(
         `SELECT c.*, CAST(tariff_value_cents AS TEXT) AS tariff_value_cents,
       CAST(calculated_base_cents AS TEXT) AS calculated_base_cents, CAST(manual_override_cents AS TEXT) AS manual_override_cents,
       CAST(effective_base_cents AS TEXT) AS effective_base_cents, v.registered_name AS vessel_name, t.effective_from AS tariff_effective_from
-      FROM operation_charges c JOIN vessel_versions v ON v.id=c.vessel_version_id JOIN tariffs t ON t.id=c.tariff_id WHERE operation_id=?`,
+      FROM operation_charges c JOIN vessel_versions v ON v.id=c.vessel_version_id JOIN tariffs t ON t.id=c.tariff_id WHERE operation_id=? ORDER BY CASE economic_endpoint_role WHEN 'ARRIVAL' THEN 1 ELSE 0 END`,
       )
-      .get(id) as ChargeRow
-    if (!end || !c) throw new ArchiveError('INVALID_ARCHIVE', 'L’operazione salvata è incompleta.')
-    const moment = momentFromColumns(end)
+      .all(id) as ChargeRow[]
+    if (!end || !charges.length)
+      throw new ArchiveError('INVALID_ARCHIVE', 'L’operazione salvata è incompleta.')
     const money = (cents: string) => Money.fromCents(BigInt(cents)).text
     const endpoint = (end: (typeof ends)[number]): OperationEndpointDto => ({
       id: end.id,
@@ -97,27 +101,23 @@ export class OperationRepository {
       berthVersionId: end.berth_version_id,
       berthName: end.berth_name,
     })
-    return {
-      ...op,
-      endpoint: endpoint(end),
-      arrival: ends.find((e) => e.role === 'ARRIVAL')
-        ? endpoint(ends.find((e) => e.role === 'ARRIVAL')!)
-        : null,
-      charge: {
+    const values = charges.map((c): OperationChargeDto => {
+      const economic = ends.find((e) => e.role === c.economic_endpoint_role)!
+      return {
         id: c.id,
         chargeKind: c.charge_kind,
-        economicEndpointRole: op.operationType === 'MOVEMENT' ? 'DEPARTURE' : 'OCCURRENCE',
+        economicEndpointRole: c.economic_endpoint_role,
         manualOverrideAmount:
           c.manual_override_cents === null ? null : money(c.manual_override_cents),
         effectiveBase: money(c.effective_base_cents),
         calculation: {
-          portId: end.port_id,
+          portId: economic.port_id,
           vesselId: op.vesselId,
           vesselVersionId: c.vessel_version_id,
           vesselName: c.vessel_name,
           vesselTypeId: c.vessel_type_id,
           size: c.size,
-          moment,
+          moment: momentFromColumns(economic),
           activity: { kind: 'OPERATION', operation: c.charge_kind },
           tariffId: c.tariff_id,
           tariffEffectiveFrom: c.tariff_effective_from,
@@ -135,7 +135,16 @@ export class OperationRepository {
           base: money(c.calculated_base_cents),
           steps: JSON.parse(c.calculation_steps) as string[],
         },
-      },
+      }
+    })
+    return {
+      ...op,
+      endpoint: endpoint(end),
+      arrival: ends.find((e) => e.role === 'ARRIVAL')
+        ? endpoint(ends.find((e) => e.role === 'ARRIVAL')!)
+        : null,
+      charges: values,
+      totalBase: operationTotal(values),
     }
   }
   all(vesselId?: string): VesselOperationDto[] {
@@ -181,27 +190,29 @@ export class OperationRepository {
       .prepare(
         'SELECT id,port_id FROM port_calls WHERE voyage_id=? AND started_at<=? AND (ended_at IS NULL OR ended_at>=?)',
       )
-      .get(voyage.id, utc, utc) as { id: string; port_id: string }
-    const stay = sql
-      .prepare(
-        'SELECT id,berth_id FROM berth_stays WHERE port_call_id=? AND started_at<=? AND (ended_at IS NULL OR ended_at>=?)',
-      )
-      .get(visit.id, utc, utc) as { id: string; berth_id: string | null } | undefined
+      .get(voyage.id, utc, utc) as { id: string; port_id: string } | undefined
+    const stay = visit
+      ? (sql
+          .prepare(
+            'SELECT id,berth_id FROM berth_stays WHERE port_call_id=? AND started_at<=? AND (ended_at IS NULL OR ended_at>=?)',
+          )
+          .get(visit.id, utc, utc) as { id: string; berth_id: string | null } | undefined)
+      : undefined
     return stay
       ? {
           status: 'IN_PORT',
           voyageId: voyage.id,
-          portCallId: visit.id,
+          portCallId: visit!.id,
           berthStayId: stay.id,
-          portId: visit.port_id,
+          portId: visit!.port_id,
           berthId: stay.berth_id,
         }
       : {
           status: 'IN_TRANSFER',
           voyageId: voyage.id,
-          portCallId: visit.id,
+          portCallId: visit?.id ?? null,
           berthStayId: null,
-          portId: visit.port_id,
+          portId: visit?.port_id ?? null,
           berthId: null,
         }
   }
@@ -258,7 +269,7 @@ export class OperationRepository {
           m.utc,
         )
     }
-    this.saveCharge(op)
+    this.saveCharges(op)
     if (op.executionStatus === 'MISSED') return
     if (op.operationType === 'ENTRY') {
       const { voyageId, portCallId: callId, berthStayId } = openingIds
@@ -284,13 +295,37 @@ export class OperationRepository {
       sql
         .prepare('UPDATE berth_stays SET closing_operation_id=?,ended_at=? WHERE id=?')
         .run(op.id, e.moment.utc, ids.berthStayId)
+      if (arrival.portId !== e.portId) {
+        const visit = sql
+          .prepare(
+            'SELECT closing_operation_id AS closingOperationId,ended_at AS endedAt FROM port_calls WHERE id=?',
+          )
+          .get(ids.portCallId) as { closingOperationId: string | null; endedAt: string | null }
+        sql
+          .prepare('UPDATE port_calls SET closing_operation_id=?,ended_at=? WHERE id=?')
+          .run(op.id, e.moment.utc, ids.portCallId)
+        sql
+          .prepare(
+            'INSERT INTO port_calls (id,voyage_id,port_id,port_version_id,opening_operation_id,started_at,closing_operation_id,ended_at) VALUES (?,?,?,?,?,?,?,?)',
+          )
+          .run(
+            openingIds.portCallId,
+            ids.voyageId,
+            arrival.portId,
+            arrival.portVersionId,
+            op.id,
+            arrival.moment.utc,
+            visit.closingOperationId,
+            visit.endedAt,
+          )
+      }
       sql
         .prepare(
           'INSERT INTO berth_stays (id,port_call_id,port_id,berth_id,berth_version_id,opening_operation_id,started_at,closing_operation_id,ended_at) VALUES (?,?,?,?,?,?,?,?,?)',
         )
         .run(
           openingIds.berthStayId,
-          ids.portCallId,
+          arrival.portId === e.portId ? ids.portCallId : openingIds.portCallId,
           arrival.portId,
           arrival.berthId,
           arrival.berthVersionId,
@@ -320,12 +355,14 @@ export class OperationRepository {
         .run(op.id, m.utc, voyage.id)
     }
   }
-  saveCharge(op: VesselOperationDto): void {
-    const c = op.charge,
-      r = c.calculation
+  saveCharges(op: VesselOperationDto): void {
+    for (const c of op.charges) this.saveCharge(op.id, c)
+  }
+  saveCharge(operationId: string, c: OperationChargeDto): void {
+    const r = c.calculation
     const values = [
       c.id,
-      op.id,
+      operationId,
       c.chargeKind,
       c.economicEndpointRole,
       r.tariffId,

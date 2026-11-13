@@ -25,7 +25,7 @@ async function start(
   arrival = '2026-05-03T13:00',
   status = 'Prevista',
 ) {
-  await page.getByRole('button', { name: 'Nuovo spostamento interno', exact: true }).click()
+  await page.getByRole('button', { name: 'Nuovo spostamento', exact: true }).click()
   const modal = page.getByRole('dialog')
   await modal.getByRole('combobox', { name: 'Stato', exact: true }).click()
   await page.getByRole('option', { name: status, exact: true }).click()
@@ -70,10 +70,10 @@ test('P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa
     await operationFixture(app, path, 11)
     await page.getByRole('button', { name: 'Apri archivio', exact: true }).click()
     await expect(page.getByTestId('archive-path')).toHaveText(path)
-    expect(readdirSync(folder).some((n) => n.includes('.prima-v12-'))).toBe(true)
+    expect(readdirSync(folder).some((n) => n.includes('.prima-v13-'))).toBe(true)
     expect(await page.evaluate(() => window.archives.getState())).toMatchObject({
       ok: true,
-      value: { active: { schemaVersion: 12 }, context: { revision: '42' } },
+      value: { active: { schemaVersion: 13 }, context: { revision: '42' } },
     })
     await page.evaluate(async (ids) => {
       const state = await window.archives.getState()
@@ -111,9 +111,7 @@ test('P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa
     await submit(modal)
     await expect(modal.getByText(/strettamente successivo/)).toBeVisible()
     await page.keyboard.press('Escape')
-    await expect(
-      page.getByRole('button', { name: 'Nuovo spostamento interno', exact: true }),
-    ).toBeFocused()
+    await expect(page.getByRole('button', { name: 'Nuovo spostamento', exact: true })).toBeFocused()
     modal = await start(page)
     await modal.getByLabel('Sostituzione manuale della base').fill('0')
     await submit(modal)
@@ -134,9 +132,7 @@ test('P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa
         animations: 'disabled',
       })
     await confirm(modal)
-    await expect(
-      page.getByRole('button', { name: 'Nuovo spostamento interno', exact: true }),
-    ).toBeFocused()
+    await expect(page.getByRole('button', { name: 'Nuovo spostamento', exact: true })).toBeFocused()
     await page.getByRole('button', { name: 'Permanenze', exact: true }).click()
     await expect(
       page.getByText('Ormeggio · Banchina non specificata', { exact: true }),
@@ -199,7 +195,7 @@ test('P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa
     await expect(page.getByText('Ormeggio · Molo nord', { exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Operazioni', exact: true }).click()
     await expect(
-      page.getByRole('heading', { name: 'Spostamento interno · Effettuata', exact: true }),
+      page.getByRole('heading', { name: 'Spostamento · Effettuata', exact: true }),
     ).toBeVisible()
     const workspace = await page.locator('.operations-workspace').boundingBox()
     expect(workspace!.height).toBeGreaterThanOrEqual(100)
@@ -230,7 +226,7 @@ test('P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa
       return r.value
     }, operationFixtureIds)
     expect(saved.total).toBe(4)
-    expect(saved.items[0].charge).toMatchObject({
+    expect(saved.items[0].charges[0]).toMatchObject({
       chargeKind: 'MOVEMENT',
       economicEndpointRole: 'DEPARTURE',
       calculation: { base: '215.00' },
@@ -338,7 +334,7 @@ test('P11 asincronia: risoluzione arrivo, query di contesto, selezione, revision
     await expect(page.getByRole('button', { name: 'Riprendi bozza', exact: true })).toHaveCount(0)
     await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()
     await expect(
-      page.getByRole('button', { name: 'Nuovo spostamento interno', exact: true }),
+      page.getByRole('button', { name: 'Nuovo spostamento', exact: true }),
     ).toBeDisabled()
   } finally {
     if (app) await app.close()

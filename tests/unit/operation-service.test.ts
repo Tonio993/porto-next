@@ -133,7 +133,7 @@ it('entrata → uscita → nuova entrata: struttura atomica, identità ancorate,
     await operations.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }),
   )
   expect(BigInt(context().revision)).toBe(BigInt(original.revision) + 1n)
-  expect(entry.charge).toMatchObject({
+  expect(entry.charges[0]).toMatchObject({
     effectiveBase: '115.00',
     calculation: { extraCount: 3, tariffValue: '115.00', base: '115.00' },
   })
@@ -174,7 +174,7 @@ it('MISSED richiede tariffa e contesto, non apre né chiude e mantiene il calcol
     manualOverrideAmount: '0.00',
   })
   expect(stays()).toEqual([])
-  expect(missed.charge).toMatchObject({
+  expect(missed.charges[0]).toMatchObject({
     manualOverrideAmount: '0.00',
     effectiveBase: '0.00',
     calculation: { base: '115.00' },
@@ -305,18 +305,18 @@ it('tariffa intermedia ricalcola soltanto intervallo incluso/escluso e conserva 
     )
   expect(p).toMatchObject({ status: 'READY', summary: { recalculated: 1 } })
   expect(context()).toEqual(before)
-  expect(p.effects.items.some((e) => e.reference.id === a.charge.id)).toBe(true)
+  expect(p.effects.items.some((e) => e.reference.id === a.charges[0].id)).toBe(true)
   value(await tariffs.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }))
   const saved = all()
   expect(saved[0]).toEqual(initial)
   expect(saved[2]).toEqual(b)
-  expect(saved[1].charge).toMatchObject({
-    id: a.charge.id,
+  expect(saved[1].charges[0]).toMatchObject({
+    id: a.charges[0].id,
     manualOverrideAmount: '0.00',
     effectiveBase: '0.00',
     calculation: { base: '215.00' },
   })
-  expect(saved[2].charge.calculation.tariffId).toBe(next.id)
+  expect(saved[2].charges[0].calculation.tariffId).toBe(next.id)
   expect(BigInt(context().revision)).toBe(BigInt(before.revision) + 1n)
 })
 it('versioni nave: anteprima completa, ricalcolo e versione applicata alle aperture, cancellazione e no-op', async () => {
@@ -345,8 +345,8 @@ it('versioni nave: anteprima completa, ricalcolo e versione applicata alle apert
   expect(p.summary.recalculated).toBe(1)
   value(await vessels.confirm({ context: p.context, payload: { previewId: p.previewId } }))
   expect(all()[0]).toEqual(entry)
-  expect(all()[1].charge).toMatchObject({
-    id: exit.charge.id,
+  expect(all()[1].charges[0]).toMatchObject({
+    id: exit.charges[0].id,
     calculation: { size: 2500, extraCount: 5, base: '125.00' },
   })
   expect(stays()[0]).toEqual(first)
@@ -445,7 +445,7 @@ it('porti e banchine: versioni applicate alle operazioni e permanenze; eliminazi
     id: first.visits[0].stays[0].id,
     berthVersionId: all()[0].endpoint.berthVersionId,
   })
-  expect(all()[0].charge).toEqual(entry.charge)
+  expect(all()[0].charges[0]).toEqual(entry.charges[0])
   expect(
     value(
       await vessels.preview({
@@ -572,7 +572,7 @@ it('contesto originale, scadenza, namespace, campi inattesi e sessioni anche Sal
 it('vincoli SQLite reali: riferimenti composti, unicità minuti, importi esatti e rollback revisione', async () => {
   const op = await create({ ...input(), manualOverrideAmount: '92233720368547758.07' }),
     before = context()
-  expect(op.charge.effectiveBase).toBe('92233720368547758.07')
+  expect(op.charges[0].effectiveBase).toBe('92233720368547758.07')
   for (const [column, value] of [
     ['effective_base_cents', -1],
     ['manual_override_cents', -1],
@@ -580,7 +580,9 @@ it('vincoli SQLite reali: riferimenti composti, unicità minuti, importi esatti 
     ['bracket_id', 'absent'],
   ] as const)
     expect(() =>
-      sql().prepare(`UPDATE operation_charges SET ${column}=? WHERE id=?`).run(value, op.charge.id),
+      sql()
+        .prepare(`UPDATE operation_charges SET ${column}=? WHERE id=?`)
+        .run(value, op.charges[0].id),
     ).toThrow()
   expect(() =>
     sql()
@@ -702,7 +704,7 @@ it('tutti gli effetti tariffari sono paginati, ma la conferma ricalcola l’insi
   expect(second.effects.items).toHaveLength(5)
   expect(context()).toEqual(before)
   value(await tariffs.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }))
-  expect(all().every((o) => o.charge.calculation.base === '215.00')).toBe(true)
+  expect(all().every((o) => o.charges[0].calculation.base === '215.00')).toBe(true)
   expect(stays()).toEqual([])
 })
 
@@ -858,7 +860,7 @@ it('P11: MISSED conserva origine e calcolo, non trasferisce e non fornisce un co
     manualOverrideAmount: '0.00',
   })
   expect(stays()).toEqual(first)
-  expect(missed.charge).toMatchObject({
+  expect(missed.charges[0]).toMatchObject({
     chargeKind: 'MOVEMENT',
     economicEndpointRole: 'DEPARTURE',
     calculation: { base: '115.00' },
@@ -951,7 +953,7 @@ it('P11: destinazione esplicita nello stesso porto e selezionabile anche MISSED,
   for (const status of ['PLANNED', 'MISSED'] as const) {
     expect(
       await preview({ ...movement(undefined, undefined, status), destinationPortId: other }),
-    ).toMatchObject(failure('OPERATION_DESTINATION_INVALID'))
+    ).toMatchObject(failure('TARIFF_NOT_FOUND'))
     expect(
       await preview({ ...movement(undefined, undefined, status), destinationBerthId: foreign }),
     ).toMatchObject(failure('NOT_SELECTABLE'))
@@ -974,7 +976,7 @@ it('P11: tariffa, peso e versione nave alla sola partenza; ricalcoli atomici e o
     "UPDATE weight_versions SET weight='1.5' WHERE sequence_id=(SELECT id FROM weight_sequences WHERE operation_type='MOVEMENT')",
   )
   const move = await create({ ...movement(), manualOverrideAmount: '0.00' })
-  expect(move.charge.calculation).toMatchObject({
+  expect(move.charges[0].calculation).toMatchObject({
     base: '172.50',
     weight: '1.5',
     ordinaryValue: '100',
@@ -1000,8 +1002,8 @@ it('P11: tariffa, peso e versione nave alla sola partenza; ricalcoli atomici e o
   sql().exec('DROP TRIGGER fail_movement_charge')
   value(await tariffs.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }))
   const updated = all()[1]
-  expect(updated.charge).toMatchObject({
-    id: move.charge.id,
+  expect(updated.charges[0]).toMatchObject({
+    id: move.charges[0].id,
     manualOverrideAmount: '0.00',
     effectiveBase: '0.00',
     calculation: { base: '472.50' },
@@ -1071,7 +1073,7 @@ it('P11: anagrafiche ai due estremi, nuove versioni durante il trasferimento e e
   value(await vessels.confirm({ context: v.context, payload: { previewId: v.previewId } }))
   expect(all()[1].endpoint.vesselVersionId).toBe(move.endpoint.vesselVersionId)
   expect(all()[1].arrival!.vesselVersionId).not.toBe(move.arrival!.vesselVersionId)
-  expect(all()[1].charge).toEqual(move.charge)
+  expect(all()[1].charges[0]).toEqual(move.charges[0])
   const del = value(
     await vessels.preview({
       context: context(),
@@ -1150,8 +1152,8 @@ it('P11: MISSED non introduce trasferimenti neppure oltre una successiva uscita;
   )
   expect(p.summary.recalculated).toBe(2)
   value(await tariffs.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }))
-  expect(all()[1].charge).toMatchObject({
-    id: missed.charge.id,
+  expect(all()[1].charges[0]).toMatchObject({
+    id: missed.charges[0].id,
     manualOverrideAmount: '7.25',
     effectiveBase: '7.25',
     calculation: { base: '215.00' },
@@ -1252,16 +1254,585 @@ it('P11: SQLite protegge ruoli, ordine dei due estremi, minuto UTC e provenienza
   expect(() =>
     sql()
       .prepare("UPDATE operation_charges SET economic_endpoint_role='OCCURRENCE' WHERE id=?")
-      .run(move.charge.id),
+      .run(move.charges[0].id),
   ).toThrow()
   expect(() =>
-    sql().prepare("UPDATE operation_charges SET charge_kind='EXIT' WHERE id=?").run(move.charge.id),
+    sql()
+      .prepare("UPDATE operation_charges SET charge_kind='EXIT' WHERE id=?")
+      .run(move.charges[0].id),
   ).toThrow()
   expect(() =>
     sql()
       .prepare('UPDATE operation_charges SET effective_base_cents=0 WHERE id=?')
-      .run(move.charge.id),
+      .run(move.charges[0].id),
   ).toThrow()
   expect(all()).toEqual(saved)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+})
+
+async function destination(zone = 'Europe/London', withTariff = true) {
+  const id = value(
+    await ports.create({
+      context: context(),
+      payload: {
+        name: 'Destinazione',
+        locality: 'Londra',
+        countryCode: 'GB',
+        initialZoneId: zone,
+      },
+    }),
+  ).id
+  if (withTariff) await tariff('2026-01-01T00:00', '200', id)
+  return id
+}
+const transfer = (
+  destinationPortId: string,
+  status: CreateOperationDto['executionStatus'] = 'PLANNED',
+): Extract<CreateOperationDto, { operationType: 'MOVEMENT' }> => ({
+  ...movement('2026-06-02T12:00', '2026-06-02T11:30', status),
+  destinationPortId,
+})
+it('P12: fusi e decorrenze distinti, due calcoli/override autonomi, viaggio conservato e contesto senza visita', async () => {
+  const dest = await destination()
+  await new TimeService(archives.coordinator).configureCompanyZone({
+    context: context(),
+    payload: { zoneId: 'Europe/Rome' },
+  })
+  sql().exec(
+    "UPDATE weight_versions SET weight='2' WHERE sequence_id IN (SELECT id FROM weight_sequences WHERE operation_type='EXIT'); UPDATE weight_versions SET weight='3' WHERE sequence_id IN (SELECT id FROM weight_sequences WHERE operation_type='ENTRY')",
+  )
+  await create()
+  const first = stays()[0]
+  const arrivalTariff = await tariff('2026-06-02T11:15', '250', dest)
+  const vp = value(
+    await vessels.preview({
+      context: context(),
+      payload: {
+        operation: 'INSERT_VERSION',
+        vesselId,
+        registeredName: 'Versione arrivo',
+        imoNumber: null,
+        vesselTypeId: 'PASSENGER',
+        size: 1000,
+        moment: moment('2026-06-02T12:15'),
+      },
+    }),
+  )
+  value(await vessels.confirm({ context: vp.context, payload: { previewId: vp.previewId } }))
+  const p = value(
+    await preview({
+      ...transfer(dest),
+      manualOverrideAmount: '0.00',
+      arrivalManualOverrideAmount: '7.25',
+    }),
+  )
+  expect(p.summary).toMatchObject({ created: 5, updated: 2 })
+  expect(p.operationValues.charges).toHaveLength(2)
+  const move = value(
+    await operations.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }),
+  )
+  expect(move).toEqual(p.operationValues)
+  expect(move.charges[0]).toMatchObject({
+    chargeKind: 'EXIT',
+    economicEndpointRole: 'DEPARTURE',
+    manualOverrideAmount: '0.00',
+    effectiveBase: '0.00',
+    calculation: { portId, weight: '2', base: '230.00', size: 2100 },
+  })
+  expect(move.charges[1]).toMatchObject({
+    chargeKind: 'ENTRY',
+    economicEndpointRole: 'ARRIVAL',
+    manualOverrideAmount: '7.25',
+    effectiveBase: '7.25',
+    calculation: {
+      portId: dest,
+      weight: '3',
+      base: '750.00',
+      tariffId: arrivalTariff.id,
+      size: 1000,
+      vesselTypeId: 'PASSENGER',
+    },
+  })
+  expect(move.totalBase).toBe('7.25')
+  expect(move.charges[0].id).not.toBe(move.charges[1].id)
+  expect(move.arrival!.moment.utc).toBe('2026-06-02T10:30:00.000Z')
+  const graph = stays()[0]
+  expect(graph.id).toBe(first.id)
+  expect(graph.endedAt).toBeNull()
+  expect(graph.visits).toHaveLength(2)
+  expect(graph.visits[0]).toMatchObject({
+    id: first.visits[0].id,
+    endedAt: move.endpoint.moment.utc,
+    closingOperationId: move.id,
+  })
+  expect(graph.visits[1]).toMatchObject({
+    portId: dest,
+    startedAt: move.arrival!.moment.utc,
+    openingOperationId: move.id,
+  })
+  const ctx = (instant: string) => new OperationRepository(db()).contextAt(vesselId, instant)
+  expect(ctx(move.endpoint.moment.utc)).toMatchObject({
+    status: 'IN_PORT',
+    portId,
+    portCallId: first.visits[0].id,
+  })
+  expect(ctx('2026-06-02T10:15:00.000Z')).toEqual({
+    status: 'IN_TRANSFER',
+    voyageId: first.id,
+    portCallId: null,
+    berthStayId: null,
+    portId: null,
+    berthId: null,
+  })
+  expect(ctx(move.arrival!.moment.utc)).toMatchObject({
+    status: 'IN_PORT',
+    portId: dest,
+    portCallId: graph.visits[1].id,
+  })
+  const exit = await create(input('EXIT', '2026-06-02T12:00', 'PERFORMED'))
+  expect(exit.endpoint.portId).toBe(dest)
+  expect(stays()[0].closingOperationId).toBe(exit.id)
+  expect(stays()[0].visits[1].closingOperationId).toBe(exit.id)
+  expect(stays()[0].visits[0].closingOperationId).toBe(move.id)
+  const saved = all(),
+    hierarchy = stays(),
+    revision = context().revision
+  await archives.close()
+  await archives.open(join(folder, 'a.ormeggi'))
+  expect(all()).toEqual(saved)
+  expect(stays()).toEqual(hierarchy)
+  expect(context().revision).toBe(revision)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+})
+it('P12: MISSED occupa entrambi gli estremi ma non cambia porto o struttura, anche oltre l’uscita', async () => {
+  const dest = await destination()
+  await create()
+  const first = stays()
+  const m = await create({
+    ...transfer(dest, 'MISSED'),
+    arrivalMoment: moment('2026-06-05T11:00'),
+    arrivalManualOverrideAmount: '0.00',
+  })
+  expect(m.charges).toHaveLength(2)
+  expect(stays()).toEqual(first)
+  expect(m.charges[1].effectiveBase).toBe('0.00')
+  expect(
+    await preview({
+      ...transfer(dest, 'MISSED'),
+      moment: moment('2026-06-03T12:00'),
+      arrivalMoment: moment('2026-06-05T11:00'),
+    }),
+  ).toMatchObject(failure('OPERATION_MINUTE_CONFLICT'))
+  const exit = await create(input('EXIT', '2026-06-03T12:00'))
+  expect(exit.endpoint.portId).toBe(portId)
+  expect(new OperationRepository(db()).contextAt(vesselId, '2026-06-04T12:00:00.000Z').status).toBe(
+    'OUTSIDE',
+  )
+})
+it('P12: gap e overlap dei due fusi, ordine UTC e collisioni con MISSED sull’intera sequenza', async () => {
+  const dest = await destination()
+  await create(input('ENTRY', '2026-03-01T12:00'))
+  expect(
+    await preview({
+      ...transfer(dest),
+      moment: moment('2026-03-29T01:00'),
+      arrivalMoment: moment('2026-03-29T01:30'),
+    }),
+  ).toMatchObject(failure('LOCAL_TIME_NOT_EXISTENT'))
+  const m = {
+    ...transfer(dest),
+    moment: moment('2026-10-25T02:45', '+02:00'),
+    arrivalMoment: moment('2026-10-25T01:15'),
+  }
+  expect(await preview(m)).toMatchObject(failure('LOCAL_TIME_AMBIGUOUS'))
+  expect(
+    await preview({ ...m, arrivalMoment: moment('2026-10-25T01:15', '+01:00') }),
+  ).toMatchObject(failure('OPERATION_TIME_INVALID'))
+  expect(
+    value(await preview({ ...m, arrivalMoment: moment('2026-10-25T01:15', '+00:00') }))
+      .operationValues.arrival!.moment.utc,
+  ).toBe('2026-10-25T01:15:00.000Z')
+  expect(
+    await preview({ ...transfer(dest), arrivalMoment: moment('2026-06-02T11:00') }),
+  ).toMatchObject(failure('OPERATION_TIME_INVALID'))
+  await create(input('EXIT', '2026-06-03T12:00', 'MISSED'))
+  expect(await preview(transfer(dest))).toMatchObject(failure('OPERATION_SEQUENCE_INVALID'))
+  expect(
+    await preview({ ...transfer(dest), arrivalMoment: moment('2026-06-03T11:00') }),
+  ).toMatchObject(failure('OPERATION_MINUTE_CONFLICT'))
+})
+it('P12: entrambi i porti e gli intervalli tariffari ricalcolano solo le componenti pertinenti, rollback e override conservati', async () => {
+  const dest = await destination()
+  await create()
+  const move = await create({
+    ...transfer(dest),
+    manualOverrideAmount: '0.00',
+    arrivalManualOverrideAmount: '12.34',
+  })
+  const initial = all(),
+    metadata = db().metadata(),
+    ctx = context()
+  const p = value(
+    await tariffs.previewCreate({
+      context: ctx,
+      payload: { portId: dest, moment: moment('2026-06-02T11:15'), configurations: config('300') },
+    }),
+  )
+  expect(p.summary.recalculated).toBe(1)
+  expect(p.effects.items.some((e) => e.reference.id === move.charges[1].id)).toBe(true)
+  sql().exec(
+    "CREATE TRIGGER fail_arrival_recalc BEFORE UPDATE ON operation_charges WHEN OLD.economic_endpoint_role='ARRIVAL' BEGIN SELECT RAISE(ABORT,'injected'); END",
+  )
+  expect(
+    await tariffs.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }),
+  ).toMatchObject({ ok: false })
+  expect(all()).toEqual(initial)
+  expect(db().metadata()).toEqual(metadata)
+  expect(context()).toEqual(ctx)
+  sql().exec('DROP TRIGGER fail_arrival_recalc')
+  value(await tariffs.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }))
+  expect(all()[1].charges[0]).toEqual(move.charges[0])
+  expect(all()[1].charges[1]).toMatchObject({
+    id: move.charges[1].id,
+    calculation: { base: '315.00' },
+    effectiveBase: '12.34',
+  })
+  const arrival = all()[1].charges[1]
+  await tariff('2026-06-02T11:45', '400', portId)
+  expect(all()[1].charges[0]).toMatchObject({
+    id: move.charges[0].id,
+    calculation: { base: '415.00' },
+    effectiveBase: '0.00',
+  })
+  expect(all()[1].charges[1]).toEqual(arrival)
+  expect(all()[1].totalBase).toBe('12.34')
+})
+it('P12: ricalcoli nave ai rispettivi istanti, correzione ed eliminazione con riferimenti e identità conservati', async () => {
+  const dest = await destination()
+  await create()
+  await new TimeService(archives.coordinator).configureCompanyZone({
+    context: context(),
+    payload: { zoneId: 'Europe/Rome' },
+  })
+  const move = await create({ ...transfer(dest), arrivalManualOverrideAmount: '0.00' }),
+    graph = stays()
+  const p = value(
+    await vessels.preview({
+      context: context(),
+      payload: {
+        operation: 'INSERT_VERSION',
+        vesselId,
+        registeredName: 'Arrivo',
+        imoNumber: null,
+        vesselTypeId: 'ADM',
+        size: 5000,
+        moment: moment('2026-06-02T12:15'),
+      },
+    }),
+  )
+  expect(p.summary.recalculated).toBe(1)
+  value(await vessels.confirm({ context: p.context, payload: { previewId: p.previewId } }))
+  expect(all()[1].charges[0]).toEqual(move.charges[0])
+  const arrival = all()[1].charges[1]
+  expect(arrival).toMatchObject({
+    id: move.charges[1].id,
+    calculation: { vesselTypeId: 'ADM', size: 5000, base: '285.00' },
+    effectiveBase: '0.00',
+  })
+  expect(all()[1].arrival!.vesselVersionId).toBe(arrival.calculation.vesselVersionId)
+  const del = value(
+    await vessels.preview({
+      context: context(),
+      payload: {
+        operation: 'DELETE_VERSION',
+        vesselId,
+        versionId: arrival.calculation.vesselVersionId,
+      },
+    }),
+  )
+  expect(del.summary.recalculated).toBe(1)
+  value(await vessels.confirm({ context: del.context, payload: { previewId: del.previewId } }))
+  expect(all()[1]).toEqual(move)
+  expect(stays()).toEqual(graph)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+})
+it('P12: rollback dopo entrambe le componenti e dopo apertura visita; retry della stessa anteprima', async () => {
+  const dest = await destination()
+  await create()
+  const p = value(await preview(transfer(dest))),
+    before = all(),
+    graph = stays(),
+    metadata = db().metadata(),
+    ctx = context()
+  for (const injection of [
+    "CREATE TRIGGER injected_failure BEFORE INSERT ON operation_charges WHEN NEW.economic_endpoint_role='ARRIVAL' BEGIN SELECT RAISE(ABORT,'injected'); END",
+    "CREATE TRIGGER injected_failure BEFORE INSERT ON berth_stays BEGIN SELECT RAISE(ABORT,'injected'); END",
+  ]) {
+    sql().exec(injection)
+    expect(
+      await operations.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }),
+    ).toMatchObject({ ok: false })
+    expect(all()).toEqual(before)
+    expect(stays()).toEqual(graph)
+    expect(db().metadata()).toEqual(metadata)
+    expect(context()).toEqual(ctx)
+    expect(sql().pragma('foreign_key_check')).toEqual([])
+    sql().exec('DROP TRIGGER injected_failure')
+  }
+  const saved = value(
+    await operations.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }),
+  )
+  expect(saved).toEqual(p.operationValues)
+  expect(BigInt(context().revision)).toBe(BigInt(ctx.revision) + 1n)
+})
+it('P12: destinazione selezionabile, appartenenza, tariffa obbligatoria e campi manuali validati anche IPC', async () => {
+  const dest = await destination('Europe/London', false)
+  await create()
+  expect(await preview(transfer(dest))).toMatchObject(failure('TARIFF_NOT_FOUND'))
+  await tariff('2026-01-01T00:00', '200', dest)
+  expect(await preview({ ...transfer(dest), destinationBerthId: berthId })).toMatchObject(
+    failure('NOT_SELECTABLE'),
+  )
+  for (const amount of [undefined, -1, '1.2', '92233720368547758.08'])
+    expect(
+      await preview({
+        ...transfer(dest),
+        arrivalManualOverrideAmount: amount,
+      } as unknown as CreateOperationDto),
+    ).toMatchObject({ ok: false })
+  expect(await preview({ ...movement(), arrivalManualOverrideAmount: '0.00' })).toMatchObject(
+    failure('VALIDATION_ERROR'),
+  )
+  sql().prepare("UPDATE ports SET status='INACTIVE' WHERE id=?").run(dest)
+  expect(await preview(transfer(dest, 'MISSED'))).toMatchObject(failure('NOT_SELECTABLE'))
+  sql().prepare("UPDATE ports SET status='ACTIVE' WHERE id=?").run(dest)
+  sql().prepare("UPDATE ports SET status='INACTIVE' WHERE id=?").run(portId)
+  sql().prepare("UPDATE berths SET status='INACTIVE' WHERE id=?").run(berthId)
+  expect(value(await preview(transfer(dest))).operationValues.endpoint).toMatchObject({
+    portId,
+    berthId,
+  })
+})
+it('P12: SQLite impedisce componenti duplicate e contesti tariffari/ruoli incoerenti; totale oltre int64 esatto e derivato', async () => {
+  const dest = await destination()
+  await create()
+  const move = await create({
+    ...transfer(dest),
+    manualOverrideAmount: '92233720368547758.07',
+    arrivalManualOverrideAmount: '92233720368547758.07',
+  })
+  expect(move.totalBase).toBe('184467440737095516.14')
+  const charge = move.charges[1]
+  for (const [column, val] of [
+    ['charge_kind', 'EXIT'],
+    ['economic_endpoint_role', 'DEPARTURE'],
+    ['tariff_id', move.charges[0].calculation.tariffId],
+  ] as const)
+    expect(() =>
+      sql().prepare(`UPDATE operation_charges SET ${column}=? WHERE id=?`).run(val, charge.id),
+    ).toThrow()
+  expect(() =>
+    sql()
+      .prepare(
+        'INSERT INTO operation_charges SELECT ?,' +
+          (sql().pragma('table_info(operation_charges)') as { name: string }[])
+            .slice(1)
+            .map((c) => c.name)
+            .join(',') +
+          ' FROM operation_charges WHERE id=?',
+      )
+      .run('duplicate', charge.id),
+  ).toThrow()
+  expect(all()[1]).toEqual(move)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+  expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
+})
+it('P12: versioni di porto e banchina di destinazione aggiornano estremo e nuova visita atomicamente', async () => {
+  const dest = await destination(),
+    berth = value(
+      await berths.create({ context: context(), payload: { portId: dest, name: 'Dest' } }),
+    ).id
+  await create()
+  const move = await create({ ...transfer(dest), destinationBerthId: berth }),
+    initial = all()
+  const p = value(
+    await ports.previewInsertVersion({
+      context: context(),
+      payload: {
+        portId: dest,
+        name: 'Londra nuova',
+        locality: 'Londra',
+        countryCode: 'GB',
+        moment: moment('2026-06-02T11:15'),
+      },
+    }),
+  )
+  expect(p.effects.items.some((e) => e.reference.kind === 'PORT_CALL')).toBe(true)
+  const ctx = context(),
+    metadata = db().metadata(),
+    graph = stays()
+  sql().exec(
+    "CREATE TRIGGER fail_new_visit BEFORE UPDATE ON port_calls BEGIN SELECT RAISE(ABORT,'injected'); END",
+  )
+  expect(
+    await ports.confirmInsertVersion({ context: p.context, payload: { previewId: p.previewId } }),
+  ).toMatchObject({ ok: false })
+  expect(all()).toEqual(initial)
+  expect(stays()).toEqual(graph)
+  expect(context()).toEqual(ctx)
+  expect(db().metadata()).toEqual(metadata)
+  sql().exec('DROP TRIGGER fail_new_visit')
+  value(
+    await ports.confirmInsertVersion({ context: p.context, payload: { previewId: p.previewId } }),
+  )
+  expect(all()[1].endpoint).toEqual(move.endpoint)
+  expect(stays()[0].visits[1].portVersionId).toBe(all()[1].arrival!.portVersionId)
+  const bp = value(
+    await berths.preview({
+      context: context(),
+      payload: {
+        operation: 'INSERT_VERSION',
+        berthId: berth,
+        name: 'Dest nuova',
+        moment: moment('2026-06-02T11:20'),
+      },
+    }),
+  )
+  value(await berths.confirm({ context: bp.context, payload: { previewId: bp.previewId } }))
+  const updated = all()[1]
+  expect(updated.arrival!.berthName).toBe('Dest nuova')
+  expect(stays()[0].visits[1].stays[0].berthVersionId).toBe(updated.arrival!.berthVersionId)
+  expect(updated.charges).toEqual(move.charges)
+  const pd = value(
+    await ports.previewDeleteVersion({
+      context: context(),
+      payload: { portId: dest, versionId: updated.arrival!.portVersionId },
+    }),
+  )
+  value(
+    await ports.confirmDeleteVersion({ context: pd.context, payload: { previewId: pd.previewId } }),
+  )
+  const bd = value(
+    await berths.preview({
+      context: context(),
+      payload: {
+        operation: 'DELETE_VERSION',
+        berthId: berth,
+        versionId: updated.arrival!.berthVersionId!,
+      },
+    }),
+  )
+  value(await berths.confirm({ context: bd.context, payload: { previewId: bd.previewId } }))
+  expect(all()[1]).toEqual(move)
+  expect(stays()).toEqual(graph)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+})
+it('P12: ritorno a un porto già visitato, ambiguità locale fra porti e nuova visita distinta nello stesso viaggio', async () => {
+  const dest = await destination()
+  await create()
+  const first = stays()[0]
+  const moved = await create(transfer(dest))
+  const ambiguity = await operations.resolveMoment({
+    context: { sessionId: context().sessionId },
+    query: {
+      operationType: 'EXIT',
+      vesselId,
+      moment: moment('2026-06-02T11:45'),
+      interpretationPortId: null,
+    },
+  })
+  expect(ambiguity).toMatchObject(failure('OPERATIONAL_CONTEXT_AMBIGUOUS'))
+  const chosen = value(
+    await operations.resolveMoment({
+      context: { sessionId: context().sessionId },
+      query: {
+        operationType: 'EXIT',
+        vesselId,
+        moment: moment('2026-06-02T11:45'),
+        interpretationPortId: dest,
+      },
+    }),
+  )
+  expect(chosen.portId).toBe(dest)
+  const back = await create({
+    ...movement('2026-06-03T12:00', '2026-06-03T13:30'),
+    destinationPortId: portId,
+    executionStatus: 'PERFORMED',
+  })
+  expect(back.endpoint.portId).toBe(dest)
+  expect(stays()[0].visits).toHaveLength(3)
+  expect(stays()[0].id).toBe(first.id)
+  expect(stays()[0].visits[0].id).toBe(first.visits[0].id)
+  expect(stays()[0].visits[2].id).not.toBe(first.visits[0].id)
+  expect(stays()[0].visits[1].openingOperationId).toBe(moved.id)
+  const internal = await create(movement('2026-06-04T12:00', '2026-06-04T13:00'))
+  expect(internal.charges).toHaveLength(1)
+  expect(stays()[0].visits[2].stays).toHaveLength(2)
+  await create(input('EXIT', '2026-06-05T12:00'))
+  expect(stays()[0].visits.every((v) => v.endedAt !== null)).toBe(true)
+  expect(stays()[0].visits[2].openingOperationId).toBe(back.id)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+})
+it('P12: correzione descrittiva nave ricalcola entrambe le componenti atomicamente senza perdere override e tuple', async () => {
+  const dest = await destination()
+  await create()
+  const move = await create({
+    ...transfer(dest),
+    manualOverrideAmount: '12.34',
+    arrivalManualOverrideAmount: '0.00',
+  })
+  const before = all(),
+    graph = stays(),
+    ctx = context(),
+    metadata = db().metadata()
+  const p = value(
+    await vessels.preview({
+      context: ctx,
+      payload: {
+        operation: 'UPDATE_VERSION',
+        vesselId,
+        versionId: move.endpoint.vesselVersionId,
+        moment: null,
+        registeredName: 'Correzione',
+        imoNumber: null,
+        vesselTypeId: 'PASSENGER',
+        size: 100,
+      },
+    }),
+  )
+  expect(p.summary.recalculated).toBe(3)
+  expect(
+    p.effects.items.filter((e) => move.charges.some((c) => c.id === e.reference.id)),
+  ).toHaveLength(2)
+  sql().exec(
+    "CREATE TRIGGER fail_second_economy BEFORE UPDATE ON operation_charges WHEN OLD.economic_endpoint_role='ARRIVAL' BEGIN SELECT RAISE(ABORT,'injected'); END",
+  )
+  expect(
+    await vessels.confirm({ context: p.context, payload: { previewId: p.previewId } }),
+  ).toMatchObject({ ok: false })
+  expect(all()).toEqual(before)
+  expect(stays()).toEqual(graph)
+  expect(context()).toEqual(ctx)
+  expect(db().metadata()).toEqual(metadata)
+  sql().exec('DROP TRIGGER fail_second_economy')
+  value(await vessels.confirm({ context: p.context, payload: { previewId: p.previewId } }))
+  const corrected = all()[1]
+  expect(corrected.endpoint).toEqual(move.endpoint)
+  expect(corrected.arrival).toEqual(move.arrival)
+  expect(corrected.charges[0]).toMatchObject({
+    id: move.charges[0].id,
+    manualOverrideAmount: '12.34',
+    effectiveBase: '12.34',
+    calculation: { vesselName: 'Correzione', vesselTypeId: 'PASSENGER', base: '100.00' },
+  })
+  expect(corrected.charges[1]).toMatchObject({
+    id: move.charges[1].id,
+    manualOverrideAmount: '0.00',
+    effectiveBase: '0.00',
+    calculation: { vesselName: 'Correzione', vesselTypeId: 'PASSENGER', base: '200.00' },
+  })
+  expect(corrected.totalBase).toBe('12.34')
+  expect(stays()).toEqual(graph)
+  expect(BigInt(context().revision)).toBe(BigInt(ctx.revision) + 1n)
   expect(sql().pragma('foreign_key_check')).toEqual([])
 })

@@ -15,7 +15,12 @@ export type OperationMomentInput = { vesselId: string; moment: MomentInputDto } 
       arrivalMoment: MomentInputDto
     }
 )
-export type CreateOperationDto = OperationMomentInput & {
+export type CreateOperationDto = (
+  | Extract<OperationMomentInput, { operationType: 'ENTRY' | 'EXIT' }>
+  | (Extract<OperationMomentInput, { operationType: 'MOVEMENT' }> & {
+      arrivalManualOverrideAmount?: string | null
+    })
+) & {
   executionStatus: ExecutionStatus
   notes: string | null
   manualOverrideAmount: string | null
@@ -29,7 +34,7 @@ export interface OperationMomentDto {
 export interface OperationChargeDto {
   id: string
   chargeKind: 'ENTRY' | 'EXIT' | 'MOVEMENT'
-  economicEndpointRole: 'OCCURRENCE' | 'DEPARTURE'
+  economicEndpointRole: 'OCCURRENCE' | 'DEPARTURE' | 'ARRIVAL'
   calculation: BaseCalculationDto
   manualOverrideAmount: string | null
   effectiveBase: string
@@ -43,7 +48,8 @@ export interface VesselOperationDto {
   notes: string | null
   endpoint: OperationEndpointDto
   arrival: OperationEndpointDto | null
-  charge: OperationChargeDto
+  charges: OperationChargeDto[]
+  totalBase: string
 }
 export interface OperationEndpointDto {
   id: string
@@ -69,9 +75,9 @@ export type OperationalContextDto =
   | {
       status: 'IN_TRANSFER'
       voyageId: string
-      portCallId: string
+      portCallId: string | null
       berthStayId: null
-      portId: string
+      portId: string | null
       berthId: null
     }
   | {

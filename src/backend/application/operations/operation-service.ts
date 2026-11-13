@@ -8,6 +8,7 @@ import type {
 } from '../../../shared/contracts/operations'
 import type { ChangeEffectDto } from '../../../shared/contracts/master-data'
 import { ArchiveError } from '../../../shared/errors/archive-error'
+import { operationTotal } from '../../domain/operations/charges'
 import { validateOperationSequence } from '../../domain/operations/sequence'
 import { resolveMoment, utcInstant } from '../../domain/values/moments'
 import { Money } from '../../domain/values/numbers'
@@ -29,7 +30,7 @@ type PreparedOperation = VesselOperationDto & { openingIds: OpeningIds }
 const kind = (value: unknown) => {
   const type = (value as { operationType?: unknown } | null)?.operationType
   if (type !== 'ENTRY' && type !== 'EXIT' && type !== 'MOVEMENT')
-    throw new ArchiveError('VALIDATION_ERROR', 'Scegli entrata, uscita o spostamento interno.')
+    throw new ArchiveError('VALIDATION_ERROR', 'Scegli entrata, uscita o spostamento.')
   return type
 }
 function parseMoment(
@@ -136,8 +137,10 @@ export class OperationService implements OperationApi {
     const portIds = [
       ...new Set(
         operations
-          .filter((o) => o.operationType === 'ENTRY' && o.executionStatus !== 'MISSED')
-          .map((o) => o.endpoint.portId),
+          .filter((o) => o.executionStatus !== 'MISSED')
+          .flatMap((o) =>
+            o.operationType === 'ENTRY' ? [o.endpoint.portId] : o.arrival ? [o.arrival.portId] : [],
+          ),
       ),
     ]
     const candidates: OperationMomentDto[] = []
@@ -190,7 +193,8 @@ export class OperationService implements OperationApi {
         })),
       )
     if (!candidates.length) {
-      if (resolutionError && portIds.length === 1) throw resolutionError
+      if (resolutionError && (portIds.length === 1 || input.interpretationPortId))
+        throw resolutionError
       throw new ArchiveError(
         'OPERATIONAL_CONTEXT_MISSING',
         'Non esiste un contesto aperto al momento indicato o la nave è in trasferimento.',
@@ -198,11 +202,6 @@ export class OperationService implements OperationApi {
     }
     const result = candidates[0]
     if (input.operationType === 'MOVEMENT') {
-      if (input.destinationPortId !== result.portId)
-        throw new ArchiveError(
-          'OPERATION_DESTINATION_INVALID',
-          'Lo spostamento interno richiede lo stesso porto di origine e destinazione.',
-        )
       result.arrivalResolution = resolveMoment(
         input.arrivalMoment.localDateTime,
         ports.get(input.destinationPortId).initialZoneId,
@@ -238,7 +237,7 @@ export class OperationService implements OperationApi {
         op.operationType === 'ENTRY'
           ? 'Entrata'
           : op.operationType === 'MOVEMENT'
-            ? 'Spostamento interno'
+            ? 'Spostamento'
             : 'Uscita',
     }
     const effects: ChangeEffectDto[] = [
@@ -260,16 +259,22 @@ export class OperationService implements OperationApi {
             : []),
         ],
       },
-      {
-        reference: { kind: 'OPERATION_CHARGE', id: op.charge.id, label: 'Componente economica' },
+      ...op.charges.map((c): ChangeEffectDto => ({
+        reference: {
+          kind: 'OPERATION_CHARGE',
+          id: c.id,
+          label: 'Componente ' + c.chargeKind + ' · ' + c.calculation.moment.utc,
+        },
         versionId: null,
         action: 'CREATE',
         changes: [
-          { field: 'calculatedBase', before: null, after: op.charge.calculation.base },
-          { field: 'manualOverride', before: null, after: op.charge.manualOverrideAmount },
-          { field: 'effectiveBase', before: null, after: op.charge.effectiveBase },
+          { field: 'port', before: null, after: c.calculation.portId },
+          { field: 'moment', before: null, after: c.calculation.moment.utc },
+          { field: 'calculatedBase', before: null, after: c.calculation.base },
+          { field: 'manualOverride', before: null, after: c.manualOverrideAmount },
+          { field: 'effectiveBase', before: null, after: c.effectiveBase },
         ],
-      },
+      })),
     ]
     if (op.executionStatus !== 'MISSED' && op.operationType === 'MOVEMENT') {
       const repository = new OperationRepository(s.database)
@@ -295,13 +300,40 @@ export class OperationService implements OperationApi {
           action: 'CREATE',
           changes: [
             { field: 'startedAt', before: null, after: op.arrival!.moment.utc },
-            { field: 'portCallId', before: null, after: ids.portCallId },
+            { field: 'portCallId', before: null, after: op.openingIds.portCallId },
             { field: 'berth', before: null, after: op.arrival!.berthName },
             { field: 'endedAt', before: null, after: closure.endedAt },
             { field: 'closingOperationId', before: null, after: closure.closingOperationId },
           ],
         },
       )
+      if (op.arrival!.portId !== op.endpoint.portId) {
+        effects.push(
+          {
+            reference: { kind: 'PORT_CALL', id: ids.portCallId, label: 'Visita di origine' },
+            versionId: null,
+            action: 'UPDATE',
+            changes: [
+              { field: 'endedAt', before: null, after: op.endpoint.moment.utc },
+              { field: 'closingOperationId', before: null, after: op.id },
+            ],
+          },
+          {
+            reference: {
+              kind: 'PORT_CALL',
+              id: op.openingIds.portCallId,
+              label: 'Visita di destinazione',
+            },
+            versionId: null,
+            action: 'CREATE',
+            changes: [
+              { field: 'startedAt', before: null, after: op.arrival!.moment.utc },
+              { field: 'voyageId', before: null, after: ids.voyageId },
+              { field: 'port', before: null, after: op.arrival!.portName },
+            ],
+          },
+        )
+      }
     } else if (op.executionStatus !== 'MISSED') {
       const ids =
         op.operationType === 'ENTRY'
@@ -333,6 +365,10 @@ export class OperationService implements OperationApi {
         'executionStatus',
         'notes',
         'manualOverrideAmount',
+        ...(kind(payload) === 'MOVEMENT' &&
+        Object.hasOwn(payload as object, 'arrivalManualOverrideAmount')
+          ? ['arrivalManualOverrideAmount']
+          : []),
       ])
       if (!['PLANNED', 'PERFORMED', 'MISSED'].includes(input.executionStatus as string))
         throw new ArchiveError('VALIDATION_ERROR', 'Stato operativo non valido.')
@@ -349,7 +385,28 @@ export class OperationService implements OperationApi {
         input.manualOverrideAmount === null
           ? null
           : Money.parse(input.manualOverrideAmount, 'manualOverrideAmount').text
+      const arrivalOverride =
+        !Object.hasOwn(input, 'arrivalManualOverrideAmount') ||
+        input.arrivalManualOverrideAmount === null
+          ? null
+          : Money.parse(input.arrivalManualOverrideAmount, 'arrivalManualOverrideAmount').text
       const resolved = this.resolve(s, target)
+      if (
+        arrivalOverride !== null &&
+        target.operationType === 'MOVEMENT' &&
+        target.destinationPortId === resolved.portId
+      )
+        throw new ArchiveError(
+          'VALIDATION_ERROR',
+          'La sostituzione all’arrivo è ammessa solo per lo spostamento tra porti.',
+          [
+            {
+              path: ['arrivalManualOverrideAmount'],
+              code: 'NOT_APPLICABLE',
+              message: 'Lo spostamento interno ha una sola componente alla partenza.',
+            },
+          ],
+        )
       if (
         resolved.resolution.status !== 'RESOLVED' ||
         resolved.arrivalResolution?.status === 'CHOICE_REQUIRED'
@@ -399,6 +456,9 @@ export class OperationService implements OperationApi {
           ...(target.operationType === 'MOVEMENT'
             ? new OperationRepository(s.database).openIds(target.vesselId, moment.utc)
             : { voyageId: randomUUID(), portCallId: randomUUID() }),
+          ...(target.operationType === 'MOVEMENT' && target.destinationPortId !== resolved.portId
+            ? { portCallId: randomUUID() }
+            : {}),
           berthStayId: randomUUID(),
         },
         id: randomUUID(),
@@ -422,24 +482,36 @@ export class OperationService implements OperationApi {
                 'ARRIVAL',
               )
             : null,
-        charge: null!,
+        charges: [],
+        totalBase: '0.00',
       }
       this.validate(s, operation)
-      const calculation = calculateBase(s.database, {
-        portId: resolved.portId,
-        vesselId: target.vesselId,
-        moment,
-        activity: { kind: 'OPERATION', operation: target.operationType },
+      const external = operation.arrival && operation.arrival.portId !== operation.endpoint.portId
+      operation.charges = (
+        external
+          ? [
+              { endpoint: operation.endpoint, kind: 'EXIT' as const, override },
+              { endpoint: operation.arrival!, kind: 'ENTRY' as const, override: arrivalOverride },
+            ]
+          : [{ endpoint: operation.endpoint, kind: target.operationType, override }]
+      ).map(({ endpoint: e, kind, override }) => {
+        const calculation = calculateBase(s.database, {
+          portId: e.portId,
+          vesselId: target.vesselId,
+          moment: e.moment,
+          activity: { kind: 'OPERATION', operation: kind },
+        })
+        return {
+          id: randomUUID(),
+          chargeKind: kind,
+          economicEndpointRole: e.role,
+          calculation,
+          manualOverrideAmount: override,
+          effectiveBase: override ?? calculation.base,
+        }
       })
-      operation.vesselVersionId = calculation.vesselVersionId
-      operation.charge = {
-        id: randomUUID(),
-        chargeKind: target.operationType,
-        economicEndpointRole: target.operationType === 'MOVEMENT' ? 'DEPARTURE' : 'OCCURRENCE',
-        calculation,
-        manualOverrideAmount: override,
-        effectiveBase: override ?? calculation.base,
-      }
+      operation.vesselVersionId = operation.endpoint.vesselVersionId
+      operation.totalBase = operationTotal(operation.charges)
       const entry = s.previews.put(namespace, s.context(), operation)
       return this.previewDto(s, operation, entry, 1, 50)
     })
@@ -473,7 +545,7 @@ export class OperationService implements OperationApi {
         pageSize,
       },
       warnings: [
-        'L’importo è una base in EUR. Spostamenti tra porti, consuntivazione e correzioni strutturali non sono ancora disponibili.',
+        'L’importo è una base in EUR. Consuntivazione e correzioni strutturali non sono ancora disponibili.',
       ],
       blockers: [],
       operationValues: {
@@ -485,7 +557,8 @@ export class OperationService implements OperationApi {
         notes: op.notes,
         endpoint: op.endpoint,
         arrival: op.arrival,
-        charge: op.charge,
+        charges: op.charges,
+        totalBase: operationTotal(op.charges),
       },
     }
   }
@@ -511,18 +584,16 @@ export class OperationService implements OperationApi {
         const id = entityId(record(p, ['previewId']).previewId, 'previewId'),
           op = s.previews.get(id, namespace, s.context()).input as PreparedOperation
         this.validate(s, op)
-        const calculation = calculateBase(s.database, {
-          portId: op.endpoint.portId,
-          vesselId: op.vesselId,
-          moment: op.endpoint.moment,
-          activity: { kind: 'OPERATION', operation: op.operationType },
+        op.charges = op.charges.map((c) => {
+          const e = c.economicEndpointRole === 'ARRIVAL' ? op.arrival! : op.endpoint
+          const calculation = calculateBase(s.database, {
+            portId: e.portId,
+            vesselId: op.vesselId,
+            moment: e.moment,
+            activity: { kind: 'OPERATION', operation: c.chargeKind },
+          })
+          return { ...c, calculation, effectiveBase: c.manualOverrideAmount ?? calculation.base }
         })
-        op.vesselVersionId = calculation.vesselVersionId
-        op.charge = {
-          ...op.charge,
-          calculation,
-          effectiveBase: op.charge.manualOverrideAmount ?? calculation.base,
-        }
         const repository = new OperationRepository(s.database)
         repository.insert(op, op.openingIds)
         consumed = id

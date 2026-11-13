@@ -18,11 +18,6 @@ export function validateOperationSequence(operations: readonly VesselOperationDt
             },
           ],
         )
-      if (op.arrival.portId !== op.endpoint.portId)
-        throw new ArchiveError(
-          'OPERATION_DESTINATION_INVALID',
-          'Lo spostamento interno richiede lo stesso porto di origine e destinazione.',
-        )
     }
     for (const end of [op.endpoint, ...(op.arrival ? [op.arrival] : [])]) {
       const minute = end.moment.utc.slice(0, 16)

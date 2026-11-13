@@ -1,5 +1,13 @@
 import { sql } from 'drizzle-orm'
-import { check, foreignKey, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import {
+  check,
+  foreignKey,
+  integer,
+  sqliteTable,
+  text,
+  unique,
+  uniqueIndex,
+} from 'drizzle-orm/sqlite-core'
 
 export const archiveMetadata = sqliteTable('archive_metadata', {
   singleton: integer('singleton').primaryKey(),
@@ -436,7 +444,6 @@ export const operationCharges = sqliteTable(
     id: text('id').primaryKey().notNull(),
     operationId: text('operation_id')
       .notNull()
-      .unique()
       .references(() => vesselOperations.id),
     chargeKind: text('charge_kind').notNull(),
     economicEndpointRole: text('economic_endpoint_role').notNull(),
@@ -469,10 +476,12 @@ export const operationCharges = sqliteTable(
     calculationSteps: text('calculation_steps').notNull(),
   },
   (table) => [
+    unique().on(table.operationId, table.economicEndpointRole),
+    unique().on(table.operationId, table.chargeKind),
     check('operation_charges_check_0', sql`charge_kind IN ('ENTRY', 'EXIT', 'MOVEMENT')`),
     check(
       'operation_charges_check_1',
-      sql`(charge_kind = 'MOVEMENT' AND economic_endpoint_role = 'DEPARTURE') OR (charge_kind IN ('ENTRY','EXIT') AND economic_endpoint_role = 'OCCURRENCE')`,
+      sql`(charge_kind = 'MOVEMENT' AND economic_endpoint_role = 'DEPARTURE') OR (charge_kind = 'EXIT' AND economic_endpoint_role IN ('OCCURRENCE','DEPARTURE')) OR (charge_kind = 'ENTRY' AND economic_endpoint_role IN ('OCCURRENCE','ARRIVAL'))`,
     ),
     foreignKey({
       columns: [table.operationId, table.economicEndpointRole],

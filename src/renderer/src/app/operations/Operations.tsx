@@ -24,7 +24,12 @@ import { VesselPicker } from './VesselPicker'
 import { BerthPicker } from './BerthPicker'
 import { OperationDetail, executionLabels, operationLabels } from './OperationDetail'
 
-type Draft = { context: ArchiveContextDto; values: CreateOperationDto; override: string }
+type Draft = {
+  context: ArchiveContextDto
+  values: CreateOperationDto
+  override: string
+  arrivalOverride: string
+}
 export function Operations({
   archives,
   onDialogChange,
@@ -125,6 +130,7 @@ export function Operations({
     setDraft({
       context,
       override: '',
+      arrivalOverride: '',
       values: {
         vesselId,
         operationType: type,
@@ -185,11 +191,22 @@ export function Operations({
       setDialogError('Inserisci un importo non negativo con al massimo due decimali.')
       return
     }
+    const arrivalOverride = draft.arrivalOverride.trim() ? moneyInput(draft.arrivalOverride) : null
+    if (draft.arrivalOverride.trim() && arrivalOverride === null) {
+      setDialogError('Inserisci un importo all’arrivo non negativo con al massimo due decimali.')
+      return
+    }
     const r = await commandRequest.request(() =>
       archives.execute(() =>
         window.operations.previewCreate({
           context: draft.context,
-          payload: { ...draft.values, manualOverrideAmount: override },
+          payload: {
+            ...draft.values,
+            manualOverrideAmount: override,
+            ...(draft.values.operationType === 'MOVEMENT'
+              ? { arrivalManualOverrideAmount: arrivalOverride }
+              : {}),
+          },
         }),
       ),
     )
@@ -253,7 +270,7 @@ export function Operations({
             Nuova uscita
           </Button>
           <Button disabled={!vesselId || busy} variant="light" onClick={() => start('MOVEMENT')}>
-            Nuovo spostamento interno
+            Nuovo spostamento
           </Button>
           {draft && !open && (
             <Button
@@ -290,12 +307,11 @@ export function Operations({
         </Button>
       </Group>
       <p className="operations-future">
-        Spostamenti tra porti, assegnazioni dei soggetti, consuntivazione e correzioni strutturali:
-        non ancora disponibili.
+        Assegnazioni dei soggetti, consuntivazione e correzioni strutturali: non ancora disponibili.
       </p>
       {!vesselId ? (
         <StateMessage title="Scegli una nave">
-          Consulta la cronologia e registra un’entrata, un’uscita o uno spostamento interno.
+          Consulta la cronologia e registra un’entrata, un’uscita o uno spostamento.
         </StateMessage>
       ) : view === 'operations' ? (
         <div className="operations-workspace">
@@ -396,7 +412,9 @@ export function Operations({
                   {operationalContext.status === 'OUTSIDE'
                     ? 'Fuori da un viaggio.'
                     : operationalContext.status === 'IN_TRANSFER'
-                      ? 'In trasferimento: nessun ormeggio applicabile.'
+                      ? operationalContext.portCallId === null
+                        ? 'In trasferimento tra porti: nessuna visita e nessun ormeggio applicabili.'
+                        : 'In trasferimento: nessun ormeggio applicabile.'
                       : 'In porto.'}
                 </p>
                 <details>
@@ -496,7 +514,7 @@ export function Operations({
             : draft?.values.operationType === 'ENTRY'
               ? 'Nuova entrata'
               : draft?.values.operationType === 'MOVEMENT'
-                ? 'Nuovo spostamento interno'
+                ? 'Nuovo spostamento'
                 : 'Nuova uscita'
         }
         size="xl"
@@ -588,7 +606,11 @@ export function Operations({
                       label="Porto di interpretazione"
                       value={draft.values.interpretationPortId}
                       onChange={(id) =>
-                        change({ ...draft.values, interpretationPortId: id } as CreateOperationDto)
+                        change({
+                          ...draft.values,
+                          interpretationPortId: id,
+                          moment: { ...draft.values.moment, selectedOffset: null },
+                        } as CreateOperationDto)
                       }
                       disabled={busy}
                     />
@@ -612,7 +634,7 @@ export function Operations({
                             : null,
                         arrivalMoment:
                           draft.values.operationType === 'MOVEMENT'
-                            ? draft.values.arrivalMoment
+                            ? { ...draft.values.arrivalMoment, selectedOffset: null }
                             : emptyMoment(),
                         destinationPortId: id ?? '',
                         destinationBerthId: null,
@@ -633,8 +655,8 @@ export function Operations({
                     />
                   )}
                   <p>
-                    La destinazione deve appartenere allo stesso porto dell’origine. La banchina può
-                    non essere specificata.
+                    Partenza e arrivo usano i fusi dei rispettivi porti. La banchina di destinazione
+                    può non essere specificata.
                   </p>
                 </>
               )}
@@ -675,6 +697,18 @@ export function Operations({
                   setDraft({ ...draft, override: e.currentTarget.value })
                 }}
               />
+              {draft.values.operationType === 'MOVEMENT' && (
+                <TextInput
+                  label="Sostituzione manuale all’arrivo (EUR, facoltativa)"
+                  description="Solo tra porti: ENTRY all’arrivo. Il campo precedente sostituisce EXIT alla partenza; nello stesso porto sostituisce MOVEMENT."
+                  value={draft.arrivalOverride}
+                  disabled={busy}
+                  onChange={(e) => {
+                    invalidateEditor()
+                    setDraft({ ...draft, arrivalOverride: e.currentTarget.value })
+                  }}
+                />
+              )}
               <Textarea
                 label="Note"
                 value={draft.values.notes ?? ''}

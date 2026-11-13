@@ -1,11 +1,9 @@
 import type { VesselOperationDto } from '../../../../shared/contracts/operations'
 import { formatMoney } from '../../api/numeric-input'
-export const operationLabels = { ENTRY: 'Entrata', EXIT: 'Uscita', MOVEMENT: 'Spostamento interno' }
+export const operationLabels = { ENTRY: 'Entrata', EXIT: 'Uscita', MOVEMENT: 'Spostamento' }
 export const executionLabels = { PLANNED: 'Prevista', PERFORMED: 'Effettuata', MISSED: 'Mancata' }
 export function OperationDetail({ operation: o }: { operation: VesselOperationDto }) {
-  const e = o.endpoint,
-    c = o.charge,
-    r = c.calculation
+  const e = o.endpoint
   return (
     <section aria-label="Dettaglio operazione" className="tariff-long-value">
       <h3>
@@ -13,7 +11,8 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
       </h3>
       {o.arrival && <h4>Partenza · Origine</h4>}
       <p>
-        {r.vesselName} · {e.portName} · {e.berthName ?? 'Banchina non specificata'}
+        {o.charges[0].calculation.vesselName} · {e.portName} ·{' '}
+        {e.berthName ?? 'Banchina non specificata'}
       </p>
       <p>
         {e.moment.localDateTime} · {e.moment.zoneId} · offset {e.moment.offset}
@@ -50,53 +49,78 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
           : o.operationType === 'ENTRY'
             ? 'Apre viaggio, visita e ormeggio.'
             : o.operationType === 'MOVEMENT'
-              ? 'Chiude l’ormeggio di origine e apre quello di destinazione nella stessa visita e nello stesso viaggio.'
+              ? o.arrival!.portId === e.portId
+                ? 'Chiude l’ormeggio di origine e apre quello di destinazione nella stessa visita e nello stesso viaggio.'
+                : 'Chiude visita e ormeggio di origine, apre visita e ormeggio di destinazione nello stesso viaggio.'
               : 'Chiude viaggio, visita e ormeggio.'}{' '}
         Lo stato non cambia con il trascorrere del tempo.
       </p>
-      <h4>Base economica · EUR{o.arrival ? ' · MOVEMENT alla partenza' : ''}</h4>
-      <p>
-        Valore tariffario: {formatMoney(r.tariffValue)} · Peso: {r.weight}
-      </p>
-      <p>
-        Base calcolata: {formatMoney(r.base)}
-        <br />
-        Sostituzione manuale:{' '}
-        {c.manualOverrideAmount === null ? 'Assente' : formatMoney(c.manualOverrideAmount)}
-        <br />
-        <strong>Base effettiva: {formatMoney(c.effectiveBase)}</strong>
-      </p>
-      <ol>
-        {r.steps.map((step, i) => (
-          <li key={i}>{step}</li>
-        ))}
-      </ol>
-      <details>
-        <summary>Riferimenti applicati e operandi</summary>
+      {o.charges.map((c) => {
+        const e = c.economicEndpointRole === 'ARRIVAL' ? o.arrival! : o.endpoint
+        const r = c.calculation
+        return (
+          <section key={c.id} aria-label={'Componente ' + c.chargeKind}>
+            <h4>
+              Base economica · EUR · {c.chargeKind}
+              {c.economicEndpointRole === 'ARRIVAL'
+                ? ' all’arrivo'
+                : c.economicEndpointRole === 'DEPARTURE'
+                  ? ' alla partenza'
+                  : ''}
+            </h4>
+            <p>
+              {e.portName} · {r.moment.localDateTime} · {r.moment.zoneId} · {r.vesselName}
+            </p>
+            <p>
+              Valore tariffario: {formatMoney(r.tariffValue)} · Peso: {r.weight}
+            </p>
+            <p>
+              Base calcolata: {formatMoney(r.base)}
+              <br />
+              Sostituzione manuale:{' '}
+              {c.manualOverrideAmount === null ? 'Assente' : formatMoney(c.manualOverrideAmount)}
+              <br />
+              <strong>Base effettiva: {formatMoney(c.effectiveBase)}</strong>
+            </p>
+            <ol>
+              {r.steps.map((step, i) => (
+                <li key={i}>{step}</li>
+              ))}
+            </ol>
+            <details>
+              <summary>Riferimenti applicati e operandi</summary>
+              <p>
+                Operazione: {o.id}
+                <br />
+                Componente: {c.id}
+                <br />
+                Versione nave: {r.vesselVersionId}
+                <br />
+                Versione porto: {e.portVersionId}
+                <br />
+                Versione banchina: {e.berthVersionId ?? '—'}
+                <br />
+                Tariffa: {r.tariffId}
+                <br />
+                Configurazione: {r.configurationId}
+                <br />
+                Scaglione: {r.bracketId}
+                <br />
+                Peso: {r.weightVersionId}
+              </p>
+              <p>
+                Tipologia {r.vesselTypeId}, dimensione {r.size}, limite {r.upperLimit}, valore{' '}
+                {r.ordinaryValue}, extra {r.extraCount} × {r.extraValue}, ampiezza {r.extraWidth}.
+              </p>
+            </details>
+          </section>
+        )
+      })}
+      {o.charges.length > 1 && (
         <p>
-          Operazione: {o.id}
-          <br />
-          Componente: {c.id}
-          <br />
-          Versione nave: {r.vesselVersionId}
-          <br />
-          Versione porto: {e.portVersionId}
-          <br />
-          Versione banchina: {e.berthVersionId ?? '—'}
-          <br />
-          Tariffa: {r.tariffId}
-          <br />
-          Configurazione: {r.configurationId}
-          <br />
-          Scaglione: {r.bracketId}
-          <br />
-          Peso: {r.weightVersionId}
+          <strong>Totale basi effettive: {formatMoney(o.totalBase)}</strong>
         </p>
-        <p>
-          Tipologia {r.vesselTypeId}, dimensione {r.size}, limite {r.upperLimit}, valore{' '}
-          {r.ordinaryValue}, extra {r.extraCount} × {r.extraValue}, ampiezza {r.extraWidth}.
-        </p>
-      </details>
+      )}
       <p>Note: {o.notes ?? '—'}</p>
     </section>
   )

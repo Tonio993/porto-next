@@ -1,5 +1,5 @@
 import type { ChangeEffectDto } from '../../../shared/contracts/master-data'
-import type { VesselOperationDto } from '../../../shared/contracts/operations'
+import type { VesselOperationDto, OperationChargeDto } from '../../../shared/contracts/operations'
 import type { PortVersionDto } from '../../../shared/contracts/ports'
 import type { BerthVersionDto } from '../../../shared/contracts/berths'
 import type { VesselVersionDto } from '../../../shared/contracts/vessels'
@@ -43,22 +43,23 @@ function diff(
 function recalculate(
   database: DatabaseSession,
   op: VesselOperationDto,
+  charge: OperationChargeDto,
   simulated: Parameters<typeof calculateBase>[2],
 ) {
   const calculation = calculateBase(
     database,
     {
       vesselId: op.vesselId,
-      portId: op.endpoint.portId,
-      moment: op.endpoint.moment,
-      activity: { kind: 'OPERATION', operation: op.operationType },
+      portId: charge.calculation.portId,
+      moment: charge.calculation.moment,
+      activity: { kind: 'OPERATION', operation: charge.chargeKind },
     },
     simulated,
   )
   return {
-    ...op.charge,
+    ...charge,
     calculation,
-    effectiveBase: op.charge.manualOverrideAmount ?? calculation.base,
+    effectiveBase: charge.manualOverrideAmount ?? calculation.base,
   }
 }
 export function tariffOperationImpacts(
@@ -66,27 +67,29 @@ export function tariffOperationImpacts(
   tariff: TariffDto,
   next: string | null,
 ) {
-  const operations = new OperationRepository(database)
-    .all()
-    .filter(
-      (o) =>
-        o.endpoint.portId === tariff.portId &&
-        o.endpoint.moment.utc >= tariff.effectiveFrom &&
-        (!next || o.endpoint.moment.utc < next),
-    )
-  const updates = operations.map((op) => ({ ...op, charge: recalculate(database, op, { tariff }) }))
-  const effects = updates.flatMap((op, index) =>
+  const updates = new OperationRepository(database).all().flatMap((op) =>
+    op.charges
+      .filter(
+        (c) =>
+          c.calculation.portId === tariff.portId &&
+          c.calculation.moment.utc >= tariff.effectiveFrom &&
+          (!next || c.calculation.moment.utc < next),
+      )
+      .map((before) => ({
+        operationId: op.id,
+        before,
+        after: recalculate(database, op, before, { tariff }),
+      })),
+  )
+  const effects = updates.flatMap(({ before, after }) =>
     diff(
       {
         kind: 'OPERATION_CHARGE',
-        id: op.charge.id,
-        label: `Componente ${op.operationType} · ${op.endpoint.moment.utc}`,
+        id: after.id,
+        label: 'Componente ' + after.chargeKind + ' · ' + after.calculation.moment.utc,
       },
-      {
-        ...operations[index].charge.calculation,
-        effectiveBase: operations[index].charge.effectiveBase,
-      },
-      { ...op.charge.calculation, effectiveBase: op.charge.effectiveBase },
+      { ...before.calculation, effectiveBase: before.effectiveBase },
+      { ...after.calculation, effectiveBase: after.effectiveBase },
     ),
   )
   return {
@@ -94,10 +97,11 @@ export function tariffOperationImpacts(
     recalculated: updates.length,
     apply: () => {
       const repository = new OperationRepository(database)
-      for (const op of updates) repository.saveCharge(op)
+      for (const u of updates) repository.saveCharge(u.operationId, u.after)
     },
   }
 }
+
 /** Simulate with the proposed complete version sequence, without writes or savepoint rollbacks. */
 export function masterOperationImpacts(database: DatabaseSession, change: MasterChange) {
   const operations = new OperationRepository(database).all(
@@ -118,19 +122,26 @@ export function masterOperationImpacts(database: DatabaseSession, change: Master
     if (change.kind === 'VESSEL') {
       const version = at(change.versions, op.endpoint.moment.utc)
       op.vesselVersionId = version.id
-      op.charge = recalculate(database, op, { vesselVersion: version })
-      const economic = diff(
-        {
-          kind: 'OPERATION_CHARGE',
-          id: op.charge.id,
-          label: 'Componente ' + op.operationType + ' · ' + op.endpoint.moment.utc,
-        },
-        { ...original.charge.calculation, effectiveBase: original.charge.effectiveBase },
-        { ...op.charge.calculation, effectiveBase: op.charge.effectiveBase },
-      )
-      effects.push(...economic)
-      if (economic.length) recalculated++
+      op.charges = op.charges.map((c, index) => {
+        const updated = recalculate(database, op, c, {
+          vesselVersion: at(change.versions, c.calculation.moment.utc),
+        })
+        const before = original.charges[index]
+        const economic = diff(
+          {
+            kind: 'OPERATION_CHARGE',
+            id: c.id,
+            label: 'Componente ' + c.chargeKind + ' · ' + c.calculation.moment.utc,
+          },
+          { ...before.calculation, effectiveBase: before.effectiveBase },
+          { ...updated.calculation, effectiveBase: updated.effectiveBase },
+        )
+        effects.push(...economic)
+        if (economic.length) recalculated++
+        return updated
+      })
     }
+
     for (const endpoint of [op.endpoint, ...(op.arrival ? [op.arrival] : [])]) {
       const before = { ...endpoint }
       if (change.kind === 'VESSEL')
@@ -218,7 +229,7 @@ export function masterOperationImpacts(database: DatabaseSession, change: Master
           sql
             .prepare('UPDATE vessel_operations SET vessel_version_id=? WHERE id=?')
             .run(op.vesselVersionId, op.id)
-          repository.saveCharge(op)
+          repository.saveCharges(op)
         }
         for (const e of [op.endpoint, ...(op.arrival ? [op.arrival] : [])])
           sql

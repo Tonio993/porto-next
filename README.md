@@ -38,9 +38,11 @@ Creazione, salvataggio con nome e backup richiedono un percorso libero. I file e
 
 ## Operazioni nave
 
-In **Operazioni nave**, scegli una nave e registra una nuova entrata o uscita. Controlla l'anteprima degli effetti e conferma: l'entrata apre viaggio, visita e ormeggio; l'uscita li chiude. La banchina è facoltativa. Le operazioni previste ed effettuate producono la struttura; quelle mancate richiedono un contesto valido e una tariffa ma non aprono né chiudono permanenze. Lo stato non cambia con il trascorrere del tempo.
+In **Operazioni nave**, scegli una nave e registra un’entrata, un’uscita o uno spostamento interno. Controlla l’anteprima degli effetti e conferma: l’entrata apre viaggio, visita e ormeggio; l’uscita li chiude; lo spostamento chiude l’ormeggio di origine e ne apre un altro nella stessa visita e nello stesso viaggio. La banchina è facoltativa. Le operazioni previste ed effettuate producono la struttura; quelle mancate richiedono un contesto valido e una tariffa ma non aprono né chiudono permanenze. Lo stato non cambia con il trascorrere del tempo.
 
-Il backend determina fuso, porto e momento economico dal contesto. La consultazione mostra base calcolata, eventuale sostituzione manuale in creazione (anche zero), base effettiva e traccia. Una tariffa intermedia o una variazione delle versioni anagrafiche include nell'anteprima gli effetti sulle attività e li applica atomicamente. Spostamenti, soggetti effettivi, consuntivazione e correzioni operative non sono ancora disponibili.
+Per lo spostamento indica partenza, arrivo e destinazione nello stesso porto; l’origine viene derivata dalla cronologia. L’arrivo deve essere successivo alla partenza in UTC. Nella vista **Permanenze**, la consultazione del contesto a un istante UTC attribuisce la partenza all’origine e l’arrivo alla destinazione; durante il trasferimento non esiste un ormeggio applicabile.
+
+Il backend determina fuso, porto e momento economico dal contesto. Lo spostamento interno genera una sola componente MOVEMENT alla partenza. La consultazione mostra base calcolata, eventuale sostituzione manuale in creazione (anche zero), base effettiva e traccia. Una tariffa intermedia o una variazione delle versioni anagrafiche include nell'anteprima gli effetti sulle attività e li applica atomicamente. Spostamenti tra porti, soggetti effettivi, consuntivazione e correzioni operative non sono ancora disponibili.
 
 ## Archivi e salvataggio
 

@@ -1,12 +1,12 @@
 # Stato di implementazione delle prestazioni
 
-Aggiornamento del 12 novembre 2026. Questo file contiene lo stato corrente e la sola consegna attiva. Requisiti e frequenza dei controlli sono nel [piano](piano-implementazione-prestazioni.md), regole di lettura e aggiornamento nella [guida documentale](guida-documentazione.md).
+Aggiornamento del 13 novembre 2026. Questo file contiene lo stato corrente e la sola consegna attiva. Requisiti e frequenza dei controlli sono nel [piano](piano-implementazione-prestazioni.md), regole di lettura e aggiornamento nella [guida documentale](guida-documentazione.md).
 
 ## Stato corrente
 
-- P00–P10, UI01 e UI02 completati. P10 verificato sulla build Electron, implementazione nel commit `3a34501`, schema v11. [Nota P10](p10/entrata-uscita-e-permanenze.md).
+- P00–P11, UI01 e UI02 completati. P11 verificato sulla build Electron, schema v12; implementazione nel commit `8450b39`. [Nota P11](p11/spostamento-interno.md).
 - M1 chiusa sul pacchetto Windows dello schema v9. La verifica integrata successiva è M2 dopo P13, secondo il piano §7.3.
-- Prossimo task **P11 — Spostamento interno**. P11–P20 restano da avviare.
+- Prossimo task **P12 — Spostamento tra porti**, seguito dalla revisione tecnica prevista. P12–P20 restano da avviare.
 
 ## Avanzamento
 
@@ -23,7 +23,7 @@ Aggiornamento del 12 novembre 2026. Questo file contiene lo stato corrente e la 
 | P08  | Completato | `0e7fc36`                    | [Catalogo e pesi iniziali](p08/catalogo-e-pesi-iniziali.md)                                          |
 | P09  | Completato | `1b2f4a5`                    | [Tariffe e calcolatore base](p09/tariffe-e-calcolatore-base.md)                                      |
 | P10  | Completato | `3a34501`                    | [Entrata, uscita e permanenze](p10/entrata-uscita-e-permanenze.md); verificato sulla build Electron. |
-| P11  | Da avviare | —                            | Scheda nel piano                                                                                     |
+| P11  | Completato | `8450b39`                    | [Spostamento interno](p11/spostamento-interno.md); verificato sulla build Electron.                  |
 | P12  | Da avviare | —                            | Scheda nel piano                                                                                     |
 | P13  | Da avviare | —                            | Scheda nel piano                                                                                     |
 | P14  | Da avviare | —                            | Scheda nel piano                                                                                     |
@@ -55,15 +55,15 @@ Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bl
 
 Le verifiche complete seguono esclusivamente il [piano §7.3](piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). Le revisioni tecniche successive sono dopo P12 e P16.
 
-## Consegna corrente — P10
+## Consegna corrente — P11
 
-**Da conservare per P11.** Operazioni e permanenze hanno identità proprie e aperture ancorate alle operazioni. Le componenti persistono traccia tariffaria e riferimenti reali, mantenendo distinti valore teorico, sostituzione manuale e base effettiva. Le modifiche tariffarie e anagrafiche integrano analisi di intervallo e ricalcoli atomici. Per API, sequenza, disambiguazione temporale e chiamanti leggere le sezioni pertinenti della [nota P10](p10/entrata-uscita-e-permanenze.md).
+**P11 completato e verificato sulla build Electron, schema v12.** Disponibili registrazione e consultazione dello spostamento interno, con origine derivata, due estremi distinti, identità di viaggio e visita conservate e componente MOVEMENT alla partenza. La query di contesto distingue origine, trasferimento senza ormeggio e destinazione. Anteprime, impatti anagrafici e ricalcoli includono i nuovi riferimenti atomicamente. [Nota operativa P11](p11/spostamento-interno.md).
 
-**P10 completato e verificato sulla build Electron.** `npm test`: 189 test su 22 file passati. Verificati otto percorsi desktop: due P10 sulla build finale e sei regressioni direttamente coinvolte di Banchine, Porti, Tariffe e Navi, riusate dopo il solo ritocco locale al DTO P10. Migrazione v10 popolato → v11, conservazione dei dati, copia preventiva e rollback verificati, inclusa apertura migrata nella build. TypeScript ed ESLint passati; Prettier segnala soltanto i cinque documenti legacy già noti. Quattro schermate ispezionate dall'agente. Prove Playwright automatizzate offline, senza sessione manuale umana; dettagli, build, motivazione della selezione e riuso nella [nota P10](p10/entrata-uscita-e-permanenze.md).
+**Prove finali:** 205 test backend/SQLite su 23 file e dieci percorsi desktop selezionati verificati; migrazione v11 popolato → v12, copie preventive e rollback anche dopo sostituzione del grafo. Build, TypeScript ed ESLint passati; Prettier segnala soltanto i cinque documenti legacy già noti. Quattro schermate ispezionate dall’agente. La nota conserva sintesi, selezione e riuso degli esiti; l’[allegato](p11/verifiche.md) identifica build e comandi. Prove automatizzate offline, nessuna sessione manuale umana.
 
-Non sono noti difetti di integrità aperti nel perimetro P10. Implementazione nel commit `3a34501`, documentazione e schermate nella consegna separata. Il pacchetto v11 e le verifiche integrate complete restano pianificati per **M2 dopo P13**, secondo §7.3; P10 non cambia runtime, dipendenze o meccanismo di caricamento delle risorse.
+Non sono noti difetti di integrità aperti nel perimetro P11. Implementazione nel commit `8450b39`; documentazione ed evidenze nella consegna separata. Il pacchetto v12 e le verifiche integrate complete restano **M2 dopo P13**; P11 non modifica runtime, dipendenze native o meccanismo di caricamento delle risorse.
 
-**Attenzioni successive.** P11 aggiunge lo spostamento interno con due estremi distinti e una componente economica alla partenza. P15 deve aggiornare l'utilizzo monotono del catalogo nella transazione della prestazione. Correzione/eliminazione diretta delle tariffe restano P18, variazioni dei pesi P19.
+**Passaggio a P12.** Estendere le componenti autonome EXIT/ENTRY, i fusi dei due porti e la query di contesto con visita assente durante il trasferimento fra porti. Conservare il viaggio e integrare i riferimenti in anteprime e ricalcoli. La [nota P11](p11/spostamento-interno.md#limiti-e-passaggio-a-p12) individua contratti, cardinalità e vincoli da estendere. **Revisione tecnica dopo P12** confermata, prima di P13. P15 deve mantenere l’utilizzo monotono del catalogo nella transazione della prestazione; correzione/eliminazione diretta delle tariffe restano P18, variazioni dei pesi P19.
 
 ## Limiti aperti
 

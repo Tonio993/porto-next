@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   check,
+  index,
   foreignKey,
   integer,
   sqliteTable,
@@ -127,6 +128,7 @@ export const customerVersions = sqliteTable(
     effectiveUtcOffset: text('effective_utc_offset'),
   },
   (table) => [
+    uniqueIndex('customer_versions_owner').on(table.id, table.customerId),
     uniqueIndex('customer_versions_initial')
       .on(table.customerId)
       .where(sql`${table.effectiveFrom} IS NULL`),
@@ -171,6 +173,7 @@ export const agencyVersions = sqliteTable(
     effectiveUtcOffset: text('effective_utc_offset'),
   },
   (table) => [
+    uniqueIndex('agency_versions_owner').on(table.id, table.agencyId),
     uniqueIndex('agency_versions_initial')
       .on(table.agencyId)
       .where(sql`${table.effectiveFrom} IS NULL`),
@@ -367,6 +370,8 @@ export const berthVersions = sqliteTable(
 export const vesselOperations = sqliteTable(
   'vessel_operations',
   {
+    customerId: text('customer_id').references(() => customers.id),
+    agencyId: text('agency_id').references(() => agencies.id),
     id: text('id').primaryKey().notNull(),
     vesselId: text('vessel_id')
       .notNull()
@@ -378,6 +383,8 @@ export const vesselOperations = sqliteTable(
     createdAt: text('created_at').notNull(),
   },
   (table) => [
+    index('vessel_operations_customer').on(table.customerId),
+    index('vessel_operations_agency').on(table.agencyId),
     check('vessel_operations_check_0', sql`operation_type IN ('ENTRY', 'EXIT', 'MOVEMENT')`),
     check('vessel_operations_check_1', sql`execution_status IN ('PLANNED', 'PERFORMED', 'MISSED')`),
     check('vessel_operations_check_2', sql`notes IS NULL OR length(notes) <= 10000`),
@@ -518,6 +525,8 @@ export const operationCharges = sqliteTable(
 export const voyages = sqliteTable(
   'voyages',
   {
+    customerId: text('customer_id').references(() => customers.id),
+    agencyId: text('agency_id').references(() => agencies.id),
     id: text('id').primaryKey().notNull(),
     vesselId: text('vessel_id')
       .notNull()
@@ -529,6 +538,8 @@ export const voyages = sqliteTable(
     endedAt: text('ended_at'),
   },
   (table) => [
+    index('voyages_customer').on(table.customerId),
+    index('voyages_agency').on(table.agencyId),
     check('voyages_check_0', sql`(closing_operation_id IS NULL) = (ended_at IS NULL)`),
     check('voyages_check_1', sql`ended_at IS NULL OR ended_at > started_at`),
     foreignKey({
@@ -560,6 +571,8 @@ export const voyages = sqliteTable(
 export const portCalls = sqliteTable(
   'port_calls',
   {
+    customerId: text('customer_id').references(() => customers.id),
+    agencyId: text('agency_id').references(() => agencies.id),
     id: text('id').primaryKey().notNull(),
     voyageId: text('voyage_id')
       .notNull()
@@ -574,6 +587,8 @@ export const portCalls = sqliteTable(
     endedAt: text('ended_at'),
   },
   (table) => [
+    index('port_calls_customer').on(table.customerId),
+    index('port_calls_agency').on(table.agencyId),
     uniqueIndex('port_calls_unique_0').on(table.id, table.portId),
     check('port_calls_check_1', sql`(closing_operation_id IS NULL) = (ended_at IS NULL)`),
     check('port_calls_check_2', sql`ended_at IS NULL OR ended_at > started_at`),
@@ -598,6 +613,8 @@ export const portCalls = sqliteTable(
 export const berthStays = sqliteTable(
   'berth_stays',
   {
+    customerId: text('customer_id').references(() => customers.id),
+    agencyId: text('agency_id').references(() => agencies.id),
     id: text('id').primaryKey().notNull(),
     portCallId: text('port_call_id').notNull(),
     portId: text('port_id').notNull(),
@@ -609,6 +626,8 @@ export const berthStays = sqliteTable(
     endedAt: text('ended_at'),
   },
   (table) => [
+    index('berth_stays_customer').on(table.customerId),
+    index('berth_stays_agency').on(table.agencyId),
     check('berth_stays_check_0', sql`(berth_id IS NULL) = (berth_version_id IS NULL)`),
     check('berth_stays_check_1', sql`(closing_operation_id IS NULL) = (ended_at IS NULL)`),
     check('berth_stays_check_2', sql`ended_at IS NULL OR ended_at > started_at`),
@@ -635,5 +654,49 @@ export const berthStays = sqliteTable(
     uniqueIndex('berth_stay_open')
       .on(table.portCallId)
       .where(sql`ended_at IS NULL`),
+  ],
+)
+
+export const operationChargeSubjects = sqliteTable(
+  'operation_charge_subjects',
+  {
+    chargeId: text('charge_id')
+      .primaryKey()
+      .notNull()
+      .references(() => operationCharges.id),
+    customerId: text('customer_id').references(() => customers.id),
+    customerVersionId: text('customer_version_id'),
+    customerSource: text('customer_source'),
+    customerSourceId: text('customer_source_id'),
+    agencyId: text('agency_id').references(() => agencies.id),
+    agencyVersionId: text('agency_version_id'),
+    agencySource: text('agency_source'),
+    agencySourceId: text('agency_source_id'),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.customerVersionId, table.customerId],
+      foreignColumns: [customerVersions.id, customerVersions.customerId],
+    }),
+    foreignKey({
+      columns: [table.agencyVersionId, table.agencyId],
+      foreignColumns: [agencyVersions.id, agencyVersions.agencyId],
+    }),
+    index('charge_subjects_customer').on(table.customerId, table.customerVersionId),
+    index('charge_subjects_agency').on(table.agencyId, table.agencyVersionId),
+    ...(['customer', 'agency'] as const).flatMap((subject) => [
+      check(
+        `charge_subjects_${subject}_presence`,
+        sql.raw(
+          `(${subject}_id IS NULL AND ${subject}_version_id IS NULL AND ${subject}_source IS NULL AND ${subject}_source_id IS NULL) OR (${subject}_id IS NOT NULL AND ${subject}_version_id IS NOT NULL AND ${subject}_source IS NOT NULL AND ${subject}_source_id IS NOT NULL)`,
+        ),
+      ),
+      check(
+        `charge_subjects_${subject}_source`,
+        sql.raw(
+          `${subject}_source IS NULL OR ${subject}_source IN ('VESSEL_OPERATION','BERTH_STAY','PORT_CALL','VOYAGE')`,
+        ),
+      ),
+    ]),
   ],
 )

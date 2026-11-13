@@ -1,3 +1,4 @@
+import { subjectPlan } from '../operations/subject-resolution'
 import { randomUUID } from 'node:crypto'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
 import type {
@@ -194,6 +195,12 @@ export class AgencyService implements AgencyApi {
       }),
       (version) => version.businessName,
     )
+    const subjects = !['DELETE_AGENCY', 'DEACTIVATE_AGENCY'].includes(change.operation)
+      ? subjectPlan(session.database, {
+          versionChange: { kind: 'agency', id: agency.id, versions: after },
+        })
+      : null
+    effects.push(...(subjects?.effects ?? []))
     const changedIds = effects.flatMap(({ versionId }) => (versionId ? [versionId] : []))
     const deleting = change.operation === 'DELETE_AGENCY'
     const deactivating = change.operation === 'DEACTIVATE_AGENCY'
@@ -222,7 +229,11 @@ export class AgencyService implements AgencyApi {
           deleting ? 'agencies' : null,
           'agency_versions',
           changedIds,
-          ['agency_versions', 'agency_identifier_reservations'],
+          [
+            'agency_versions',
+            'agency_identifier_reservations',
+            ...(!deleting ? ['operation_charge_subjects'] : []),
+          ],
         )
     const warnings = deleting
       ? [
@@ -233,14 +244,14 @@ export class AgencyService implements AgencyApi {
       : deactivating
         ? ['L’agenzia sarà esclusa dalle nuove selezioni. I riferimenti esistenti restano validi.']
         : ['Le ragioni sociali storiche rimangono riservate a questa agenzia.']
-    return { repository, agency, effects, blockers, warnings }
+    return { repository, agency, effects, blockers, warnings, subjects }
   }
 
   preview(request: CommandRequest<AgencyChangeDto>) {
     return this.coordinator.command(request, (session, payload): AgencyPreviewDto => {
       const now = this.now()
       const change = this.parse(session, payload, now)
-      const { effects, blockers, warnings } = this.analyse(session, change, now)
+      const { effects, blockers, warnings, subjects } = this.analyse(session, change, now)
       const context = session.context()
       return {
         ...session.previews.put(previewNamespace, context, change),
@@ -252,7 +263,7 @@ export class AgencyService implements AgencyApi {
           updated: effects.filter(({ action }) => action === 'UPDATE').length,
           deleted: effects.filter(({ action }) => action === 'DELETE').length,
           recalculated: 0,
-          reattributed: 0,
+          reattributed: subjects?.updates.length ?? 0,
         },
         effects: { items: effects.slice(0, 50), total: effects.length, page: 1, pageSize: 50 },
         blockers,
@@ -288,7 +299,11 @@ export class AgencyService implements AgencyApi {
         const input = record(payload, ['previewId'])
         const id = entityId(input.previewId, 'previewId')
         const change = session.previews.get(id, previewNamespace, session.context()).input as Change
-        const { repository, agency, effects, blockers } = this.analyse(session, change, this.now())
+        const { repository, agency, effects, blockers, subjects } = this.analyse(
+          session,
+          change,
+          this.now(),
+        )
         if (blockers.length)
           throw new ArchiveError(
             'PREVIEW_BLOCKED',
@@ -299,12 +314,14 @@ export class AgencyService implements AgencyApi {
         if (effects.length) {
           if ('version' in change)
             repository.saveVersion(agency, change.version, change.operation === 'INSERT_VERSION')
-          else if (change.operation === 'DELETE_VERSION')
+          else if (change.operation === 'DELETE_VERSION') {
+            subjects?.apply()
             repository.deleteVersion(agency.id, change.versionId)
-          else if (change.operation === 'DEACTIVATE_AGENCY')
+          } else if (change.operation === 'DEACTIVATE_AGENCY')
             repository.setStatus(agency.id, 'INACTIVE')
           else repository.delete(agency.id)
         }
+        if (change.operation !== 'DELETE_VERSION') subjects?.apply()
         consumed = id
         return { agencyId: agency.id }
       },

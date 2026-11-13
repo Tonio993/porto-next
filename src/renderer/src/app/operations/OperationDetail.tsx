@@ -1,3 +1,4 @@
+import { SubjectValues } from './SubjectValues'
 import type { VesselOperationDto } from '../../../../shared/contracts/operations'
 import { formatMoney } from '../../api/numeric-input'
 export const operationLabels = { ENTRY: 'Entrata', EXIT: 'Uscita', MOVEMENT: 'Spostamento' }
@@ -82,6 +83,7 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
               <br />
               <strong>Base effettiva: {formatMoney(c.effectiveBase)}</strong>
             </p>
+            <SubjectValues subjects={c.subjects} />
             <ol>
               {r.steps.map((step, i) => (
                 <li key={i}>{step}</li>

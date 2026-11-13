@@ -1,3 +1,4 @@
+import { AssignmentRepository } from './assignment-repository'
 import type {
   VesselOperationDto,
   VoyageDto,
@@ -104,6 +105,7 @@ export class OperationRepository {
     const values = charges.map((c): OperationChargeDto => {
       const economic = ends.find((e) => e.role === c.economic_endpoint_role)!
       return {
+        subjects: new AssignmentRepository(this.database).subjects(c.id),
         id: c.id,
         chargeKind: c.charge_kind,
         economicEndpointRole: c.economic_endpoint_role,
@@ -237,7 +239,9 @@ export class OperationRepository {
       e = op.endpoint,
       m = momentToColumns(e.moment)
     sql
-      .prepare('INSERT INTO vessel_operations VALUES (?,?,?,?,?,?,?)')
+      .prepare(
+        'INSERT INTO vessel_operations (id,vessel_id,vessel_version_id,operation_type,execution_status,notes,created_at) VALUES (?,?,?,?,?,?,?)',
+      )
       .run(
         op.id,
         op.vesselId,
@@ -419,6 +423,7 @@ export class OperationRepository {
         .join(',')}`,
       )
       .run(...values)
+    new AssignmentRepository(this.database).saveSubjects(c.id, c.subjects)
   }
   stays(vesselId: string, page: number, pageSize: number): PageDto<VoyageDto> {
     const sql = this.database.sqlite

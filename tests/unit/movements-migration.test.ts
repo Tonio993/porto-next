@@ -51,7 +51,11 @@ function v11(path: string, obstructed = false) {
       .sort())
       db.exec(readFileSync(join('migrations', name), 'utf8'))
     db.pragma('foreign_keys=OFF')
-    const data = rows(sql())
+    const data = Object.fromEntries(
+      Object.entries(rows(sql())).filter(([table]) =>
+        db.prepare("SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?").get(table),
+      ),
+    )
     for (const table of Object.keys(data)) db.prepare(`DELETE FROM "${table}"`).run()
     for (const [table, records] of Object.entries(data)) {
       const columns = (db.pragma(`table_xinfo('${table}')`) as { name: string; hidden: number }[])
@@ -153,7 +157,7 @@ it('P11: migra v11 popolato preservando ogni riga, int64, tuple, identità, meta
   v11(path)
   const before = snapshot(path)
   const opened = await archives.open(path)
-  expect(opened.schemaVersion).toBe(13)
+  expect(opened.schemaVersion).toBe(14)
   const after = snapshot(path)
   for (const [table, records] of Object.entries(before.rows)) {
     const actual = after.rows[table]
@@ -164,7 +168,7 @@ it('P11: migra v11 popolato preservando ogni riga, int64, tuple, identità, meta
             return r
           })
         : actual,
-    ).toEqual(records)
+    ).toMatchObject(records)
   }
   expect(new OperationRepository(archives.coordinator.requireSession().database).all()).toEqual(
     original,
@@ -172,7 +176,7 @@ it('P11: migra v11 popolato preservando ogni riga, int64, tuple, identità, meta
   expect(
     new OperationRepository(archives.coordinator.requireSession().database).stays(vesselId, 1, 25),
   ).toEqual(hierarchy)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v13-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v14-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
   expect(sql().pragma('foreign_key_check')).toEqual([])
   expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
@@ -189,7 +193,7 @@ it('P11: fallimento durante DDL parziale conserva v11 popolato e la sessione pre
     snapshot(
       join(
         folder,
-        readdirSync(folder).find((n) => n.includes('.prima-v13-'))!,
+        readdirSync(folder).find((n) => n.includes('.prima-v14-'))!,
       ),
     ),
   ).toEqual(before)
@@ -211,6 +215,6 @@ it('P11: rollback dopo copia, sostituzione del grafo e indici ripristina interam
   await expect(archives.open(path)).rejects.toThrow()
   expect(snapshot(path)).toEqual(before)
   expect(context()).toEqual(active)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v13-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v14-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
 })

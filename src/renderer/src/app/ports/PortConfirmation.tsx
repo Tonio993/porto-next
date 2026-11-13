@@ -43,8 +43,10 @@ const labels: Record<string, string> = {
   status: 'Stato',
   port: 'Porto',
   berth: 'Banchina',
-  customer: 'Cliente',
-  agency: 'Agenzia',
+  customerId: 'Cliente esplicito',
+  agencyId: 'Agenzia esplicita',
+  customer: 'Cliente effettivo e fonte',
+  agency: 'Agenzia effettiva e fonte',
   vessel: 'Nave',
   selectable: 'Selezionabile',
 }

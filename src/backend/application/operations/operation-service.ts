@@ -1,3 +1,4 @@
+import { subjectPlan } from './subject-resolution'
 import { randomUUID } from 'node:crypto'
 import type {
   OperationApi,
@@ -357,6 +358,11 @@ export class OperationService implements OperationApi {
           ],
         })
     }
+    effects.push(
+      ...subjectPlan(s.database, { pending: op }).effects.filter(
+        (e) => !op.charges.some((c) => c.id === e.reference.id),
+      ),
+    )
     return effects
   }
   previewCreate: OperationApi['previewCreate'] = (request) =>
@@ -502,6 +508,7 @@ export class OperationService implements OperationApi {
           activity: { kind: 'OPERATION', operation: kind },
         })
         return {
+          subjects: { customer: null, agency: null },
           id: randomUUID(),
           chargeKind: kind,
           economicEndpointRole: e.role,
@@ -512,6 +519,7 @@ export class OperationService implements OperationApi {
       })
       operation.vesselVersionId = operation.endpoint.vesselVersionId
       operation.totalBase = operationTotal(operation.charges)
+      operation.charges = subjectPlan(s.database, { pending: operation }).subjectsFor(operation)
       const entry = s.previews.put(namespace, s.context(), operation)
       return this.previewDto(s, operation, entry, 1, 50)
     })
@@ -536,7 +544,9 @@ export class OperationService implements OperationApi {
         updated: effects.filter((e) => e.action === 'UPDATE').length,
         deleted: 0,
         recalculated: 0,
-        reattributed: 0,
+        reattributed: effects.filter(
+          (e) => e.action === 'UPDATE' && e.reference.kind === 'OPERATION_CHARGE',
+        ).length,
       },
       effects: {
         items: effects.slice((page - 1) * pageSize, page * pageSize),
@@ -595,7 +605,10 @@ export class OperationService implements OperationApi {
           return { ...c, calculation, effectiveBase: c.manualOverrideAmount ?? calculation.base }
         })
         const repository = new OperationRepository(s.database)
+        const subjects = subjectPlan(s.database, { pending: op })
+        op.charges = subjects.subjectsFor(op)
         repository.insert(op, op.openingIds)
+        subjects.apply()
         consumed = id
         return repository.get(op.id)
       },

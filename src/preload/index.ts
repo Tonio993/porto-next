@@ -1,3 +1,4 @@
+import { assignmentChannels, type AssignmentApi } from '../shared/contracts/assignments'
 import { operationChannels, type OperationApi } from '../shared/contracts/operations'
 import { tariffChannels, type TariffApi } from '../shared/contracts/tariffs'
 import { catalogChannels, type CatalogApi } from '../shared/contracts/catalog'
@@ -149,3 +150,11 @@ const operations: OperationApi = {
   previewEffects: (request) => ipcRenderer.invoke(operationChannels.previewEffects, request),
 }
 contextBridge.exposeInMainWorld('operations', operations)
+
+const assignments: AssignmentApi = {
+  get: (request) => ipcRenderer.invoke(assignmentChannels.get, request),
+  preview: (request) => ipcRenderer.invoke(assignmentChannels.preview, request),
+  previewEffects: (request) => ipcRenderer.invoke(assignmentChannels.previewEffects, request),
+  confirm: (request) => ipcRenderer.invoke(assignmentChannels.confirm, request),
+}
+contextBridge.exposeInMainWorld('assignments', assignments)

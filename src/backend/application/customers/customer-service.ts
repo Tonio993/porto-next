@@ -1,3 +1,4 @@
+import { subjectPlan } from '../operations/subject-resolution'
 import { randomUUID } from 'node:crypto'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
 import type {
@@ -198,6 +199,12 @@ export class CustomerService implements CustomerApi {
       }),
       (version) => version.businessName,
     )
+    const subjects = !['DELETE_CUSTOMER', 'DEACTIVATE_CUSTOMER'].includes(change.operation)
+      ? subjectPlan(session.database, {
+          versionChange: { kind: 'customer', id: customer.id, versions: after },
+        })
+      : null
+    effects.push(...(subjects?.effects ?? []))
     const changedIds = effects.flatMap(({ versionId }) => (versionId ? [versionId] : []))
     const deleting = change.operation === 'DELETE_CUSTOMER'
     const deactivating = change.operation === 'DEACTIVATE_CUSTOMER'
@@ -226,7 +233,11 @@ export class CustomerService implements CustomerApi {
           deleting ? 'customers' : null,
           'customer_versions',
           changedIds,
-          ['customer_versions', 'customer_identifier_reservations'],
+          [
+            'customer_versions',
+            'customer_identifier_reservations',
+            ...(!deleting ? ['operation_charge_subjects'] : []),
+          ],
         )
     const warnings = deleting
       ? [
@@ -237,14 +248,14 @@ export class CustomerService implements CustomerApi {
       : deactivating
         ? ['Il cliente sarà escluso dalle nuove selezioni. I riferimenti esistenti restano validi.']
         : ['Le ragioni sociali storiche rimangono riservate a questo cliente.']
-    return { repository, customer, effects, blockers, warnings }
+    return { repository, customer, effects, blockers, warnings, subjects }
   }
 
   preview(request: CommandRequest<CustomerChangeDto>) {
     return this.coordinator.command(request, (session, payload): CustomerPreviewDto => {
       const now = this.now()
       const change = this.parse(session, payload, now)
-      const { effects, blockers, warnings } = this.analyse(session, change, now)
+      const { effects, blockers, warnings, subjects } = this.analyse(session, change, now)
       const context = session.context()
       return {
         ...session.previews.put(previewNamespace, context, change),
@@ -256,7 +267,7 @@ export class CustomerService implements CustomerApi {
           updated: effects.filter(({ action }) => action === 'UPDATE').length,
           deleted: effects.filter(({ action }) => action === 'DELETE').length,
           recalculated: 0,
-          reattributed: 0,
+          reattributed: subjects?.updates.length ?? 0,
         },
         effects: { items: effects.slice(0, 50), total: effects.length, page: 1, pageSize: 50 },
         blockers,
@@ -292,7 +303,7 @@ export class CustomerService implements CustomerApi {
         const input = record(payload, ['previewId'])
         const id = entityId(input.previewId, 'previewId')
         const change = session.previews.get(id, previewNamespace, session.context()).input as Change
-        const { repository, customer, effects, blockers } = this.analyse(
+        const { repository, customer, effects, blockers, subjects } = this.analyse(
           session,
           change,
           this.now(),
@@ -307,12 +318,14 @@ export class CustomerService implements CustomerApi {
         if (effects.length) {
           if ('version' in change)
             repository.saveVersion(customer, change.version, change.operation === 'INSERT_VERSION')
-          else if (change.operation === 'DELETE_VERSION')
+          else if (change.operation === 'DELETE_VERSION') {
+            subjects?.apply()
             repository.deleteVersion(customer.id, change.versionId)
-          else if (change.operation === 'DEACTIVATE_CUSTOMER')
+          } else if (change.operation === 'DEACTIVATE_CUSTOMER')
             repository.setStatus(customer.id, 'INACTIVE')
           else repository.delete(customer.id)
         }
+        if (change.operation !== 'DELETE_VERSION') subjects?.apply()
         consumed = id
         return { customerId: customer.id }
       },

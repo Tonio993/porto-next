@@ -1,3 +1,5 @@
+import { AssignmentService } from '../../backend/application/operations/assignment-service'
+import { assignmentChannels, type AssignmentApi } from '../../shared/contracts/assignments'
 import { OperationService } from '../../backend/application/operations/operation-service'
 import { operationChannels, type OperationApi } from '../../shared/contracts/operations'
 import { TariffService } from '../../backend/application/tariffs/tariff-service'
@@ -140,4 +142,14 @@ export function registerOperationIpc(
       service[action](input as never),
     )
   }
+}
+
+export function registerAssignmentIpc(
+  service: AssignmentService,
+  window: () => BrowserWindow | null,
+): void {
+  for (const action of Object.keys(assignmentChannels) as (keyof AssignmentApi)[])
+    registerGuardedIpc(assignmentChannels[action], window, (input) =>
+      service[action](input as never),
+    )
 }

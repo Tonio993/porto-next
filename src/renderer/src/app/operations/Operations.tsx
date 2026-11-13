@@ -1,3 +1,5 @@
+import type { AssignmentTarget } from '../../../../shared/contracts/assignments'
+import { AssignmentEditor } from './AssignmentEditor'
 import { useEffect, useRef, useState } from 'react'
 import { Button, Fieldset, Group, Modal, Select, Stack, Textarea, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
@@ -37,6 +39,14 @@ export function Operations({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
+  const [assignmentTarget, setAssignmentTarget] = useState<AssignmentTarget | null>(null),
+    [assignmentOpen, setAssignmentOpen] = useState(false)
+  const assignmentTrigger = useRef<HTMLElement | null>(null)
+  const assign = (target: AssignmentTarget) => {
+    assignmentTrigger.current = document.activeElement as HTMLElement
+    setAssignmentTarget(target)
+    setAssignmentOpen(true)
+  }
   const context = archives.state.context!
   const [vesselId, setVesselId] = useState<string | null>(null),
     [page, setPage] = useState(1),
@@ -69,9 +79,9 @@ export function Operations({
     { request: readDetail } = detailRequest
   const busy = archives.busy || archives.commandBusy || commandRequest.loading
   useEffect(() => {
-    onDialogChange(open)
+    onDialogChange(open || assignmentOpen)
     return () => onDialogChange(false)
-  }, [open, onDialogChange])
+  }, [open, assignmentOpen, onDialogChange])
   useEffect(() => {
     if (!vesselId) return
     void readList(() =>
@@ -307,8 +317,13 @@ export function Operations({
         </Button>
       </Group>
       <p className="operations-future">
-        Assegnazioni dei soggetti, consuntivazione e correzioni strutturali: non ancora disponibili.
+        Consuntivazione e correzioni strutturali: non ancora disponibili.
       </p>
+      {assignmentTarget && !assignmentOpen && (
+        <Button variant="default" onClick={() => setAssignmentOpen(true)}>
+          Riprendi assegnazione
+        </Button>
+      )}
       {!vesselId ? (
         <StateMessage title="Scegli una nave">
           Consulta la cronologia e registra un’entrata, un’uscita o uno spostamento.
@@ -359,7 +374,15 @@ export function Operations({
             {detailRequest.loading ? (
               <p role="status">Caricamento dettaglio…</p>
             ) : detail ? (
-              <OperationDetail operation={detail} />
+              <>
+                <Button
+                  disabled={busy}
+                  onClick={() => assign({ kind: 'VESSEL_OPERATION', id: detail.id })}
+                >
+                  Assegna soggetti all’operazione
+                </Button>
+                <OperationDetail operation={detail} />
+              </>
             ) : (
               <p>Seleziona un’operazione per consultare dati e calcolo.</p>
             )}
@@ -434,6 +457,13 @@ export function Operations({
           </Fieldset>
           {stays?.items.map((v) => (
             <article key={v.id} className="operation-voyage">
+              <Button
+                disabled={busy}
+                variant="light"
+                onClick={() => assign({ kind: 'VOYAGE', id: v.id })}
+              >
+                Assegna soggetti al viaggio
+              </Button>
               <h3>Viaggio · {v.endedAt ? 'Chiuso' : 'Aperto'}</h3>
               <p>
                 Inizio UTC {v.startedAt} · Fine UTC {v.endedAt ?? 'Aperta'}
@@ -472,12 +502,26 @@ export function Operations({
               </Group>
               {v.visits.map((p) => (
                 <section key={p.id}>
+                  <Button
+                    disabled={busy}
+                    variant="light"
+                    onClick={() => assign({ kind: 'PORT_CALL', id: p.id })}
+                  >
+                    Assegna soggetti alla visita
+                  </Button>
                   <h4>Visita · {p.portName}</h4>
                   <p>
                     {p.id} · {p.startedAt} → {p.endedAt ?? 'Aperta'}
                   </p>
                   {p.stays.map((b) => (
                     <div key={b.id}>
+                      <Button
+                        disabled={busy}
+                        variant="light"
+                        onClick={() => assign({ kind: 'BERTH_STAY', id: b.id })}
+                      >
+                        Assegna soggetti all’ormeggio
+                      </Button>
                       <strong>Ormeggio · {b.berthName ?? 'Banchina non specificata'}</strong>
                       <p>
                         {b.id} · {b.startedAt} → {b.endedAt ?? 'Aperto'}
@@ -504,6 +548,22 @@ export function Operations({
             />
           )}
         </div>
+      )}
+      {assignmentTarget && (
+        <AssignmentEditor
+          key={assignmentTarget.kind + assignmentTarget.id}
+          archives={archives}
+          target={assignmentTarget}
+          opened={assignmentOpen}
+          trigger={assignmentTrigger.current}
+          onClose={() => setAssignmentOpen(false)}
+          onSaved={() => {
+            setReload((n) => n + 1)
+            setAssignmentTarget(null)
+            setNotice('Assegnazioni aggiornate.')
+            assignmentTrigger.current?.focus()
+          }}
+        />
       )}
       <Modal
         opened={open}

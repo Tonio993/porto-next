@@ -1,3 +1,4 @@
+import type { EffectiveSubjectsDto } from './assignments'
 import type { ApplicationResult, CommandRequest, QueryRequest } from './application'
 import type { ChangePreviewDto, PageDto } from './master-data'
 import type { BaseCalculationDto } from './tariffs'
@@ -32,6 +33,7 @@ export interface OperationMomentDto {
   arrivalResolution?: MomentResolutionDto
 }
 export interface OperationChargeDto {
+  subjects: EffectiveSubjectsDto
   id: string
   chargeKind: 'ENTRY' | 'EXIT' | 'MOVEMENT'
   economicEndpointRole: 'OCCURRENCE' | 'DEPARTURE' | 'ARRIVAL'

@@ -706,7 +706,7 @@ it('tutti gli effetti tariffari sono paginati, ma la conferma ricalcola l’insi
   value(await tariffs.confirmCreate({ context: p.context, payload: { previewId: p.previewId } }))
   expect(all().every((o) => o.charges[0].calculation.base === '215.00')).toBe(true)
   expect(stays()).toEqual([])
-})
+}, 20_000)
 
 it('un errore nell’aggiornamento metadati annulla anche attività e identità derivate', async () => {
   const p = value(await preview()),

@@ -4,9 +4,9 @@ Aggiornamento del 16 novembre 2026. Questo file contiene lo stato corrente e la 
 
 ## Stato corrente
 
-- P00–P15, UI01 e UI02 completati. P15 verificato sulla build Electron, schema v16; implementazione nel commit `97e4b8e`, base `21dbcf3`. [Nota P15](p15/prestazione-catalogo.md).
+- P00–P16, UI01 e UI02 completati. P16 verificato sulla build Electron, schema v16 senza nuova migrazione; implementazione nel commit `8c5f0e7`, base `9b5314c`. [Nota P16](p16/ciclo-vita-prestazioni.md).
 - M1 chiusa sul pacchetto Windows dello schema v9. **M2 chiusa** sull’integrazione P13, schema v14, secondo il piano §7.3. [Evidenze](p13/verifiche.md#verifiche-m2).
-- Revisione tecnica dopo P12 completata. Prossimo task **P16 — Ciclo di vita delle prestazioni ordinarie**, in una nuova chat. P16–P20 restano da avviare.
+- Revisione tecnica dopo P12 completata. Prossimi passi: **revisione tecnica post-P16 e UI03**, prima della chiusura M3. P17–P20 restano da avviare.
 
 ## Avanzamento
 
@@ -28,7 +28,7 @@ Aggiornamento del 16 novembre 2026. Questo file contiene lo stato corrente e la 
 | P13  | Completato | `c2b2ff9`                    | [Cliente e agenzia effettivi](p13/cliente-e-agenzia-effettivi.md); build e pacchetto verificati, schema v14. |
 | P14  | Completato | `a554e27`                    | [Prima prestazione libera](p14/prestazione-libera.md); build verificata, schema v15.                         |
 | P15  | Completato | `97e4b8e`                    | [Prima prestazione da catalogo](p15/prestazione-catalogo.md); build verificata, schema v16.                  |
-| P16  | Da avviare | —                            | Scheda nel piano                                                                                             |
+| P16  | Completato | `8c5f0e7`                    | [Ciclo di vita ordinario](p16/ciclo-vita-prestazioni.md); build verificata, schema v16.                      |
 | P17A | Da avviare | —                            | Scheda nel piano                                                                                             |
 | P17B | Da avviare | —                            | Scheda nel piano                                                                                             |
 | P17C | Da avviare | —                            | Scheda nel piano                                                                                             |
@@ -49,19 +49,17 @@ Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bl
 | UI04     | Da avviare  | In P20.                                                                                                                                               |
 | M1       | Chiusa      | Schema v9, build e pacchetto verificati. [Evidenze](ui02/revisione-anagrafiche-e-catalogo.md#verifiche-ui02-e-m1).                                    |
 | M2       | Chiusa      | Schema v14: suite complete su build e medesimo eseguibile Windows, migrazioni cumulative e trasferibilità. [Evidenze](p13/verifiche.md#verifiche-m2). |
-| M3       | Pianificata | Dopo P16 e correzioni UI03.                                                                                                                           |
+| M3       | Pianificata | Dopo revisione tecnica post-P16 e correzioni UI03, con prove integrate §7.3.                                                                          |
 | M4       | Pianificata | Dopo P19.                                                                                                                                             |
 | M5       | Pianificata | P20, con UI04 e generazione installer.                                                                                                                |
 
 Le verifiche complete seguono esclusivamente il [piano §7.3](piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). La revisione tecnica dopo P12 è completata e documentata nella [nota P12](p12/spostamento-tra-porti.md#revisione-tecnica-dopo-p12); la prossima rimane dopo P16.
 
-## Consegna corrente — P15
+## Consegna corrente — P16
 
-**P15 completato e verificato sulla build Electron, schema v16.** Creazione, elenco e dettaglio CATALOG nello stesso flusso P14, con tipo selezionabile, descrizione corrente e spiegazione di tariffa, scaglione, extra, peso e base esatta. Contesto, soggetti, risultati e utilizzo storico sono atomici. Ricalcoli integrati nelle variazioni e riattribuzioni già disponibili; basi manuali FREE conservate. [Nota operativa](p15/prestazione-catalogo.md).
+**P16 completato e verificato sulla build Electron, schema v16 senza nuove migrazioni.** Consuntivazione esplicita, modifica, eliminazione e sole note per FREE/CATALOG, con anteprime, ricalcoli pertinenti e ricerca paginata completa. Categoria, tipi storici, basi manuali e utilizzo storico conservati. [Nota operativa e verifiche](p16/ciclo-vita-prestazioni.md).
 
-**Verifiche:** suite backend/SQLite completa con ripetizione isolata del solo timeout ambientale, invarianti e migrazione v15 popolato→v16 con copia preventiva/rollback, apertura Electron e percorsi desktop pertinenti verificati. TypeScript, ESLint e build passati; solo i cinque avvisi Prettier legacy. Due schermate ispezionate, prove automatizzate offline, nessuna sessione manuale umana. [Esiti, selezione, riuso e build](p15/prestazione-catalogo.md#verifiche-finali).
-
-**Passaggio a P16 — Ciclo di vita delle prestazioni ordinarie**, in una nuova chat: consuntivazione, modifica, eliminazione e ricerca completa, conservando categoria, tipi storici e basi manuali FREE. [Passaggio operativo](p15/prestazione-catalogo.md#limiti-e-passaggio-a-p16). Revisione tecnica e UI03 dopo P16; suite desktop completa, migrazioni cumulative e pacchetto restano a M3. M2 rimane chiusa sull'integrazione v14.
+**Passaggio alla revisione tecnica post-P16 e a UI03**, con i punti d’integrazione e le prove nella [nota P16](p16/ciclo-vita-prestazioni.md#limiti-e-passaggio-operativo). M3 richiede l’integrazione delle correzioni previste, suite desktop completa, migrazioni cumulative e pacchetto finale; rimane pianificata. M2 resta chiusa sull’integrazione v14.
 
 ## Limiti aperti
 

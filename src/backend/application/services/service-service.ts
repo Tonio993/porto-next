@@ -1,7 +1,12 @@
+import { isDeepStrictEqual as same } from 'node:util'
+import { recalculateService, type ServiceCalculationInput } from './service-calculation'
 import type { CommandRequest } from '../../../shared/contracts/application'
 import { randomUUID } from 'node:crypto'
 import type {
   ServiceApi,
+  ServiceChange,
+  ServiceChangePreviewDto,
+  ServiceListQuery,
   ServiceMomentInput,
   ServiceMomentDto,
   ServiceActivityDto,
@@ -11,7 +16,7 @@ import { record } from '../archives/context-validation'
 import { entityId, pagination } from '../ports/port-input'
 import { momentInput } from '../tariffs/tariff-input'
 import { ArchiveError } from '../../../shared/errors/archive-error'
-import { resolveMoment } from '../../domain/values/moments'
+import { utcInstant, resolveMoment } from '../../domain/values/moments'
 import { Money } from '../../domain/values/numbers'
 import { serviceContext } from '../../domain/services/context'
 import { subjectTimeline } from '../../domain/operations/subject-context'
@@ -24,7 +29,32 @@ import { CustomerRepository } from '../../infrastructure/database/customer-repos
 import { AgencyRepository } from '../../infrastructure/database/agency-repository'
 import { subjectPlan } from '../operations/subject-resolution'
 import { CatalogRepository } from '../../infrastructure/database/catalog-repository'
-import { calculateBase } from '../tariffs/calculate-base'
+const namespace = 'SERVICE_CHANGE'
+function invalid(field: string, message: string): never {
+  throw new ArchiveError('VALIDATION_ERROR', message, [
+    { path: [field], code: 'INVALID_VALUE', message },
+  ])
+}
+function notes(value: unknown): string | null {
+  if (value !== null && (typeof value !== 'string' || [...value].length > 10000))
+    invalid('notes', 'Le note ammettono al massimo 10000 caratteri.')
+  return value as string | null
+}
+const filterKeys = [
+  'vesselId',
+  'category',
+  'serviceTypeId',
+  'executionStatus',
+  'fromUtc',
+  'toUtc',
+  'portId',
+  'berthId',
+  'voyageId',
+  'portCallId',
+  'berthStayId',
+  'customerId',
+  'agencyId',
+] as const
 
 function parseMoment(value: unknown, extra: string[] = []) {
   const i = record(value, ['vesselId', 'interpretationPortId', 'moment', ...extra])
@@ -105,33 +135,57 @@ export class ServiceService implements ServiceApi {
     )
   list: ServiceApi['list'] = (request) =>
     this.coordinator.query(request, (s, q) => {
-      const i = record(q, ['vesselId', 'page', 'pageSize']),
-        id = entityId(i.vesselId, 'vesselId'),
-        p = pagination(i.page, i.pageSize)
-      new VesselRepository(s.database, new Date().toISOString()).get(id)
-      return new ServiceRepository(s.database).list(id, p.page, p.pageSize)
+      // Filters are optional; every provided field is still validated, including direct IPC.
+      const raw = q as unknown
+      const keys = raw && typeof raw === 'object' && !Array.isArray(raw) ? Object.keys(raw) : []
+      record(raw, [
+        'page',
+        'pageSize',
+        ...keys.filter((k) => (filterKeys as readonly string[]).includes(k)),
+      ])
+      const i = raw as Record<string, unknown>
+      const query: ServiceListQuery = pagination(i.page, i.pageSize)
+      for (const key of filterKeys) {
+        if (i[key] === undefined || i[key] === null) continue
+        if (key === 'category') {
+          if (!['FREE', 'CATALOG'].includes(i[key] as string)) invalid(key, 'Categoria non valida.')
+          query.category = i[key] as 'FREE' | 'CATALOG'
+        } else if (key === 'executionStatus') {
+          if (!['PLANNED', 'PERFORMED', 'MISSED'].includes(i[key] as string))
+            invalid(key, 'Stato non valido.')
+          query.executionStatus = i[key] as ServiceActivityDto['executionStatus']
+        } else if (key === 'fromUtc' || key === 'toUtc') query[key] = utcInstant(i[key])
+        else query[key] = entityId(i[key], key)
+      }
+      if (query.fromUtc && query.toUtc && query.fromUtc > query.toUtc)
+        invalid('toUtc', 'La fine del periodo precede l’inizio.')
+      return new ServiceRepository(s.database).list(query)
     })
   createFree: ServiceApi['createFree'] = (request) => this.create(request, 'FREE')
   createCatalog: ServiceApi['createCatalog'] = (request) => this.create(request, 'CATALOG')
   private create(request: CommandRequest<unknown>, category: ServiceActivityDto['category']) {
-    return this.coordinator.command(request, (s, p) => this.register(s, p, category))
+    return this.coordinator.command(request, (s, p) => {
+      const value = this.build(s, p, category)
+      const repository = new ServiceRepository(s.database)
+      repository.insert(value)
+      if (value.category === 'CATALOG')
+        new CatalogRepository(s.database).markUsed(value.serviceTypeId)
+      return repository.get(value.id)
+    })
   }
-  private register(
+  private build(
     s: ArchiveApplicationSession,
     p: unknown,
     category: ServiceActivityDto['category'],
-  ) {
+    previous?: ServiceActivityDto,
+    force = false,
+  ): ServiceActivityDto {
     const { input: i, target } = parseMoment(p, [
       'executionStatus',
       ...(category === 'FREE' ? ['description', 'base'] : ['serviceTypeId']),
       'notes',
       'specified',
     ])
-    const invalid = (field: string, message: string): never => {
-      throw new ArchiveError('VALIDATION_ERROR', message, [
-        { path: [field], code: 'INVALID_VALUE', message },
-      ])
-    }
     if (!['PLANNED', 'PERFORMED', 'MISSED'].includes(i.executionStatus as string))
       invalid('executionStatus', 'Scegli uno stato valido.')
     if (
@@ -141,8 +195,7 @@ export class ServiceService implements ServiceApi {
         [...i.description.trim()].length > 1000)
     )
       invalid('description', 'Inserisci una descrizione da 1 a 1000 caratteri.')
-    if (i.notes !== null && (typeof i.notes !== 'string' || [...i.notes].length > 10000))
-      invalid('notes', 'Le note ammettono al massimo 10000 caratteri.')
+    const parsedNotes = notes(i.notes)
     const base = category === 'FREE' ? Money.parse(i.base, 'base') : null
     if (base?.cents === 0n) invalid('base', 'L’importo base deve essere maggiore di zero.')
     const v = record(i.specified, ['customerId', 'agencyId'])
@@ -151,14 +204,20 @@ export class ServiceService implements ServiceApi {
       agencyId: v.agencyId === null ? null : entityId(v.agencyId, 'agencyId'),
     }
     const now = new Date().toISOString()
-    new VesselRepository(s.database, now).requireSelectable(target.vesselId)
+    const vessels = new VesselRepository(s.database, now)
+    if (previous?.vesselId === target.vesselId) vessels.get(target.vesselId)
+    else vessels.requireSelectable(target.vesselId)
     for (const kind of ['customer', 'agency'] as const) {
       const field = kind === 'customer' ? 'customerId' : 'agencyId',
         id = specified[field]
       if (id)
         try {
-          if (kind === 'customer') new CustomerRepository(s.database, now).requireSelectable(id)
-          else new AgencyRepository(s.database, now).requireSelectable(id)
+          const repository =
+            kind === 'customer'
+              ? new CustomerRepository(s.database, now)
+              : new AgencyRepository(s.database, now)
+          if (previous?.specified[field] === id) repository.get(id)
+          else repository.requireSelectable(id)
         } catch (error) {
           if (error instanceof ArchiveError)
             throw new ArchiveError(error.code, error.message, [
@@ -167,13 +226,45 @@ export class ServiceService implements ServiceApi {
           throw error
         }
     }
-    const resolved = this.resolve(s, target)
-    if (resolved.resolution.status !== 'RESOLVED')
-      throw new ArchiveError(
-        'LOCAL_TIME_AMBIGUOUS',
-        'Scegli esplicitamente l’occorrenza del momento della prestazione.',
-      )
-    const moment = resolved.resolution.moment
+    const repository = new ServiceRepository(s.database),
+      catalog = new CatalogRepository(s.database)
+    const typeId = category === 'CATALOG' ? entityId(i.serviceTypeId, 'serviceTypeId') : null
+    const type = typeId
+      ? previous?.serviceTypeId === typeId
+        ? catalog.get(typeId)
+        : catalog.requireSelectable(typeId)
+      : null
+    const unchangedMoment =
+      previous &&
+      previous.vesselId === target.vesselId &&
+      previous.moment.localDateTime === target.moment.localDateTime &&
+      (target.moment.selectedOffset === null ||
+        previous.moment.offset === target.moment.selectedOffset) &&
+      (!target.interpretationPortId || previous.context.portId === target.interpretationPortId)
+    const relevant =
+      force ||
+      !previous ||
+      !unchangedMoment ||
+      previous.serviceTypeId !== typeId ||
+      previous.executionStatus !== i.executionStatus ||
+      !same(previous.specified, specified) ||
+      (category === 'FREE' && previous.base !== base!.text)
+    if (previous && !relevant)
+      return {
+        ...previous,
+        description: type?.description ?? (i.description as string).trim(),
+        notes: parsedNotes,
+      }
+    let moment = unchangedMoment ? previous.moment : null
+    if (!moment) {
+      const resolved = this.resolve(s, target)
+      if (resolved.resolution.status !== 'RESOLVED')
+        throw new ArchiveError(
+          'LOCAL_TIME_AMBIGUOUS',
+          'Scegli esplicitamente l’occorrenza del momento della prestazione.',
+        )
+      moment = resolved.resolution.moment
+    }
     const context = serviceContext(
       subjectTimeline(
         new OperationRepository(s.database).all(target.vesselId),
@@ -181,29 +272,19 @@ export class ServiceService implements ServiceApi {
       ),
       moment.utc,
     )
-    if (context.portId !== resolved.portId)
+    if (target.interpretationPortId && context.portId !== target.interpretationPortId)
       throw new ArchiveError(
         'OPERATIONAL_CONTEXT_MISSING',
         'Il porto scelto non corrisponde alla permanenza.',
       )
-    const repository = new ServiceRepository(s.database)
-    const catalog = new CatalogRepository(s.database)
-    const type =
-      category === 'CATALOG'
-        ? catalog.requireSelectable(entityId(i.serviceTypeId, 'serviceTypeId'))
-        : null
-    const calculation = type
-      ? calculateBase(s.database, {
-          vesselId: target.vesselId,
-          portId: context.portId,
-          moment,
-          activity: { kind: 'CATALOG', serviceTypeId: type.id },
-        })
-      : null
-    const value: ServiceActivityDto = {
-      id: randomUUID(),
-      ...(type && calculation
-        ? { category: 'CATALOG' as const, serviceTypeId: type.id, calculation }
+    const value: ServiceCalculationInput = {
+      id: previous?.id ?? randomUUID(),
+      ...(type
+        ? {
+            category: 'CATALOG' as const,
+            serviceTypeId: type.id,
+            calculation: previous?.calculation ?? null,
+          }
         : { category: 'FREE' as const, serviceTypeId: null, calculation: null }),
       vesselId: target.vesselId,
       moment,
@@ -211,14 +292,123 @@ export class ServiceService implements ServiceApi {
       ...repository.versions(context, target.vesselId, moment.utc),
       executionStatus: i.executionStatus as ServiceActivityDto['executionStatus'],
       description: type?.description ?? (i.description as string).trim(),
-      notes: i.notes as string | null,
-      base: calculation?.base ?? base!.text,
+      notes: parsedNotes,
+      base: base?.text ?? previous?.base ?? '0.00',
       specified,
       subjects: { customer: null, agency: null },
     }
-    value.subjects = subjectPlan(s.database).subjectsForService(value)
-    repository.insert(value)
-    if (type) catalog.markUsed(type.id)
-    return repository.get(value.id)
+    const calculated = recalculateService(s.database, value)
+    calculated.subjects = subjectPlan(s.database).subjectsForService(calculated)
+    return calculated
+  }
+  updateNotes: ServiceApi['updateNotes'] = (request) =>
+    this.coordinator.command(request, (s, p) => {
+      const input = record(p, ['id', 'notes']),
+        id = entityId(input.id, 'id'),
+        value = notes(input.notes)
+      const repository = new ServiceRepository(s.database)
+      repository.updateNotes(id, value)
+      return repository.get(id)
+    })
+  private analyze(s: ArchiveApplicationSession, change: ServiceChange) {
+    const repository = new ServiceRepository(s.database),
+      before = repository.get(change.id)
+    if (change.operation === 'DELETE')
+      return { before, after: null, blockers: repository.deleteBlockers(before) }
+    const category = change.operation.endsWith('_FREE') ? 'FREE' : 'CATALOG'
+    if (category !== before.category)
+      invalid('operation', 'La categoria della prestazione non può essere modificata.')
+    const complete = change.operation.startsWith('COMPLETE_')
+    const values = record(change.values, [
+      'vesselId',
+      'interpretationPortId',
+      'moment',
+      'executionStatus',
+      'notes',
+      'specified',
+      ...(category === 'FREE' ? ['description', 'base'] : ['serviceTypeId']),
+    ])
+    const status = values.executionStatus as ServiceActivityDto['executionStatus']
+    if (complete) {
+      if (before.executionStatus !== 'PLANNED' || !['PERFORMED', 'MISSED'].includes(status))
+        invalid('executionStatus', 'Consuntiva una prestazione prevista come effettuata o mancata.')
+      if (status === 'MISSED') {
+        const requestedMoment = momentInput(values.moment)
+        if (
+          change.values.vesselId !== before.vesselId ||
+          requestedMoment.localDateTime !== before.moment.localDateTime ||
+          (requestedMoment.selectedOffset !== null &&
+            requestedMoment.selectedOffset !== before.moment.offset) ||
+          (change.values.interpretationPortId !== null &&
+            change.values.interpretationPortId !== before.context.portId)
+        )
+          invalid('moment', 'La prestazione mancata conserva nave e istante pianificati.')
+      }
+    } else if (status !== before.executionStatus && before.executionStatus === 'PLANNED')
+      invalid('executionStatus', 'Usa la consuntivazione esplicita per registrare l’esito.')
+    else if (status === 'PLANNED' && before.executionStatus !== 'PLANNED')
+      invalid('executionStatus', 'Una prestazione consuntivata non può tornare prevista.')
+    const after = this.build(s, change.values, category, before, complete)
+    return { before, after, blockers: [] }
+  }
+  preview: ServiceApi['preview'] = (request) =>
+    this.coordinator.command(request, (s, p) => {
+      const operation = (p as ServiceChange | null)?.operation
+      if (
+        !['UPDATE_FREE', 'UPDATE_CATALOG', 'COMPLETE_FREE', 'COMPLETE_CATALOG', 'DELETE'].includes(
+          operation as string,
+        )
+      )
+        invalid('operation', 'Operazione non valida.')
+      const input = record(
+        p,
+        operation === 'DELETE' ? ['operation', 'id'] : ['operation', 'id', 'values'],
+      )
+      const change = { ...input, id: entityId(input.id, 'id') } as ServiceChange
+      const analysis = this.analyze(s, change)
+      const entry = s.previews.put(namespace, s.context(), change)
+      return {
+        ...entry,
+        context: s.context(),
+        operation: change.operation,
+        ...analysis,
+        changedFields: analysis.after
+          ? Object.keys(analysis.after).filter(
+              (key) =>
+                !same(
+                  analysis.before[key as keyof ServiceActivityDto],
+                  analysis.after![key as keyof ServiceActivityDto],
+                ),
+            )
+          : ['deleted'],
+      } satisfies ServiceChangePreviewDto
+    })
+  confirm: ServiceApi['confirm'] = (request) => {
+    let consumed = ''
+    return this.coordinator.command(
+      request,
+      (s, p) => {
+        const id = entityId(record(p, ['previewId']).previewId, 'previewId')
+        const change = s.previews.get(id, namespace, s.context()).input as ServiceChange
+        const { before, after, blockers } = this.analyze(s, change)
+        if (blockers.length)
+          throw new ArchiveError(
+            'PREVIEW_BLOCKED',
+            'La prestazione ha riferimenti che impediscono l’eliminazione.',
+            [],
+            blockers,
+          )
+        const repository = new ServiceRepository(s.database)
+        if (!after) repository.delete(before.id)
+        else if (!same(before, after)) {
+          repository.save(after)
+          if (after.category === 'CATALOG' && before.serviceTypeId !== after.serviceTypeId)
+            new CatalogRepository(s.database).markUsed(after.serviceTypeId)
+        }
+        consumed = id
+        return { id: before.id, service: after ? repository.get(before.id) : null }
+      },
+      (s) => s.previews.consume(consumed),
+    )
   }
 }

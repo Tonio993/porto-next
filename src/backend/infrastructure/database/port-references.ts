@@ -55,6 +55,7 @@ export function foreignReferences(
   versionTable: string,
   versionIds: readonly string[],
   owned: readonly string[],
+  versionIdColumn = 'id',
 ): ConflictDto[] {
   const tables = database.sqlite
     .prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")
@@ -81,7 +82,7 @@ export function foreignReferences(
       const count = database.sqlite
         .prepare(
           `SELECT count(*) FROM ${quote(name)} child WHERE EXISTS (
-          SELECT 1 FROM ${quote(key.table)} parent WHERE parent.id IN (SELECT value FROM json_each(?)) AND ${matches})`,
+          SELECT 1 FROM ${quote(key.table)} parent WHERE parent.${quote(target === identityTable ? 'id' : versionIdColumn)} IN (SELECT value FROM json_each(?)) AND ${matches})`,
         )
         .pluck()
         .get(JSON.stringify(ids)) as number

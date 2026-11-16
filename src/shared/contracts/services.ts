@@ -1,4 +1,10 @@
-import type { ApplicationResult, CommandRequest, QueryRequest } from './application'
+import type {
+  ApplicationResult,
+  ArchiveContextDto,
+  CommandRequest,
+  ConflictDto,
+  QueryRequest,
+} from './application'
 import type { EffectiveSubjectsDto, SpecifiedSubjectsDto } from './assignments'
 import type { PageDto } from './master-data'
 import type { ExecutionStatus, OperationalContextDto } from './operations'
@@ -51,7 +57,52 @@ export type ServiceActivityDto = ServiceActivityCommonDto &
     | { category: 'FREE'; serviceTypeId: null; calculation: null }
     | { category: 'CATALOG'; serviceTypeId: string; calculation: BaseCalculationDto }
   )
+export interface ServiceListQuery {
+  vesselId?: string | null
+  category?: 'FREE' | 'CATALOG' | null
+  serviceTypeId?: string | null
+  executionStatus?: ExecutionStatus | null
+  fromUtc?: string | null
+  toUtc?: string | null
+  portId?: string | null
+  berthId?: string | null
+  voyageId?: string | null
+  portCallId?: string | null
+  berthStayId?: string | null
+  customerId?: string | null
+  agencyId?: string | null
+  page: number
+  pageSize: number
+}
+export type ServiceChange =
+  | { operation: 'UPDATE_FREE' | 'COMPLETE_FREE'; id: string; values: CreateFreeServiceDto }
+  | {
+      operation: 'UPDATE_CATALOG' | 'COMPLETE_CATALOG'
+      id: string
+      values: CreateCatalogServiceDto
+    }
+  | { operation: 'DELETE'; id: string }
+export interface ServiceChangePreviewDto {
+  previewId: string
+  context: ArchiveContextDto
+  operation: ServiceChange['operation']
+  generatedAtUtc: string
+  expiresAtUtc: string
+  before: ServiceActivityDto
+  after: ServiceActivityDto | null
+  changedFields: readonly string[]
+  blockers: readonly ConflictDto[]
+}
 export interface ServiceApi {
+  preview(
+    request: CommandRequest<ServiceChange>,
+  ): Promise<ApplicationResult<ServiceChangePreviewDto>>
+  confirm(
+    request: CommandRequest<{ previewId: string }>,
+  ): Promise<ApplicationResult<{ id: string; service: ServiceActivityDto | null }>>
+  updateNotes(
+    request: CommandRequest<{ id: string; notes: string | null }>,
+  ): Promise<ApplicationResult<ServiceActivityDto>>
   createCatalog(
     request: CommandRequest<CreateCatalogServiceDto>,
   ): Promise<ApplicationResult<ServiceActivityDto>>
@@ -62,11 +113,14 @@ export interface ServiceApi {
     request: CommandRequest<CreateFreeServiceDto>,
   ): Promise<ApplicationResult<ServiceActivityDto>>
   list(
-    request: QueryRequest<{ vesselId: string; page: number; pageSize: number }>,
+    request: QueryRequest<ServiceListQuery>,
   ): Promise<ApplicationResult<PageDto<ServiceActivityDto>>>
   get(request: QueryRequest<{ id: string }>): Promise<ApplicationResult<ServiceActivityDto>>
 }
 export const serviceChannels = {
+  preview: 'services:preview',
+  confirm: 'services:confirm',
+  updateNotes: 'services:update-notes',
   resolveMoment: 'services:resolve-moment',
   createFree: 'services:create-free',
   createCatalog: 'services:create-catalog',

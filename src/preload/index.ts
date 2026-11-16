@@ -161,6 +161,9 @@ const assignments: AssignmentApi = {
 contextBridge.exposeInMainWorld('assignments', assignments)
 
 const services: ServiceApi = {
+  preview: (request) => ipcRenderer.invoke(serviceChannels.preview, request),
+  confirm: (request) => ipcRenderer.invoke(serviceChannels.confirm, request),
+  updateNotes: (request) => ipcRenderer.invoke(serviceChannels.updateNotes, request),
   resolveMoment: (request) => ipcRenderer.invoke(serviceChannels.resolveMoment, request),
   createFree: (request) => ipcRenderer.invoke(serviceChannels.createFree, request),
   createCatalog: (request) => ipcRenderer.invoke(serviceChannels.createCatalog, request),

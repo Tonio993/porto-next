@@ -11,10 +11,14 @@ export function CatalogPicker({
   value,
   onChange,
   disabled,
+  historical = false,
+  retainedId = null,
 }: {
   context: ArchiveContextDto
   value: string | null
   onChange: (id: string | null) => void
+  retainedId?: string | null
+  historical?: boolean
   disabled: boolean
 }) {
   const [search, setSearch] = useState(''),
@@ -24,6 +28,11 @@ export function CatalogPicker({
     [error, setError] = useState<string | null>(null)
   const { request, invalidate, loading } = useApplicationRequest(context, setError),
     chosenRequest = useApplicationRequest(context, setError)
+  const [retained, setRetained] = useState<{ value: string; label: string } | null>(null)
+  const { request: readRetained, invalidate: invalidateRetained } = useApplicationRequest(
+    context,
+    setError,
+  )
   const api = window.catalog
   const option = (s: ServiceTypeDto) => ({
     value: s.id,
@@ -33,12 +42,12 @@ export function CatalogPicker({
     void request(() =>
       api.list({
         context: { sessionId: context.sessionId },
-        query: { search, page, pageSize: 25, status: 'ACTIVE' },
+        query: { search, page, pageSize: 25, status: historical ? 'ALL' : 'ACTIVE' },
       }),
     ).then((r) => {
       if (r?.ok) setList(r.value)
     })
-  }, [request, api, context.sessionId, context.revision, search, page])
+  }, [request, api, context.sessionId, context.revision, search, page, historical])
   const { request: readChosen, invalidate: invalidateChosen } = chosenRequest
   useEffect(() => {
     invalidateChosen()
@@ -50,7 +59,19 @@ export function CatalogPicker({
         if (r?.ok) setChosen(option(r.value))
       })
   }, [readChosen, invalidateChosen, api, context.sessionId, context.revision, value])
+  useEffect(() => {
+    invalidateRetained()
+    setRetained(null)
+    if (retainedId)
+      void readRetained(() =>
+        api.get({ context: { sessionId: context.sessionId }, query: { id: retainedId } }),
+      ).then((r) => {
+        if (r?.ok) setRetained(option(r.value))
+      })
+  }, [readRetained, invalidateRetained, api, context.sessionId, context.revision, retainedId])
   const options = list?.items.map(option) ?? []
+  if (retained?.value === retainedId && !options.some((o) => o.value === retainedId))
+    options.unshift(retained)
   if (chosen?.value === value && !options.some((o) => o.value === value)) options.unshift(chosen)
   return (
     <>

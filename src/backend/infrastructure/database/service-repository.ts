@@ -1,8 +1,9 @@
-﻿import type { ServiceActivityDto } from '../../../shared/contracts/services'
+﻿import type { ServiceActivityDto, ServiceListQuery } from '../../../shared/contracts/services'
 import type { PageDto } from '../../../shared/contracts/master-data'
 import { ArchiveError } from '../../../shared/errors/archive-error'
 import { Money } from '../../domain/values/numbers'
 import type { DatabaseSession } from './database-session'
+import { foreignReferences } from './port-references'
 import { AssignmentRepository } from './assignment-repository'
 import { momentFromColumns, momentToColumns, type MomentColumns } from './moment-storage'
 import { PortRepository } from './port-repository'
@@ -68,17 +69,108 @@ export class ServiceRepository {
       }[]
     ).map((r) => this.get(r.id))
   }
-  list(vesselId: string, page: number, pageSize: number): PageDto<ServiceActivityDto> {
+  list(query: ServiceListQuery): PageDto<ServiceActivityDto> {
+    const columns = {
+      vesselId: 's.vessel_id',
+      category: 's.category',
+      serviceTypeId: 's.service_type_id',
+      executionStatus: 's.execution_status',
+      portId: 's.port_id',
+      berthId: 's.berth_id',
+      voyageId: 's.voyage_id',
+      portCallId: 's.port_call_id',
+      berthStayId: 's.berth_stay_id',
+      customerId: 'subjects.customer_id',
+      agencyId: 'subjects.agency_id',
+    } as const
+    const conditions: string[] = [],
+      args: string[] = []
+    for (const [key, column] of Object.entries(columns)) {
+      const value = query[key as keyof typeof columns]
+      if (value) {
+        conditions.push(column + '=?')
+        args.push(value)
+      }
+    }
+    if (query.fromUtc) {
+      conditions.push('s.utc>=?')
+      args.push(query.fromUtc)
+    }
+    if (query.toUtc) {
+      conditions.push('s.utc<=?')
+      args.push(query.toUtc)
+    }
+    const from =
+      'FROM service_activities s JOIN service_activity_subjects subjects ON subjects.service_id=s.id' +
+      (conditions.length ? ' WHERE ' + conditions.join(' AND ') : '')
     const total = this.database.sqlite
-      .prepare('SELECT count(*) FROM service_activities WHERE vessel_id=?')
+      .prepare('SELECT count(*) ' + from)
       .pluck()
-      .get(vesselId) as number
+      .get(...args) as number
     const rows = this.database.sqlite
+      .prepare('SELECT s.id ' + from + ' ORDER BY s.utc DESC,s.id LIMIT ? OFFSET ?')
+      .all(...args, query.pageSize, (query.page - 1) * query.pageSize) as { id: string }[]
+    return {
+      items: rows.map((r) => this.get(r.id)),
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+    }
+  }
+  deleteBlockers(value: ServiceActivityDto) {
+    // Inspect external FKs to both the activity and its owned row, including CASCADE.
+    const reference = { kind: 'SERVICE_ACTIVITY' as const, id: value.id, label: value.description }
+    return foreignReferences(
+      this.database,
+      reference,
+      'service_activities',
+      'service_activity_subjects',
+      [value.id],
+      ['service_activity_subjects'],
+      'service_id',
+    )
+  }
+  delete(id: string) {
+    this.database.sqlite.prepare('DELETE FROM service_activity_subjects WHERE service_id=?').run(id)
+    this.database.sqlite.prepare('DELETE FROM service_activities WHERE id=?').run(id)
+  }
+  updateNotes(id: string, notes: string | null) {
+    if (this.get(id).notes !== notes)
+      this.database.sqlite
+        .prepare('UPDATE service_activities SET notes=? WHERE id=?')
+        .run(notes, id)
+  }
+  save(value: ServiceActivityDto) {
+    const m = momentToColumns(value.moment),
+      c = value.context
+    this.database.sqlite
       .prepare(
-        'SELECT id FROM service_activities WHERE vessel_id=? ORDER BY utc DESC,id LIMIT ? OFFSET ?',
+        `UPDATE service_activities SET vessel_id=?,vessel_version_id=?,execution_status=?,description=?,base_cents=?,notes=?,local_date_time=?,zone_id=?,utc_offset=?,utc=?,voyage_id=?,port_call_id=?,berth_stay_id=?,port_id=?,port_version_id=?,berth_id=?,berth_version_id=?,customer_id=?,agency_id=?,service_type_id=?,tariff_id=?,configuration_id=?,bracket_id=?,weight_sequence_id=?,weight_version_id=?,calculation=? WHERE id=?`,
       )
-      .all(vesselId, pageSize, (page - 1) * pageSize) as { id: string }[]
-    return { items: rows.map((r) => this.get(r.id)), total, page, pageSize }
+      .run(
+        value.vesselId,
+        value.vesselVersionId,
+        value.executionStatus,
+        value.category === 'FREE' ? value.description : null,
+        Money.parse(value.base).cents,
+        value.notes,
+        m.local_date_time,
+        m.zone_id,
+        m.utc_offset,
+        m.utc,
+        c.voyageId,
+        c.portCallId,
+        c.berthStayId,
+        c.portId,
+        value.portVersionId,
+        c.berthId,
+        value.berthVersionId,
+        value.specified.customerId,
+        value.specified.agencyId,
+        ...this.economicColumns(value),
+        value.id,
+      )
+    new AssignmentRepository(this.database).saveSubjects(value.id, value.subjects, 'service')
   }
   versions(context: ServiceActivityDto['context'], vesselId: string, utc: string) {
     const at = <T extends { effectiveFrom: string | null; effectiveTo: string | null }>(

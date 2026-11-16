@@ -2,10 +2,16 @@ import type { ServiceActivityDto } from '../../../shared/contracts/services'
 import type { DatabaseSession } from '../../infrastructure/database/database-session'
 import { calculateBase } from '../tariffs/calculate-base'
 
+export type ServiceCalculationInput =
+  | Extract<ServiceActivityDto, { category: 'FREE' }>
+  | (Omit<Extract<ServiceActivityDto, { category: 'CATALOG' }>, 'calculation'> & {
+      calculation: ServiceActivityDto['calculation']
+    })
+
 /** Caller owns the transaction and the proposed context/version sequence. FREE stays manual. */
 export function recalculateService(
   database: DatabaseSession,
-  value: ServiceActivityDto,
+  value: ServiceCalculationInput,
   simulated: Parameters<typeof calculateBase>[2] = {},
 ): ServiceActivityDto {
   if (value.category === 'FREE') return value

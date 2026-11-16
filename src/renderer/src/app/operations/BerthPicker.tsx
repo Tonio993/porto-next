@@ -11,11 +11,13 @@ export function BerthPicker({
   value,
   onChange,
   disabled,
+  historical = false,
 }: {
   context: ArchiveContextDto
   portId: string
   value: string | null
   onChange: (value: string | null) => void
+  historical?: boolean
   disabled: boolean
 }) {
   const [page, setPage] = useState(1),
@@ -27,12 +29,12 @@ export function BerthPicker({
     void request(() =>
       window.berths.list({
         context: { sessionId: context.sessionId },
-        query: { portId, page, pageSize: 25, selectableOnly: true },
+        query: { portId, page, pageSize: 25, selectableOnly: !historical },
       }),
     ).then((r) => {
       if (r?.ok) setList(r.value)
     })
-  }, [request, context.sessionId, context.revision, portId, page])
+  }, [request, context.sessionId, context.revision, portId, page, historical])
   const options =
     list?.items.map((b) => ({ value: b.id, label: `${b.code} · ${b.version.name}` })) ?? []
   if (chosen?.value === value && !options.some((o) => o.value === value)) options.unshift(chosen)

@@ -1,3 +1,5 @@
+import * as serviceCalculation from '../../src/backend/application/services/service-calculation'
+import * as subjectResolution from '../../src/backend/application/operations/subject-resolution'
 import { CatalogService } from '../../src/backend/application/catalog/catalog-service'
 import { CatalogRepository } from '../../src/backend/infrastructure/database/catalog-repository'
 import { mkdtempSync, rmSync } from 'node:fs'
@@ -20,6 +22,9 @@ import { ServiceRepository } from '../../src/backend/infrastructure/database/ser
 import type { ApplicationResult } from '../../src/shared/contracts/application'
 import type { CreateOperationDto } from '../../src/shared/contracts/operations'
 import type {
+  ServiceActivityDto,
+  ServiceChange,
+  ServiceListQuery,
   CreateCatalogServiceDto,
   CreateFreeServiceDto,
 } from '../../src/shared/contracts/services'
@@ -1039,4 +1044,571 @@ it('CATALOG: CHECK della base int64 non ammette saturazione del cast e categoria
       .run(saved.id),
   ).toThrow()
   expect(new ServiceRepository(db()).get(saved.id)).toEqual(saved)
+})
+
+function changeFor(
+  saved: ServiceActivityDto,
+  patch: Partial<CreateFreeServiceDto & CreateCatalogServiceDto> = {},
+  complete = false,
+): ServiceChange {
+  const common = {
+    vesselId: saved.vesselId,
+    interpretationPortId: saved.context.portId,
+    moment: moment(saved.moment.localDateTime, saved.moment.offset),
+    executionStatus: saved.executionStatus,
+    notes: saved.notes,
+    specified: saved.specified,
+    ...patch,
+  }
+  return saved.category === 'FREE'
+    ? {
+        operation: complete ? 'COMPLETE_FREE' : 'UPDATE_FREE',
+        id: saved.id,
+        values: {
+          ...common,
+          description: patch.description ?? saved.description,
+          base: patch.base ?? saved.base,
+        },
+      }
+    : {
+        operation: complete ? 'COMPLETE_CATALOG' : 'UPDATE_CATALOG',
+        id: saved.id,
+        values: { ...common, serviceTypeId: patch.serviceTypeId ?? saved.serviceTypeId },
+      }
+}
+const previewChange = (payload: ServiceChange) => services.preview({ context: context(), payload })
+async function applyChange(payload: ServiceChange) {
+  const p = value(await previewChange(payload))
+  return value(await services.confirm({ context: p.context, payload: { previewId: p.previewId } }))
+}
+function integrity() {
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+  expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
+}
+it.each(['FREE', 'CATALOG'] as const)(
+  'P16 %s: consuntivazione esplicita, anteprima senza scritture, esito mancato con base conservata',
+  async (category) => {
+    const saved = value(
+      category === 'FREE'
+        ? await create()
+        : await createCatalog({ ...catalogInput(), executionStatus: 'PLANNED' }),
+    )
+    const metadata = db().metadata(),
+      ctx = context()
+    const missed = changeFor(saved, { executionStatus: 'MISSED' }, true)
+    if (category === 'FREE' && missed.operation !== 'DELETE')
+      missed.values.moment.selectedOffset = null
+    const pre = value(await previewChange(missed))
+    expect(pre.before).toEqual(saved)
+    expect(pre.after).toMatchObject({
+      executionStatus: 'MISSED',
+      moment: saved.moment,
+      base: saved.base,
+      context: saved.context,
+    })
+    expect(pre.changedFields).toEqual(['executionStatus'])
+    expect(db().metadata()).toEqual(metadata)
+    expect(all()).toEqual([saved])
+    // A future observation never promotes a planned activity.
+    vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2030-01-01T00:00:00Z'))
+    expect(all()[0].executionStatus).toBe('PLANNED')
+    vi.restoreAllMocks()
+    const result = value(
+      await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }),
+    )
+    expect(result.service?.executionStatus).toBe('MISSED')
+    expect(BigInt(context().revision)).toBe(BigInt(ctx.revision) + 1n)
+    expect(
+      await previewChange(changeFor(result.service!, { executionStatus: 'PERFORMED' }, true)),
+    ).toMatchObject(failure('VALIDATION_ERROR'))
+    expect(
+      await services.confirm({ context: context(), payload: { previewId: pre.previewId } }),
+    ).toMatchObject(failure('PREVIEW_EXPIRED'))
+    integrity()
+  },
+)
+it('P16: effettuata con dati effettivi, nuove versioni, permanenza e soggetti; mancata conserva l’istante', async () => {
+  const saved = value(await create())
+  await operation(move())
+  const person = value(
+    await customers().create({
+      context: context(),
+      payload: { businessName: 'Cliente destinazione' },
+    }),
+  )
+  const stay = value(
+    await operations.stays({
+      context: { sessionId: context().sessionId },
+      query: { vesselId, page: 1, pageSize: 25 },
+    }),
+  ).items[0].visits[0].stays[1]
+  await assign({ kind: 'BERTH_STAY', id: stay.id }, person.id)
+  expect(
+    await previewChange(
+      changeFor(saved, { executionStatus: 'MISSED', moment: moment('2026-06-01T15:00') }, true),
+    ),
+  ).toMatchObject(failure('VALIDATION_ERROR'))
+  const pre = value(
+    await previewChange(
+      changeFor(saved, { executionStatus: 'PERFORMED', moment: moment('2026-06-01T15:00') }, true),
+    ),
+  )
+  expect(pre.after).toMatchObject({
+    executionStatus: 'PERFORMED',
+    context: { berthId },
+    subjects: { customer: { id: person.id, source: { kind: 'BERTH_STAY', id: stay.id } } },
+    base: saved.base,
+  })
+  value(await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }))
+  integrity()
+})
+it.each(['FREE', 'CATALOG'] as const)(
+  'P16 %s: modifica con contesto e rifiuto di transito, orfane, categoria e transizioni improprie',
+  async (category) => {
+    const saved = value(
+      category === 'FREE'
+        ? await create()
+        : await createCatalog({ ...catalogInput(), executionStatus: 'PLANNED' }),
+    )
+    await operation(move())
+    await operation(exit())
+    for (const at of ['2026-06-01T11:59', '2026-06-01T14:30', '2026-06-01T18:01'])
+      expect(await previewChange(changeFor(saved, { moment: moment(at) }))).toMatchObject(
+        failure('OPERATIONAL_CONTEXT_MISSING'),
+      )
+    expect(await previewChange(changeFor(saved, { executionStatus: 'PERFORMED' }))).toMatchObject(
+      failure('VALIDATION_ERROR'),
+    )
+    const other = {
+      ...changeFor(saved),
+      operation: category === 'FREE' ? 'UPDATE_CATALOG' : 'UPDATE_FREE',
+    } as ServiceChange
+    expect(await previewChange(other)).toMatchObject(failure('VALIDATION_ERROR'))
+    const updated = (await applyChange(changeFor(saved, { moment: moment('2026-06-01T15:00') })))
+      .service!
+    expect(updated.context.berthId).toBe(berthId)
+    expect(updated.base).toBe(saved.base)
+    expect(updated.moment.localDateTime).toBe('2026-06-01T15:00')
+    integrity()
+  },
+)
+it('P16 CATALOG: mantiene tipo storico senza markUsed; sostituzione selezionabile atomica, rinomina corrente, FREE manuale', async () => {
+  const saved = value(await createCatalog()),
+    catalog = new CatalogService(archives.coordinator)
+  const deactivate = value(
+    await catalog.preview({
+      context: context(),
+      payload: { operation: 'DEACTIVATE', id: saved.serviceTypeId! },
+    }),
+  )
+  value(
+    await catalog.confirm({
+      context: deactivate.context,
+      payload: { previewId: deactivate.previewId },
+    }),
+  )
+  const realMark = CatalogRepository.prototype.markUsed
+  const mark = vi.spyOn(CatalogRepository.prototype, 'markUsed')
+  const maintained = (await applyChange(changeFor(saved, { moment: moment('2026-06-01T13:30') })))
+    .service!
+  expect(maintained.serviceTypeId).toBe(saved.serviceTypeId)
+  expect(mark).not.toHaveBeenCalled()
+  const replacement = value(
+    await catalog.create({
+      context: context(),
+      payload: { description: 'Nuovo tipo', initialWeight: '2' },
+    }),
+  )
+  const pre = value(await previewChange(changeFor(maintained, { serviceTypeId: replacement.id })))
+  expect(pre.after?.base).toBe('200.00')
+  expect(new CatalogRepository(db()).get(replacement.id).hasEverBeenUsed).toBe(false)
+  const metadata = db().metadata(),
+    ctx = context()
+  mark.mockImplementation(function (this: CatalogRepository, id: string) {
+    // Use the real method, then fail after the historic-use write.
+    realMark.call(this, id)
+    throw Error('rollback utilizzo')
+  })
+  expect(
+    await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }),
+  ).toMatchObject(failure('UNEXPECTED'))
+  expect(db().metadata()).toEqual(metadata)
+  expect(context()).toEqual(ctx)
+  expect(all()[0]).toEqual(maintained)
+  expect(new CatalogRepository(db()).get(replacement.id).hasEverBeenUsed).toBe(false)
+  mark.mockRestore()
+  const result = value(
+    await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }),
+  ).service!
+  expect(result).toMatchObject({
+    serviceTypeId: replacement.id,
+    description: 'Nuovo tipo',
+    base: '200.00',
+  })
+  expect(new CatalogRepository(db()).get(replacement.id).hasEverBeenUsed).toBe(true)
+  expect(
+    await previewChange(changeFor(result, { serviceTypeId: saved.serviceTypeId! })),
+  ).toMatchObject(failure('NOT_SELECTABLE'))
+  const free = value(await create()),
+    freeUpdated = (
+      await applyChange(
+        changeFor(free, { base: '92233720368547758.07', description: 'Libera corretta' }),
+      )
+    ).service!
+  expect(freeUpdated).toMatchObject({
+    base: '92233720368547758.07',
+    calculation: null,
+    category: 'FREE',
+  })
+  expect(await previewChange(changeFor(freeUpdated, { base: '0.00' }))).toMatchObject(
+    failure('VALIDATION_ERROR'),
+  )
+  integrity()
+})
+it.each(['FREE', 'CATALOG'] as const)(
+  'P16 %s: sole note senza attribuzioni/calcoli, tuple e traccia byte per byte, no-op e rollback',
+  async (category) => {
+    const saved = value(category === 'FREE' ? await create() : await createCatalog())
+    const before = sql()
+      .prepare('SELECT * FROM service_activities WHERE id=?')
+      .get(saved.id) as Record<string, unknown>
+    const subjects = sql().prepare('SELECT * FROM service_activity_subjects').all()
+    vi.spyOn(serviceCalculation, 'recalculateService').mockImplementation(() => {
+      throw Error('ricalcolo vietato')
+    })
+    vi.spyOn(subjectResolution, 'subjectPlan').mockImplementation(() => {
+      throw Error('riattribuzione vietata')
+    })
+    const notes = 'Note corrette àèìòù'
+    const updated = value(
+      await services.updateNotes({ context: context(), payload: { id: saved.id, notes } }),
+    )
+    expect(updated).toEqual({ ...saved, notes })
+    expect(sql().prepare('SELECT * FROM service_activities WHERE id=?').get(saved.id)).toEqual({
+      ...before,
+      notes,
+    })
+    expect(sql().prepare('SELECT * FROM service_activity_subjects').all()).toEqual(subjects)
+    const metadata = db().metadata(),
+      ctx = context()
+    value(await services.updateNotes({ context: context(), payload: { id: saved.id, notes } }))
+    expect(context()).toEqual(ctx)
+    expect(db().metadata()).toEqual(metadata)
+    sql().exec(
+      "CREATE TRIGGER fail_notes AFTER UPDATE OF notes ON service_activities BEGIN SELECT RAISE(ABORT,'forced'); END",
+    )
+    expect(
+      await services.updateNotes({
+        context: context(),
+        payload: { id: saved.id, notes: 'Rollback' },
+      }),
+    ).toMatchObject(failure('UNEXPECTED'))
+    expect(all()[0]).toEqual(updated)
+    expect(db().metadata()).toEqual(metadata)
+    integrity()
+  },
+)
+it('P16: eliminazione fisica ordinata, rollback dei soggetti, utilizzo storico, riferimenti esterni composti/CASCADE bloccanti', async () => {
+  const saved = value(await createCatalog()),
+    ctx = context()
+  sql().exec(
+    'CREATE TABLE external_owned (id TEXT PRIMARY KEY, service_id TEXT REFERENCES service_activity_subjects(service_id) ON DELETE CASCADE)',
+  )
+  sql().prepare('INSERT INTO external_owned VALUES (?,?)').run('external', saved.id)
+  const blocked = value(await previewChange({ operation: 'DELETE', id: saved.id }))
+  expect(blocked.blockers).toHaveLength(1)
+  expect(
+    await services.confirm({ context: blocked.context, payload: { previewId: blocked.previewId } }),
+  ).toMatchObject(failure('PREVIEW_BLOCKED'))
+  expect(context()).toEqual(ctx)
+  expect(all()).toEqual([saved])
+  sql().exec(
+    'DROP TABLE external_owned; CREATE UNIQUE INDEX external_service_pair ON service_activities(id,vessel_id); CREATE TABLE external_compound (service_id TEXT,vessel_id TEXT,FOREIGN KEY(service_id,vessel_id) REFERENCES service_activities(id,vessel_id) ON DELETE CASCADE)',
+  )
+  sql().prepare('INSERT INTO external_compound VALUES (?,?)').run(saved.id, vesselId)
+  expect(value(await previewChange({ operation: 'DELETE', id: saved.id })).blockers).toHaveLength(1)
+  sql().exec('DROP TABLE external_compound')
+  const pre = value(await previewChange({ operation: 'DELETE', id: saved.id })),
+    metadata = db().metadata()
+  sql().exec(
+    "CREATE TRIGGER fail_delete BEFORE DELETE ON service_activities BEGIN SELECT RAISE(ABORT,'forced'); END",
+  )
+  expect(
+    await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }),
+  ).toMatchObject(failure('UNEXPECTED'))
+  expect(all()).toEqual([saved])
+  expect(db().metadata()).toEqual(metadata)
+  sql().exec('DROP TRIGGER fail_delete')
+  value(await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }))
+  expect(all()).toEqual([])
+  expect(sql().prepare('SELECT * FROM service_activity_subjects').all()).toEqual([])
+  expect(new CatalogRepository(db()).get(saved.serviceTypeId!).hasEverBeenUsed).toBe(true)
+  expect(new CatalogRepository(db()).deleteBlockers(saved.serviceTypeId!).length).toBeGreaterThan(0)
+  integrity()
+})
+it('P16: no-op, anteprime obsolete, namespace, scadenza, sessione e rollback dopo UPDATE', async () => {
+  const saved = value(await create()),
+    metadata = db().metadata(),
+    ctx = context()
+  const noop = value(await previewChange(changeFor(saved)))
+  expect(noop.changedFields).toEqual([])
+  value(await services.confirm({ context: noop.context, payload: { previewId: noop.previewId } }))
+  expect(db().metadata()).toEqual(metadata)
+  expect(context()).toEqual(ctx)
+  const pre = value(await previewChange(changeFor(saved, { base: '125.00' })))
+  const save = ServiceRepository.prototype.save
+  vi.spyOn(ServiceRepository.prototype, 'save').mockImplementation(function (
+    this: ServiceRepository,
+    value,
+  ) {
+    save.call(this, value)
+    throw Error('dopo update')
+  })
+  expect(
+    await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }),
+  ).toMatchObject(failure('UNEXPECTED'))
+  expect(all()).toEqual([saved])
+  expect(db().metadata()).toEqual(metadata)
+  vi.restoreAllMocks()
+  const type = new CatalogRepository(db()).list({
+    search: '',
+    status: 'ALL',
+    page: 1,
+    pageSize: 25,
+  }).items[0]
+  const catalogPre = value(
+    await new CatalogService(archives.coordinator).preview({
+      context: context(),
+      payload: { operation: 'RENAME', id: type.id, description: 'Altro' },
+    }),
+  )
+  expect(
+    await services.confirm({ context: context(), payload: { previewId: catalogPre.previewId } }),
+  ).toMatchObject(failure('PREVIEW_EXPIRED'))
+  value(
+    await services.updateNotes({
+      context: context(),
+      payload: { id: saved.id, notes: 'Nuova revisione' },
+    }),
+  )
+  expect(
+    await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }),
+  ).toMatchObject(failure('REVISION_CONFLICT'))
+  expect(
+    await services.confirm({ context: context(), payload: { previewId: pre.previewId } }),
+  ).toMatchObject(failure('REVISION_CONFLICT'))
+  const exp = value(await previewChange(changeFor(all()[0], { base: '126.00' })))
+  vi.spyOn(Date, 'now').mockReturnValue(Date.parse(exp.expiresAtUtc))
+  expect(
+    await services.confirm({ context: exp.context, payload: { previewId: exp.previewId } }),
+  ).toMatchObject(failure('PREVIEW_EXPIRED'))
+  vi.restoreAllMocks()
+  const sessionPre = value(await previewChange(changeFor(all()[0], { base: '127.00' })))
+  const expected = all()
+  await archives.close()
+  await archives.open(join(folder, 'active.ormeggi'))
+  expect(
+    await services.confirm({
+      context: sessionPre.context,
+      payload: { previewId: sessionPre.previewId },
+    }),
+  ).toMatchObject(failure('ARCHIVE_SESSION_CHANGED'))
+  expect(all()).toEqual(expected)
+  integrity()
+})
+it('P16: filtri combinati, periodo incluso, soggetti ereditati effettivi, pagine stabili e validazione IPC', async () => {
+  const customer = value(
+    await customers().create({
+      context: context(),
+      payload: { businessName: 'Cliente ereditato' },
+    }),
+  )
+  const agency = value(
+    await agencies().create({ context: context(), payload: { businessName: 'Agenzia ereditata' } }),
+  )
+  await operation(move())
+  const saved = value(
+    await createCatalog({ ...catalogInput(), moment: moment('2026-06-01T15:00') }),
+  )
+  await assign({ kind: 'VOYAGE', id: saved.context.voyageId }, customer.id, agency.id)
+  await create()
+  await create(input('2026-06-01T16:00'))
+  const filters: ServiceListQuery = {
+    page: 1,
+    pageSize: 1,
+    vesselId,
+    category: 'CATALOG',
+    serviceTypeId: saved.serviceTypeId,
+    executionStatus: 'MISSED',
+    fromUtc: saved.moment.utc,
+    toUtc: saved.moment.utc,
+    portId,
+    berthId,
+    voyageId: saved.context.voyageId,
+    portCallId: saved.context.portCallId,
+    berthStayId: saved.context.berthStayId,
+    customerId: customer.id,
+    agencyId: agency.id,
+  }
+  const list = (query: ServiceListQuery) =>
+    services.list({ context: { sessionId: context().sessionId }, query })
+  const result = value(await list(filters))
+  expect(result.total).toBe(1)
+  expect(result.items[0].id).toBe(saved.id)
+  expect(result.items[0].specified).toEqual({ customerId: null, agencyId: null })
+  expect(value(await list({ ...filters, category: 'FREE' })).total).toBe(0)
+  expect(
+    value(await list({ ...filters, fromUtc: '2026-06-01T13:00:00.001Z', toUtc: null })).total,
+  ).toBe(0)
+  const pages = await Promise.all([1, 2, 3, 4].map((page) => list({ page, pageSize: 1 })))
+  expect(pages.map((r) => value(r).items.length)).toEqual([1, 1, 1, 0])
+  expect(new Set(pages.flatMap((r) => value(r).items.map((s) => s.id))).size).toBe(3)
+  for (const patch of [
+    { category: 'OTHER' },
+    { executionStatus: 'OTHER' },
+    { customerId: 'bad' },
+    { fromUtc: '2026-02-30T00:00:00.000Z' },
+    { pageSize: 101 },
+    { unknown: true },
+  ])
+    expect(await list({ ...filters, ...patch } as ServiceListQuery)).toMatchObject(
+      failure('VALIDATION_ERROR'),
+    )
+  expect(await list({ ...filters, toUtc: '2026-01-01T00:00:00.000Z' })).toMatchObject(
+    failure('VALIDATION_ERROR'),
+  )
+  for (const payload of [
+    null,
+    { operation: 'UPDATE_FREE', id: saved.id, values: null },
+    { operation: 'DELETE', id: saved.id, category: 'FREE' },
+  ])
+    expect(await services.preview({ context: context(), payload: payload as never })).toMatchObject(
+      failure('VALIDATION_ERROR'),
+    )
+  expect(
+    await services.updateNotes({
+      context: context(),
+      payload: { id: saved.id, notes: 'x'.repeat(10001) },
+    }),
+  ).toMatchObject(failure('VALIDATION_ERROR'))
+  expect(
+    await services.updateNotes({
+      context: context(),
+      payload: { id: saved.id, notes: null, base: '0.00' } as never,
+    }),
+  ).toMatchObject(failure('VALIDATION_ERROR'))
+  integrity()
+})
+
+it('P16: cambio nave e istante ridetermina versioni, tariffa zero, soggetti indipendenti; FREE resta manuale', async () => {
+  value(
+    await new TimeService(archives.coordinator).configureCompanyZone({
+      context: context(),
+      payload: { zoneId: 'Europe/Rome' },
+    }),
+  )
+  const original = value(await createCatalog()),
+    free = value(await create())
+  const second = value(
+    await vessels().create({
+      context: context(),
+      payload: {
+        registeredName: 'Seconda nave',
+        imoNumber: null,
+        vesselTypeId: 'STANDARD',
+        size: 150,
+      },
+    }),
+  )
+  expect(await previewChange(changeFor(original, { vesselId: second.id }))).toMatchObject(
+    failure('OPERATIONAL_CONTEXT_MISSING'),
+  )
+  await operation({ ...entry(), vesselId: second.id })
+  const version = value(
+    await vessels().preview({
+      context: context(),
+      payload: {
+        operation: 'INSERT_VERSION',
+        vesselId: second.id,
+        moment: moment('2026-06-01T14:00'),
+        registeredName: 'Seconda aggiornata',
+        imoNumber: null,
+        vesselTypeId: 'STANDARD',
+        size: 200,
+      },
+    }),
+  )
+  value(
+    await vessels().confirm({
+      context: version.context,
+      payload: { previewId: version.previewId },
+    }),
+  )
+  const tariffService = new TariffService(archives.coordinator)
+  const newTariff = value(
+    await tariffService.previewCreate({
+      context: context(),
+      payload: {
+        portId,
+        moment: moment('2026-06-01T14:00'),
+        configurations: (['STANDARD', 'PASSENGER', 'ADM'] as const).map((vesselTypeId) => ({
+          vesselTypeId,
+          brackets: [{ upperLimit: 5000, value: '0' }],
+          extraWidth: 100,
+          extraValue: '0',
+        })),
+      },
+    }),
+  )
+  value(
+    await tariffService.confirmCreate({
+      context: newTariff.context,
+      payload: { previewId: newTariff.previewId },
+    }),
+  )
+  const customer = value(
+      await customers().create({
+        context: context(),
+        payload: { businessName: 'Esplicito nuovo' },
+      }),
+    ),
+    agency = value(
+      await agencies().create({ context: context(), payload: { businessName: 'Ereditata nuova' } }),
+    )
+  const voyage = value(
+    await operations.stays({
+      context: { sessionId: context().sessionId },
+      query: { vesselId: second.id, page: 1, pageSize: 25 },
+    }),
+  ).items[0]
+  await assign({ kind: 'VOYAGE', id: voyage.id }, null, agency.id)
+  const patch = {
+    vesselId: second.id,
+    moment: moment('2026-06-01T15:00'),
+    specified: { customerId: customer.id, agencyId: null },
+  }
+  const pre = value(await previewChange(changeFor(original, patch)))
+  expect(pre.after).toMatchObject({
+    vesselId: second.id,
+    vesselName: 'Seconda aggiornata',
+    base: '0.00',
+    subjects: {
+      customer: { id: customer.id, source: { kind: 'SERVICE_ACTIVITY', id: original.id } },
+      agency: { id: agency.id, source: { kind: 'VOYAGE', id: voyage.id } },
+    },
+  })
+  expect(pre.after?.vesselVersionId).not.toBe(second.version.id)
+  expect(pre.after?.calculation?.tariffId).not.toBe(original.calculation?.tariffId)
+  const updated = value(
+    await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }),
+  ).service!
+  expect(updated.base).toBe('0.00')
+  const freeUpdated = (await applyChange(changeFor(free, patch))).service!
+  expect(freeUpdated).toMatchObject({
+    base: free.base,
+    calculation: null,
+    context: updated.context,
+    vesselVersionId: updated.vesselVersionId,
+  })
+  integrity()
 })

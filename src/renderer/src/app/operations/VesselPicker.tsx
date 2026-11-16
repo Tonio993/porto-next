@@ -33,6 +33,28 @@ export function VesselPicker({
       if (r?.ok) setList(r.value)
     })
   }, [request, context.sessionId, context.revision, search, page])
+  const { request: readChosen, invalidate: invalidateChosen } = useApplicationRequest(
+    context,
+    setError,
+  )
+  useEffect(() => {
+    invalidateChosen()
+    setChosen(null)
+    if (value)
+      void readChosen(() =>
+        window.vessels.get({ context: { sessionId: context.sessionId }, query: { id: value } }),
+      ).then((r) => {
+        if (r?.ok)
+          setChosen({
+            value: r.value.id,
+            label:
+              r.value.code +
+              ' · ' +
+              r.value.version.registeredName +
+              (r.value.selectable ? '' : ' · Disattivata'),
+          })
+      })
+  }, [readChosen, invalidateChosen, context.sessionId, context.revision, value])
   const options =
     list?.items.map((v) => ({
       value: v.id,

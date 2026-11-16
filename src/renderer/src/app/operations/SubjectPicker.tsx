@@ -13,11 +13,13 @@ export function SubjectPicker({
   value,
   onChange,
   disabled,
+  historical = false,
 }: {
   kind: 'customer' | 'agency'
   context: ArchiveContextDto
   value: string | null
   onChange: (id: string | null) => void
+  historical?: boolean
   disabled: boolean
 }) {
   const [search, setSearch] = useState(''),
@@ -37,12 +39,12 @@ export function SubjectPicker({
     void request(() =>
       api.list({
         context: { sessionId: context.sessionId },
-        query: { search, page, pageSize: 25, selectableOnly: true },
+        query: { search, page, pageSize: 25, selectableOnly: !historical },
       }),
     ).then((r) => {
       if (r?.ok) setList(r.value)
     })
-  }, [request, api, context.sessionId, context.revision, search, page])
+  }, [request, api, context.sessionId, context.revision, search, page, historical])
   const { request: readChosen, invalidate: invalidateChosen } = chosenRequest
   useEffect(() => {
     invalidateChosen()
@@ -71,8 +73,12 @@ export function SubjectPicker({
         }}
       />
       <Select
-        label={label + (kind === 'customer' ? ' esplicito' : ' esplicita')}
-        placeholder="Eredita dal livello superiore"
+        label={
+          historical
+            ? label + (kind === 'customer' ? ' effettivo' : ' effettiva')
+            : label + (kind === 'customer' ? ' esplicito' : ' esplicita')
+        }
+        placeholder={historical ? 'Tutti' : 'Eredita dal livello superiore'}
         clearable
         clearButtonProps={{
           tabIndex: 0,

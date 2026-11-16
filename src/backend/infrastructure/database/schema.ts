@@ -538,6 +538,7 @@ export const voyages = sqliteTable(
     endedAt: text('ended_at'),
   },
   (table) => [
+    uniqueIndex('service_voyage_owner').on(table.id, table.vesselId),
     index('voyages_customer').on(table.customerId),
     index('voyages_agency').on(table.agencyId),
     check('voyages_check_0', sql`(closing_operation_id IS NULL) = (ended_at IS NULL)`),
@@ -587,6 +588,7 @@ export const portCalls = sqliteTable(
     endedAt: text('ended_at'),
   },
   (table) => [
+    uniqueIndex('service_visit_owner').on(table.id, table.voyageId, table.portId),
     index('port_calls_customer').on(table.customerId),
     index('port_calls_agency').on(table.agencyId),
     uniqueIndex('port_calls_unique_0').on(table.id, table.portId),
@@ -626,6 +628,7 @@ export const berthStays = sqliteTable(
     endedAt: text('ended_at'),
   },
   (table) => [
+    uniqueIndex('service_stay_owner').on(table.id, table.portCallId, table.portId),
     index('berth_stays_customer').on(table.customerId),
     index('berth_stays_agency').on(table.agencyId),
     check('berth_stays_check_0', sql`(berth_id IS NULL) = (berth_version_id IS NULL)`),
@@ -695,6 +698,122 @@ export const operationChargeSubjects = sqliteTable(
         `charge_subjects_${subject}_source`,
         sql.raw(
           `${subject}_source IS NULL OR ${subject}_source IN ('VESSEL_OPERATION','BERTH_STAY','PORT_CALL','VOYAGE')`,
+        ),
+      ),
+    ]),
+  ],
+)
+
+export const serviceActivities = sqliteTable(
+  'service_activities',
+  {
+    id: text('id').primaryKey().notNull(),
+    category: text('category', { enum: ['FREE'] }).notNull(),
+    vesselId: text('vessel_id')
+      .notNull()
+      .references(() => vessels.id),
+    vesselVersionId: text('vessel_version_id').notNull(),
+    executionStatus: text('execution_status', {
+      enum: ['PLANNED', 'PERFORMED', 'MISSED'],
+    }).notNull(),
+    description: text('description').notNull(),
+    baseCents: integer('base_cents').notNull(),
+    notes: text('notes'),
+    localDateTime: text('local_date_time').notNull(),
+    zoneId: text('zone_id').notNull(),
+    utcOffset: text('utc_offset').notNull(),
+    utc: text('utc').notNull(),
+    voyageId: text('voyage_id').notNull(),
+    portCallId: text('port_call_id').notNull(),
+    berthStayId: text('berth_stay_id').notNull(),
+    portId: text('port_id')
+      .notNull()
+      .references(() => ports.id),
+    portVersionId: text('port_version_id').notNull(),
+    berthId: text('berth_id'),
+    berthVersionId: text('berth_version_id'),
+    customerId: text('customer_id').references(() => customers.id),
+    agencyId: text('agency_id').references(() => agencies.id),
+    createdAt: text('created_at').notNull(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.vesselVersionId, t.vesselId],
+      foreignColumns: [vesselVersions.id, vesselVersions.vesselId],
+    }),
+    foreignKey({
+      columns: [t.voyageId, t.vesselId],
+      foreignColumns: [voyages.id, voyages.vesselId],
+    }),
+    foreignKey({
+      columns: [t.portCallId, t.voyageId, t.portId],
+      foreignColumns: [portCalls.id, portCalls.voyageId, portCalls.portId],
+    }),
+    foreignKey({
+      columns: [t.berthStayId, t.portCallId, t.portId],
+      foreignColumns: [berthStays.id, berthStays.portCallId, berthStays.portId],
+    }),
+    foreignKey({
+      columns: [t.portVersionId, t.portId],
+      foreignColumns: [portVersions.id, portVersions.portId],
+    }),
+    foreignKey({ columns: [t.berthId, t.portId], foreignColumns: [berths.id, berths.portId] }),
+    foreignKey({
+      columns: [t.berthVersionId, t.berthId],
+      foreignColumns: [berthVersions.id, berthVersions.berthId],
+    }),
+    check('services_category', sql.raw("category='FREE'")),
+    check('services_status', sql.raw("execution_status IN ('PLANNED','PERFORMED','MISSED')")),
+    check('services_description', sql.raw('length(trim(description)) BETWEEN 1 AND 1000')),
+    check('services_base', sql.raw("typeof(base_cents)='integer' AND base_cents>0")),
+    check('services_notes', sql.raw('notes IS NULL OR length(notes)<=10000')),
+    check('services_berth_presence', sql.raw('(berth_id IS NULL)=(berth_version_id IS NULL)')),
+    index('services_vessel_moment').on(t.vesselId, t.utc, t.id),
+    index('services_port').on(t.portId, t.portVersionId),
+    index('services_berth').on(t.berthId, t.berthVersionId),
+    index('services_customer').on(t.customerId),
+    index('services_agency').on(t.agencyId),
+  ],
+)
+
+export const serviceActivitySubjects = sqliteTable(
+  'service_activity_subjects',
+  {
+    serviceId: text('service_id')
+      .primaryKey()
+      .notNull()
+      .references(() => serviceActivities.id),
+    customerId: text('customer_id').references(() => customers.id),
+    customerVersionId: text('customer_version_id'),
+    customerSource: text('customer_source'),
+    customerSourceId: text('customer_source_id'),
+    agencyId: text('agency_id').references(() => agencies.id),
+    agencyVersionId: text('agency_version_id'),
+    agencySource: text('agency_source'),
+    agencySourceId: text('agency_source_id'),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.customerVersionId, table.customerId],
+      foreignColumns: [customerVersions.id, customerVersions.customerId],
+    }),
+    foreignKey({
+      columns: [table.agencyVersionId, table.agencyId],
+      foreignColumns: [agencyVersions.id, agencyVersions.agencyId],
+    }),
+    index('service_subjects_customer').on(table.customerId, table.customerVersionId),
+    index('service_subjects_agency').on(table.agencyId, table.agencyVersionId),
+    ...(['customer', 'agency'] as const).flatMap((subject) => [
+      check(
+        `service_subjects_${subject}_presence`,
+        sql.raw(
+          `(${subject}_id IS NULL AND ${subject}_version_id IS NULL AND ${subject}_source IS NULL AND ${subject}_source_id IS NULL) OR (${subject}_id IS NOT NULL AND ${subject}_version_id IS NOT NULL AND ${subject}_source IS NOT NULL AND ${subject}_source_id IS NOT NULL)`,
+        ),
+      ),
+      check(
+        `service_subjects_${subject}_source`,
+        sql.raw(
+          `${subject}_source IS NULL OR ${subject}_source IN ('SERVICE_ACTIVITY','BERTH_STAY','PORT_CALL','VOYAGE')`,
         ),
       ),
     ]),

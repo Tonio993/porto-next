@@ -545,7 +545,9 @@ export class OperationService implements OperationApi {
         deleted: 0,
         recalculated: 0,
         reattributed: effects.filter(
-          (e) => e.action === 'UPDATE' && e.reference.kind === 'OPERATION_CHARGE',
+          (e) =>
+            e.action === 'UPDATE' &&
+            ['OPERATION_CHARGE', 'SERVICE_ACTIVITY'].includes(e.reference.kind),
         ).length,
       },
       effects: {

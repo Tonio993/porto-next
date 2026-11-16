@@ -1,4 +1,6 @@
-﻿import { AssignmentService } from '../backend/application/operations/assignment-service'
+import { ServiceService } from '../backend/application/services/service-service'
+import { registerServiceIpc } from './ipc/register'
+import { AssignmentService } from '../backend/application/operations/assignment-service'
 import { registerAssignmentIpc } from './ipc/register'
 import { OperationService } from '../backend/application/operations/operation-service'
 import { registerOperationIpc } from './ipc/register'
@@ -130,6 +132,7 @@ if (ownsInstance) {
       registerAgencyIpc(new AgencyService(archives.coordinator), () => window)
       registerVesselIpc(new VesselService(archives.coordinator), () => window)
       registerCatalogIpc(new CatalogService(archives.coordinator), () => window)
+      registerServiceIpc(new ServiceService(archives.coordinator), () => window)
       registerAssignmentIpc(new AssignmentService(archives.coordinator), () => window)
       registerOperationIpc(new OperationService(archives.coordinator), () => window)
       registerTariffIpc(new TariffService(archives.coordinator), () => window)

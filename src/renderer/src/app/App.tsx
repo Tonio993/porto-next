@@ -1,3 +1,4 @@
+import { Services } from './services/Services'
 import { Operations } from './operations/Operations'
 import { CatalogPage } from './CatalogPage'
 import { useState } from 'react'
@@ -101,7 +102,10 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
         </header>
         <main
           className={
-            active && ['Anagrafiche', 'Catalogo e tariffe', 'Operazioni nave'].includes(section)
+            active &&
+            ['Anagrafiche', 'Catalogo e tariffe', 'Operazioni nave', 'Prestazioni'].includes(
+              section,
+            )
               ? 'data-main'
               : undefined
           }
@@ -126,7 +130,9 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
                         ? 'Gestisci catalogo, pesi e tariffe e simula il calcolo base.'
                         : section === 'Operazioni nave'
                           ? 'Registra entrate, uscite e spostamenti; consulta permanenze e importi base.'
-                          : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
+                          : section === 'Prestazioni'
+                            ? 'Registra e consulta prestazioni libere nel contesto operativo della nave.'
+                            : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
                   : 'Crea un archivio o aprine uno esistente per iniziare.'}
               </p>
             </div>
@@ -171,6 +177,8 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
             <CatalogPage archives={archives} onDialogChange={setFeedbackInDialog} />
           ) : section === 'Operazioni nave' && state.context ? (
             <Operations archives={archives} onDialogChange={setFeedbackInDialog} />
+          ) : section === 'Prestazioni' && state.context ? (
+            <Services archives={archives} onDialogChange={setFeedbackInDialog} />
           ) : section !== 'Archivi' ? (
             <section className="archive-panel">
               <h2>Sezione in preparazione</h2>

@@ -4,7 +4,13 @@ export interface AssignmentLayer {
   target: AssignmentTarget
   specified: SpecifiedSubjectsDto
 }
-const priority = ['VESSEL_OPERATION', 'BERTH_STAY', 'PORT_CALL', 'VOYAGE'] as const
+const priority = [
+  'SERVICE_ACTIVITY',
+  'VESSEL_OPERATION',
+  'BERTH_STAY',
+  'PORT_CALL',
+  'VOYAGE',
+] as const
 /** Ogni ricerca si interrompe soltanto per il proprio soggetto. Null significa ereditarietà. */
 export function resolveSubjects(layers: readonly AssignmentLayer[]) {
   const resolve = (field: keyof SpecifiedSubjectsDto) => {

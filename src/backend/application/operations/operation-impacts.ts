@@ -1,3 +1,4 @@
+import { ServiceRepository } from '../../infrastructure/database/service-repository'
 import type { ChangeEffectDto } from '../../../shared/contracts/master-data'
 import type { VesselOperationDto, OperationChargeDto } from '../../../shared/contracts/operations'
 import type { PortVersionDto } from '../../../shared/contracts/ports'
@@ -9,6 +10,7 @@ import { OperationRepository } from '../../infrastructure/database/operation-rep
 import { calculateBase } from '../tariffs/calculate-base'
 
 export const operationTables = [
+  'service_activities',
   'vessel_operations',
   'operation_endpoints',
   'operation_charges',
@@ -187,6 +189,30 @@ export function masterOperationImpacts(database: DatabaseSession, change: Master
     }
     if (effects.length > effectCount) updates.push(op)
   }
+  const serviceRepository = new ServiceRepository(database)
+  const serviceUpdates = serviceRepository.all().flatMap((before) => {
+    const after = structuredClone(before)
+    if (change.kind === 'VESSEL' && before.vesselId === change.id) {
+      const version = at(change.versions, before.moment.utc)
+      after.vesselVersionId = version.id
+      after.vesselName = version.registeredName
+    } else if (change.kind === 'PORT' && before.context.portId === change.id) {
+      const version = at(change.versions, before.moment.utc)
+      after.portVersionId = version.id
+      after.portName = version.name
+    } else if (change.kind === 'BERTH' && before.context.berthId === change.id) {
+      const version = at(change.versions, before.moment.utc)
+      after.berthVersionId = version.id
+      after.berthName = version.name
+    }
+    const changes = diff(
+      { kind: 'SERVICE_ACTIVITY', id: before.id, label: before.description },
+      { ...before },
+      { ...after },
+    )
+    effects.push(...changes)
+    return changes.length ? [after] : []
+  })
   const [table, column, owner, kind, label] =
     change.kind === 'VESSEL'
       ? (['voyages', 'vessel_version_id', 'vessel_id', 'VOYAGE', 'Viaggio'] as const)
@@ -238,6 +264,7 @@ export function masterOperationImpacts(database: DatabaseSession, change: Master
             )
             .run(e.vesselVersionId, e.portVersionId, e.berthVersionId, e.id)
       }
+      for (const value of serviceUpdates) serviceRepository.saveAttribution(value)
       for (const update of structures)
         sql
           .prepare(`UPDATE ${update.table} SET ${update.column}=? WHERE id=?`)

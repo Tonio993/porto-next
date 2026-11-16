@@ -1,3 +1,4 @@
+import freeServicesSql from '../../../../migrations/0015_free_services.sql?raw'
 import effectiveSubjectsSql from '../../../../migrations/0014_effective_subjects.sql?raw'
 import interPortMovementsSql from '../../../../migrations/0013_inter_port_movements.sql?raw'
 import movementsSql from '../../../../migrations/0012_internal_movements.sql?raw'
@@ -17,7 +18,7 @@ import { ArchiveError } from '../../../shared/errors/archive-error'
 import subjectsSql from '../../../../migrations/0007_customers_agencies.sql?raw'
 
 export const APPLICATION_ID = 0x504f5254
-export const SCHEMA_VERSION = 14
+export const SCHEMA_VERSION = 15
 
 const migrations = [
   { version: 1, sql: initialSql },
@@ -34,6 +35,7 @@ const migrations = [
   { version: 12, sql: movementsSql },
   { version: 13, sql: interPortMovementsSql },
   { version: 14, sql: effectiveSubjectsSql },
+  { version: 15, sql: freeServicesSql },
 ]
 
 export function migrate(database: Database.Database, fromVersion: number): void {

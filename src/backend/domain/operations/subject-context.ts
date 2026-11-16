@@ -9,6 +9,7 @@ export interface SubjectOpeningIds {
 export interface SubjectSpan {
   targets: AssignmentTarget[]
   portId: string
+  berthId: string | null
   start: string
   end: string | null
 }
@@ -39,6 +40,7 @@ export function subjectTimeline(
         { kind: 'VOYAGE', id: ids.voyageId },
       ],
       portId: e.portId,
+      berthId: e.berthId,
       start: e.moment.utc,
       end: null,
     }

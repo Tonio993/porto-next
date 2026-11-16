@@ -3,6 +3,7 @@ import type {
   AssignmentLevel,
 } from '../../../../shared/contracts/assignments'
 export const assignmentLabels: Record<AssignmentLevel, string> = {
+  SERVICE_ACTIVITY: 'Prestazione',
   VOYAGE: 'Viaggio',
   PORT_CALL: 'Visita',
   BERTH_STAY: 'Ormeggio',

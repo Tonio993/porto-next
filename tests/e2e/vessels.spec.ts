@@ -102,9 +102,9 @@ for (const [kind, plural, singular, newLabel] of [
       await expect(page.getByTestId('archive-path')).toHaveText(path)
       expect(await page.evaluate(() => window.archives.getState())).toMatchObject({
         ok: true,
-        value: { active: { schemaVersion: 14 } },
+        value: { active: { schemaVersion: 15 } },
       })
-      expect(readdirSync(folder).some((n) => n.includes('.prima-v14-'))).toBe(true)
+      expect(readdirSync(folder).some((n) => n.includes('.prima-v15-'))).toBe(true)
       await page.getByRole('button', { name: 'Anagrafiche', exact: true }).click()
       await page.getByRole('button', { name: plural, exact: true }).click()
       const creation = page.getByRole('dialog', { name: newLabel, exact: true })

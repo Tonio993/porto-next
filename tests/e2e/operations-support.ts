@@ -79,7 +79,7 @@ export async function operationFixture(
         if (version >= 11) {
           const utc = '2026-05-02T10:00:00.000Z'
           db.prepare(
-            "INSERT INTO vessel_operations VALUES (?,?,?,'ENTRY','PERFORMED','Entrata storica P10',?)",
+            "INSERT INTO vessel_operations (id,vessel_id,vessel_version_id,operation_type,execution_status,notes,created_at) VALUES (?,?,?,'ENTRY','PERFORMED','Entrata storica P10',?)",
           ).run(ids.entryId, ids.vesselId, 'vv0', utc)
           db.prepare(
             `INSERT INTO operation_endpoints (id,operation_id,vessel_id,role,port_id,port_version_id,berth_id,berth_version_id,local_date_time,zone_id,utc_offset,utc${version >= 12 ? ',vessel_version_id' : ''}) VALUES ('endpoint-p10',?,?,'OCCURRENCE',?,'pv',NULL,NULL,'2026-05-02T12:00','Europe/Rome','+02:00',?${version >= 12 ? `,'vv0'` : ''})`,
@@ -97,6 +97,10 @@ export async function operationFixture(
             "INSERT INTO berth_stays (id,port_call_id,port_id,berth_id,berth_version_id,opening_operation_id,started_at) VALUES ('stay-p10','visit-p10',?,NULL,NULL,?,?)",
           ).run(ids.portId, ids.entryId, utc)
         }
+        if (version >= 14)
+          db.exec(
+            'INSERT INTO operation_charge_subjects(charge_id) SELECT id FROM operation_charges',
+          )
         if (interPort) {
           db.prepare("INSERT INTO ports VALUES (?,2,'ACTIVE')").run(ids.destinationPortId)
           db.prepare(

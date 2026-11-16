@@ -1,3 +1,6 @@
+import { ServiceRepository } from '../../infrastructure/database/service-repository'
+import { serviceContext } from '../../domain/services/context'
+import type { ServiceActivityDto } from '../../../shared/contracts/services'
 import { isDeepStrictEqual } from 'node:util'
 import type {
   AssignmentChangeDto,
@@ -66,9 +69,17 @@ export function subjectPlan(
     options.assignment && same(target, options.assignment.target)
       ? options.assignment.specified
       : repository.specified(target, true)
-  const resolve = (targets: AssignmentTarget[], utc: string): EffectiveSubjectsDto => {
+  const resolve = (
+    targets: AssignmentTarget[],
+    utc: string,
+    direct?: ServiceActivityDto,
+  ): EffectiveSubjectsDto => {
     const result = resolveSubjects(
-      targets.map((target) => ({ target, specified: specified(target) })),
+      targets.map((target) => ({
+        target,
+        specified:
+          direct && target.kind === 'SERVICE_ACTIVITY' ? direct.specified : specified(target),
+      })),
     )
     const one = (kind: 'customer' | 'agency') => {
       const subject = result[kind]
@@ -105,6 +116,30 @@ export function subjectPlan(
       return effects.length ? [{ chargeId: c.id, operationId: op.id, before, after, effects }] : []
     }),
   )
+  const serviceRepository = new ServiceRepository(database)
+  const serviceTargets = (value: ServiceActivityDto): AssignmentTarget[] => [
+    { kind: 'SERVICE_ACTIVITY', id: value.id },
+    { kind: 'BERTH_STAY', id: value.context.berthStayId },
+    { kind: 'PORT_CALL', id: value.context.portCallId },
+    { kind: 'VOYAGE', id: value.context.voyageId },
+  ]
+  const subjectsForService = (value: ServiceActivityDto) =>
+    resolve(serviceTargets(value), value.moment.utc, value)
+  const serviceUpdates = serviceRepository.all().flatMap((before) => {
+    const context = serviceContext(timelines.get(before.vesselId) ?? [], before.moment.utc)
+    const after = {
+      ...before,
+      context,
+      ...serviceRepository.versions(context, before.vesselId, before.moment.utc),
+    }
+    after.subjects = subjectsForService(after)
+    const effects = subjectEffects(
+      { kind: 'SERVICE_ACTIVITY', id: before.id, label: before.description },
+      before,
+      after,
+    )
+    return effects.length ? [{ before, after, effects }] : []
+  })
   const values = (target: AssignmentTarget): AssignmentDto => {
     const op =
       target.kind === 'VESSEL_OPERATION' ? operations.find((o) => o.id === target.id)! : null
@@ -127,11 +162,13 @@ export function subjectPlan(
     }
   }
   return {
-    updates,
-    effects: updates.flatMap((u) => u.effects),
+    updates: [...updates, ...serviceUpdates],
+    effects: [...updates, ...serviceUpdates].flatMap((u) => u.effects),
+    subjectsForService,
     values,
     apply: () => {
       for (const u of updates) repository.saveSubjects(u.chargeId, u.after)
+      for (const u of serviceUpdates) serviceRepository.saveAttribution(u.after)
     },
     subjectsFor: (op: VesselOperationDto) =>
       op.charges.map((c) => ({

@@ -285,13 +285,14 @@ export class BerthService implements BerthApi {
         if (effects.length) {
           if ('version' in change)
             repository.saveVersion(berth, change.version, change.operation === 'INSERT_VERSION')
-          else if (change.operation === 'DELETE_VERSION')
+          else if (change.operation === 'DELETE_VERSION') {
+            impacts?.apply()
             repository.deleteVersion(berth.id, change.versionId)
-          else if (change.operation === 'DEACTIVATE_BERTH')
+          } else if (change.operation === 'DEACTIVATE_BERTH')
             repository.setStatus(berth.id, 'INACTIVE')
           else repository.delete(berth.id)
         }
-        impacts?.apply()
+        if (change.operation !== 'DELETE_VERSION') impacts?.apply()
         consumed = id
         return { berthId: berth.id }
       },

@@ -1,3 +1,4 @@
+import type { ServiceApi } from '../../shared/contracts/services'
 import type { AssignmentApi } from '../../shared/contracts/assignments'
 import type { OperationApi } from '../../shared/contracts/operations'
 import type { TariffApi } from '../../shared/contracts/tariffs'
@@ -12,6 +13,7 @@ import type { PortApi } from '../../shared/contracts/ports'
 
 declare global {
   interface Window {
+    services: ServiceApi
     assignments: AssignmentApi
     operations: OperationApi
     tariffs: TariffApi

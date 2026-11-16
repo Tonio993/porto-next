@@ -1,3 +1,4 @@
+import { serviceChannels, type ServiceApi } from '../shared/contracts/services'
 import { assignmentChannels, type AssignmentApi } from '../shared/contracts/assignments'
 import { operationChannels, type OperationApi } from '../shared/contracts/operations'
 import { tariffChannels, type TariffApi } from '../shared/contracts/tariffs'
@@ -158,3 +159,11 @@ const assignments: AssignmentApi = {
   confirm: (request) => ipcRenderer.invoke(assignmentChannels.confirm, request),
 }
 contextBridge.exposeInMainWorld('assignments', assignments)
+
+const services: ServiceApi = {
+  resolveMoment: (request) => ipcRenderer.invoke(serviceChannels.resolveMoment, request),
+  createFree: (request) => ipcRenderer.invoke(serviceChannels.createFree, request),
+  list: (request) => ipcRenderer.invoke(serviceChannels.list, request),
+  get: (request) => ipcRenderer.invoke(serviceChannels.get, request),
+}
+contextBridge.exposeInMainWorld('services', services)

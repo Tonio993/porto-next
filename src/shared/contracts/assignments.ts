@@ -1,7 +1,8 @@
 import type { ApplicationResult, CommandRequest, QueryRequest } from './application'
 import type { ChangePreviewDto, PageDto } from './master-data'
 
-export type AssignmentLevel = 'VESSEL_OPERATION' | 'BERTH_STAY' | 'PORT_CALL' | 'VOYAGE'
+export type AssignmentLevel =
+  'SERVICE_ACTIVITY' | 'VESSEL_OPERATION' | 'BERTH_STAY' | 'PORT_CALL' | 'VOYAGE'
 export interface AssignmentTarget {
   kind: AssignmentLevel
   id: string

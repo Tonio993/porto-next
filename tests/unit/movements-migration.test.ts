@@ -157,7 +157,7 @@ it('P11: migra v11 popolato preservando ogni riga, int64, tuple, identità, meta
   v11(path)
   const before = snapshot(path)
   const opened = await archives.open(path)
-  expect(opened.schemaVersion).toBe(14)
+  expect(opened.schemaVersion).toBe(15)
   const after = snapshot(path)
   for (const [table, records] of Object.entries(before.rows)) {
     const actual = after.rows[table]
@@ -176,7 +176,7 @@ it('P11: migra v11 popolato preservando ogni riga, int64, tuple, identità, meta
   expect(
     new OperationRepository(archives.coordinator.requireSession().database).stays(vesselId, 1, 25),
   ).toEqual(hierarchy)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v14-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v15-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
   expect(sql().pragma('foreign_key_check')).toEqual([])
   expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
@@ -193,7 +193,7 @@ it('P11: fallimento durante DDL parziale conserva v11 popolato e la sessione pre
     snapshot(
       join(
         folder,
-        readdirSync(folder).find((n) => n.includes('.prima-v14-'))!,
+        readdirSync(folder).find((n) => n.includes('.prima-v15-'))!,
       ),
     ),
   ).toEqual(before)
@@ -215,6 +215,6 @@ it('P11: rollback dopo copia, sostituzione del grafo e indici ripristina interam
   await expect(archives.open(path)).rejects.toThrow()
   expect(snapshot(path)).toEqual(before)
   expect(context()).toEqual(active)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v14-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v15-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
 })

@@ -117,7 +117,7 @@ export function AssignmentEditor({
               indipendenti. I valori delle permanenze sono riferiti al loro inizio; ogni componente
               usa il proprio istante economico.
             </p>
-            {preview ? (
+            {preview && !obsolete ? (
               <>
                 <SubjectValues subjects={preview.assignment.effective} />
                 {preview.assignment.components.map((c) => (

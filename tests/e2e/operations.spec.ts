@@ -38,10 +38,10 @@ test('P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia
     await operationFixture(app, path)
     await page.getByRole('button', { name: 'Apri archivio', exact: true }).click()
     await expect(page.getByTestId('archive-path')).toHaveText(path)
-    expect(readdirSync(folder).some((n) => n.includes('.prima-v14-'))).toBe(true)
+    expect(readdirSync(folder).some((n) => n.includes('.prima-v15-'))).toBe(true)
     expect(await page.evaluate(() => window.archives.getState())).toMatchObject({
       ok: true,
-      value: { active: { schemaVersion: 14 }, context: { revision: '42' } },
+      value: { active: { schemaVersion: 15 }, context: { revision: '42' } },
     })
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(960, 700))
     await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()

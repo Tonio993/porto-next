@@ -236,7 +236,7 @@ export class CustomerService implements CustomerApi {
           [
             'customer_versions',
             'customer_identifier_reservations',
-            ...(!deleting ? ['operation_charge_subjects'] : []),
+            ...(!deleting ? ['operation_charge_subjects', 'service_activity_subjects'] : []),
           ],
         )
     const warnings = deleting

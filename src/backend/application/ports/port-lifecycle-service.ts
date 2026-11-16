@@ -327,13 +327,14 @@ export class PortLifecycleService {
               change.version!,
               change.operation === 'INSERT_VERSION',
             )
-          else if (change.operation === 'DELETE_VERSION')
+          else if (change.operation === 'DELETE_VERSION') {
+            analysis.impacts?.apply()
             repository.deleteVersion(change.portId, change.versionId!)
-          else if (change.operation === 'DEACTIVATE_PORT')
+          } else if (change.operation === 'DEACTIVATE_PORT')
             repository.setStatus(change.portId, 'INACTIVE')
           else repository.delete(change.portId)
         }
-        analysis.impacts?.apply()
+        if (change.operation !== 'DELETE_VERSION') analysis.impacts?.apply()
         consumed = id
         return { portId: change.portId }
       },

@@ -9,6 +9,7 @@ import type { DatabaseSession } from './database-session'
 import type { SubjectOpeningIds } from '../../domain/operations/subject-context'
 
 const tables = {
+  SERVICE_ACTIVITY: 'service_activities',
   VESSEL_OPERATION: 'vessel_operations',
   VOYAGE: 'voyages',
   PORT_CALL: 'port_calls',
@@ -79,10 +80,10 @@ export class AssignmentRepository {
     if (!row) throw new ArchiveError('NOT_FOUND', 'La versione del soggetto non esiste.')
     return row
   }
-  subjects(chargeId: string): EffectiveSubjectsDto {
+  subjects(chargeId: string, owner: 'operation' | 'service' = 'operation'): EffectiveSubjectsDto {
     const row = this.database.sqlite
       .prepare(
-        `SELECT s.*,c.business_name AS customer_name,a.business_name AS agency_name FROM operation_charge_subjects s LEFT JOIN customer_versions c ON c.id=s.customer_version_id LEFT JOIN agency_versions a ON a.id=s.agency_version_id WHERE charge_id=?`,
+        `SELECT s.*,c.business_name AS customer_name,a.business_name AS agency_name FROM ${owner === 'operation' ? 'operation_charge_subjects' : 'service_activity_subjects'} s LEFT JOIN customer_versions c ON c.id=s.customer_version_id LEFT JOIN agency_versions a ON a.id=s.agency_version_id WHERE ${owner === 'operation' ? 'charge_id' : 'service_id'}=?`,
       )
       .get(chargeId) as Record<string, string | null> | undefined
     const one = (kind: 'customer' | 'agency'): EffectiveSubjectDto | null =>
@@ -99,7 +100,11 @@ export class AssignmentRepository {
         : null
     return { customer: one('customer'), agency: one('agency') }
   }
-  saveSubjects(chargeId: string, subjects: EffectiveSubjectsDto) {
+  saveSubjects(
+    chargeId: string,
+    subjects: EffectiveSubjectsDto,
+    owner: 'operation' | 'service' = 'operation',
+  ) {
     const values = [
       chargeId,
       ...(['customer', 'agency'] as const).flatMap((kind) => {
@@ -109,7 +114,7 @@ export class AssignmentRepository {
     ]
     this.database.sqlite
       .prepare(
-        `INSERT INTO operation_charge_subjects VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(charge_id) DO UPDATE SET customer_id=excluded.customer_id,customer_version_id=excluded.customer_version_id,customer_source=excluded.customer_source,customer_source_id=excluded.customer_source_id,agency_id=excluded.agency_id,agency_version_id=excluded.agency_version_id,agency_source=excluded.agency_source,agency_source_id=excluded.agency_source_id`,
+        `INSERT INTO ${owner === 'operation' ? 'operation_charge_subjects' : 'service_activity_subjects'} VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(${owner === 'operation' ? 'charge_id' : 'service_id'}) DO UPDATE SET customer_id=excluded.customer_id,customer_version_id=excluded.customer_version_id,customer_source=excluded.customer_source,customer_source_id=excluded.customer_source_id,agency_id=excluded.agency_id,agency_version_id=excluded.agency_version_id,agency_source=excluded.agency_source,agency_source_id=excluded.agency_source_id`,
       )
       .run(...values)
   }

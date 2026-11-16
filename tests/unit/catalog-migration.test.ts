@@ -70,14 +70,14 @@ it('migra v8 popolato conservando tutte le righe, revisioni e backup; inizializz
   fixture(path)
   const before = snapshot(path)
   expect(await archives.open(path)).toMatchObject({
-    schemaVersion: 14,
+    schemaVersion: 15,
     updatedAt: '2026-02-01T00:00:00.000Z',
   })
   expect(archives.context()?.revision).toBe('42')
   const after = snapshot(path)
-  expect(after.version).toBe(14)
+  expect(after.version).toBe(15)
   for (const [table, rows] of Object.entries(before.rows)) expect(after.rows[table]).toEqual(rows)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v14-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v15-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
   expect(after.rows.service_types).toHaveLength(1)
   expect(after.rows.weight_sequences).toHaveLength(4)
@@ -101,6 +101,6 @@ it('rollback dopo creazione parziale delle tabelle conserva v8, dati e sessione 
   await expect(archives.open(path)).rejects.toThrow()
   expect(snapshot(path)).toEqual(before)
   expect(archives.context()).toEqual(context)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v14-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v15-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
 })

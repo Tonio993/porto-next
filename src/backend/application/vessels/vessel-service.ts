@@ -317,13 +317,14 @@ export class VesselService implements VesselApi {
         if (effects.length) {
           if ('version' in change)
             repository.saveVersion(vessel, change.version, change.operation === 'INSERT_VERSION')
-          else if (change.operation === 'DELETE_VERSION')
+          else if (change.operation === 'DELETE_VERSION') {
+            impacts?.apply()
             repository.deleteVersion(vessel.id, change.versionId)
-          else if (change.operation === 'DEACTIVATE_VESSEL')
+          } else if (change.operation === 'DEACTIVATE_VESSEL')
             repository.setStatus(vessel.id, 'INACTIVE')
           else repository.delete(vessel.id)
         }
-        impacts?.apply()
+        if (change.operation !== 'DELETE_VERSION') impacts?.apply()
         consumed = id
         return { vesselId: vessel.id }
       },

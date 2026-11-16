@@ -181,7 +181,7 @@ it('P13: v13 popolato → v14, copia preventiva, tuple, int64, identità e sogge
     original = new OperationRepository(archives.coordinator.requireSession().database).all()
   v13(path)
   const before = snapshot(path)
-  expect((await archives.open(path)).schemaVersion).toBe(15)
+  expect((await archives.open(path)).schemaVersion).toBe(16)
   const after = snapshot(path)
   for (const [table, records] of Object.entries(before.rows))
     expect(after.rows[table]).toMatchObject(records)
@@ -194,7 +194,7 @@ it('P13: v13 popolato → v14, copia preventiva, tuple, int64, identità e sogge
   for (const table of ['voyages', 'port_calls', 'berth_stays', 'vessel_operations'])
     for (const row of after.rows[table] as Record<string, unknown>[])
       expect(row).toMatchObject({ customer_id: null, agency_id: null })
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v15-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v16-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
   expect(sql().pragma('foreign_key_check')).toEqual([])
   expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
@@ -210,7 +210,7 @@ it('P13: fallimento dopo ALTER e creazione tabella annulla DDL e conserva file/s
   await expect(archives.open(path)).rejects.toThrow()
   expect(snapshot(path)).toEqual(before)
   expect(context()).toEqual(active)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v15-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v16-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
 })
 it('P13: SQLite rifiuta coppie versione/proprietario incoerenti e fonti incomplete', () => {

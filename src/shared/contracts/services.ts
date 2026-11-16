@@ -3,6 +3,7 @@ import type { EffectiveSubjectsDto, SpecifiedSubjectsDto } from './assignments'
 import type { PageDto } from './master-data'
 import type { ExecutionStatus, OperationalContextDto } from './operations'
 import type { MomentInputDto, MomentResolutionDto, ResolvedMomentDto } from './values'
+import type { BaseCalculationDto } from './tariffs'
 
 export interface ServiceMomentInput {
   vesselId: string
@@ -16,14 +17,19 @@ export interface CreateFreeServiceDto extends ServiceMomentInput {
   notes: string | null
   specified: SpecifiedSubjectsDto
 }
+export interface CreateCatalogServiceDto extends Omit<
+  CreateFreeServiceDto,
+  'description' | 'base'
+> {
+  serviceTypeId: string
+}
 export interface ServiceMomentDto {
   portId: string
   portName: string
   resolution: MomentResolutionDto
 }
-export interface ServiceActivityDto {
+interface ServiceActivityCommonDto {
   id: string
-  category: 'FREE'
   vesselId: string
   vesselVersionId: string
   vesselName: string
@@ -40,7 +46,15 @@ export interface ServiceActivityDto {
   specified: SpecifiedSubjectsDto
   subjects: EffectiveSubjectsDto
 }
+export type ServiceActivityDto = ServiceActivityCommonDto &
+  (
+    | { category: 'FREE'; serviceTypeId: null; calculation: null }
+    | { category: 'CATALOG'; serviceTypeId: string; calculation: BaseCalculationDto }
+  )
 export interface ServiceApi {
+  createCatalog(
+    request: CommandRequest<CreateCatalogServiceDto>,
+  ): Promise<ApplicationResult<ServiceActivityDto>>
   resolveMoment(
     request: QueryRequest<ServiceMomentInput>,
   ): Promise<ApplicationResult<ServiceMomentDto>>
@@ -55,6 +69,7 @@ export interface ServiceApi {
 export const serviceChannels = {
   resolveMoment: 'services:resolve-moment',
   createFree: 'services:create-free',
+  createCatalog: 'services:create-catalog',
   list: 'services:list',
   get: 'services:get',
 } as const

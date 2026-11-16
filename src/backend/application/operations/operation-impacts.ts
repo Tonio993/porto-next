@@ -8,6 +8,7 @@ import type { TariffDto } from '../../../shared/contracts/tariffs'
 import type { DatabaseSession } from '../../infrastructure/database/database-session'
 import { OperationRepository } from '../../infrastructure/database/operation-repository'
 import { calculateBase } from '../tariffs/calculate-base'
+import { recalculateService } from '../services/service-calculation'
 
 export const operationTables = [
   'service_activities',
@@ -94,12 +95,33 @@ export function tariffOperationImpacts(
       { ...after.calculation, effectiveBase: after.effectiveBase },
     ),
   )
+  const services = new ServiceRepository(database)
+  const serviceUpdates = services
+    .all()
+    .filter(
+      (s) =>
+        s.category === 'CATALOG' &&
+        s.context.portId === tariff.portId &&
+        s.moment.utc >= tariff.effectiveFrom &&
+        (!next || s.moment.utc < next),
+    )
+    .map((before) => ({ before, after: recalculateService(database, before, { tariff }) }))
+  effects.push(
+    ...serviceUpdates.flatMap(({ before, after }) =>
+      diff(
+        { kind: 'SERVICE_ACTIVITY', id: before.id, label: before.description },
+        { ...before },
+        { ...after },
+      ),
+    ),
+  )
   return {
     effects,
-    recalculated: updates.length,
+    recalculated: updates.length + serviceUpdates.length,
     apply: () => {
       const repository = new OperationRepository(database)
       for (const u of updates) repository.saveCharge(u.operationId, u.after)
+      for (const u of serviceUpdates) services.saveAttribution(u.after)
     },
   }
 }
@@ -191,11 +213,13 @@ export function masterOperationImpacts(database: DatabaseSession, change: Master
   }
   const serviceRepository = new ServiceRepository(database)
   const serviceUpdates = serviceRepository.all().flatMap((before) => {
-    const after = structuredClone(before)
+    let after = structuredClone(before)
     if (change.kind === 'VESSEL' && before.vesselId === change.id) {
       const version = at(change.versions, before.moment.utc)
       after.vesselVersionId = version.id
       after.vesselName = version.registeredName
+      after = recalculateService(database, after, { vesselVersion: version })
+      if (before.category === 'CATALOG') recalculated++
     } else if (change.kind === 'PORT' && before.context.portId === change.id) {
       const version = at(change.versions, before.moment.utc)
       after.portVersionId = version.id

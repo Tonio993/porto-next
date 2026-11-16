@@ -6,7 +6,12 @@ import { foreignReferences } from '../../infrastructure/database/port-references
 export function tariffInsertionBlockers(database: DatabaseSession, previous: TariffDto | null) {
   if (!previous) return []
   const reference = { kind: 'TARIFF' as const, id: previous.id, label: 'Tariffa precedente' }
-  const owned = ['tariff_configurations', 'tariff_brackets', 'operation_charges']
+  const owned = [
+    'tariff_configurations',
+    'tariff_brackets',
+    'operation_charges',
+    'service_activities',
+  ]
   return [
     ...foreignReferences(
       database,

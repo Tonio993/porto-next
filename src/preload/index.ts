@@ -163,6 +163,7 @@ contextBridge.exposeInMainWorld('assignments', assignments)
 const services: ServiceApi = {
   resolveMoment: (request) => ipcRenderer.invoke(serviceChannels.resolveMoment, request),
   createFree: (request) => ipcRenderer.invoke(serviceChannels.createFree, request),
+  createCatalog: (request) => ipcRenderer.invoke(serviceChannels.createCatalog, request),
   list: (request) => ipcRenderer.invoke(serviceChannels.list, request),
   get: (request) => ipcRenderer.invoke(serviceChannels.get, request),
 }

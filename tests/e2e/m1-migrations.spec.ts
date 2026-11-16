@@ -112,7 +112,7 @@ test('M2: migrazioni cumulative v1–v13, dati conservati, backup, copie e trasf
       const open = await page.evaluate(() => window.archives.open())
       expect(open).toMatchObject({
         ok: true,
-        value: { active: { schemaVersion: 15 }, context: { revision: version === 1 ? '0' : '42' } },
+        value: { active: { schemaVersion: 16 }, context: { revision: version === 1 ? '0' : '42' } },
       })
       const snapshot = async (path: string) =>
         app.evaluate(({ app }, path) => {
@@ -158,7 +158,7 @@ test('M2: migrazioni cumulative v1–v13, dati conservati, backup, copie e trasf
         expect(after.rows[table]).toMatchObject(rows)
       expect(after.rows.weight_versions).toHaveLength(4)
       const backup = readdirSync(folder).find((n) =>
-        n.startsWith(`v${version}.ormeggi.prima-v15-`),
+        n.startsWith(`v${version}.ormeggi.prima-v16-`),
       )!
       expect(backup).toBeTruthy()
       expect((await snapshot(join(folder, backup))).rows).toEqual(before)
@@ -220,7 +220,7 @@ test('M2: migrazioni cumulative v1–v13, dati conservati, backup, copie e trasf
       expect(await otherPage.evaluate(() => window.archives.open())).toMatchObject({
         ok: true,
         value: {
-          active: { schemaVersion: 15, name: 'M1 popolato', updatedAt: '2026-02-01T00:00:00.000Z' },
+          active: { schemaVersion: 16, name: 'M1 popolato', updatedAt: '2026-02-01T00:00:00.000Z' },
           context: { revision: '42' },
         },
       })

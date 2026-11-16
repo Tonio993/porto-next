@@ -122,7 +122,7 @@ test('P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, c
       } = await setup(app, path),
       errors: string[] = []
     page.on('pageerror', (e) => errors.push(e.message))
-    expect(readdirSync(folder).some((n) => n.includes('.prima-v15-'))).toBe(true)
+    expect(readdirSync(folder).some((n) => n.includes('.prima-v16-'))).toBe(true)
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(960, 700))
     await page.getByRole('button', { name: 'Permanenze', exact: true }).click()
     const voyage = page.getByRole('button', { name: 'Assegna soggetti al viaggio', exact: true })

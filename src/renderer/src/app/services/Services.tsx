@@ -1,4 +1,5 @@
-﻿import { useEffect, useRef, useState } from 'react'
+import { CatalogPicker } from './CatalogPicker'
+import { useEffect, useRef, useState } from 'react'
 import { Button, Fieldset, Group, Modal, Select, Stack, Textarea, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
 import type {
@@ -18,7 +19,13 @@ import { TariffMomentFields, emptyMoment } from '../tariffs/TariffMomentFields'
 import { PageControls } from '../PageControls'
 import { StateMessage } from '../StateMessage'
 
-type Draft = { context: ArchiveContextDto; values: CreateFreeServiceDto; amount: string }
+type Draft = {
+  context: ArchiveContextDto
+  values: CreateFreeServiceDto
+  amount: string
+  category: 'FREE' | 'CATALOG'
+  serviceTypeId: string | null
+}
 export function Services({
   archives,
   onDialogChange,
@@ -86,7 +93,7 @@ export function Services({
     invalidateEditor()
     if (draft) setDraft({ ...draft, values })
   }
-  const start = () => {
+  const start = (category: 'FREE' | 'CATALOG') => {
     if (!vesselId) return
     trigger.current = document.activeElement as HTMLElement
     invalidateEditor()
@@ -94,6 +101,8 @@ export function Services({
     setDraft({
       context,
       amount: '',
+      category,
+      serviceTypeId: null,
       values: {
         vesselId,
         interpretationPortId: null,
@@ -127,14 +136,30 @@ export function Services({
   const save = async () => {
     if (!draft) return
     const base = moneyInput(draft.amount)
-    if (!base || base === '0.00') {
+    if (draft.category === 'FREE' && (!base || base === '0.00')) {
       setDialogError('Inserisci un importo base maggiore di zero con al massimo due decimali.')
       return
     }
     setDialogError(null)
     const r = await command.request(() =>
       archives.execute(() =>
-        window.services.createFree({ context: draft.context, payload: { ...draft.values, base } }),
+        draft.category === 'FREE'
+          ? window.services.createFree({
+              context: draft.context,
+              payload: { ...draft.values, base: base! },
+            })
+          : window.services.createCatalog({
+              context: draft.context,
+              payload: {
+                vesselId: draft.values.vesselId,
+                interpretationPortId: draft.values.interpretationPortId,
+                moment: draft.values.moment,
+                executionStatus: draft.values.executionStatus,
+                notes: draft.values.notes,
+                specified: draft.values.specified,
+                serviceTypeId: draft.serviceTypeId!,
+              },
+            }),
       ),
     )
     if (r?.ok) {
@@ -142,7 +167,11 @@ export function Services({
       setDraft(null)
       setSelected({ id: r.value.id })
       setDetail(r.value)
-      setNotice('Prestazione libera registrata.')
+      setNotice(
+        draft.category === 'FREE'
+          ? 'Prestazione libera registrata.'
+          : 'Prestazione da catalogo registrata.',
+      )
       setReload((n) => n + 1)
     } else if (!r) {
       setUncertain(true)
@@ -159,8 +188,11 @@ export function Services({
       <Group justify="space-between">
         <h2>Prestazioni nave</h2>
         <Group>
-          <Button disabled={!vesselId || busy} onClick={start}>
+          <Button disabled={!vesselId || busy} onClick={() => start('FREE')}>
             Nuova prestazione libera
+          </Button>
+          <Button disabled={!vesselId || busy} onClick={() => start('CATALOG')}>
+            Nuova prestazione da catalogo
           </Button>
           {draft && !open && (
             <Button
@@ -227,6 +259,7 @@ export function Services({
                 <thead>
                   <tr>
                     <th>Momento locale</th>
+                    <th>Categoria</th>
                     <th>Descrizione</th>
                     <th>Stato</th>
                     <th>Base EUR</th>
@@ -239,6 +272,7 @@ export function Services({
                       <td>
                         {s.moment.localDateTime} ({s.moment.offset})
                       </td>
+                      <td>{s.category === 'FREE' ? 'Libera' : 'Catalogo'}</td>
                       <td>{s.description}</td>
                       <td>{executionLabels[s.executionStatus]}</td>
                       <td>{s.base}</td>
@@ -275,7 +309,8 @@ export function Services({
         <section className="archive-panel" aria-label="Dettaglio prestazione">
           <h3>{detail.description}</h3>
           <p>
-            Libera · {executionLabels[detail.executionStatus]} · Base EUR {detail.base}
+            {detail.category === 'FREE' ? 'Libera' : 'Catalogo'} ·{' '}
+            {executionLabels[detail.executionStatus]} · Base EUR {detail.base}
           </p>
           <p>
             {detail.vesselName} · {detail.portName} ·{' '}
@@ -292,10 +327,47 @@ export function Services({
             <br />
             Ormeggio: {detail.context.berthStayId}
           </p>
+          {detail.calculation && (
+            <section aria-label="Calcolo della prestazione" className="tariff-long-value">
+              <h4>Spiegazione del calcolo</h4>
+              <p>
+                Tipologia {detail.calculation.vesselTypeId} · dimensione {detail.calculation.size} ·
+                Peso: {detail.calculation.weight}
+              </p>
+              <p>
+                Tariffa dal {detail.calculation.tariffEffectiveFrom} · Scaglione fino a{' '}
+                {detail.calculation.upperLimit}
+              </p>
+              <ol>
+                {detail.calculation.steps.map((step, i) => (
+                  <li key={i}>{step}</li>
+                ))}
+              </ol>
+              <details>
+                <summary>Riferimenti del calcolo</summary>
+                <p>
+                  Tipo: {detail.serviceTypeId}
+                  <br />
+                  Tariffa: {detail.calculation.tariffId}
+                  <br />
+                  Configurazione: {detail.calculation.configurationId}
+                  <br />
+                  Scaglione: {detail.calculation.bracketId}
+                  <br />
+                  Sequenza peso: {detail.calculation.weightSequenceId}
+                  <br />
+                  Versione peso: {detail.calculation.weightVersionId}
+                </p>
+              </details>
+            </section>
+          )}
           <SubjectValues subjects={detail.subjects} />
           {detail.notes && <p>Note: {detail.notes}</p>}
           <p>
-            Importo base manuale. Modifica e consuntivazione saranno disponibili nei prossimi passi.
+            {detail.category === 'FREE'
+              ? 'Importo base manuale.'
+              : 'Importo base calcolato dalla tariffa e dal peso applicabili.'}{' '}
+            Modifica e consuntivazione saranno disponibili nei prossimi passi.
           </p>
         </section>
       )}
@@ -307,7 +379,11 @@ export function Services({
             setOpen(false)
           }
         }}
-        title="Nuova prestazione libera"
+        title={
+          draft?.category === 'CATALOG'
+            ? 'Nuova prestazione da catalogo'
+            : 'Nuova prestazione libera'
+        }
         size="lg"
         closeOnClickOutside={false}
         onExitTransitionEnd={() => trigger.current?.focus()}
@@ -324,7 +400,10 @@ export function Services({
                 Ricarica la bozza per usare il contesto corrente.
               </StateMessage>
             )}
-            <Fieldset disabled={busy || stale || uncertain} legend="Prestazione libera">
+            <Fieldset
+              disabled={busy || stale || uncertain}
+              legend={draft.category === 'FREE' ? 'Prestazione libera' : 'Prestazione da catalogo'}
+            >
               <Stack>
                 <TariffMomentFields
                   moment={draft.values.moment}
@@ -362,23 +441,45 @@ export function Services({
                     })
                   }
                 />
-                <TextInput
-                  label="Descrizione"
-                  required
-                  maxLength={1000}
-                  value={draft.values.description}
-                  onChange={(e) => change({ ...draft.values, description: e.currentTarget.value })}
-                />
-                <TextInput
-                  label="Importo base EUR"
-                  required
-                  inputMode="decimal"
-                  value={draft.amount}
-                  onChange={(e) => {
-                    invalidateEditor()
-                    setDraft({ ...draft, amount: e.currentTarget.value })
-                  }}
-                />
+                {draft.category === 'CATALOG' ? (
+                  <>
+                    <CatalogPicker
+                      context={context}
+                      value={draft.serviceTypeId}
+                      disabled={busy}
+                      onChange={(id) => {
+                        invalidateEditor()
+                        setDraft({ ...draft, serviceTypeId: id })
+                      }}
+                    />
+                    <p>
+                      La base viene calcolata al salvataggio con tariffa e peso applicabili. Il
+                      dettaglio mostra la spiegazione del calcolo.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <TextInput
+                      label="Descrizione"
+                      required
+                      maxLength={1000}
+                      value={draft.values.description}
+                      onChange={(e) =>
+                        change({ ...draft.values, description: e.currentTarget.value })
+                      }
+                    />
+                    <TextInput
+                      label="Importo base EUR"
+                      required
+                      inputMode="decimal"
+                      value={draft.amount}
+                      onChange={(e) => {
+                        invalidateEditor()
+                        setDraft({ ...draft, amount: e.currentTarget.value })
+                      }}
+                    />
+                  </>
+                )}
                 <Textarea
                   label="Note"
                   maxLength={10000}
@@ -439,7 +540,12 @@ export function Services({
                 Chiudi
               </Button>
               <Button
-                disabled={busy || stale || uncertain}
+                disabled={
+                  busy ||
+                  stale ||
+                  uncertain ||
+                  (draft.category === 'CATALOG' && !draft.serviceTypeId)
+                }
                 loading={command.loading}
                 onClick={() => void save()}
               >

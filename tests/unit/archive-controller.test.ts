@@ -1,3 +1,6 @@
+import { ServiceService } from '../../src/backend/application/services/service-service'
+import { serviceChannels } from '../../src/shared/contracts/services'
+import { registerServiceIpc } from '../../src/main/ipc/register'
 import { OperationService } from '../../src/backend/application/operations/operation-service'
 import { operationChannels } from '../../src/shared/contracts/operations'
 import { registerOperationIpc } from '../../src/main/ipc/register'
@@ -380,6 +383,46 @@ describe('confine IPC', () => {
       const handler = vi
         .mocked(ipcMain.handle)
         .mock.calls.find(([channel]) => channel === operationChannels[action])![1]
+      for (const event of [
+        { sender: {}, senderFrame: owner.webContents.mainFrame },
+        { sender: owner.webContents, senderFrame: {} },
+      ])
+        expect(await handler(event as Electron.IpcMainInvokeEvent, null)).toMatchObject({
+          ok: false,
+          context: null,
+          error: { code: 'INVALID_INPUT' },
+        })
+      available = false
+      expect(
+        await handler(
+          {
+            sender: owner.webContents,
+            senderFrame: owner.webContents.mainFrame,
+          } as Electron.IpcMainInvokeEvent,
+          null,
+        ),
+      ).toMatchObject({ ok: false, error: { code: 'INVALID_INPUT' } })
+      available = true
+      expect(execute).not.toHaveBeenCalled()
+      await handler(
+        {
+          sender: owner.webContents,
+          senderFrame: owner.webContents.mainFrame,
+        } as Electron.IpcMainInvokeEvent,
+        null,
+      )
+      expect(execute).toHaveBeenCalledOnce()
+    }
+  })
+  it('protegge tutti i canali delle prestazioni, incluso CATALOG, da mittenti e frame estranei', async () => {
+    const service = new ServiceService(new ArchiveCoordinator())
+    let available = true
+    registerServiceIpc(service, () => (available ? owner : null))
+    for (const action of Object.keys(serviceChannels) as (keyof typeof serviceChannels)[]) {
+      const execute = vi.spyOn(service, action)
+      const handler = vi
+        .mocked(ipcMain.handle)
+        .mock.calls.find(([channel]) => channel === serviceChannels[action])![1]
       for (const event of [
         { sender: {}, senderFrame: owner.webContents.mainFrame },
         { sender: owner.webContents, senderFrame: {} },

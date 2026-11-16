@@ -1,6 +1,6 @@
 # Porto Next
 
-Gestionale desktop locale per una società di ormeggiatori, con archivi indipendenti, anagrafiche storiche, catalogo, tariffe, operazioni nave e prestazioni libere. Per stato delle consegne, schema e prossimo task consultare il [registro](doc/stato-implementazione-prestazioni.md).
+Gestionale desktop locale per una società di ormeggiatori, con archivi indipendenti, anagrafiche storiche, catalogo, tariffe, operazioni nave e prestazioni libere o da catalogo. Per stato delle consegne, schema e prossimo task consultare il [registro](doc/stato-implementazione-prestazioni.md).
 
 ## Tecnologie
 
@@ -46,7 +46,9 @@ Il backend determina fuso, porto e momento economico dal contesto. Lo spostament
 
 Usa **Assegna soggetti** nel dettaglio dell’operazione o nella vista **Permanenze** per gestire cliente e agenzia di viaggio, visita e ormeggio. I due soggetti sono indipendenti: ciascuno eredita dal primo valore presente nell’ordine operazione → ormeggio → visita → viaggio. Rimuovere un valore esplicito ripristina l’ereditarietà. Controlla i soggetti effettivi e le fonti nell’anteprima, quindi conferma per aggiornare atomicamente tutte le componenti interessate. Le componenti di uno spostamento tra porti possono avere coppie diverse; i soggetti assenti sono ammessi. I riferimenti già assegnati restano validi dopo la disattivazione, ma non possono essere selezionati nuovamente. Dopo un conflitto, **Ricarica assegnazioni** recupera esplicitamente i valori registrati. [Dettagli e passaggio operativo P13](doc/p13/cliente-e-agenzia-effettivi.md).
 
-In **Prestazioni**, seleziona una nave e usa **Nuova prestazione libera**. Inserisci momento locale, stato, descrizione e base EUR positiva; note, cliente e agenzia sono facoltativi. **Verifica momento e contesto** determina il porto competente e propone le scelte necessarie per porto o orario ambiguo. La prestazione richiede una permanenza valida anche se mancata e non può cadere durante un trasferimento. La base è manuale e non richiede una tariffa propria. Il dettaglio mostra contesto e soggetti effettivi con fonti; **Riprendi bozza** conserva i dati dopo la chiusura dell'editor. Dopo un conflitto usa **Ricarica bozza**. Prestazioni da catalogo, modifica e consuntivazione seguiranno nei prossimi passi.
+In **Prestazioni**, seleziona una nave e usa **Nuova prestazione libera** oppure **Nuova prestazione da catalogo**. Per una libera inserisci descrizione e base EUR positiva; per una prestazione da catalogo scegli un tipo attivo: descrizione corrente, tariffa, scaglione, peso e base sono determinati dal backend. Il dettaglio espone la spiegazione del calcolo e i riferimenti applicati. Una base tariffaria può essere zero; lo stato Mancata non azzera l’importo. Note, cliente e agenzia sono facoltativi.
+
+**Verifica momento e contesto** determina il porto competente e propone le scelte necessarie per porto o orario ambiguo. Entrambe le categorie richiedono una permanenza valida anche se mancate e non possono cadere durante un trasferimento. La libera non richiede una tariffa propria; il catalogo la richiede nel porto e all’istante attribuiti. Il dettaglio mostra contesto e soggetti effettivi con fonti; **Riprendi bozza** conserva i dati dopo la chiusura dell’editor. Dopo un conflitto usa **Ricarica bozza**. Modifica, eliminazione, consuntivazione e ricerca completa seguiranno in P16.
 
 ## Archivi e salvataggio
 
@@ -97,7 +99,7 @@ I file SQL sono importati nella build con `?raw`: non dipendono dalla directory 
 
 Il [piano](doc/piano-implementazione-prestazioni.md) definisce requisiti, dipendenze e controlli. Il [registro](doc/stato-implementazione-prestazioni.md) riporta lo stato corrente e collega le note dei task. Per sviluppo e manutenzione seguire [AGENTS](AGENTS.md) e la [guida documentale](doc/guida-documentazione.md), consultando le fonti per argomento.
 
-In **Anagrafiche → Porti** sono disponibili ricerca, elenco, dettaglio, cronologia, versioni, disattivazione, riattivazione ed eliminazione consentita. Il dettaglio comprende le banchine del porto, con il proprio ciclo di vita. Un porto con banchine o tariffe è protetto dall'eliminazione. La selezionabilità della banchina dipende sia dal suo stato sia da quello del porto. Le operazioni che richiedono una conferma espongono un'anteprima degli effetti. La registrazione delle prestazioni è prevista negli incrementi successivi.
+In **Anagrafiche → Porti** sono disponibili ricerca, elenco, dettaglio, cronologia, versioni, disattivazione, riattivazione ed eliminazione consentita. Il dettaglio comprende le banchine del porto, con il proprio ciclo di vita. Un porto con banchine o tariffe è protetto dall'eliminazione. La selezionabilità della banchina dipende sia dal suo stato sia da quello del porto. Le operazioni che richiedono una conferma espongono un'anteprima degli effetti.
 
 **Anagrafiche → Clienti / Agenzie** espone due anagrafiche indipendenti, con la sola ragione sociale. Ricerca storica e per codice, elenco paginato, dettaglio, cronologia e ciclo di vita seguono le stesse convenzioni. Una ragione sociale può appartenere a entrambe le tipologie; dentro ciascuna rimane prenotata fino all’eliminazione dell’identità. I progressivi non vengono riutilizzati. Prima di introdurre una versione con decorrenza occorre confermare il fuso aziendale in **Riferimenti temporali**; ore ambigue e inesistenti sono gestite dal backend. La versione iniziale rimane senza decorrenza.
 

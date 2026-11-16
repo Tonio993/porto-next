@@ -21,6 +21,7 @@ import {
 import { AssignmentRepository } from '../../infrastructure/database/assignment-repository'
 import type { DatabaseSession } from '../../infrastructure/database/database-session'
 import { OperationRepository } from '../../infrastructure/database/operation-repository'
+import { recalculateService } from '../services/service-calculation'
 
 export interface SubjectVersionChange {
   kind: 'customer' | 'agency'
@@ -127,11 +128,16 @@ export function subjectPlan(
     resolve(serviceTargets(value), value.moment.utc, value)
   const serviceUpdates = serviceRepository.all().flatMap((before) => {
     const context = serviceContext(timelines.get(before.vesselId) ?? [], before.moment.utc)
-    const after = {
+    let after: ServiceActivityDto = {
       ...before,
       context,
       ...serviceRepository.versions(context, before.vesselId, before.moment.utc),
     }
+    if (
+      after.context.portId !== before.context.portId ||
+      after.vesselVersionId !== before.vesselVersionId
+    )
+      after = recalculateService(database, after)
     after.subjects = subjectsForService(after)
     const effects = subjectEffects(
       { kind: 'SERVICE_ACTIVITY', id: before.id, label: before.description },

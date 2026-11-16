@@ -1,3 +1,5 @@
+import { CustomerService } from '../../src/backend/application/customers/customer-service'
+import { ServiceService } from '../../src/backend/application/services/service-service'
 import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -42,12 +44,12 @@ function snapshot(path: string) {
     db.close()
   }
 }
-/** Export real P10-compatible records into the unmodified distributed v14 DDL. */
-function v14(path: string, obstructed = false) {
+/** Export real records into the unmodified distributed DDL of the requested version. */
+function previous(path: string, version = 14, obstructed = false) {
   const db = new Database(path)
   try {
     for (const name of readdirSync('migrations')
-      .filter((n) => Number(n.slice(0, 4)) <= 14)
+      .filter((n) => Number(n.slice(0, 4)) <= version)
       .sort())
       db.exec(readFileSync(join('migrations', name), 'utf8'))
     db.pragma('foreign_keys=OFF')
@@ -73,7 +75,7 @@ function v14(path: string, obstructed = false) {
     const migration = readFileSync('migrations/0013_inter_port_movements.sql', 'utf8')
     db.exec(migration.slice(migration.indexOf('CREATE TRIGGER operation_endpoint_shape_insert')))
     db.pragma('application_id=0x504f5254')
-    db.pragma('user_version=14')
+    db.pragma(`user_version=${version}`)
     if (obstructed)
       db.exec(
         'CREATE TABLE charge_dependency (charge_id TEXT NOT NULL REFERENCES operation_charges(id) ON DELETE RESTRICT) STRICT; INSERT INTO charge_dependency SELECT id FROM operation_charges LIMIT 1',
@@ -171,6 +173,27 @@ beforeEach(async () => {
       )
     }
   }
+  const customerId = value(
+    await new CustomerService(archives.coordinator).create({
+      context: context(),
+      payload: { businessName: 'Cliente storico v15' },
+    }),
+  ).id
+  value(
+    await new ServiceService(archives.coordinator).createFree({
+      context: context(),
+      payload: {
+        vesselId,
+        interpretationPortId: null,
+        moment: moment('2026-06-01T12:30'),
+        executionStatus: 'MISSED',
+        description: 'Libera v15 — àèìòù',
+        base: '92233720368547758.07',
+        notes: 'Tupla storica',
+        specified: { customerId, agencyId: null },
+      },
+    }),
+  )
 })
 afterEach(async () => {
   await archives.close()
@@ -179,10 +202,10 @@ afterEach(async () => {
 
 it('P14: v14 popolato → v15 conserva tutte le righe, tuple, int64, revisioni e copia preventiva', async () => {
   const path = join(folder, 'v14.ormeggi')
-  v14(path)
+  previous(path)
   const before = snapshot(path),
     original = new OperationRepository(archives.coordinator.requireSession().database).all()
-  expect((await archives.open(path)).schemaVersion).toBe(15)
+  expect((await archives.open(path)).schemaVersion).toBe(16)
   const after = snapshot(path)
   for (const [table, records] of Object.entries(before.rows))
     expect(after.rows[table]).toEqual(records)
@@ -191,14 +214,14 @@ it('P14: v14 popolato → v15 conserva tutte le righe, tuple, int64, revisioni e
   expect(new OperationRepository(archives.coordinator.requireSession().database).all()).toEqual(
     original,
   )
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v15-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v16-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
   expect(sql().pragma('foreign_key_check')).toEqual([])
   expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
 })
 it('P14: errore dopo creazione delle tabelle annulla migrazione e conserva sessione, file e copia', async () => {
   const path = join(folder, 'failure.ormeggi')
-  v14(path)
+  previous(path)
   const fixture = new Database(path)
   fixture.exec('CREATE INDEX service_subjects_agency ON archive_metadata(name)')
   fixture.close()
@@ -207,6 +230,49 @@ it('P14: errore dopo creazione delle tabelle annulla migrazione e conserva sessi
   await expect(archives.open(path)).rejects.toThrow()
   expect(snapshot(path)).toEqual(before)
   expect(context()).toEqual(active)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v15-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v16-'))!
+  expect(snapshot(join(folder, backup))).toEqual(before)
+})
+
+it('P15: v15 popolato → v16 conserva FREE, soggetti, operazioni, revisione e copia preventiva', async () => {
+  const path = join(folder, 'v15.ormeggi')
+  previous(path, 15)
+  const before = snapshot(path)
+  const original = await new ServiceService(archives.coordinator).list({
+    context: { sessionId: context().sessionId },
+    query: { vesselId, page: 1, pageSize: 25 },
+  })
+  expect((await archives.open(path)).schemaVersion).toBe(16)
+  const after = snapshot(path)
+  for (const [table, records] of Object.entries(before.rows)) {
+    const columns = Object.keys((records as Record<string, unknown>[])[0] ?? {})
+    expect(
+      (after.rows[table] as Record<string, unknown>[]).map((row) =>
+        Object.fromEntries(columns.map((c) => [c, row[c]])),
+      ),
+    ).toEqual(records)
+  }
+  const actual = await new ServiceService(archives.coordinator).list({
+    context: { sessionId: context().sessionId },
+    query: { vesselId, page: 1, pageSize: 25 },
+  })
+  expect(value(actual)).toEqual(value(original))
+  const backup = readdirSync(folder).find((n) => n.startsWith('v15.ormeggi.prima-v16-'))!
+  expect(snapshot(join(folder, backup))).toEqual(before)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+  expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
+})
+it('P15: errore dopo ricostruzione e copia dei soggetti annulla ogni effetto della migrazione v15', async () => {
+  const path = join(folder, 'v15-failure.ormeggi')
+  previous(path, 15)
+  const fixture = new Database(path)
+  fixture.exec('CREATE INDEX services_type ON archive_metadata(name)')
+  fixture.close()
+  const before = snapshot(path),
+    active = context()
+  await expect(archives.open(path)).rejects.toThrow()
+  expect(snapshot(path)).toEqual(before)
+  expect(context()).toEqual(active)
+  const backup = readdirSync(folder).find((n) => n.startsWith('v15-failure.ormeggi.prima-v16-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
 })

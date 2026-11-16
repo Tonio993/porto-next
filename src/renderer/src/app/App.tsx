@@ -131,7 +131,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
                         : section === 'Operazioni nave'
                           ? 'Registra entrate, uscite e spostamenti; consulta permanenze e importi base.'
                           : section === 'Prestazioni'
-                            ? 'Registra e consulta prestazioni libere nel contesto operativo della nave.'
+                            ? 'Registra e consulta prestazioni libere o da catalogo nel contesto operativo della nave.'
                             : 'Gestisci il file aperto e le sue copie, tutto dal tuo computer.'
                   : 'Crea un archivio o aprine uno esistente per iniziare.'}
               </p>

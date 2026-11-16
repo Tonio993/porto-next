@@ -8,6 +8,7 @@ import { momentFromColumns, momentToColumns, type MomentColumns } from './moment
 import { PortRepository } from './port-repository'
 import { BerthRepository } from './berth-repository'
 import { VesselRepository } from './vessel-repository'
+import type { BaseCalculationDto } from '../../../shared/contracts/tariffs'
 
 export class ServiceRepository {
   constructor(private readonly database: DatabaseSession) {}
@@ -23,13 +24,25 @@ export class ServiceRepository {
     if (!row) throw new ArchiveError('NOT_FOUND', 'La prestazione non esiste.')
     return {
       id,
-      category: 'FREE',
+      ...(row.category === 'CATALOG'
+        ? {
+            category: 'CATALOG' as const,
+            serviceTypeId: row.service_type_id!,
+            calculation: JSON.parse(row.calculation!) as BaseCalculationDto,
+          }
+        : { category: 'FREE' as const, serviceTypeId: null, calculation: null }),
       vesselId: row.vessel_id!,
       vesselVersionId: row.vessel_version_id!,
       vesselName: row.vessel_name!,
       moment: momentFromColumns(row),
       executionStatus: row.execution_status as ServiceActivityDto['executionStatus'],
-      description: row.description!,
+      description:
+        row.category === 'CATALOG'
+          ? (this.database.sqlite
+              .prepare('SELECT description FROM service_types WHERE id=?')
+              .pluck()
+              .get(row.service_type_id) as string)
+          : row.description!,
       base: Money.fromCents(BigInt(row.base!)).text,
       notes: row.notes,
       context: {
@@ -95,15 +108,15 @@ export class ServiceRepository {
       c = value.context
     this.database.sqlite
       .prepare(
-        `INSERT INTO service_activities (id,category,vessel_id,vessel_version_id,execution_status,description,base_cents,notes,local_date_time,zone_id,utc_offset,utc,voyage_id,port_call_id,berth_stay_id,port_id,port_version_id,berth_id,berth_version_id,customer_id,agency_id,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        `INSERT INTO service_activities (id,category,vessel_id,vessel_version_id,execution_status,description,base_cents,notes,local_date_time,zone_id,utc_offset,utc,voyage_id,port_call_id,berth_stay_id,port_id,port_version_id,berth_id,berth_version_id,customer_id,agency_id,created_at,service_type_id,tariff_id,configuration_id,bracket_id,weight_sequence_id,weight_version_id,calculation) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       )
       .run(
         value.id,
-        'FREE',
+        value.category,
         value.vesselId,
         value.vesselVersionId,
         value.executionStatus,
-        value.description,
+        value.category === 'FREE' ? value.description : null,
         Money.parse(value.base).cents,
         value.notes,
         m.local_date_time,
@@ -120,14 +133,27 @@ export class ServiceRepository {
         value.specified.customerId,
         value.specified.agencyId,
         new Date().toISOString(),
+        ...this.economicColumns(value),
       )
     new AssignmentRepository(this.database).saveSubjects(value.id, value.subjects, 'service')
+  }
+  private economicColumns(value: ServiceActivityDto) {
+    const c = value.calculation
+    return [
+      value.serviceTypeId,
+      c?.tariffId ?? null,
+      c?.configurationId ?? null,
+      c?.bracketId ?? null,
+      c?.weightSequenceId ?? null,
+      c?.weightVersionId ?? null,
+      c ? JSON.stringify(c) : null,
+    ]
   }
   saveAttribution(value: ServiceActivityDto) {
     const c = value.context
     this.database.sqlite
       .prepare(
-        `UPDATE service_activities SET vessel_version_id=?,voyage_id=?,port_call_id=?,berth_stay_id=?,port_id=?,port_version_id=?,berth_id=?,berth_version_id=? WHERE id=?`,
+        `UPDATE service_activities SET vessel_version_id=?,voyage_id=?,port_call_id=?,berth_stay_id=?,port_id=?,port_version_id=?,berth_id=?,berth_version_id=?,base_cents=?,service_type_id=?,tariff_id=?,configuration_id=?,bracket_id=?,weight_sequence_id=?,weight_version_id=?,calculation=? WHERE id=?`,
       )
       .run(
         value.vesselVersionId,
@@ -138,6 +164,8 @@ export class ServiceRepository {
         value.portVersionId,
         c.berthId,
         value.berthVersionId,
+        Money.parse(value.base).cents,
+        ...this.economicColumns(value),
         value.id,
       )
     new AssignmentRepository(this.database).saveSubjects(value.id, value.subjects, 'service')

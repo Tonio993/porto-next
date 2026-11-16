@@ -257,13 +257,17 @@ export const serviceTypes = sqliteTable('service_types', {
   status: text('status', { enum: ['ACTIVE', 'INACTIVE'] }).notNull(),
   hasEverBeenUsed: integer('has_ever_been_used', { mode: 'boolean' }).notNull().default(false),
 })
-export const weightSequences = sqliteTable('weight_sequences', {
-  id: text('id').primaryKey(),
-  serviceTypeId: text('service_type_id')
-    .unique()
-    .references(() => serviceTypes.id),
-  operationType: text('operation_type', { enum: ['ENTRY', 'EXIT', 'MOVEMENT'] }).unique(),
-})
+export const weightSequences = sqliteTable(
+  'weight_sequences',
+  {
+    id: text('id').primaryKey(),
+    serviceTypeId: text('service_type_id')
+      .unique()
+      .references(() => serviceTypes.id),
+    operationType: text('operation_type', { enum: ['ENTRY', 'EXIT', 'MOVEMENT'] }).unique(),
+  },
+  (t) => [uniqueIndex('service_weight_owner').on(t.id, t.serviceTypeId)],
+)
 export const weightVersions = sqliteTable(
   'weight_versions',
   {
@@ -294,7 +298,10 @@ export const tariffs = sqliteTable(
     effectiveZoneId: text('effective_zone_id').notNull(),
     effectiveUtcOffset: text('effective_utc_offset').notNull(),
   },
-  (table) => [uniqueIndex('tariffs_effective').on(table.portId, table.effectiveFrom)],
+  (table) => [
+    uniqueIndex('tariffs_effective').on(table.portId, table.effectiveFrom),
+    uniqueIndex('service_tariff_port').on(table.id, table.portId),
+  ],
 )
 export const tariffConfigurations = sqliteTable(
   'tariff_configurations',
@@ -708,7 +715,7 @@ export const serviceActivities = sqliteTable(
   'service_activities',
   {
     id: text('id').primaryKey().notNull(),
-    category: text('category', { enum: ['FREE'] }).notNull(),
+    category: text('category', { enum: ['FREE', 'CATALOG'] }).notNull(),
     vesselId: text('vessel_id')
       .notNull()
       .references(() => vessels.id),
@@ -716,7 +723,7 @@ export const serviceActivities = sqliteTable(
     executionStatus: text('execution_status', {
       enum: ['PLANNED', 'PERFORMED', 'MISSED'],
     }).notNull(),
-    description: text('description').notNull(),
+    description: text('description'),
     baseCents: integer('base_cents').notNull(),
     notes: text('notes'),
     localDateTime: text('local_date_time').notNull(),
@@ -734,6 +741,13 @@ export const serviceActivities = sqliteTable(
     berthVersionId: text('berth_version_id'),
     customerId: text('customer_id').references(() => customers.id),
     agencyId: text('agency_id').references(() => agencies.id),
+    serviceTypeId: text('service_type_id').references(() => serviceTypes.id),
+    tariffId: text('tariff_id'),
+    configurationId: text('configuration_id'),
+    bracketId: text('bracket_id'),
+    weightSequenceId: text('weight_sequence_id'),
+    weightVersionId: text('weight_version_id'),
+    calculation: text('calculation'),
     createdAt: text('created_at').notNull(),
   },
   (t) => [
@@ -762,12 +776,54 @@ export const serviceActivities = sqliteTable(
       columns: [t.berthVersionId, t.berthId],
       foreignColumns: [berthVersions.id, berthVersions.berthId],
     }),
-    check('services_category', sql.raw("category='FREE'")),
+    check(
+      'services_category',
+      sql.raw(`(category='FREE' AND description IS NOT NULL AND length(trim(description)) BETWEEN 1 AND 1000 AND base_cents>0 AND service_type_id IS NULL AND tariff_id IS NULL AND configuration_id IS NULL AND bracket_id IS NULL AND weight_sequence_id IS NULL AND weight_version_id IS NULL AND calculation IS NULL)
+    OR (category='CATALOG' AND description IS NULL AND service_type_id IS NOT NULL AND tariff_id IS NOT NULL AND configuration_id IS NOT NULL AND bracket_id IS NOT NULL AND weight_sequence_id IS NOT NULL AND weight_version_id IS NOT NULL AND calculation IS NOT NULL)`),
+    ),
     check('services_status', sql.raw("execution_status IN ('PLANNED','PERFORMED','MISSED')")),
-    check('services_description', sql.raw('length(trim(description)) BETWEEN 1 AND 1000')),
-    check('services_base', sql.raw("typeof(base_cents)='integer' AND base_cents>0")),
+
+    check('services_base', sql.raw("typeof(base_cents)='integer' AND base_cents>=0")),
     check('services_notes', sql.raw('notes IS NULL OR length(notes)<=10000')),
     check('services_berth_presence', sql.raw('(berth_id IS NULL)=(berth_version_id IS NULL)')),
+    foreignKey({ columns: [t.tariffId, t.portId], foreignColumns: [tariffs.id, tariffs.portId] }),
+    foreignKey({
+      columns: [t.configurationId, t.tariffId],
+      foreignColumns: [tariffConfigurations.id, tariffConfigurations.tariffId],
+    }),
+    foreignKey({
+      columns: [t.bracketId, t.configurationId],
+      foreignColumns: [tariffBrackets.id, tariffBrackets.configurationId],
+    }),
+    foreignKey({
+      columns: [t.weightSequenceId, t.serviceTypeId],
+      foreignColumns: [weightSequences.id, weightSequences.serviceTypeId],
+    }),
+    foreignKey({
+      columns: [t.weightVersionId, t.weightSequenceId],
+      foreignColumns: [weightVersions.id, weightVersions.sequenceId],
+    }),
+    check(
+      'services_calculation_consistency',
+      sql.raw(`category='FREE' OR (
+    json_extract(calculation,'$.activity.kind') IS 'CATALOG'
+    AND json_extract(calculation,'$.activity.serviceTypeId') IS service_type_id
+    AND json_extract(calculation,'$.tariffId') IS tariff_id
+    AND json_extract(calculation,'$.configurationId') IS configuration_id
+    AND json_extract(calculation,'$.bracketId') IS bracket_id
+    AND json_extract(calculation,'$.weightSequenceId') IS weight_sequence_id
+    AND json_extract(calculation,'$.weightVersionId') IS weight_version_id
+    AND json_extract(calculation,'$.vesselId') IS vessel_id
+    AND json_extract(calculation,'$.vesselVersionId') IS vessel_version_id
+    AND json_extract(calculation,'$.portId') IS port_id
+    AND json_extract(calculation,'$.moment.utc') IS utc
+    AND json_extract(calculation,'$.base') IS printf('%d.%02d',base_cents / 100,base_cents % 100)
+  )`),
+    ),
+    check('services_calculation_json', sql.raw('calculation IS NULL OR json_valid(calculation)')),
+    index('services_type').on(t.serviceTypeId),
+    index('services_tariff').on(t.tariffId, t.configurationId, t.bracketId),
+    index('services_weight').on(t.weightSequenceId, t.weightVersionId),
     index('services_vessel_moment').on(t.vesselId, t.utc, t.id),
     index('services_port').on(t.portId, t.portVersionId),
     index('services_berth').on(t.berthId, t.berthVersionId),

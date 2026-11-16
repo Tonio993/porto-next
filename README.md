@@ -1,6 +1,6 @@
 # Porto Next
 
-Gestionale desktop locale per una società di ormeggiatori, con archivi indipendenti, anagrafiche storiche, catalogo, tariffe e operazioni nave. Per stato delle consegne, schema e prossimo task consultare il [registro](doc/stato-implementazione-prestazioni.md).
+Gestionale desktop locale per una società di ormeggiatori, con archivi indipendenti, anagrafiche storiche, catalogo, tariffe, operazioni nave e prestazioni libere. Per stato delle consegne, schema e prossimo task consultare il [registro](doc/stato-implementazione-prestazioni.md).
 
 ## Tecnologie
 
@@ -45,6 +45,8 @@ Per lo spostamento indica partenza, arrivo e porto/banchina di destinazione; l�
 Il backend determina fuso, porto e momento economico dal contesto. Lo spostamento interno genera una sola componente MOVEMENT alla partenza; quello tra porti genera EXIT alla partenza ed ENTRY all’arrivo, con calcoli e sostituzioni manuali indipendenti. Il totale visualizzato è la somma corrente delle due basi effettive. La consultazione mostra base calcolata, eventuale sostituzione manuale in creazione (anche zero), base effettiva e traccia. Una tariffa intermedia o una variazione delle versioni anagrafiche include nell'anteprima gli effetti sulle attività e li applica atomicamente. Consuntivazione e correzioni operative non sono ancora disponibili.
 
 Usa **Assegna soggetti** nel dettaglio dell’operazione o nella vista **Permanenze** per gestire cliente e agenzia di viaggio, visita e ormeggio. I due soggetti sono indipendenti: ciascuno eredita dal primo valore presente nell’ordine operazione → ormeggio → visita → viaggio. Rimuovere un valore esplicito ripristina l’ereditarietà. Controlla i soggetti effettivi e le fonti nell’anteprima, quindi conferma per aggiornare atomicamente tutte le componenti interessate. Le componenti di uno spostamento tra porti possono avere coppie diverse; i soggetti assenti sono ammessi. I riferimenti già assegnati restano validi dopo la disattivazione, ma non possono essere selezionati nuovamente. Dopo un conflitto, **Ricarica assegnazioni** recupera esplicitamente i valori registrati. [Dettagli e passaggio operativo P13](doc/p13/cliente-e-agenzia-effettivi.md).
+
+In **Prestazioni**, seleziona una nave e usa **Nuova prestazione libera**. Inserisci momento locale, stato, descrizione e base EUR positiva; note, cliente e agenzia sono facoltativi. **Verifica momento e contesto** determina il porto competente e propone le scelte necessarie per porto o orario ambiguo. La prestazione richiede una permanenza valida anche se mancata e non può cadere durante un trasferimento. La base è manuale e non richiede una tariffa propria. Il dettaglio mostra contesto e soggetti effettivi con fonti; **Riprendi bozza** conserva i dati dopo la chiusura dell'editor. Dopo un conflitto usa **Ricarica bozza**. Prestazioni da catalogo, modifica e consuntivazione seguiranno nei prossimi passi.
 
 ## Archivi e salvataggio
 

@@ -1,12 +1,12 @@
 # Stato di implementazione delle prestazioni
 
-Aggiornamento del 13 novembre 2026. Questo file contiene lo stato corrente e la sola consegna attiva. Requisiti e frequenza dei controlli sono nel [piano](piano-implementazione-prestazioni.md), regole di lettura e aggiornamento nella [guida documentale](guida-documentazione.md).
+Aggiornamento del 16 novembre 2026. Questo file contiene lo stato corrente e la sola consegna attiva. Requisiti e frequenza dei controlli sono nel [piano](piano-implementazione-prestazioni.md), regole di lettura e aggiornamento nella [guida documentale](guida-documentazione.md).
 
 ## Stato corrente
 
-- P00–P13, UI01 e UI02 completati. P13 verificato sulla build Electron e nel pacchetto Windows, schema v14; implementazione nel commit `c2b2ff9`, base `d99e18b`. [Nota P13](p13/cliente-e-agenzia-effettivi.md).
+- P00–P14, UI01 e UI02 completati. P14 verificato sulla build Electron, schema v15; implementazione nel commit `a554e27`, base `0beb74f`. [Nota P14](p14/prestazione-libera.md).
 - M1 chiusa sul pacchetto Windows dello schema v9. **M2 chiusa** sull’integrazione P13, schema v14, secondo il piano §7.3. [Evidenze](p13/verifiche.md#verifiche-m2).
-- Revisione tecnica dopo P12 completata. Prossimo task **P14 — Prima prestazione libera**; P14–P20 restano da avviare.
+- Revisione tecnica dopo P12 completata. Prossimo task **P15 — Prima prestazione da catalogo**, nella stessa chat. P15–P20 restano da avviare.
 
 ## Avanzamento
 
@@ -26,7 +26,7 @@ Aggiornamento del 13 novembre 2026. Questo file contiene lo stato corrente e la 
 | P11  | Completato | `8450b39`                    | [Spostamento interno](p11/spostamento-interno.md); verificato sulla build Electron.                          |
 | P12  | Completato | `f07c859`                    | [Spostamento tra porti](p12/spostamento-tra-porti.md); verificato sulla build Electron.                      |
 | P13  | Completato | `c2b2ff9`                    | [Cliente e agenzia effettivi](p13/cliente-e-agenzia-effettivi.md); build e pacchetto verificati, schema v14. |
-| P14  | Da avviare | —                            | Scheda nel piano                                                                                             |
+| P14  | Completato | `a554e27`                    | [Prima prestazione libera](p14/prestazione-libera.md); build verificata, schema v15.                         |
 | P15  | Da avviare | —                            | Scheda nel piano                                                                                             |
 | P16  | Da avviare | —                            | Scheda nel piano                                                                                             |
 | P17A | Da avviare | —                            | Scheda nel piano                                                                                             |
@@ -55,15 +55,13 @@ Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bl
 
 Le verifiche complete seguono esclusivamente il [piano §7.3](piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). La revisione tecnica dopo P12 è completata e documentata nella [nota P12](p12/spostamento-tra-porti.md#revisione-tecnica-dopo-p12); la prossima rimane dopo P16.
 
-## Consegna corrente — P13
+## Consegna corrente — P14
 
-**P13 completato e verificato sulla build Electron, schema v14.** Assegnazioni indipendenti su viaggio, visita, ormeggio e operazione; valori effettivi, versioni applicabili e fonti persistiti per componente. Priorità operazione → ormeggio → visita → viaggio; rimozione degli override ripristina l’ereditarietà. Le componenti esterne usano origine e destinazione autonomamente; MISSED non crea permanenze fittizie. [Nota operativa](p13/cliente-e-agenzia-effettivi.md).
+**P14 completato e verificato sulla build Electron, schema v15.** Prestazioni FREE attraverso backend, SQLite, IPC/preload e UI: creazione, elenco e dettaglio per nave, contesto completo al proprio istante, importo manuale positivo esatto e soggetti indipendenti con fonti. Nuovi riferimenti integrati nelle variazioni anagrafiche, nelle assegnazioni e nelle anteprime delle operazioni. [Nota operativa](p14/prestazione-libera.md).
 
-**Prove P13:** 236/236 casi backend/SQLite su 26 file, migrazione v13 popolato→v14 con copia preventiva e rollback, due percorsi desktop funzionale e asincrono sulla build integrata. TypeScript, ESLint e build passati; Prettier segnala soltanto i cinque legacy noti. Due schermate ispezionate alle dimensioni minima e desktop. Prove automatizzate offline, nessuna sessione manuale umana. Dettagli e identificazione della build nell’[allegato](p13/verifiche.md).
+**Prove:** 263/263 casi backend/SQLite su 28 file, migrazione v14 popolato→v15 con copia preventiva e rollback; 9 percorsi desktop pertinenti verificati. Riutilizzati gli esiti non coinvolti e ripetute le prove interessate dalle correzioni di anteprima obsoleta e riapertura del dettaglio. TypeScript, ESLint e build passati; soltanto i cinque avvisi Prettier legacy. Due schermate ispezionate, prove automatizzate offline, nessuna sessione manuale umana. [Comandi, copertura e build](p14/verifiche.md).
 
-**M2 chiusa, distinta dal completamento P13:** tutti i 27 percorsi desktop verificati sulla build integrata e tutti i 27 sul medesimo eseguibile Windows x64, con migrazioni cumulative v1–v13→v14 e trasferibilità. Riutilizzati i 26 esiti validi di ciascuna serie completa e ripetuto integralmente P13 dopo correzioni ai soli helper di test. Build, risorse confezionate, eseguibile, ASAR e driver nativo identificati nell’[allegato](p13/verifiche.md#verifiche-m2), con impronte ricontrollate e invariate a fine prove. Nessuna modifica a runtime, dipendenze native o configurazione di confezionamento; nessuna ricompilazione durante le serie finali. Nessun difetto di integrità noto nel perimetro verificato. Prossima verifica integrata completa: M3 dopo P16 e UI03.
-
-**Passaggio a P14 — Prima prestazione libera.** Il [passaggio operativo](p13/cliente-e-agenzia-effettivi.md#limiti-e-passaggio-a-p14) indica come estendere risoluzione e impatti alle prestazioni ordinarie, mantenendo il contesto completo al proprio istante e i limiti del trasferimento. Nuovi riferimenti da integrare subito nelle anteprime e nei comandi esistenti. Fatture e correzioni strutturali restano fuori da P13; prossima revisione tecnica dopo P16 e UI03 prima della chiusura M3.
+**Passaggio a P15 — Prima prestazione da catalogo**, nella stessa chat: estendere il flusso di attribuzione con tipo selezionabile, tariffa/peso, risultato e utilizzo storico persistiti atomicamente. [Passaggio operativo](p14/prestazione-libera.md#limiti-e-passaggio-a-p15). M2 rimane chiusa sulla precedente integrazione v14; suite desktop completa, migrazioni cumulative e pacchetto restano pianificati a M3 dopo P16 e UI03.
 
 ## Limiti aperti
 

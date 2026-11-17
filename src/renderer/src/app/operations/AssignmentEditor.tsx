@@ -42,6 +42,20 @@ export function AssignmentEditor({
     effects = useApplicationRequest(context, setError)
   const latest = useRef(context)
   latest.current = context
+  const content = useRef<HTMLDivElement | null>(null)
+  const initialFocus = useRef(true)
+  useEffect(() => {
+    if (!opened) {
+      initialFocus.current = true
+      return
+    }
+    if (!draft || read.loading || !initialFocus.current) return
+    const input = content.current?.querySelector<HTMLInputElement>('[data-autofocus]')
+    if (input && !input.disabled) {
+      input.focus()
+      initialFocus.current = false
+    }
+  }, [opened, draft, read.loading])
   const { request: query } = read
   const reload = () => {
     command.invalidate()
@@ -111,7 +125,7 @@ export function AssignmentEditor({
         <p role="status">Caricamento assegnazioni…</p>
       ) : (
         draft && (
-          <Stack>
+          <Stack ref={content}>
             <p>
               Un valore esplicito assente eredita dal livello superiore. Cliente e agenzia sono
               indipendenti. I valori delle permanenze sono riferiti al loro inizio; ogni componente
@@ -119,11 +133,11 @@ export function AssignmentEditor({
             </p>
             {preview && !obsolete ? (
               <>
-                <SubjectValues subjects={preview.assignment.effective} />
+                <SubjectValues subjects={preview.assignment.effective} ownLevel={target.kind} />
                 {preview.assignment.components.map((c) => (
                   <section key={c.id} aria-label={c.label}>
                     <h4>{c.label}</h4>
-                    <SubjectValues subjects={c.subjects} />
+                    <SubjectValues subjects={c.subjects} ownLevel="VESSEL_OPERATION" />
                   </section>
                 ))}
                 <PortConfirmation
@@ -189,11 +203,11 @@ export function AssignmentEditor({
                   ? values.components.map((c) => (
                       <section key={c.id}>
                         <h4>{c.label}</h4>
-                        <SubjectValues subjects={c.subjects} />
+                        <SubjectValues subjects={c.subjects} ownLevel="VESSEL_OPERATION" />
                       </section>
                     ))
-                  : values && <SubjectValues subjects={values.effective} />}
-                <Group>
+                  : values && <SubjectValues subjects={values.effective} ownLevel={target.kind} />}
+                <Group className="form-actions">
                   <Button variant="default" disabled={busy} onClick={close}>
                     Chiudi
                   </Button>

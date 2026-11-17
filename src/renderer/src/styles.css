@@ -1144,3 +1144,252 @@ footer {
 .services-page h2 {
   margin-block: 0.35rem;
 }
+
+/* UI03: filters, list and consultation each keep usable scrolling space. */
+.services-page {
+  overflow: hidden;
+  gap: 8px;
+}
+.services-page > :not(.services-workspace) {
+  flex-shrink: 0;
+}
+.operational-heading h2 {
+  font-size: 19px;
+}
+.service-filters {
+  border: 1px solid #d5e0e5;
+  border-radius: 8px;
+  background: white;
+  padding: 8px 12px;
+}
+.service-filters summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.filter-summary {
+  margin-left: 16px;
+  color: #536b7b;
+  font-size: 12px;
+  font-weight: 400;
+}
+.service-filter-fields {
+  margin-top: 10px;
+  max-height: clamp(90px, 15vh, 150px);
+  overflow: auto;
+  padding: 4px 8px 8px 4px;
+  scrollbar-gutter: stable;
+}
+.service-filter-fields > * {
+  flex-shrink: 0;
+}
+.service-filter-fields > .mantine-InputWrapper-root {
+  max-width: 100%;
+}
+.services-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+.services-results {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: white;
+  border: 1px solid #d5e0e5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.services-page .table-scroll {
+  flex: 1;
+  min-height: 0;
+  scrollbar-gutter: stable;
+}
+.services-page table {
+  table-layout: fixed;
+  min-width: 620px;
+  font-size: 13px;
+}
+.services-page th:first-child {
+  width: 116px;
+}
+.services-page th:nth-child(2) {
+  width: 80px;
+}
+.services-page th:nth-child(4) {
+  width: 80px;
+}
+.services-page th:nth-child(5) {
+  width: 84px;
+}
+.services-page th:last-child {
+  width: 112px;
+}
+.services-page td:last-child .mantine-Button-root {
+  padding-inline: 4px;
+  font-size: 12px;
+}
+.services-page th {
+  position: sticky;
+  top: 0;
+  background: #edf2f5;
+  z-index: 1;
+  color: #234454;
+}
+.services-page td {
+  vertical-align: top;
+}
+.service-list-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.service-row-vessel {
+  display: block;
+  color: #234454;
+}
+.services-page tr[aria-selected='true'] {
+  background: #edf8f4;
+}
+.services-page tr[aria-selected='true'] td:first-child {
+  box-shadow: inset 4px 0 #17846e;
+}
+.services-results > .list-pagination {
+  margin: 0;
+  padding: 8px;
+  flex-shrink: 0;
+}
+.services-results > p {
+  padding-inline: 12px;
+}
+.service-detail {
+  overflow: auto;
+  min-height: 0;
+  scrollbar-gutter: stable;
+}
+.service-detail h3 {
+  font-size: 17px;
+}
+.service-complete-description {
+  display: none;
+}
+.service-detail .detail-actions {
+  margin-top: 12px;
+  gap: 8px;
+}
+.service-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.service-comparison > section,
+.effective-subject {
+  min-width: 0;
+  padding: 10px 12px;
+  background: #f4f7f9;
+  border: 1px solid #d5e0e5;
+  border-radius: 7px;
+  overflow-wrap: anywhere;
+}
+.service-comparison h4 {
+  margin-top: 0;
+}
+.preview-state {
+  padding: 10px 12px;
+  border-left: 4px solid #536b7b;
+  background: #f4f7f9;
+  font-weight: 600;
+}
+.effective-subjects {
+  display: grid;
+  gap: 8px;
+  margin-block: 12px;
+}
+.effective-subject p {
+  margin-block: 0 4px;
+}
+.effective-subject summary {
+  font-size: 12px;
+}
+.operations-workspace > *,
+.operations-list {
+  min-width: 0;
+}
+.operations-list {
+  border: 1px solid #d5e0e5;
+  border-radius: 8px;
+  background: white;
+  padding: 12px;
+}
+.operations-detail > section > section {
+  border-top: 1px solid #d5e0e5;
+  margin-top: 16px;
+  padding-top: 4px;
+}
+.operations-rows button[aria-pressed='true'] {
+  border-left: 4px solid #17846e;
+}
+.operations-rows button[aria-pressed='true'] strong::after {
+  content: ' · Selezionata';
+}
+.operation-voyage {
+  background: white;
+}
+.operation-voyage > section {
+  border-left: 3px solid #b9cbd4;
+  padding: 12px;
+  margin-top: 12px;
+  background: #f4f7f9;
+}
+.operation-voyage > section > div {
+  border-top: 1px solid #d5e0e5;
+  padding-block: 12px;
+}
+.operation-voyage strong {
+  display: block;
+  margin-top: 8px;
+}
+.service-filter-fields:focus-visible,
+.service-detail:focus-visible,
+.services-page .table-scroll:focus-visible,
+.operations-detail:focus-visible,
+.operations-stays:focus-visible,
+summary:focus-visible {
+  outline: 2px solid #087f5b;
+  outline-offset: -2px;
+}
+@media (max-width: 1200px) {
+  .services-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 100px minmax(180px, 1fr);
+    overflow: auto;
+  }
+  .service-detail-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .service-complete-description {
+    display: block;
+    font-size: 13px;
+  }
+  .services-workspace:not([data-detail='true']) {
+    grid-template-rows: minmax(100px, 1fr);
+  }
+  .services-workspace:not([data-detail='true']) .selection-empty {
+    display: none;
+  }
+  .operations-workspace {
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+@media (max-width: 700px) {
+  .service-comparison {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

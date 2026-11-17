@@ -3,7 +3,11 @@ import { ServicePreview } from './ServicePreview'
 import { CatalogPicker } from './CatalogPicker'
 import { useEffect, useRef, useState } from 'react'
 import { Button, Fieldset, Group, Modal, Select, Stack, Textarea, TextInput } from '@mantine/core'
-import type { ApplicationResult, ArchiveContextDto } from '../../../../shared/contracts/application'
+import type {
+  ApplicationResult,
+  ArchiveContextDto,
+  FieldIssueDto,
+} from '../../../../shared/contracts/application'
 import type {
   CreateFreeServiceDto,
   ServiceActivityDto,
@@ -57,6 +61,18 @@ export function Services({
     [dialogError, setDialogError] = useState<string | null>(null),
     [notice, setNotice] = useState<string | null>(null)
   const [uncertain, setUncertain] = useState(false)
+  const [issues, setIssues] = useState<readonly FieldIssueDto[]>([])
+  const [previewExpired, setPreviewExpired] = useState(false)
+  useEffect(() => {
+    if (!preview) {
+      setPreviewExpired(false)
+      return
+    }
+    const remaining = Date.parse(preview.expiresAtUtc) - Date.now()
+    setPreviewExpired(remaining <= 0)
+    const timer = window.setTimeout(() => setPreviewExpired(true), Math.max(0, remaining))
+    return () => window.clearTimeout(timer)
+  }, [preview])
   const trigger = useRef<HTMLElement | null>(null),
     detailFocus = useRef<HTMLButtonElement | null>(null),
     reloadFocus = useRef<HTMLButtonElement | null>(null)
@@ -120,6 +136,7 @@ export function Services({
     setResolution(null)
     setCandidates([])
     setDialogError(null)
+    setIssues([])
   }
   const change = (values: CreateFreeServiceDto) => {
     invalidateEditor()
@@ -331,6 +348,7 @@ export function Services({
         ),
       )
       if (r?.ok) setPreview(r.value)
+      else if (r) setIssues(r.error.fields)
       return
     }
     const base = moneyInput(draft.amount)
@@ -364,6 +382,7 @@ export function Services({
         executeServiceCommand(() => window.services.preview({ context: draft.context, payload })),
       )
       if (r?.ok) setPreview(r.value)
+      else if (r) setIssues(r.error.fields)
       return
     }
     const r = await command.request(() =>
@@ -399,7 +418,8 @@ export function Services({
           : 'Prestazione da catalogo registrata.',
       )
       setReload((n) => n + 1)
-    } else if (!r) {
+    } else if (r) setIssues(r.error.fields)
+    else if (!r) {
       setUncertain(true)
       setDialogError(
         'Esito non verificato. Ricarica la consultazione e controlla la registrazione prima di riprovare.',
@@ -411,13 +431,13 @@ export function Services({
     (draft.context.sessionId !== context.sessionId || draft.context.revision !== context.revision)
   return (
     <section className="master-data-page services-page" aria-label="Prestazioni">
-      <Group justify="space-between">
+      <Group justify="space-between" className="operational-heading">
         <h2>Prestazioni nave</h2>
         <Group>
           <Button disabled={!vesselId || busy} onClick={() => start('FREE')}>
             Nuova prestazione libera
           </Button>
-          <Button disabled={!vesselId || busy} onClick={() => start('CATALOG')}>
+          <Button variant="light" disabled={!vesselId || busy} onClick={() => start('CATALOG')}>
             Nuova prestazione da catalogo
           </Button>
           {draft && !open && (
@@ -466,202 +486,248 @@ export function Services({
           setPage(1)
         }}
       />
-      {vesselId && (
+      <Group gap="xs" className="consultation-actions">
+        {vesselId && (
+          <Button
+            variant="default"
+            disabled={busy}
+            onClick={() => {
+              listing.invalidate()
+              reading.invalidate()
+              setVesselId(null)
+              setFilters({})
+              setPage(1)
+              setList(null)
+              setSelected(null)
+              setDetail(null)
+            }}
+          >
+            Tutte le navi
+          </Button>
+        )}
         <Button
-          variant="default"
+          ref={reloadFocus}
+          variant="subtle"
           disabled={busy}
           onClick={() => {
-            listing.invalidate()
             reading.invalidate()
-            setVesselId(null)
-            setFilters({})
-            setPage(1)
-            setList(null)
-            setSelected(null)
             setDetail(null)
+            setReload((n) => n + 1)
           }}
         >
-          Tutte le navi
+          Ricarica consultazione
         </Button>
-      )}
-      <Button
-        ref={reloadFocus}
-        variant="subtle"
-        disabled={busy}
-        onClick={() => {
-          reading.invalidate()
-          setDetail(null)
-          setReload((n) => n + 1)
-        }}
-      >
-        Ricarica consultazione
-      </Button>
+      </Group>
       {error && (
         <StateMessage kind="error" title="Consultazione non disponibile">
           {error}
         </StateMessage>
       )}
       {notice && <StateMessage kind="success" title={notice} />}
-      {listing.loading ? (
-        <p role="status">Caricamento prestazioni…</p>
-      ) : (
-        list && (
-          <>
-            <div
-              className="table-scroll"
-              role="region"
-              aria-label="Elenco prestazioni"
-              tabIndex={0}
-            >
-              <table>
-                <thead>
-                  <tr>
-                    <th>Momento locale</th>
-                    <th>Categoria</th>
-                    <th>Descrizione</th>
-                    <th>Stato</th>
-                    <th>Base EUR</th>
-                    <th>Consultazione</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {list.items.map((s) => (
-                    <tr key={s.id}>
-                      <td>
-                        {s.moment.localDateTime} ({s.moment.offset})
-                      </td>
-                      <td>{s.category === 'FREE' ? 'Libera' : 'Catalogo'}</td>
-                      <td>{s.description}</td>
-                      <td>{executionLabels[s.executionStatus]}</td>
-                      <td>{s.base}</td>
-                      <td>
-                        <Button
-                          variant="subtle"
-                          onClick={() => {
-                            reading.invalidate()
-                            setSelected({ id: s.id })
-                            setDetail(null)
-                          }}
-                        >
-                          Apri prestazione
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {!list.total && <p>Nessuna prestazione registrata.</p>}
-            <PageControls
-              page={list}
-              disabled={busy || listing.loading}
-              onPage={(n) => {
-                listing.invalidate()
-                setPage(n)
-              }}
-            />
-          </>
-        )
-      )}
-      {detail && (
-        <section className="archive-panel" aria-label="Dettaglio prestazione">
-          <h3>{detail.description}</h3>
-          <p>
-            {detail.category === 'FREE' ? 'Libera' : 'Catalogo'} ·{' '}
-            {executionLabels[detail.executionStatus]} · Base EUR {detail.base}
-          </p>
-          <p>
-            {detail.vesselName} · {detail.portName} ·{' '}
-            {detail.berthName ?? 'Banchina non specificata'}
-          </p>
-          <p>
-            {detail.moment.localDateTime} · {detail.moment.zoneId} · {detail.moment.offset} · UTC{' '}
-            {detail.moment.utc}
-          </p>
-          <p className="tariff-long-value">
-            Viaggio: {detail.context.voyageId}
-            <br />
-            Visita: {detail.context.portCallId}
-            <br />
-            Ormeggio: {detail.context.berthStayId}
-          </p>
-          {detail.calculation && (
-            <section aria-label="Calcolo della prestazione" className="tariff-long-value">
-              <h4>Spiegazione del calcolo</h4>
-              <p>
-                Tipologia {detail.calculation.vesselTypeId} · dimensione {detail.calculation.size} ·
-                Peso: {detail.calculation.weight}
-              </p>
-              <p>
-                Tariffa dal {detail.calculation.tariffEffectiveFrom} · Scaglione fino a{' '}
-                {detail.calculation.upperLimit}
-              </p>
-              <ol>
-                {detail.calculation.steps.map((step, i) => (
-                  <li key={i}>{step}</li>
-                ))}
-              </ol>
-              <details>
-                <summary>Riferimenti del calcolo</summary>
-                <p>
-                  Tipo: {detail.serviceTypeId}
-                  <br />
-                  Tariffa: {detail.calculation.tariffId}
-                  <br />
-                  Configurazione: {detail.calculation.configurationId}
-                  <br />
-                  Scaglione: {detail.calculation.bracketId}
-                  <br />
-                  Sequenza peso: {detail.calculation.weightSequenceId}
-                  <br />
-                  Versione peso: {detail.calculation.weightVersionId}
-                </p>
-              </details>
-            </section>
+      <div className="services-workspace" data-detail={!!detail || reading.loading}>
+        <section
+          className="services-results"
+          aria-label="Risultati prestazioni"
+          aria-busy={listing.loading}
+        >
+          {listing.loading ? (
+            <p role="status">Caricamento prestazioni…</p>
+          ) : (
+            list && (
+              <>
+                <div
+                  className="table-scroll"
+                  role="region"
+                  aria-label="Elenco prestazioni"
+                  tabIndex={0}
+                >
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Momento locale</th>
+                        <th>Categoria</th>
+                        <th>Descrizione</th>
+                        <th>Stato</th>
+                        <th>Base EUR</th>
+                        <th>Consultazione</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {list.items.map((s) => (
+                        <tr key={s.id} aria-selected={selected?.id === s.id}>
+                          <td>
+                            {!vesselId && (
+                              <strong className="service-row-vessel">{s.vesselName}</strong>
+                            )}
+                            {s.moment.localDateTime.slice(0, 10)}
+                            <br />
+                            {s.moment.localDateTime.slice(11)} ({s.moment.offset})
+                          </td>
+                          <td>{s.category === 'FREE' ? 'Libera' : 'Catalogo'}</td>
+                          <td>
+                            <span className="service-list-description" title={s.description}>
+                              {s.description}
+                            </span>
+                          </td>
+                          <td>{executionLabels[s.executionStatus]}</td>
+                          <td>{s.base}</td>
+                          <td>
+                            <Button
+                              variant="subtle"
+                              aria-pressed={selected?.id === s.id}
+                              onClick={() => {
+                                reading.invalidate()
+                                setSelected({ id: s.id })
+                                setDetail(null)
+                              }}
+                            >
+                              Apri prestazione
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {!list.total && <p>Nessuna prestazione registrata.</p>}
+                <PageControls
+                  page={list}
+                  disabled={busy || listing.loading}
+                  onPage={(n) => {
+                    listing.invalidate()
+                    setPage(n)
+                  }}
+                />
+              </>
+            )
           )}
-          <SubjectValues subjects={detail.subjects} />
-          {detail.notes && <p>Note: {detail.notes}</p>}
-          <Group>
-            <Button
-              disabled={busy || reading.loading || detailRevision !== context.revision}
-              ref={detailFocus}
-              onClick={() => edit('UPDATE')}
-            >
-              Modifica prestazione
-            </Button>
-            {detail.executionStatus === 'PLANNED' && (
+        </section>
+        {detail ? (
+          <section
+            className="archive-panel service-detail"
+            aria-label="Dettaglio prestazione"
+            tabIndex={0}
+          >
+            <h3 className="service-detail-title">{detail.description}</h3>
+            {detail.description.length > 120 && (
+              <details className="service-complete-description">
+                <summary>Descrizione completa</summary>
+                <p>{detail.description}</p>
+              </details>
+            )}
+            <p>
+              {detail.category === 'FREE' ? 'Libera' : 'Catalogo'} ·{' '}
+              {executionLabels[detail.executionStatus]} · Base EUR {detail.base}
+            </p>
+            <p>
+              {detail.vesselName} · {detail.portName} ·{' '}
+              {detail.berthName ?? 'Banchina non specificata'}
+            </p>
+            <p>
+              {detail.moment.localDateTime} · {detail.moment.zoneId} · {detail.moment.offset} · UTC{' '}
+              {detail.moment.utc}
+            </p>
+            <details className="tariff-long-value">
+              <summary>Riferimenti della permanenza</summary>
+              <p>
+                Viaggio: {detail.context.voyageId}
+                <br />
+                Visita: {detail.context.portCallId}
+                <br />
+                Ormeggio: {detail.context.berthStayId}
+              </p>
+            </details>
+            {detail.calculation && (
+              <section aria-label="Calcolo della prestazione" className="tariff-long-value">
+                <h4>Spiegazione del calcolo</h4>
+                <p>
+                  Tipologia {detail.calculation.vesselTypeId} · dimensione {detail.calculation.size}{' '}
+                  · Peso: {detail.calculation.weight}
+                </p>
+                <p>
+                  Tariffa dal {detail.calculation.tariffEffectiveFrom} · Scaglione fino a{' '}
+                  {detail.calculation.upperLimit}
+                </p>
+                <ol>
+                  {detail.calculation.steps.map((step, i) => (
+                    <li key={i}>{step}</li>
+                  ))}
+                </ol>
+                <details>
+                  <summary>Riferimenti del calcolo</summary>
+                  <p>
+                    Tipo: {detail.serviceTypeId}
+                    <br />
+                    Tariffa: {detail.calculation.tariffId}
+                    <br />
+                    Configurazione: {detail.calculation.configurationId}
+                    <br />
+                    Scaglione: {detail.calculation.bracketId}
+                    <br />
+                    Sequenza peso: {detail.calculation.weightSequenceId}
+                    <br />
+                    Versione peso: {detail.calculation.weightVersionId}
+                  </p>
+                </details>
+              </section>
+            )}
+            <SubjectValues subjects={detail.subjects} ownLevel="SERVICE_ACTIVITY" />
+            {detail.notes && <p>Note: {detail.notes}</p>}
+            <Group className="detail-actions">
               <Button
                 disabled={busy || reading.loading || detailRevision !== context.revision}
-                onClick={() => edit('COMPLETE')}
+                ref={detailFocus}
+                onClick={() => edit('UPDATE')}
               >
-                Consuntiva prestazione
+                Modifica prestazione
               </Button>
+              {detail.executionStatus === 'PLANNED' && (
+                <Button
+                  disabled={busy || reading.loading || detailRevision !== context.revision}
+                  onClick={() => edit('COMPLETE')}
+                >
+                  Consuntiva prestazione
+                </Button>
+              )}
+              <Button
+                variant="default"
+                disabled={busy || reading.loading || detailRevision !== context.revision}
+                onClick={() => edit('NOTES')}
+              >
+                Modifica sole note
+              </Button>
+              <Button
+                color="red"
+                variant="default"
+                disabled={busy || reading.loading || detailRevision !== context.revision}
+                onClick={() => edit('DELETE')}
+              >
+                Elimina prestazione
+              </Button>
+            </Group>
+            <p>
+              {detail.category === 'FREE'
+                ? 'Importo base manuale.'
+                : 'Importo base calcolato dalla tariffa e dal peso applicabili.'}{' '}
+              Disponibilità operativa: contesto di permanenza completo; l’idoneità definitiva alla
+              fatturazione sarà valutata in una fase successiva.
+            </p>
+          </section>
+        ) : (
+          <section
+            className="archive-panel service-detail selection-empty"
+            aria-busy={reading.loading}
+          >
+            {reading.loading ? (
+              <p role="status">Caricamento dettaglio prestazione…</p>
+            ) : (
+              <StateMessage title="Seleziona una prestazione">
+                Apri una riga per consultare contesto, soggetti, importo base e azioni.
+              </StateMessage>
             )}
-            <Button
-              variant="default"
-              disabled={busy || reading.loading || detailRevision !== context.revision}
-              onClick={() => edit('NOTES')}
-            >
-              Modifica sole note
-            </Button>
-            <Button
-              color="red"
-              variant="default"
-              disabled={busy || reading.loading || detailRevision !== context.revision}
-              onClick={() => edit('DELETE')}
-            >
-              Elimina prestazione
-            </Button>
-          </Group>
-          <p>
-            {detail.category === 'FREE'
-              ? 'Importo base manuale.'
-              : 'Importo base calcolato dalla tariffa e dal peso applicabili.'}{' '}
-            Disponibilità operativa: contesto di permanenza completo; l’idoneità definitiva alla
-            fatturazione sarà valutata in una fase successiva.
-          </p>
-        </section>
-      )}
+          </section>
+        )}
+      </div>
       <Modal
         opened={open}
         onClose={() => {
@@ -682,7 +748,10 @@ export function Services({
               ? 'Nuova prestazione da catalogo'
               : 'Nuova prestazione libera'
         }
-        size="lg"
+        size={preview ? 'xl' : 'lg'}
+        returnFocus={false}
+        closeOnEscape={!busy}
+        withCloseButton={!busy}
         closeOnClickOutside={false}
         onExitTransitionEnd={() => {
           const target = trigger.current
@@ -703,9 +772,19 @@ export function Services({
                 Ricarica la bozza per usare il contesto corrente.
               </StateMessage>
             )}
-            {preview && <ServicePreview preview={preview} />}
+            {!!issues.length && (
+              <div role="alert">
+                {issues.map((issue, i) => (
+                  <p key={i}>{issue.message}</p>
+                ))}
+              </div>
+            )}
+            {preview && (
+              <ServicePreview preview={preview} obsolete={stale} expired={previewExpired} />
+            )}
             {draft.mode === 'NOTES' && (
               <Textarea
+                data-autofocus
                 label="Note"
                 maxLength={10000}
                 value={draft.values.notes ?? ''}
@@ -819,6 +898,7 @@ export function Services({
                     <>
                       <TextInput
                         label="Descrizione"
+                        error={issues.find((issue) => issue.path.at(-1) === 'description')?.message}
                         required
                         maxLength={1000}
                         value={draft.values.description}
@@ -828,6 +908,12 @@ export function Services({
                       />
                       <TextInput
                         label="Importo base EUR"
+                        error={
+                          issues.find((issue) => issue.path.at(-1) === 'base')?.message ??
+                          (dialogError?.startsWith('Inserisci un importo base')
+                            ? dialogError
+                            : undefined)
+                        }
                         required
                         inputMode="decimal"
                         value={draft.amount}
@@ -883,8 +969,9 @@ export function Services({
                 Torna ai dati
               </Button>
             )}
-            <Group justify="space-between">
+            <Group justify="space-between" className="form-actions">
               <Button
+                data-autofocus={draft.mode === 'DELETE' || !!preview || undefined}
                 variant="default"
                 disabled={busy}
                 onClick={() => {
@@ -895,11 +982,13 @@ export function Services({
                 Chiudi
               </Button>
               <Button
+                color={draft.mode === 'DELETE' ? 'red' : undefined}
                 disabled={
                   busy ||
                   stale ||
                   uncertain ||
                   !!preview?.blockers.length ||
+                  (!!preview && previewExpired) ||
                   (draft.category === 'CATALOG' && !draft.serviceTypeId)
                 }
                 loading={command.loading}

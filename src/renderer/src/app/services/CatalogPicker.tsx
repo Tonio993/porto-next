@@ -88,8 +88,15 @@ export function CatalogPicker({
       />
       <Select
         label="Tipo di prestazione"
-        required
-        allowDeselect={false}
+        required={!historical}
+        placeholder={historical ? 'Tutti i tipi' : 'Seleziona un tipo'}
+        clearable={historical}
+        clearButtonProps={{
+          tabIndex: 0,
+          'aria-hidden': false,
+          'aria-label': 'Rimuovi filtro tipo di prestazione',
+        }}
+        allowDeselect={historical}
         data={options}
         value={value}
         disabled={disabled || loading}

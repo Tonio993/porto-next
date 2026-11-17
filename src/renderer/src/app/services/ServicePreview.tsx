@@ -43,7 +43,7 @@ function Values({ value }: { value: ServiceActivityDto }) {
         <br />
         Ormeggio: {value.context.berthStayId}
       </p>
-      <SubjectValues subjects={value.subjects} />
+      <SubjectValues subjects={value.subjects} ownLevel="SERVICE_ACTIVITY" />
       <p>Note: {value.notes ?? 'Nessuna'}</p>
       {value.calculation && (
         <ol>
@@ -55,10 +55,27 @@ function Values({ value }: { value: ServiceActivityDto }) {
     </div>
   )
 }
-export function ServicePreview({ preview }: { preview: ServiceChangePreviewDto }) {
+export function ServicePreview({
+  preview,
+  obsolete,
+  expired,
+}: {
+  preview: ServiceChangePreviewDto
+  obsolete: boolean
+  expired: boolean
+}) {
   return (
     <section aria-label="Anteprima prestazione">
       <h3>Anteprima degli effetti</h3>
+      <p className="preview-state">
+        {obsolete
+          ? 'Anteprima obsoleta · ricarica la bozza e genera una nuova anteprima.'
+          : expired
+            ? 'Anteprima scaduta · torna ai dati e genera una nuova anteprima.'
+            : preview.blockers.length
+              ? 'Anteprima bloccata · risolvi i vincoli prima di confermare.'
+              : 'Anteprima pronta · confronta i valori prima di confermare.'}
+      </p>
       <p>
         {preview.changedFields.length
           ? preview.changedFields
@@ -66,16 +83,20 @@ export function ServicePreview({ preview }: { preview: ServiceChangePreviewDto }
               .join(', ')
           : 'Nessuna variazione.'}
       </p>
-      <h4>Prima</h4>
-      <Values value={preview.before} />
-      {preview.after ? (
-        <>
+      <div className="service-comparison">
+        <section aria-label="Valori prima">
+          <h4>Prima</h4>
+          <Values value={preview.before} />
+        </section>
+        <section aria-label="Valori dopo">
           <h4>Dopo</h4>
-          <Values value={preview.after} />
-        </>
-      ) : (
-        <p>La prestazione e i suoi soggetti verranno eliminati definitivamente.</p>
-      )}
+          {preview.after ? (
+            <Values value={preview.after} />
+          ) : (
+            <p>La prestazione e i suoi soggetti verranno eliminati definitivamente.</p>
+          )}
+        </section>
+      </div>
       {preview.blockers.map((b, i) => (
         <p role="alert" key={i}>
           {b.reference.label}: {b.reason}

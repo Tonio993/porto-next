@@ -50,15 +50,28 @@ export function ServiceFilters({
   if (selected && !options.some((v) => v.id === selected.id)) voyageOptions.unshift(selected)
   const visits = selected?.visits ?? [],
     visit = visits.find((v) => v.id === value.portCallId)
+  const activeCount = Object.values(value).filter((v) => v != null && v !== '').length
   return (
     <details
+      className="service-filters"
       onToggle={(e) => {
         if (e.currentTarget.open) setExpanded(true)
       }}
     >
-      <summary>Filtri prestazioni</summary>
+      <summary>
+        <span>Filtri prestazioni</span>
+        <span className="filter-summary">
+          {activeCount ? `${activeCount} attivi · combinati` : 'Nessun filtro attivo'}
+        </span>
+      </summary>
       {expanded && (
-        <Stack>
+        <Stack
+          className="service-filter-fields"
+          gap="xs"
+          role="region"
+          aria-label="Filtri combinati"
+          tabIndex={0}
+        >
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
             <Select
               label="Categoria"

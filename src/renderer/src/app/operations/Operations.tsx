@@ -304,12 +304,17 @@ export function Operations({
       {notice && <StateMessage kind="success" title={notice} />}
       <Group>
         <Button
+          aria-pressed={view === 'operations'}
           variant={view === 'operations' ? 'filled' : 'default'}
           onClick={() => setView('operations')}
         >
           Operazioni
         </Button>
-        <Button variant={view === 'stays' ? 'filled' : 'default'} onClick={() => setView('stays')}>
+        <Button
+          aria-pressed={view === 'stays'}
+          variant={view === 'stays' ? 'filled' : 'default'}
+          onClick={() => setView('stays')}
+        >
           Permanenze
         </Button>
         <Button variant="subtle" disabled={busy} onClick={() => setReload((n) => n + 1)}>
@@ -370,7 +375,12 @@ export function Operations({
               />
             )}
           </div>
-          <div className="operations-detail">
+          <div
+            className="operations-detail archive-panel"
+            role="region"
+            aria-label="Consultazione operazione"
+            tabIndex={0}
+          >
             {detailRequest.loading ? (
               <p role="status">Caricamento dettaglio…</p>
             ) : detail ? (
@@ -389,7 +399,12 @@ export function Operations({
           </div>
         </div>
       ) : (
-        <div className="operations-stays" aria-label="Permanenze derivate">
+        <div
+          className="operations-stays"
+          role="region"
+          aria-label="Permanenze derivate"
+          tabIndex={0}
+        >
           {stayRequest.loading ? (
             <p role="status">Caricamento permanenze…</p>
           ) : stays?.total === 0 ? (
@@ -776,7 +791,7 @@ export function Operations({
                 disabled={busy}
                 onChange={(e) => change({ ...draft.values, notes: e.currentTarget.value || null })}
               />
-              <Group>
+              <Group className="form-actions">
                 <Button variant="default" onClick={close} disabled={busy}>
                   Chiudi
                 </Button>

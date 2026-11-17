@@ -62,7 +62,7 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
         return (
           <section key={c.id} aria-label={'Componente ' + c.chargeKind}>
             <h4>
-              Base economica · EUR · {c.chargeKind}
+              Base economica · EUR · {operationLabels[c.chargeKind]}
               {c.economicEndpointRole === 'ARRIVAL'
                 ? ' all’arrivo'
                 : c.economicEndpointRole === 'DEPARTURE'
@@ -83,7 +83,7 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
               <br />
               <strong>Base effettiva: {formatMoney(c.effectiveBase)}</strong>
             </p>
-            <SubjectValues subjects={c.subjects} />
+            <SubjectValues subjects={c.subjects} ownLevel="VESSEL_OPERATION" />
             <ol>
               {r.steps.map((step, i) => (
                 <li key={i}>{step}</li>
@@ -124,6 +124,10 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
         </p>
       )}
       <p>Note: {o.notes ?? '—'}</p>
+      <p className="operations-future">
+        Gli importi sono basi operative; l’idoneità definitiva alla fatturazione sarà valutata in
+        una fase successiva.
+      </p>
     </section>
   )
 }

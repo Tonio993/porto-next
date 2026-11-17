@@ -1,0 +1,265 @@
+{
+  "task": "V01",
+  "date": "2026-11-17",
+  "base": "017cdf6",
+  "branch": "main",
+  "schemaVersion": 16,
+  "implementation": "Implementazione V01 sulla base 017cdf6; sorgenti identificati dalle impronte sottostanti",
+  "implementationSha256": {
+    "package.json": "48c59719054e179aab95492044843656548cefbb76b129ba9e387d72840e52e6",
+    "scripts/test.mjs": "1c953c0f60fcae1c343703f46ae61019c1aab0b1b62b9166a67d781f3cd8eec1",
+    "vitest.config.ts": "35a17da688442a3e266bdbe3d363cecfe24a28b78a5c9df886e182347b48db94",
+    "playwright.config.ts": "5d9b81e21efd2c6217aaecc59d1660e0d4351732377bae58aaf7f04f6140b1b5",
+    "scripts/verification/collect.mjs": "b2d002ee62e0a5469a0b65739913bc80ba7a1ccea926de8e90a004bd04f16105",
+    "scripts/verification/collection.test.mjs": "68d7c73245b7a649dc6f78bef8061930473428029a2d7699eb6a66b856cbd554",
+    "scripts/verification/playwright-context.mjs": "cdb84205850fb5f73f458fccc350f9a7b943c6fc055adb4072d35d25ff8c1907",
+    "scripts/verification/results.mjs": "150e4046633d143e03f05749e9faa1a1be39116b20bb47bb4e8b1c5d45692fa1",
+    "scripts/verification/vitest-context.mjs": "b0b23997432427c1dc3857e5dc9976881b175195affdeacd37aa2d079260e32a"
+  },
+  "checks": {
+    "fixtures": {
+      "command": "npm.cmd run test:report:fixtures",
+      "passed": 4,
+      "failed": 0,
+      "exitCode": 0,
+      "log": ".local/v01-fixtures.log",
+      "logSha256": "f9f5b8e4b5edcbda440de8d31f7a4cdaf833ad7d95611b9b3978d88df846d061"
+    },
+    "existingCommand": {
+      "command": "npm.cmd test -- tests/unit/archive-service.test.ts",
+      "passed": 12,
+      "failed": 0,
+      "exitCode": 0,
+      "log": ".local/v01-existing-command.log",
+      "logSha256": "37a0c800d8ed25d9f5523a4dbb487d8c643fc543ea21335eff2e2a7d295544c6"
+    },
+    "check": {
+      "command": "npm.cmd run check",
+      "exitCode": 1,
+      "typecheck": "passed",
+      "eslint": "passed",
+      "formatting": "solo cinque legacy preesistenti, V03",
+      "log": ".local/v01-check.log",
+      "logSha256": "eb966b1daf333f7b1f21fcd850a4f77d4139a5947223e5f6fb171a194efdef16",
+      "legacy": [
+        "doc/legacy/00-roadmap-progetto.md",
+        "doc/legacy/01-analisi-dominio.md",
+        "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+        "doc/legacy/03-modello-dati.md",
+        "doc/legacy/04-sviluppo-evolutivo.md"
+      ]
+    }
+  },
+  "runs": {
+    "backend": {
+      "runId": "2026-11-17T14-56-54.377Z-EFr3CT",
+      "directory": "test-results/verification/2026-11-17T14-56-54.377Z-EFr3CT",
+      "reproduction": "& 'C:\\nvm4w\\nodejs\\node.exe' 'C:\\Other\\porto-next\\scripts\\verification\\collect.mjs' 'vitest' '--phase' 'backend' '--scope' 'suite backend completa V01' '--'",
+      "environment": {
+        "cwd": "C:\\Other\\porto-next",
+        "platform": "win32",
+        "architecture": "x64",
+        "osRelease": "10.0.26200",
+        "node": "v24.21.0",
+        "runnerVersion": "5.1.0",
+        "electronVersion": "45.2.3",
+        "variables": {},
+        "runnerRuntime": {
+          "node": "24.22.2",
+          "acorn": "8.18.0",
+          "ada": "4.0.0",
+          "amaro": "1.1.11",
+          "ares": "1.34.9",
+          "brotli": "1.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.4.3",
+          "merve": "1.2.2",
+          "modules": "150",
+          "napi": "10",
+          "nbytes": "0.1.4",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.70.0",
+          "nghttp3": "",
+          "ngtcp2": "",
+          "openssl": "0.0.0",
+          "simdjson": "4.6.11",
+          "simdutf": "7.7.0",
+          "sqlite": "3.53.4",
+          "tz": "2026e",
+          "undici": "7.30.1",
+          "unicode": "17.0",
+          "uv": "1.52.1",
+          "uvwasi": "0.0.23",
+          "v8": "15.6.75.27-electron.0",
+          "zlib": "1.3.2.1-motley",
+          "zstd": "1.6.0",
+          "electron": "45.2.3",
+          "chrome": "156.0.8078.80"
+        }
+      },
+      "outcome": "passed",
+      "processExitCode": 0,
+      "collectorExitCode": 0,
+      "counts": {
+        "passed": 296,
+        "failed": 0,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 296,
+        "attempts": 296,
+        "retried": 0
+      },
+      "durationMs": 31185,
+      "revalidatedWithFinalNormalizer": true,
+      "sha256": {
+        "results.json": "223731d7e615576d8f02dd544639f54320e1622083c332200f1ef70bbdbc9ad3",
+        "summary.md": "7028085aca711503d364f22b444935a34e54a60f6259693b249d2cd4ff590fd9",
+        "execution.json": "e29dfdb579d6ad93c7a5b87c3ef998efca64774a3039d6faa5876f64b70f6fa0",
+        "native/report.json": "5f32383c9f98ef3457544fa0440d2a3e6ab9a94b1be8aa80f16b28b488a8ce3d",
+        "native/context.json": "f42c68067cb51d3d706e63fb4303d38bbf1a6f1d18e1f4b65a800b6731e7436a",
+        "stdout.log": "a7ff0265173f4df8f89e426bea434634db9363a64239c9b7215da3582b2d7d0b",
+        "stderr.log": "db8db5ac0786f202e60d9dfac388edd8c6bebaf167acde2b7c8cc5f5c669f7cd"
+      }
+    },
+    "desktopBuild": {
+      "runId": "2026-11-17T14-57-39.779Z-UE5sRC",
+      "directory": "test-results/verification/2026-11-17T14-57-39.779Z-UE5sRC",
+      "reproduction": "& 'C:\\nvm4w\\nodejs\\node.exe' 'C:\\Other\\porto-next\\scripts\\verification\\collect.mjs' 'playwright' '--phase' 'desktop-build' '--scope' 'Archivi: avvio, isolamento, offline, file e riapertura' '--' 'tests/e2e/archives.spec.ts'",
+      "environment": {
+        "cwd": "C:\\Other\\porto-next",
+        "platform": "win32",
+        "architecture": "x64",
+        "osRelease": "10.0.26200",
+        "node": "v24.21.0",
+        "runnerVersion": "1.65.0",
+        "electronVersion": "45.2.3",
+        "variables": {},
+        "runnerRuntime": {
+          "node": "24.21.0"
+        }
+      },
+      "outcome": "passed",
+      "processExitCode": 0,
+      "collectorExitCode": 0,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 1,
+        "attempts": 1,
+        "retried": 0
+      },
+      "durationMs": 35292,
+      "revalidatedWithFinalNormalizer": true,
+      "sha256": {
+        "results.json": "7fcb10cf33f12deea52da4b69a711322fa422c40560c2972b39ff3a2c2c09bda",
+        "summary.md": "08b9009c2ddc11dcc7dfa2e1dc8042b6da27f0ef61dc0a40e55160064e8e163a",
+        "execution.json": "d04eea317ea6e5dd57b355257de49914c0fc80a6d522c5c4a85c83b9646fc90e",
+        "native/report.json": "33b77c3e2d61b6c7b8bb04f0fb7f07339e853e22b0a357804f062d1f11c3e4a6",
+        "native/context.json": "cd23dda5bb8d6c945a166d25f4365f39bef5c72a062f7a6fef7837e719c65e0b",
+        "stdout.log": "f3a082d2c277d4362235975c8ffcc6667c656ed700d3dcb4a82e12a57451456d",
+        "stderr.log": "a48270b75ce6194717c629c95186a1bde753c654de22fd6581e06758e25d1ca0"
+      }
+    },
+    "backendTimeout": {
+      "runId": "2026-11-17T14-53-10.193Z-CIuiO2",
+      "directory": "test-results/verification/2026-11-17T14-53-10.193Z-CIuiO2",
+      "reproduction": "& 'C:\\nvm4w\\nodejs\\node.exe' 'C:\\Other\\porto-next\\scripts\\verification\\collect.mjs' 'vitest' '--phase' 'backend' '--scope' 'suite backend completa V01' '--'",
+      "environment": {
+        "cwd": "C:\\Other\\porto-next",
+        "platform": "win32",
+        "architecture": "x64",
+        "osRelease": "10.0.26200",
+        "node": "v24.21.0",
+        "runnerVersion": "5.1.0",
+        "electronVersion": "45.2.3",
+        "variables": {},
+        "runnerRuntime": {
+          "node": "24.22.2",
+          "acorn": "8.18.0",
+          "ada": "4.0.0",
+          "amaro": "1.1.11",
+          "ares": "1.34.9",
+          "brotli": "1.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.4.3",
+          "merve": "1.2.2",
+          "modules": "150",
+          "napi": "10",
+          "nbytes": "0.1.4",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.70.0",
+          "nghttp3": "",
+          "ngtcp2": "",
+          "openssl": "0.0.0",
+          "simdjson": "4.6.11",
+          "simdutf": "7.7.0",
+          "sqlite": "3.53.4",
+          "tz": "2026e",
+          "undici": "7.30.1",
+          "unicode": "17.0",
+          "uv": "1.52.1",
+          "uvwasi": "0.0.23",
+          "v8": "15.6.75.27-electron.0",
+          "zlib": "1.3.2.1-motley",
+          "zstd": "1.6.0",
+          "electron": "45.2.3",
+          "chrome": "156.0.8078.80"
+        }
+      },
+      "outcome": "failed",
+      "processExitCode": 1,
+      "collectorExitCode": 1,
+      "counts": {
+        "passed": 295,
+        "failed": 1,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 296,
+        "attempts": 296,
+        "retried": 0
+      },
+      "durationMs": 36860,
+      "revalidatedWithFinalNormalizer": true,
+      "sha256": {
+        "results.json": "2a476036a7b8887a6875ba2009ad5260032c30248d3cff9747a5d8a3f8b76100",
+        "summary.md": "d4d7223a52aadd42f0f7a4d6131aafb6c4b79e83ac7a941378c0675269cb1133",
+        "execution.json": "f8af58cb4cfa2bb61a0b711ca423bb73a2c1c103ca78884e932db5ad3fee8b3a",
+        "native/report.json": "fbd190eacad59596cc0c1fa4fcb0821acc39fc9fb984776d2052374a01d2ca01",
+        "native/context.json": "f65b55323f1c55ca26b851088d276cb7c0e01749b3c67309e9136cec60ed7b2a",
+        "stdout.log": "f5006d57ed5322f30c435b1f0047e1712dde7b3002620d65a3f858d7034b1dda",
+        "stderr.log": "2ddd4ff5ad3760ae4d040fe2314bd27529dfd5e680c621251d03bf36434e5bd8"
+      }
+    }
+  },
+  "buildReuse": {
+    "sourceManifest": "doc/m3/allegati/build-sha256.json",
+    "payload": {
+      "out/main/index.js": "6eeb6a20bb736b20666fc3347844f4c0d327aaadf86357e2e00a3fa71405759b",
+      "out/preload/index.js": "610c780fdc34d1a0e51990be8b935249c49ae08945527ce3510d161d348ce179",
+      "out/renderer/assets/index-DluJBYNQ.css": "fdde8f53c66fb7b4bc4ec1a45fc5659311f697864e7bca224950495f523cc338",
+      "out/renderer/assets/index-iyJ_IBYi.js": "20ccb1c4e49dfabbc7bb7222938db1a66d2896eeaceeceff78847a7f08509bd2",
+      "out/renderer/index.html": "f53da56c2f665738f778e3b56033b158cbe41b93d4cbfec7c6a04b25d49c02fb"
+    },
+    "allHashesMatch": true,
+    "rebuilt": false,
+    "packaged": false
+  },
+  "coverage": "Fixture generate fuori dalle suite applicative; backend completo con SQLite Electron e migrazioni; desktop Archivi con archivi/preferenze temporanei e renderer offline.",
+  "limitations": [
+    "Un solo Windows x64; nessuna sessione manuale umana.",
+    "Avvii nel percorso esterno già autorizzato; ACL, sandbox e isolamento Electron preservati.",
+    "Il timeout intermedio sui fusi resta un esito separato, seguito dalla suite completa in sequenza senza cambiare timeout o retry.",
+    "Ultima modifica di sola presentazione del riepilogo verificata con fixture; i medesimi JSON backend/desktop sono ricontrollati con il normalizzatore finale.",
+    "Suite desktop e pacchetto completi alla milestone; nessun trigger di packaging in V01."
+  ]
+}

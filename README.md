@@ -137,6 +137,8 @@ npm run dist:win
 
 - `check`: TypeScript, ESLint e formattazione.
 - `test`: test del backend nel runtime Node di Electron, con database temporanei reali.
+- `test:report`: raccolta esplicita di una esecuzione Vitest o Playwright con `summary.md`, JSON completo, log e artefatti; [comandi e formato V01](doc/v01/risultati-strutturati.md#comandi-disponibili).
+- `test:report:fixtures`: verifica isolata della raccolta, inclusi errori, salti, interruzioni e retry.
 - `test:e2e`: build e test su Electron con dialoghi nativi simulati; la finestra di test resta nascosta. Verifica anche il funzionamento offline e la persistenza dopo il riavvio. Non occorre scaricare un browser Playwright separato.
 - `pack`: applicazione non installata in `dist/win-unpacked/`.
 - `test:packaged`: esegue l'intera suite desktop sul pacchetto Windows, con dati temporanei isolati.

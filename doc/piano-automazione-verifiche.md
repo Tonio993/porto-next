@@ -12,17 +12,17 @@ La frequenza dei controlli resta quella del [piano §7.3](piano-implementazione-
 
 Eseguire V01 → V02 → V03 prima di riprendere **P17A**. Usare poi il primo task funzionale come riscontro operativo e rivalutare V04–V07: sono pianificati, non prerequisiti per proseguire lo sviluppo. Costi e benefici sono valutazioni relative, non stime temporali o percentuali di risparmio.
 
-| ID  | Attività                                 | Beneficio                  | Costo       | Dipendenze | Stato       | Consegna |
-| --- | ---------------------------------------- | -------------------------- | ----------- | ---------- | ----------- | -------- |
-| V01 | Risultati strutturati e report sintetico | Molto alto                 | Medio-basso | Nessuna    | Da avviare  | —        |
-| V02 | Coordinatore e profili                   | Molto alto                 | Medio       | V01        | Da avviare  | —        |
-| V03 | Avvisi e adozione documentale            | Alto                       | Basso       | V02        | Da avviare  | —        |
-| V04 | Ripetizioni mirate e consolidamento      | Alto                       | Medio       | V01–V02    | Pianificato | —        |
-| V05 | Riuso verificabile di build ed esiti     | Alto per esecuzioni lunghe | Alto        | V02, V04   | Pianificato | —        |
-| V06 | Diagnostica e acquisizioni desktop       | Medio-alto                 | Medio       | V01–V02    | Pianificato | —        |
-| V07 | Ottimizzazione della durata              | Da misurare                | Medio-alto  | Misure V02 | Opzionale   | —        |
+| ID  | Attività                                 | Beneficio                  | Costo       | Dipendenze | Stato       | Consegna                                             |
+| --- | ---------------------------------------- | -------------------------- | ----------- | ---------- | ----------- | ---------------------------------------------------- |
+| V01 | Risultati strutturati e report sintetico | Molto alto                 | Medio-basso | Nessuna    | Completato  | [Formato v1 e comandi](v01/risultati-strutturati.md) |
+| V02 | Coordinatore e profili                   | Molto alto                 | Medio       | V01        | Da avviare  | —                                                    |
+| V03 | Avvisi e adozione documentale            | Alto                       | Basso       | V02        | Da avviare  | —                                                    |
+| V04 | Ripetizioni mirate e consolidamento      | Alto                       | Medio       | V01–V02    | Pianificato | —                                                    |
+| V05 | Riuso verificabile di build ed esiti     | Alto per esecuzioni lunghe | Alto        | V02, V04   | Pianificato | —                                                    |
+| V06 | Diagnostica e acquisizioni desktop       | Medio-alto                 | Medio       | V01–V02    | Pianificato | —                                                    |
+| V07 | Ottimizzazione della durata              | Da misurare                | Medio-alto  | Misure V02 | Opzionale   | —                                                    |
 
-Stati: Da avviare, Pianificato, In corso, Implementato/da verificare, Completato, Bloccato con causa concreta; Opzionale per V07 finché non approvato. **Prossima attività: V01.** Per ogni consegna aggiornare in posto la riga e la sezione finale di questo documento, con riferimento all’implementazione, esiti e limiti effettivi.
+Stati: Da avviare, Pianificato, In corso, Implementato/da verificare, Completato, Bloccato con causa concreta; Opzionale per V07 finché non approvato. **Prossima attività: V02.** Per ogni consegna aggiornare in posto la riga e la sezione finale di questo documento, con riferimento all’implementazione, esiti e limiti effettivi.
 
 Per iniziare un Vxx leggere obiettivo, sequenza, scheda corrente e regole comuni; consultare le altre schede quando servono per una dipendenza.
 
@@ -86,4 +86,10 @@ Per iniziare un Vxx leggere obiettivo, sequenza, scheda corrente e regole comuni
 
 ## Consegna corrente
 
-**Pianificazione completata; implementazione V01–V07 non avviata.** Prima chat: V01. Le verifiche di questo documento sono soltanto documentali; non introducono nuovi comandi né sostituiscono le evidenze applicative M3. Al termine di V01 registrare qui risultato, prove, limiti e passaggio a V02, mantenendo la tabella come indice degli stati.
+**V01 completato e verificato il 17 novembre 2026**, base `017cdf6`, branch `main` inizialmente pulito; schema applicativo v16 invariato. Disponibili `test:report` e `test:report:fixtures`: una esecuzione Vitest o Playwright produce `summary.md`, `results.json` v1, metadati, JSON nativi, log completi e artefatti isolati. SQLite passa sempre da `scripts/test.mjs` nel runtime Electron; i comandi precedenti sono preservati. [Contratto, identità, esiti e integrazione](v01/risultati-strutturati.md), [manifest delle prove](v01/verifiche.json).
+
+**Verifiche finali:** 4/4 prove della raccolta con fixture isolate per successo, asserzione fallita, setup, interruzione, report assente/malformato/incompleto, salti/todo, fallimenti attesi, retry, parametri, più progetti e ripetizioni; backend completo **296/296**, incluse invarianti e migrazioni SQLite; integrazione desktop **Archivi 1/1** su Electron, offline e con archivi/preferenze temporanei; comando preesistente `npm test` verificato anche senza raccolta su Archivi **12/12**. `npm run check`: TypeScript ed ESLint passati, uscita 1 soltanto per i cinque Prettier legacy `00`–`04`, invariati e rinviati a V03. File modificati formattati, UTF-8, collegamenti e differenze Git verificati. Riusata la build M3 con tutte le cinque impronte coincidenti al manifest: nessuna modifica applicativa, di schema, runtime o confezionamento; suite desktop e pacchetto completi restano al prossimo traguardo del §7.3. Prove automatizzate su Windows x64 nel percorso esterno autorizzato, con ACL, sandbox e isolamento Electron conservati; nessuna nuova sessione manuale umana.
+
+Un tentativo backend intermedio ha registrato **295/296** per timeout di 5 secondi nella prova che avvia tre processi Electron per confrontare i fusi, durante l’esecuzione concorrente delle fixture. La suite completa successiva, eseguita in sequenza, passa **296/296** senza modificare test, timeout o retry. Il manifest conserva entrambe le esecuzioni e i loro codici originali; nessun consolidamento o promozione automatica degli esiti. Le ultime modifiche di sola presentazione del riepilogo sono coperte dalle fixture finali; esiti e conteggi backend/desktop sono ricontrollati sui medesimi JSON nativi con il normalizzatore finale.
+
+**Passaggio operativo a V02 — Coordinatore e profili:** consumare `formatVersion: 1` e le API di `scripts/verification/collect.mjs` e `results.mjs`, distinguendo `process.exitCode`, uscita della raccolta, `outcome`, lacune, salti e flaky. Registrare separatamente le fasi richieste/non eseguite/bloccate e coordinare build, test e pacchetto secondo §7.3. Non interpretare un solo zero come completamento del task. L’arresto forzato del collector o un disco non scrivibile possono lasciare soltanto metadati/log iniziali: V02 deve riconoscerli come incompleti. Nessun coordinatore, profilo, cache o consolidamento fra esecuzioni introdotto in V01; politica di conservazione generale e avvisi legacy restano V03, consolidamento V04 e riuso automatico V05.

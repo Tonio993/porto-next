@@ -213,12 +213,12 @@ L'analisi espone oggetti creati, modificati o rimossi, attribuzioni, fonti dei s
 
 Le revisioni grafiche sono attività implementative con verifica nell'applicazione Electron. Affiancano le revisioni tecniche della sezione 7.2 e mantengono invariati perimetro funzionale, contratti applicativi e regole di dominio. Gli ID `UI01`–`UI04` non rinumerano i task funzionali e hanno stato autonomo nel registro.
 
-| ID   | Collocazione                          | Risultato atteso                                                                                             |
-| ---- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| UI01 | Dopo P04, prima di P05–P07.           | Struttura comune e percorso Porti come riferimento visivo per le anagrafiche successive.                     |
-| UI02 | Dopo P00–P08, alla chiusura di M1.    | Coerenza di anagrafiche e catalogo, verificata con dati realistici, testi lunghi e liste paginate.           |
-| UI03 | Dopo P09–P16, alla chiusura di M3.    | Revisione dei flussi operativi completi, dalla registrazione alla ricerca e consultazione delle prestazioni. |
-| UI04 | Dentro P20, prima della sua chiusura. | Verifica finale di leggibilità, accessibilità e dimensioni supportate, anche nell'eseguibile confezionato.   |
+| ID   | Collocazione                           | Risultato atteso                                                                                             |
+| ---- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| UI01 | Dopo P04, prima di P05–P07.            | Struttura comune e percorso Porti come riferimento visivo per le anagrafiche successive.                     |
+| UI02 | Dopo P00–P08, alla chiusura di M1.     | Coerenza di anagrafiche e catalogo, verificata con dati realistici, testi lunghi e liste paginate.           |
+| UI03 | Dopo P09–P16, prima della chiusura M3. | Revisione dei flussi operativi completi, dalla registrazione alla ricerca e consultazione delle prestazioni. |
+| UI04 | Dentro P20, prima della sua chiusura.  | Verifica finale di leggibilità, accessibilità e dimensioni supportate, anche nell'eseguibile confezionato.   |
 
 **UI01 — Revisione grafica iniziale post P04.** Esaminare l'app in esecuzione prima di scegliere il layout. Rivedere struttura della finestra, navigazione anagrafiche, gerarchie, tipografia, spaziature, densità, tabelle, form e azioni. Nel percorso Porti valutare la disposizione di elenco, dettaglio, cronologia, creazione, modifica e conferma, riducendo la necessità di scorrere fra attività correlate. Scegliere pannelli, pagine o dialoghi in base al flusso osservato. Distinguere dati storici, correnti e futuri e azioni principali, secondarie e distruttive; rendere riconoscibili caricamento, assenza di dati, errori e conflitti.
 
@@ -228,7 +228,7 @@ Applicare il risultato alle schermate esistenti coinvolte e documentare poche co
 
 **UI02 — Consolidamento alla chiusura di M1.** Confrontare porti, banchine, clienti, agenzie, navi e catalogo; uniformare navigazione, ricerca, elenchi, dettaglio, cronologie, form e conferme dove i comportamenti coincidono. Verificare uso frequente, liste lunghe, paginazione, testi estesi e stati vuoti. Integrare le convenzioni comuni sulla base delle differenze reali. Esiti e convenzioni in [UI02](ui02/revisione-anagrafiche-e-catalogo.md).
 
-**UI03 — Revisione operativa dopo M3.** Verificare inserimento e consultazione di operazioni e prestazioni, ricerca, soggetti ereditati o espliciti, contesto temporale, importi base e spiegazione del calcolo. Rivedere il percorso completo e la gestione degli errori; le correzioni aggiunte in P17–P19 seguiranno le convenzioni risultanti.
+**UI03 — Revisione operativa prima della chiusura M3.** Verificare inserimento e consultazione di operazioni e prestazioni, ricerca, soggetti ereditati o espliciti, contesto temporale, importi base e spiegazione del calcolo. Rivedere il percorso completo e la gestione degli errori; le correzioni aggiunte in P17–P19 seguiranno le convenzioni risultanti. Esiti e convenzioni in [UI03](ui03/revisione-flussi-operativi.md).
 
 **UI04 — Controllo finale in P20.** Verificare l'interfaccia integrata dopo P17–P19: navigazione da tastiera, focus, etichette, contrasto, leggibilità degli stati senza affidarsi al solo colore e assenza di contenuti o comandi irraggiungibili alle dimensioni supportate. Correggere le regressioni visive e di usabilità residue prima del rilascio.
 

@@ -4,9 +4,9 @@ Aggiornamento del 17 novembre 2026. Questo file contiene lo stato corrente e la 
 
 ## Stato corrente
 
-- P00–P16, UI01 e UI02 completati. P16 e revisione tecnica post-P16 verificati sulla build Electron, schema v16 senza nuova migrazione; implementazione P16 nel commit `8c5f0e7`, base `9b5314c`. [Nota P16 e revisione](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
+- P00–P16 e UI01–UI03 completati. UI03 verificata sulla build Electron, schema v16 invariato, implementazione `2e24749`, base `c1ee663`. [Nota UI03](ui03/revisione-flussi-operativi.md). P16 e revisione tecnica post-P16 restano verificati; [nota e revisione](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 - M1 chiusa sul pacchetto Windows dello schema v9. **M2 chiusa** sull’integrazione P13, schema v14, secondo il piano §7.3. [Evidenze](p13/verifiche.md#verifiche-m2).
-- Revisioni tecniche dopo P12 e P16 completate. Prossimo passo: **UI03**, prima della chiusura M3. P17–P20 restano da avviare.
+- Revisioni tecniche dopo P12 e P16 completate. Prossimo passo: **chiusura M3** sull’integrazione UI03, con le prove complete §7.3. P17–P20 restano da avviare.
 
 ## Avanzamento
 
@@ -45,7 +45,7 @@ Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bl
 | -------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | UI01     | Completato  | [Convenzioni iniziali](ui01/revisione-post-p04.md).                                                                                                   |
 | UI02     | Completato  | [Consolidamento anagrafiche/catalogo](ui02/revisione-anagrafiche-e-catalogo.md).                                                                      |
-| UI03     | Da avviare  | Dopo P16, prima della chiusura M3.                                                                                                                    |
+| UI03     | Completato  | [Revisione dei flussi P09–P16](ui03/revisione-flussi-operativi.md), verificata sulla build Electron, schema v16.                                      |
 | UI04     | Da avviare  | In P20.                                                                                                                                               |
 | M1       | Chiusa      | Schema v9, build e pacchetto verificati. [Evidenze](ui02/revisione-anagrafiche-e-catalogo.md#verifiche-ui02-e-m1).                                    |
 | M2       | Chiusa      | Schema v14: suite complete su build e medesimo eseguibile Windows, migrazioni cumulative e trasferibilità. [Evidenze](p13/verifiche.md#verifiche-m2). |
@@ -55,11 +55,11 @@ Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bl
 
 Le verifiche complete seguono esclusivamente il [piano §7.3](piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). Le revisioni tecniche dopo P12 e P16 sono completate e documentate nelle rispettive note [P12](p12/spostamento-tra-porti.md#revisione-tecnica-dopo-p12) e [P16](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 
-## Consegna corrente — Revisione tecnica post-P16
+## Consegna corrente — UI03
 
-**Revisione tecnica post-P16 completata e verificata sulla build Electron, schema v16 invariato.** Preservata la base P16 già committata; correzioni nel commit `1dcacd4`, circoscritte alle FK con PK implicite e al recupero delle scritture con risposta persa, comprese consuntivazioni ed eliminazioni già applicate. Suite backend completa 296/296, invarianti SQLite e 17/17 percorsi desktop pertinenti verificati; TypeScript, ESLint e build passati, con i soli cinque avvisi Prettier legacy noti. Ambito, cause, prove, riuso e impronte nella [nota P16](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
+**UI03 completata e verificata sulla build Electron, schema v16 invariato.** Implementazione e test nel commit `2e24749`, base effettiva `c1ee663`, branch `main` inizialmente pulito. Revisionati consultazione, filtri, dettaglio e anteprime delle prestazioni, operazioni, permanenze e fonti dei soggetti. Preservato e verificato il recupero delle scritture incerte post-P16. Suite backend completa **296/296**, invarianti SQLite e **22/22 percorsi desktop distinti** verificati con riuso motivato; TypeScript, ESLint e build passati, con i soli cinque avvisi Prettier legacy noti. Confrontate cinque schermate iniziali e otto finali a 960×700 e 1440×960. Decisioni, convenzioni, esiti e impronte nella [nota UI03](ui03/revisione-flussi-operativi.md).
 
-**Passaggio a UI03**, con i punti d’attenzione nella [nota P16](p16/ciclo-vita-prestazioni.md#limiti-e-passaggio-operativo). M3 richiede l’integrazione delle correzioni UI03, suite desktop completa, migrazioni cumulative e pacchetto finale; rimane pianificata. P17 non è avviato. M2 resta chiusa sull’integrazione v14.
+**Passaggio alla chiusura M3, ancora aperta**: occorrono suite desktop completa, migrazioni cumulative e pacchetto Windows integrato finale con tutta la suite sul medesimo eseguibile, secondo §7.3. Nessun nuovo pacchetto o sessione manuale umana in UI03. P17 non è avviato. M2 resta chiusa sull’integrazione v14.
 
 ## Limiti aperti
 

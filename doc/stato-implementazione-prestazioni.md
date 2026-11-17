@@ -6,7 +6,8 @@ Aggiornamento del 17 novembre 2026. Questo file contiene lo stato corrente e la 
 
 - P00–P16 e UI01–UI03 completati. UI03 verificata sulla build Electron, schema v16 invariato, implementazione `2e24749`, base `c1ee663`. [Nota UI03](ui03/revisione-flussi-operativi.md). P16 e revisione tecnica post-P16 restano verificati; [nota e revisione](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 - M1 chiusa sul pacchetto Windows dello schema v9. **M2 chiusa** sull’integrazione P13, schema v14, secondo il piano §7.3. [Evidenze](p13/verifiche.md#verifiche-m2).
-- Revisioni tecniche dopo P12 e P16 completate. **M3 chiusa** sull’integrazione UI03, schema v16: backend completo, 39/39 percorsi desktop su build e 39/39 sul medesimo eseguibile Windows x64; migrazioni cumulative e trasferibilità verificate. [Nota M3](m3/chiusura.md). Prossimo passo: **P17A — Consuntivare operazioni con replay**. P17–P20 restano da avviare.
+- Revisioni tecniche dopo P12 e P16 completate. **M3 chiusa** sull’integrazione UI03, schema v16: backend completo, 39/39 percorsi desktop su build e 39/39 sul medesimo eseguibile Windows x64; migrazioni cumulative e trasferibilità verificate. [Nota M3](m3/chiusura.md). Prossimo passo funzionale: **P17A — Consuntivare operazioni con replay**. P17–P20 restano da avviare.
+- Preparazione tecnica prima di P17A: **V01 → V02 → V03**, a partire da V01 — risultati strutturati e report sintetico. Priorità, schede e stati nel [piano di automazione delle verifiche](piano-automazione-verifiche.md). V04–V07 saranno rivalutati dopo il primo utilizzo.
 
 ## Avanzamento
 

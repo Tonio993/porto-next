@@ -11,18 +11,19 @@ Questa guida limita le letture alle informazioni necessarie al task e assegna a 
 
 Usare titoli e ricerche mirate per estrarre sezioni. I collegamenti indicano fonti da consultare secondo l'argomento. Le cronologie delle prove e i manifest servono durante audit, diagnosi e verifica degli artefatti.
 
-| Argomento del task             | Sezioni e riferimenti da consultare                                                 |
-| ------------------------------ | ----------------------------------------------------------------------------------- |
-| Sessioni, file, IPC, anteprime | Piano §§3.1–3.4, P00 D04 e nota P01/P04 pertinente.                                 |
-| Migrazioni e persistenza       | Piano §3.3, runner/schema e prove della versione precedente.                        |
-| Numeri e tempo                 | P00 D02/D03, nota P02 e adattatori esistenti.                                       |
-| Anagrafiche                    | Piano §2.1, P00 D01 e nota della tipologia coinvolta.                               |
-| Catalogo e pesi                | Piano §2.4, nota P08 e successiva nota P19 quando disponibile.                      |
-| Tariffe e calcolo              | Piano §2.4, sezioni operative P09 e scenari TAR pertinenti.                         |
-| Operazioni e permanenze        | Piano §2.2, nota operativa più recente, contratti e scenari di sequenza pertinenti. |
-| Soggetti e prestazioni         | Piano §2.3, P00 R01 e sezioni delle slice applicabili.                              |
-| Interfaccia                    | Piano §3.5 e convenzioni dell'ultima revisione UI disponibile.                      |
-| Chiusura di milestone          | Piano §§1.3, 6 e 7.3, con le evidenze pertinenti al traguardo.                      |
+| Argomento del task             | Sezioni e riferimenti da consultare                                                     |
+| ------------------------------ | --------------------------------------------------------------------------------------- |
+| Sessioni, file, IPC, anteprime | Piano §§3.1–3.4, P00 D04 e nota P01/P04 pertinente.                                     |
+| Migrazioni e persistenza       | Piano §3.3, runner/schema e prove della versione precedente.                            |
+| Numeri e tempo                 | P00 D02/D03, nota P02 e adattatori esistenti.                                           |
+| Anagrafiche                    | Piano §2.1, P00 D01 e nota della tipologia coinvolta.                                   |
+| Catalogo e pesi                | Piano §2.4, nota P08 e successiva nota P19 quando disponibile.                          |
+| Tariffe e calcolo              | Piano §2.4, sezioni operative P09 e scenari TAR pertinenti.                             |
+| Operazioni e permanenze        | Piano §2.2, nota operativa più recente, contratti e scenari di sequenza pertinenti.     |
+| Soggetti e prestazioni         | Piano §2.3, P00 R01 e sezioni delle slice applicabili.                                  |
+| Interfaccia                    | Piano §3.5 e convenzioni dell'ultima revisione UI disponibile.                          |
+| Chiusura di milestone          | Piano §§1.3, 6 e 7.3, con le evidenze pertinenti al traguardo.                          |
+| Automazione delle verifiche    | [Piano V01–V07](piano-automazione-verifiche.md): scheda corrente e passaggio operativo. |
 
 ## Responsabilità dei documenti
 
@@ -30,6 +31,7 @@ Usare titoli e ricerche mirate per estrarre sezioni. I collegamenti indicano fon
 | ------------------------------- | ------------------------------------------------------------------------------------------------ |
 | AGENTS                          | Regole operative stabili e percorso di lettura.                                                  |
 | Piano                           | Requisiti, perimetro, dipendenze, accettazione e matrice autorevole dei controlli.               |
+| Piano automazione verifiche     | Priorità, schede e avanzamento V01–V07; frequenza dei controlli collegata al piano §7.3.         |
 | Registro                        | Stato corrente, righe dei task/UI/milestone, problemi aperti e sola consegna corrente.           |
 | Nota del task                   | Decisioni nuove, contratti/punti d'integrazione, verifiche finali, limiti e passaggio operativo. |
 | README                          | Avvio, uso, capacità disponibili e comandi, con rinvio al registro per lo stato delle consegne.  |

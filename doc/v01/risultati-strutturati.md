@@ -1,6 +1,6 @@
 # V01 — Risultati strutturati e report sintetico
 
-Modalità esplicita di raccolta di **una esecuzione di test**, formato `formatVersion: 1`. Schema applicativo v16 invariato. Stato ed esiti finali sono nella [consegna corrente del piano](../piano-automazione-verifiche.md#consegna-corrente); [manifest selezionato](verifiche.json). Frequenza e copertura restano quelle del [piano §7.3](../piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento).
+Modalità esplicita di raccolta di **una esecuzione di test**, formato `formatVersion: 1`. Schema applicativo v16 invariato. Esiti della consegna V01 nel [manifest selezionato](verifiche.json); avanzamento e prossima attività nella [consegna corrente del piano](../piano-automazione-verifiche.md#consegna-corrente). Frequenza e copertura restano quelle del [piano §7.3](../piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento).
 
 ## Comandi disponibili
 

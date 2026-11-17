@@ -13,7 +13,7 @@ const repository = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const quote = (arg) => `'${arg.replaceAll("'", "''")}'`
 export const commandText = (command, args) => `& ${[command, ...args].map(quote).join(' ')}`
 
-// Una sola fase. Sequenza, profili, timeout, cache e consolidamento appartengono a V02+.
+// Una sola fase. La sequenza e i timeout sono responsabilità del chiamante.
 export async function collect({
   runner,
   phase,
@@ -22,6 +22,9 @@ export async function collect({
   cwd = repository,
   signal,
   command,
+  env = process.env,
+  outputRoot = resolve(cwd, 'test-results/verification'),
+  onDirectory,
 }) {
   if (!['vitest', 'playwright'].includes(runner))
     throw new Error('Runner ammessi: vitest, playwright')
@@ -37,7 +40,7 @@ export async function collect({
   )
     throw new Error('Reporter, output e modalità interattive sono riservati alla raccolta')
   const startedAt = new Date().toISOString()
-  const parent = resolve(cwd, 'test-results/verification')
+  const parent = outputRoot
   await mkdir(parent, { recursive: true })
   const directory = await mkdtemp(resolve(parent, `${startedAt.replaceAll(':', '-')}-`))
   await mkdir(resolve(directory, 'native'))
@@ -78,8 +81,8 @@ export async function collect({
     electronVersion: require('electron/package.json').version,
     variables: Object.fromEntries(
       ['CI', 'TZ', 'NODE_ENV', 'PORTO_PACKAGED_EXE']
-        .filter((k) => process.env[k] !== undefined)
-        .map((k) => [k, process.env[k]]),
+        .filter((k) => env[k] !== undefined)
+        .map((k) => [k, env[k]]),
     ),
   }
   const reproduction = command
@@ -118,12 +121,13 @@ export async function collect({
     JSON.stringify(metadata, null, 2) + '\n',
     'utf8',
   )
+  await onDirectory?.(directory)
   const processResult = await execute(actual, {
     cwd,
     directory,
     signal,
     env: {
-      ...process.env,
+      ...env,
       PORTO_VERIFICATION_CONTEXT: contextPath,
       PORTO_VERIFICATION_PROCESS_FILE: runtimePath,
       PLAYWRIGHT_JSON_OUTPUT_FILE: nativePath,

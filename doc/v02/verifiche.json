@@ -1,0 +1,718 @@
+{
+  "task": "V02",
+  "date": "2026-11-17",
+  "base": "5140cc8",
+  "branch": "main",
+  "schemaVersion": 16,
+  "implementationSha256": {
+    "package.json": "94f26797316013174eaec4477fc13609afacfc084aee52e109a7834bfc1533ad",
+    "scripts/verification/collect.mjs": "6b23f0f3a544a76d215444b423fb144794e21fef68b1ae86684664973b80b16f",
+    "scripts/verification/coordinator.mjs": "0556bf4ab7bec9192b58697a0073140d8d9c1dab058cf9d3abe8e2b0cca481dd",
+    "scripts/verification/coordinator.test.mjs": "6d957464328412ccad4b67ce0edfd4e88d363c0b3376dd12c1c6f12fb8b01c9a",
+    "scripts/verification/documents.mjs": "01b13eaf625b8b802408605c18e5caa92becf2152eeb493ac7461d838f446f1a",
+    "scripts/verification/formatting.mjs": "d6b39e0157a00e28319be102375223cbea8722d5c885cf387f1c513c4e01eff2"
+  },
+  "checks": {
+    "fixtures": {
+      "command": "& 'C:\\nvm4w\\nodejs\\node.exe' '--test' '--test-concurrency=1' 'C:\\Other\\porto-next\\scripts\\verification\\collection.test.mjs' 'C:\\Other\\porto-next\\scripts\\verification\\coordinator.test.mjs'",
+      "passed": 13,
+      "failed": 0,
+      "v01": 4,
+      "v02": 9,
+      "log": "test-results/verification/2026-11-17T15-18-45.294Z-coordinator-MMnj7Q/fixtures/stdout.log",
+      "sha256": "f6133d8248ad12cddc1de2e8d56887335428d7a7def728c50897b2ad5798faea"
+    },
+    "finalV02Fixtures": {
+      "command": "node --test --test-concurrency=1 scripts/verification/coordinator.test.mjs",
+      "passed": 9,
+      "failed": 0,
+      "exitCode": 0,
+      "log": ".local/v02-fixtures-final.log",
+      "sha256": "66dd66ed5428acea03d78c0654df6853c611a912f87c14f9df17beec9415dee0",
+      "reason": "Ultime correzioni circoscritte al limite massimo del timer Node e alla produzione del riepilogo anche dopo errore di rilascio lock. Fixture V02 ripetute; esiti V01/backend/build/desktop riusati perché comandi, ambienti, dipendenze, report e artefatti sono invariati."
+    },
+    "backend": {
+      "environment": {
+        "cwd": "C:\\Other\\porto-next",
+        "platform": "win32",
+        "architecture": "x64",
+        "osRelease": "10.0.26200",
+        "node": "v24.21.0",
+        "runnerVersion": "5.1.0",
+        "electronVersion": "45.2.3",
+        "variables": {},
+        "runnerRuntime": {
+          "node": "24.22.2",
+          "acorn": "8.18.0",
+          "ada": "4.0.0",
+          "amaro": "1.1.11",
+          "ares": "1.34.9",
+          "brotli": "1.2.0",
+          "cldr": "48.0",
+          "icu": "78.2",
+          "llhttp": "9.4.3",
+          "merve": "1.2.2",
+          "modules": "150",
+          "napi": "10",
+          "nbytes": "0.1.4",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.70.0",
+          "nghttp3": "",
+          "ngtcp2": "",
+          "openssl": "0.0.0",
+          "simdjson": "4.6.11",
+          "simdutf": "7.7.0",
+          "sqlite": "3.53.4",
+          "tz": "2026e",
+          "undici": "7.30.1",
+          "unicode": "17.0",
+          "uv": "1.52.1",
+          "uvwasi": "0.0.23",
+          "v8": "15.6.75.27-electron.0",
+          "zlib": "1.3.2.1-motley",
+          "zstd": "1.6.0",
+          "electron": "45.2.3",
+          "chrome": "156.0.8078.80"
+        }
+      },
+      "outcome": "passed",
+      "processExitCode": 0,
+      "collectorExitCode": 0,
+      "counts": {
+        "passed": 296,
+        "failed": 0,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 296,
+        "attempts": 296,
+        "retried": 0
+      },
+      "issues": [],
+      "sha256": {
+        "results.json": "a5db09780fa385bf3a95069d3663451afcc9b0efef601af42a6354390e1f41cf",
+        "summary.md": "deed4987ae3edb89eb81c1f11cd58972cd2a32693eff6624e0e939766807f7c1",
+        "execution.json": "dd3e9d248ed8adceff2f9e2d0390e2e8e8c3f68beb9b280f02a7c7fe2c71077f",
+        "native/report.json": "9e37c83e08dfc767c2f73bc728f6be9f7cad6812a537d25d0733f8ca6223ea15",
+        "native/context.json": "37cf6f79c5d8963862a772cedd92b2a685195976cadb075db86d8892f125eec0",
+        "stdout.log": "f4a61695b782e8b1492f7af7a7a934c2686c82713ae855b211a76a70e372511e",
+        "stderr.log": "51cdaec28c0104ee6c1d13741c5054a7cf20516696287a0fc4dbdc864bdde096"
+      }
+    },
+    "desktop": {
+      "environment": {
+        "cwd": "C:\\Other\\porto-next",
+        "platform": "win32",
+        "architecture": "x64",
+        "osRelease": "10.0.26200",
+        "node": "v24.21.0",
+        "runnerVersion": "1.65.0",
+        "electronVersion": "45.2.3",
+        "variables": {},
+        "runnerRuntime": {
+          "node": "24.21.0"
+        }
+      },
+      "outcome": "passed",
+      "processExitCode": 0,
+      "collectorExitCode": 0,
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 1,
+        "attempts": 1,
+        "retried": 0
+      },
+      "issues": [],
+      "sha256": {
+        "results.json": "34f4c511eaa199d3f0a4ce426c809c21a1c6dccfc4fc32c0ea5a1fafd610eb41",
+        "summary.md": "ca9d11762d2dae14b4bc867426797617521d493c4a84246c23f6d9e51c507f7a",
+        "execution.json": "37e757e8595fbed93cf9d10196a22387ef5e3ecacf9ab3c333df7f4224f2a808",
+        "native/report.json": "cfba8a8da5683836b1d4b9d3f3a039a76aace182385ff1bdbf02b1126406fe91",
+        "native/context.json": "cd23dda5bb8d6c945a166d25f4365f39bef5c72a062f7a6fef7837e719c65e0b",
+        "stdout.log": "b7eee3e9f234ee52d7fd5bb5fbb9ac24cc17e3794cf86f4d448f15241932af6c",
+        "stderr.log": "5855e996908cf2adb3492898673c5f52ae9fb5830fe8a877200ec670781f9d63"
+      }
+    }
+  },
+  "runs": {
+    "step": {
+      "directory": "test-results/verification/2026-11-17T15-18-45.294Z-coordinator-MMnj7Q",
+      "profile": "step",
+      "coverage": "requested-profile",
+      "completed": true,
+      "outcome": "known-warning",
+      "coordinatorExitCode": 2,
+      "durationMs": 291358,
+      "sha256": {
+        "results.json": "37aa72338a7a00d51acaf4875fdccc63573e5cdd6497fd656c2b9b4f92560eeb",
+        "summary.md": "d38648732756eb7bc2aea490d5657328f0178334f9b871b600c0fb8e3b8ede60",
+        "plan.json": "a02da264ab59ccbb9541ab2d0efa3f3e69b332207ab9b4b5deb5a6b774105568"
+      },
+      "phases": [
+        {
+          "id": "documents",
+          "requested": true,
+          "dependencies": [],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "details": "documents/execution.json"
+        },
+        {
+          "id": "diff",
+          "requested": true,
+          "dependencies": [],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "details": "diff/execution.json"
+        },
+        {
+          "id": "typescript-node",
+          "requested": true,
+          "dependencies": [],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "details": "typescript-node/execution.json"
+        },
+        {
+          "id": "typescript-web",
+          "requested": true,
+          "dependencies": [],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "details": "typescript-web/execution.json"
+        },
+        {
+          "id": "eslint",
+          "requested": true,
+          "dependencies": [],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "details": "eslint/execution.json"
+        },
+        {
+          "id": "formatting",
+          "requested": true,
+          "dependencies": [],
+          "status": "known-warning",
+          "process": {
+            "exitCode": 1,
+            "closeCode": 1,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "formatting": {
+            "legacy": [
+              "doc/legacy/00-roadmap-progetto.md",
+              "doc/legacy/01-analisi-dominio.md",
+              "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+              "doc/legacy/03-modello-dati.md",
+              "doc/legacy/04-sviluppo-evolutivo.md"
+            ],
+            "regressions": []
+          },
+          "details": "formatting/execution.json"
+        },
+        {
+          "id": "fixtures",
+          "requested": true,
+          "dependencies": [],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "details": "fixtures/execution.json"
+        },
+        {
+          "id": "backend",
+          "requested": true,
+          "dependencies": ["fixtures"],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null,
+            "runtime": {
+              "executable": "C:\\Other\\porto-next\\node_modules\\electron\\dist\\electron.exe",
+              "args": [
+                "node_modules/vitest/vitest.mjs",
+                "run",
+                "--includeTaskLocation",
+                "--reporter=default",
+                "--reporter=json",
+                "--reporter=C:\\Other\\porto-next\\scripts\\verification\\vitest-context.mjs",
+                "--outputFile=C:\\Other\\porto-next\\test-results\\verification\\2026-11-17T15-18-45.294Z-coordinator-MMnj7Q\\backend\\collection\\2026-11-17T15-21-35.774Z-N0NogU\\native\\report.json"
+              ],
+              "exitCode": 0,
+              "signal": null,
+              "error": null,
+              "environment": {
+                "ELECTRON_RUN_AS_NODE": "1"
+              }
+            }
+          },
+          "collectorExitCode": 0,
+          "outcome": "passed",
+          "counts": {
+            "passed": 296,
+            "failed": 0,
+            "skipped": 0,
+            "incomplete": 0,
+            "flaky": 0,
+            "expected-failure": 0,
+            "total": 296,
+            "attempts": 296,
+            "retried": 0
+          },
+          "collectorDirectory": "backend/collection/2026-11-17T15-21-35.774Z-N0NogU",
+          "details": "backend/collection/2026-11-17T15-21-35.774Z-N0NogU/summary.md"
+        },
+        {
+          "id": "build",
+          "requested": true,
+          "dependencies": ["typescript-node", "typescript-web"],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "details": "build/execution.json"
+        },
+        {
+          "id": "desktop",
+          "requested": true,
+          "dependencies": ["build"],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "collectorExitCode": 0,
+          "outcome": "passed",
+          "counts": {
+            "passed": 1,
+            "failed": 0,
+            "skipped": 0,
+            "incomplete": 0,
+            "flaky": 0,
+            "expected-failure": 0,
+            "total": 1,
+            "attempts": 1,
+            "retried": 0
+          },
+          "collectorDirectory": "desktop/collection/2026-11-17T15-23-00.482Z-yhnDD8",
+          "details": "desktop/collection/2026-11-17T15-23-00.482Z-yhnDD8/summary.md"
+        },
+        {
+          "id": "package",
+          "requested": false,
+          "dependencies": ["build"],
+          "status": "not-requested"
+        },
+        {
+          "id": "packaged-desktop",
+          "requested": false,
+          "dependencies": ["package"],
+          "status": "not-requested"
+        }
+      ],
+      "command": "node scripts/verification/coordinator.mjs step --document doc/v02/coordinatore-profili.md --document doc/piano-automazione-verifiche.md --document doc/stato-implementazione-prestazioni.md --desktop tests/e2e/archives.spec.ts"
+    },
+    "intentionalLockCollision": {
+      "directory": "test-results/verification/2026-11-17T15-20-42.710Z-coordinator-POUVpv",
+      "profile": "diagnostica",
+      "coverage": "partial",
+      "completed": true,
+      "outcome": "incomplete",
+      "coordinatorExitCode": 2,
+      "durationMs": 4,
+      "sha256": {
+        "results.json": "f0428a8ce3fc658d940d17731d371ecc8716869e0ddd84d69999aa84f6aa87ab",
+        "summary.md": "bc665ba059652be4b3b6cb6fc29509ed6ee66826b8c2f81159182497790eda6a",
+        "plan.json": "928679500b15398c7a3e6f3c232012587633a444f79898356446c05c1efc1e71"
+      },
+      "phases": [
+        {
+          "id": "documents",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "diff",
+          "requested": true,
+          "dependencies": [],
+          "status": "blocked",
+          "reason": "Lock di altra esecuzione"
+        },
+        {
+          "id": "typescript-node",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "typescript-web",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "eslint",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "formatting",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "fixtures",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "backend",
+          "requested": false,
+          "dependencies": ["fixtures"],
+          "status": "not-requested"
+        },
+        {
+          "id": "build",
+          "requested": false,
+          "dependencies": ["typescript-node", "typescript-web"],
+          "status": "not-requested"
+        },
+        {
+          "id": "desktop",
+          "requested": false,
+          "dependencies": ["build"],
+          "status": "not-requested"
+        },
+        {
+          "id": "package",
+          "requested": false,
+          "dependencies": ["build"],
+          "status": "not-requested"
+        },
+        {
+          "id": "packaged-desktop",
+          "requested": false,
+          "dependencies": ["package"],
+          "status": "not-requested"
+        }
+      ],
+      "expected": "incomplete con diff blocked; nessun processo di verifica avviato"
+    },
+    "documents": {
+      "directory": "test-results/verification/2026-11-17T15-30-14.629Z-coordinator-1RXFeM",
+      "profile": "documentazione",
+      "coverage": "requested-profile",
+      "completed": true,
+      "outcome": "known-warning",
+      "coordinatorExitCode": 2,
+      "durationMs": 15490,
+      "sha256": {
+        "results.json": "08a5d71aa4fa47494198701b8f239720a39194969a4b765edda7a9eed7aa83af",
+        "summary.md": "24e87be2694ba4c9bdb8e88f382018aa754e41a9b31fbe6675cf73809f625dd8",
+        "plan.json": "26f45f789d5520733d17b9f3d9dd08cdb0f726202f4b4deee7fc42ee2973f5b3"
+      },
+      "phases": [
+        {
+          "id": "documents",
+          "requested": true,
+          "dependencies": [],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "details": "documents/execution.json"
+        },
+        {
+          "id": "diff",
+          "requested": true,
+          "dependencies": [],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "details": "diff/execution.json"
+        },
+        {
+          "id": "typescript-node",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "typescript-web",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "eslint",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "formatting",
+          "requested": true,
+          "dependencies": [],
+          "status": "known-warning",
+          "process": {
+            "exitCode": 1,
+            "closeCode": 1,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "formatting": {
+            "legacy": [
+              "doc/legacy/00-roadmap-progetto.md",
+              "doc/legacy/01-analisi-dominio.md",
+              "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+              "doc/legacy/03-modello-dati.md",
+              "doc/legacy/04-sviluppo-evolutivo.md"
+            ],
+            "regressions": []
+          },
+          "details": "formatting/execution.json"
+        },
+        {
+          "id": "fixtures",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "backend",
+          "requested": false,
+          "dependencies": ["fixtures"],
+          "status": "not-requested"
+        },
+        {
+          "id": "build",
+          "requested": false,
+          "dependencies": ["typescript-node", "typescript-web"],
+          "status": "not-requested"
+        },
+        {
+          "id": "desktop",
+          "requested": false,
+          "dependencies": ["build"],
+          "status": "not-requested"
+        },
+        {
+          "id": "package",
+          "requested": false,
+          "dependencies": ["build"],
+          "status": "not-requested"
+        },
+        {
+          "id": "packaged-desktop",
+          "requested": false,
+          "dependencies": ["package"],
+          "status": "not-requested"
+        }
+      ]
+    },
+    "diagnostic": {
+      "directory": "test-results/verification/2026-11-17T15-27-13.287Z-coordinator-k1ht7y",
+      "profile": "diagnostica",
+      "coverage": "partial",
+      "completed": true,
+      "outcome": "passed",
+      "coordinatorExitCode": 2,
+      "durationMs": 215,
+      "sha256": {
+        "results.json": "2c9bc938730347a3767d98aff61a420fca73a24f3921fcf3385ffeef2c3d4608",
+        "summary.md": "fabc2c55e1721f3f14d13e04d2f0f8f9f97193472975b00a8011aa442d729955",
+        "plan.json": "928679500b15398c7a3e6f3c232012587633a444f79898356446c05c1efc1e71"
+      },
+      "phases": [
+        {
+          "id": "documents",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "diff",
+          "requested": true,
+          "dependencies": [],
+          "status": "passed",
+          "process": {
+            "exitCode": 0,
+            "closeCode": 0,
+            "signal": null,
+            "error": null,
+            "interrupted": null
+          },
+          "details": "diff/execution.json"
+        },
+        {
+          "id": "typescript-node",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "typescript-web",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "eslint",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "formatting",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "fixtures",
+          "requested": false,
+          "dependencies": [],
+          "status": "not-requested"
+        },
+        {
+          "id": "backend",
+          "requested": false,
+          "dependencies": ["fixtures"],
+          "status": "not-requested"
+        },
+        {
+          "id": "build",
+          "requested": false,
+          "dependencies": ["typescript-node", "typescript-web"],
+          "status": "not-requested"
+        },
+        {
+          "id": "desktop",
+          "requested": false,
+          "dependencies": ["build"],
+          "status": "not-requested"
+        },
+        {
+          "id": "package",
+          "requested": false,
+          "dependencies": ["build"],
+          "status": "not-requested"
+        },
+        {
+          "id": "packaged-desktop",
+          "requested": false,
+          "dependencies": ["package"],
+          "status": "not-requested"
+        }
+      ]
+    }
+  },
+  "reuse": {
+    "sourceManifest": "doc/m3/allegati/build-sha256.json",
+    "packageManifest": "doc/m3/allegati/package-prima-tests-sha256.json",
+    "rebuilt": true,
+    "reasonForBuild": "Verifica dell’avvio effettivo build e della dipendenza desktop nel coordinatore; nessun riuso automatico V05.",
+    "payload": {
+      "out/main/index.js": "6eeb6a20bb736b20666fc3347844f4c0d327aaadf86357e2e00a3fa71405759b",
+      "out/preload/index.js": "610c780fdc34d1a0e51990be8b935249c49ae08945527ce3510d161d348ce179",
+      "out/renderer/assets/index-DluJBYNQ.css": "fdde8f53c66fb7b4bc4ec1a45fc5659311f697864e7bca224950495f523cc338",
+      "out/renderer/assets/index-iyJ_IBYi.js": "20ccb1c4e49dfabbc7bb7222938db1a66d2896eeaceeceff78847a7f08509bd2",
+      "out/renderer/index.html": "f53da56c2f665738f778e3b56033b158cbe41b93d4cbfec7c6a04b25d49c02fb"
+    },
+    "allPayloadHashesMatchM3": true,
+    "sourceFilesCompared": 154,
+    "changedSources": [
+      {
+        "path": "scripts/test.mjs",
+        "unchanged": false
+      },
+      {
+        "path": "package.json",
+        "unchanged": false
+      }
+    ],
+    "expectedSourceDifferences": {
+      "scripts/test.mjs": "Metadati di raccolta V01; invariato in V02.",
+      "package.json": "Alias npm V01/V02 e fixture in sequenza; dipendenze, runtime e configurazione applicativa invariati."
+    },
+    "distributionFilesCompared": 138,
+    "changedPackage": [],
+    "retainedEvidence": "Suite complete build/pacchetto, migrazioni cumulative e trasferibilità M3; ispezioni UI03. Nessuna modifica applicativa, SQL, runtime, dipendenze native o confezionamento; nuovo percorso di orchestrazione coperto da fixture e integrazione reale selettiva.",
+    "nextFullCampaign": "M4 secondo piano §7.3, salvo trigger anticipati; installer P20."
+  },
+  "limitations": [
+    "Windows x64 soltanto; processi nel percorso esterno autorizzato, ACL e sandbox Electron preservati; nessuna nuova sessione manuale umana.",
+    "Il lock protegge le invocazioni del coordinatore; i comandi nativi preesistenti devono essere avviati separatamente.",
+    "Dopo terminazione forzata il lock residuo richiede il controllo del proprietario prima della rimozione; disco non scrivibile può impedire i report finali.",
+    "Nessuna campagna M3 ripetuta: milestone e confezionamento verificati nelle fixture; nuova integrazione reale limitata a step/backend/build/Archivi.",
+    "Cinque avvisi Prettier legacy invariati: codice originale 1, stato known-warning, uscita coordinatore 2; sistemazione V03."
+  ]
+}

@@ -101,10 +101,14 @@ test('gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio
     expect(originalContext.revision).toBe('3')
     await page.getByRole('button', { name: 'Prestazioni', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Prestazioni', exact: true })).toBeVisible()
+    await expect(page.getByText('Nessuna prestazione registrata.')).toBeVisible()
     await expect(
-      page.getByText('Le funzioni di prestazioni non sono ancora disponibili.'),
-    ).toBeVisible()
-    await page.getByRole('button', { name: 'Torna all’archivio' }).click()
+      page.getByRole('button', { name: 'Nuova prestazione libera', exact: true }),
+    ).toBeDisabled()
+    await expect(
+      page.getByRole('button', { name: 'Nuova prestazione da catalogo', exact: true }),
+    ).toBeDisabled()
+    await page.getByRole('button', { name: 'Archivi', exact: true }).click()
     await saveDialog(app, backup)
     await page.getByRole('button', { name: 'Crea copia di backup', exact: true }).click()
     await expect(page.getByRole('status')).toContainText('Copia di backup creata')

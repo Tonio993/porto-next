@@ -288,10 +288,11 @@ test('P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE c
     await modal.getByRole('combobox', { name: 'Stato', exact: true }).click()
     await page.getByRole('option', { name: 'Mancata', exact: true }).click()
     await modal.getByLabel('Note', { exact: true }).fill('Catalogo P15 — verifica')
-    await page.screenshot({
-      path: testInfo.outputPath('p15-editor-minimo.png'),
-      animations: 'disabled',
-    })
+    if (!process.env.PORTO_PACKAGED_EXE)
+      await page.screenshot({
+        path: testInfo.outputPath('p15-editor-minimo.png'),
+        animations: 'disabled',
+      })
     await modal.getByRole('button', { name: 'Chiudi', exact: true }).click()
     await expect(
       page.getByRole('button', { name: 'Nuova prestazione da catalogo', exact: true }),
@@ -310,10 +311,11 @@ test('P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE c
     await detail.locator('li').last().scrollIntoViewIfNeeded()
     await expect(detail.locator('li').last()).toBeInViewport()
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1440, 960))
-    await page.screenshot({
-      path: testInfo.outputPath('p15-dettaglio-desktop.png'),
-      animations: 'disabled',
-    })
+    if (!process.env.PORTO_PACKAGED_EXE)
+      await page.screenshot({
+        path: testInfo.outputPath('p15-dettaglio-desktop.png'),
+        animations: 'disabled',
+      })
     await page.evaluate(async () => {
       const state = await window.archives.getState()
       if (!state.ok || !state.value.context) throw Error('context')
@@ -482,10 +484,11 @@ for (const category of ['FREE', 'CATALOG'] as const)
           BrowserWindow.getAllWindows()[0].setSize(960, 700),
         )
         await modal.getByRole('button', { name: 'Conferma variazione' }).scrollIntoViewIfNeeded()
-        await page.screenshot({
-          path: testInfo.outputPath('p16-anteprima-minimo.png'),
-          animations: 'disabled',
-        })
+        if (!process.env.PORTO_PACKAGED_EXE)
+          await page.screenshot({
+            path: testInfo.outputPath('p16-anteprima-minimo.png'),
+            animations: 'disabled',
+          })
         await modal.getByRole('button', { name: 'Conferma variazione' }).click()
         await expect(modal).toHaveCount(0)
         await expect(detail).toContainText('Effettuata')
@@ -642,10 +645,11 @@ for (const category of ['FREE', 'CATALOG'] as const)
           BrowserWindow.getAllWindows()[0].setSize(1440, 960),
         )
         await detail.scrollIntoViewIfNeeded()
-        await page.screenshot({
-          path: testInfo.outputPath('p16-dettaglio-desktop.png'),
-          animations: 'disabled',
-        })
+        if (!process.env.PORTO_PACKAGED_EXE)
+          await page.screenshot({
+            path: testInfo.outputPath('p16-dettaglio-desktop.png'),
+            animations: 'disabled',
+          })
         if (category === 'CATALOG') {
           await page.evaluate(async () => {
             const s = await window.archives.getState()
@@ -901,10 +905,11 @@ for (const category of ['FREE', 'CATALOG'] as const)
         await app.evaluate(({ BrowserWindow }) =>
           BrowserWindow.getAllWindows()[0].setSize(960, 700),
         )
-        await page.screenshot({
-          path: testInfo.outputPath('recupero-incerto-minimo.png'),
-          animations: 'disabled',
-        })
+        if (!process.env.PORTO_PACKAGED_EXE)
+          await page.screenshot({
+            path: testInfo.outputPath('recupero-incerto-minimo.png'),
+            animations: 'disabled',
+          })
       }
       await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).click()
       await expect(modal.getByLabel('Momento prestazione locale')).toHaveValue('2026-05-02T13:00')
@@ -938,10 +943,11 @@ for (const category of ['FREE', 'CATALOG'] as const)
         await app.evaluate(({ BrowserWindow }) =>
           BrowserWindow.getAllWindows()[0].setSize(1440, 960),
         )
-        await page.screenshot({
-          path: testInfo.outputPath('consuntivazione-riletta-desktop.png'),
-          animations: 'disabled',
-        })
+        if (!process.env.PORTO_PACKAGED_EXE)
+          await page.screenshot({
+            path: testInfo.outputPath('consuntivazione-riletta-desktop.png'),
+            animations: 'disabled',
+          })
       }
       await modal.getByRole('button', { name: 'Mostra anteprima' }).click()
       await expect(modal.getByRole('region', { name: 'Anteprima prestazione' })).toBeVisible()
@@ -1077,10 +1083,11 @@ test('P16 ricerca: soggetti ereditati, porto e banchina, filtri vuoti e ispezion
     await filters
       .getByRole('combobox', { name: 'Cliente effettivo', exact: true })
       .scrollIntoViewIfNeeded()
-    await page.screenshot({
-      path: testInfo.outputPath('p16-filtri-minimo.png'),
-      animations: 'disabled',
-    })
+    if (!process.env.PORTO_PACKAGED_EXE)
+      await page.screenshot({
+        path: testInfo.outputPath('p16-filtri-minimo.png'),
+        animations: 'disabled',
+      })
     await pick('Categoria', 'Libera')
     await expect(page.getByText('Nessuna prestazione registrata.', { exact: true })).toBeVisible()
     await pick('Categoria', 'Catalogo')

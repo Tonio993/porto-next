@@ -45,6 +45,7 @@ test('UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle
     page.on('pageerror', (e) => errors.push(e.message))
     const phase = process.env.PORTO_UI03_BEFORE ? 'prima' : 'dopo'
     const shot = async (name: string) => {
+      if (process.env.PORTO_PACKAGED_EXE) return
       const directory = process.env.PORTO_UI03_SCREENSHOTS ? resolve('doc/ui03/schermate') : null
       if (directory) mkdirSync(directory, { recursive: true })
       await page.screenshot({

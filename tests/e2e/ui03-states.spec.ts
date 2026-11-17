@@ -76,14 +76,16 @@ test('UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento 
     await expect(modal.getByText(/Anteprima bloccata/)).toBeVisible()
     await expect(modal.getByRole('button', { name: 'Conferma variazione' })).toBeDisabled()
     await modal.getByRole('button', { name: 'Conferma variazione' }).scrollIntoViewIfNeeded()
-    if (process.env.PORTO_UI03_SCREENSHOTS)
-      mkdirSync(resolve('doc/ui03/schermate'), { recursive: true })
-    await page.screenshot({
-      path: process.env.PORTO_UI03_SCREENSHOTS
-        ? resolve('doc/ui03/schermate/dopo-anteprima-bloccata-minimo.png')
-        : testInfo.outputPath('anteprima-bloccata-minimo.png'),
-      animations: 'disabled',
-    })
+    if (!process.env.PORTO_PACKAGED_EXE) {
+      if (process.env.PORTO_UI03_SCREENSHOTS)
+        mkdirSync(resolve('doc/ui03/schermate'), { recursive: true })
+      await page.screenshot({
+        path: process.env.PORTO_UI03_SCREENSHOTS
+          ? resolve('doc/ui03/schermate/dopo-anteprima-bloccata-minimo.png')
+          : testInfo.outputPath('anteprima-bloccata-minimo.png'),
+        animations: 'disabled',
+      })
+    }
     await page.keyboard.press('Escape')
     await expect(
       detail.getByRole('button', { name: 'Elimina prestazione', exact: true }),

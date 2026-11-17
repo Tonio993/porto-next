@@ -330,55 +330,55 @@ Il punto comprende:
 
 ## 3.5 Ordine e dipendenze
 
-| Punto | Dipendenze principali |
-| --- | --- |
-| 1. Convenzioni | Definisce il linguaggio comune della fase. |
-| 2. Identificativi | Dipende dalle convenzioni e viene utilizzato da tutti gli ambiti. |
-| 3. Anagrafiche | Dipende da convenzioni e identificativi. |
-| 4. Permanenze | Dipende dalle anagrafiche di nave, porto e banchina. |
-| 5. Operazioni nave | Dipende dalle permanenze e ne determina le variazioni. |
-| 6. Prestazioni | Dipende da anagrafiche, permanenze e operazioni. |
-| 7. Movimentazioni merci | Dipende da anagrafiche e permanenze. |
-| 8. Cliente e agenzia | Dipende dai livelli operativi e dalle prestazioni. |
-| 9. Tariffe e pesi | Dipende da porti, navi, operazioni e prestazioni. |
-| 10. Regole economiche | Dipende dagli elementi tariffati e dai relativi istanti. |
-| 11. Fatture | Dipende da soggetti, attività e calcoli economici. |
-| 12. Contabilità | Dipende da identificativi, classificazioni e regole monetarie comuni. |
-| 13. Incassi | Dipende da fatture e movimenti contabili. |
-| 14. Tempi e fusi | È trasversale e consolida la rappresentazione temporale dei punti precedenti. |
-| 15. Resoconti e backup | Dipende dall'insieme dei dati persistenti. |
-| 16. Integrità referenziale | Verifica e completa relazioni e cicli di vita dei punti 1–15. |
-| 17. Unicità e indici | Dipende dal modello strutturale e dai percorsi di accesso definiti. |
-| 18. Dati autorevoli e derivati | Verifica trasversalmente persistenza, snapshot e ricalcoli. |
-| 19. Diagramma | Rappresenta sinteticamente il modello consolidato. |
-| 20. Copertura dei casi d'uso | Dipende dal completamento del modello e del diagramma. |
-| 21. Revisione finale | Dipende dal completamento di tutti i punti precedenti. |
+| Punto                          | Dipendenze principali                                                         |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| 1. Convenzioni                 | Definisce il linguaggio comune della fase.                                    |
+| 2. Identificativi              | Dipende dalle convenzioni e viene utilizzato da tutti gli ambiti.             |
+| 3. Anagrafiche                 | Dipende da convenzioni e identificativi.                                      |
+| 4. Permanenze                  | Dipende dalle anagrafiche di nave, porto e banchina.                          |
+| 5. Operazioni nave             | Dipende dalle permanenze e ne determina le variazioni.                        |
+| 6. Prestazioni                 | Dipende da anagrafiche, permanenze e operazioni.                              |
+| 7. Movimentazioni merci        | Dipende da anagrafiche e permanenze.                                          |
+| 8. Cliente e agenzia           | Dipende dai livelli operativi e dalle prestazioni.                            |
+| 9. Tariffe e pesi              | Dipende da porti, navi, operazioni e prestazioni.                             |
+| 10. Regole economiche          | Dipende dagli elementi tariffati e dai relativi istanti.                      |
+| 11. Fatture                    | Dipende da soggetti, attività e calcoli economici.                            |
+| 12. Contabilità                | Dipende da identificativi, classificazioni e regole monetarie comuni.         |
+| 13. Incassi                    | Dipende da fatture e movimenti contabili.                                     |
+| 14. Tempi e fusi               | È trasversale e consolida la rappresentazione temporale dei punti precedenti. |
+| 15. Resoconti e backup         | Dipende dall'insieme dei dati persistenti.                                    |
+| 16. Integrità referenziale     | Verifica e completa relazioni e cicli di vita dei punti 1–15.                 |
+| 17. Unicità e indici           | Dipende dal modello strutturale e dai percorsi di accesso definiti.           |
+| 18. Dati autorevoli e derivati | Verifica trasversalmente persistenza, snapshot e ricalcoli.                   |
+| 19. Diagramma                  | Rappresenta sinteticamente il modello consolidato.                            |
+| 20. Copertura dei casi d'uso   | Dipende dal completamento del modello e del diagramma.                        |
+| 21. Revisione finale           | Dipende dal completamento di tutti i punti precedenti.                        |
 
 ## 3.6 Stato dell'analisi
 
-| Punto | Ambito | Stato |
-| --- | --- | --- |
-| 1 | Scopo, perimetro e convenzioni | Completato |
-| 2 | Identificativi tecnici e riferimenti stabili | Completato |
-| 3 | Anagrafiche e versioni temporali | Completato |
-| 4 | Navi, viaggi, visite e ormeggi | Completato |
-| 5 | Operazioni nave e sequenze | Completato |
-| 6 | Prestazioni e catalogo | Proposta da verificare nelle slice VS-06–VS-08 |
-| 7 | Movimentazioni merci | Rinviato alla slice VS-09 |
-| 8 | Cliente e agenzia | Da sviluppare nelle prime slice che ne richiedono l'attribuzione |
-| 9 | Tariffe, scaglioni e pesi | Rinviato alla slice VS-07 |
-| 10 | Regole economiche | Rinviato alle slice economiche interessate |
-| 11 | Fatture e componenti economiche | Rinviato alla slice VS-10 |
-| 12 | Contabilità | Rinviato alla slice VS-12 |
-| 13 | Incassi e quote | Rinviato alla slice VS-11 |
-| 14 | Date, istanti e fusi | Trasversale, da verificare progressivamente |
-| 15 | Resoconti, configurazioni e backup | Rinviato alle slice VS-13–VS-14 |
-| 16 | Cardinalità ed integrità referenziale | Revisione progressiva e finale |
-| 17 | Unicità, indici e prestazioni | Revisione progressiva e finale |
-| 18 | Dati autorevoli, consolidati e derivati | Revisione progressiva e finale |
-| 19 | Diagramma delle entità e delle relazioni | Aggiornamento progressivo |
-| 20 | Copertura dei casi d'uso | Verifica progressiva e finale |
-| 21 | Revisione trasversale e chiusura | Prima del rilascio |
+| Punto | Ambito                                       | Stato                                                            |
+| ----- | -------------------------------------------- | ---------------------------------------------------------------- |
+| 1     | Scopo, perimetro e convenzioni               | Completato                                                       |
+| 2     | Identificativi tecnici e riferimenti stabili | Completato                                                       |
+| 3     | Anagrafiche e versioni temporali             | Completato                                                       |
+| 4     | Navi, viaggi, visite e ormeggi               | Completato                                                       |
+| 5     | Operazioni nave e sequenze                   | Completato                                                       |
+| 6     | Prestazioni e catalogo                       | Proposta da verificare nelle slice VS-06–VS-08                   |
+| 7     | Movimentazioni merci                         | Rinviato alla slice VS-09                                        |
+| 8     | Cliente e agenzia                            | Da sviluppare nelle prime slice che ne richiedono l'attribuzione |
+| 9     | Tariffe, scaglioni e pesi                    | Rinviato alla slice VS-07                                        |
+| 10    | Regole economiche                            | Rinviato alle slice economiche interessate                       |
+| 11    | Fatture e componenti economiche              | Rinviato alla slice VS-10                                        |
+| 12    | Contabilità                                  | Rinviato alla slice VS-12                                        |
+| 13    | Incassi e quote                              | Rinviato alla slice VS-11                                        |
+| 14    | Date, istanti e fusi                         | Trasversale, da verificare progressivamente                      |
+| 15    | Resoconti, configurazioni e backup           | Rinviato alle slice VS-13–VS-14                                  |
+| 16    | Cardinalità ed integrità referenziale        | Revisione progressiva e finale                                   |
+| 17    | Unicità, indici e prestazioni                | Revisione progressiva e finale                                   |
+| 18    | Dati autorevoli, consolidati e derivati      | Revisione progressiva e finale                                   |
+| 19    | Diagramma delle entità e delle relazioni     | Aggiornamento progressivo                                        |
+| 20    | Copertura dei casi d'uso                     | Verifica progressiva e finale                                    |
+| 21    | Revisione trasversale e chiusura             | Prima del rilascio                                               |
 
 ## 3.7 Prossima attività e modalità di aggiornamento
 
@@ -410,16 +410,16 @@ Il risultato di questa fase è un **modello logico autorevole**, indipendente da
 
 Il modello distingue le seguenti categorie:
 
-| Categoria | Significato |
-| --- | --- |
-| Entità | Elemento con identità stabile e ciclo di vita autonomo nel dominio. |
-| Componente dipendente | Elemento che esiste soltanto come parte di un'entità proprietaria e ne segue il ciclo di vita. |
-| Entità di associazione | Relazione tra entità che possiede dati o regole proprie, come la quota che collega un incasso a una fattura. |
-| Versione temporale | Stato completo di un elemento valido a partire da una determinata decorrenza. |
-| Oggetto valore | Insieme di valori privo di identità autonoma, definito dal proprio contenuto, come un importo monetario o un momento di dominio. |
-| Snapshot consolidato | Copia immutabile dei dati necessari a preservare un fatto storico, in particolare una fattura emessa. |
-| Dato derivato o proiezione | Valore ricostruibile da fonti autorevoli; viene memorizzato soltanto quando serve una motivazione esplicita di correttezza o prestazione. |
-| Registrazione tecnica | Dato necessario al funzionamento, alla configurazione, alla tracciabilità o al backup, ma non coincidente con un concetto operativo principale. |
+| Categoria                  | Significato                                                                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entità                     | Elemento con identità stabile e ciclo di vita autonomo nel dominio.                                                                             |
+| Componente dipendente      | Elemento che esiste soltanto come parte di un'entità proprietaria e ne segue il ciclo di vita.                                                  |
+| Entità di associazione     | Relazione tra entità che possiede dati o regole proprie, come la quota che collega un incasso a una fattura.                                    |
+| Versione temporale         | Stato completo di un elemento valido a partire da una determinata decorrenza.                                                                   |
+| Oggetto valore             | Insieme di valori privo di identità autonoma, definito dal proprio contenuto, come un importo monetario o un momento di dominio.                |
+| Snapshot consolidato       | Copia immutabile dei dati necessari a preservare un fatto storico, in particolare una fattura emessa.                                           |
+| Dato derivato o proiezione | Valore ricostruibile da fonti autorevoli; viene memorizzato soltanto quando serve una motivazione esplicita di correttezza o prestazione.       |
+| Registrazione tecnica      | Dato necessario al funzionamento, alla configurazione, alla tracciabilità o al backup, ma non coincidente con un concetto operativo principale. |
 
 Queste categorie non determinano ancora aggregati software, moduli o tabelle. Tali confini verranno definiti nell'architettura applicativa.
 
@@ -429,27 +429,27 @@ La documentazione funzionale e di dominio resta in italiano, in modo da essere c
 
 Si distinguono quindi tre livelli:
 
-| Livello | Lingua e convenzione | Esempio |
-| --- | --- | --- |
-| Dominio e documentazione | Italiano, con termini al singolare usati in modo coerente. | Movimentazione merci |
-| Codice e API | Inglese; `PascalCase` per tipi e `camelCase` per attributi e relazioni. | `CargoMovement`, `invoiceDate` |
-| Database | Inglese, secondo la convenzione fisica definita nell'architettura. | `cargo_movement`, `invoice_date` |
+| Livello                  | Lingua e convenzione                                                    | Esempio                          |
+| ------------------------ | ----------------------------------------------------------------------- | -------------------------------- |
+| Dominio e documentazione | Italiano, con termini al singolare usati in modo coerente.              | Movimentazione merci             |
+| Codice e API             | Inglese; `PascalCase` per tipi e `camelCase` per attributi e relazioni. | `CargoMovement`, `invoiceDate`   |
+| Database                 | Inglese, secondo la convenzione fisica definita nell'architettura.      | `cargo_movement`, `invoice_date` |
 
 Ogni concetto riceve un solo nome funzionale italiano e un solo nome tecnico inglese ufficiale. Alla prima definizione dettagliata vengono riportati entrambi, per esempio **Movimentazione merci (`CargoMovement`)**. Classi, attributi, API, tabelle, colonne, chiavi, vincoli e indici utilizzano i termini tecnici inglesi; le etichette dell'interfaccia restano localizzabili e non costituiscono identificatori tecnici.
 
 Il glossario bilingue viene esteso durante la modellazione e consolidato nella revisione finale. Le prime corrispondenze sono:
 
-| Termine di dominio | Nome tecnico |
-| --- | --- |
-| Nave | `Vessel` |
-| Porto | `Port` |
-| Banchina | `Berth` |
-| Viaggio | `Voyage` |
-| Visita portuale | `PortCall` |
-| Operazione nave | `VesselOperation` |
-| Movimentazione merci | `CargoMovement` |
-| Fattura | `Invoice` |
-| Incasso | `CustomerPayment` |
+| Termine di dominio   | Nome tecnico      |
+| -------------------- | ----------------- |
+| Nave                 | `Vessel`          |
+| Porto                | `Port`            |
+| Banchina             | `Berth`           |
+| Viaggio              | `Voyage`          |
+| Visita portuale      | `PortCall`        |
+| Operazione nave      | `VesselOperation` |
+| Movimentazione merci | `CargoMovement`   |
+| Fattura              | `Invoice`         |
+| Incasso              | `CustomerPayment` |
 
 Per concetti potenzialmente ambigui, come prestazione, ormeggio e movimento contabile, il nome tecnico viene stabilito nel relativo punto dopo averne precisato il significato. Sono evitate traduzioni letterali che possano produrre sovrapposizioni o interpretazioni errate.
 
@@ -487,20 +487,20 @@ I valori predefiniti sono ammessi soltanto quando esprimono una regola esplicita
 
 Il modello usa i seguenti tipi logici di base:
 
-| Tipo | Convenzione |
-| --- | --- |
-| Testo | Stringa normalizzata, con lunghezza massima definita per il singolo attributo quando necessario. |
-| Intero | Numero intero esatto, eventualmente soggetto a limiti positivi o non negativi. |
-| Decimale esatto | Numero decimale non rappresentato in virgola mobile; precisione e scala dipendono dal significato specifico. |
-| Importo monetario | Valore decimale esatto in euro con due cifre decimali. |
-| Percentuale | Decimale esatto con limiti e scala stabiliti dalla specifica regola; gli sconti percentuali, ove previsto, sono compresi tra 0 e 100. |
-| Quantità merce | Decimale esatto strettamente positivo con al massimo tre cifre decimali. |
-| Data civile | Data di calendario priva di ora e fuso. |
-| Momento di dominio | Data e ora locale al minuto, `ZoneId` IANA, offset applicato e corrispondente istante UTC. |
-| Istante tecnico | Istante UTC con precisione massima al millisecondo. |
-| Booleano | Valore vero o falso con significato affermativo esplicito. |
-| Stato o tipo chiuso | Valore appartenente a un insieme finito definito dal dominio. |
-| Riferimento stabile | Collegamento all'identità di un'altra entità, distinto dai relativi codici visibili. |
+| Tipo                | Convenzione                                                                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Testo               | Stringa normalizzata, con lunghezza massima definita per il singolo attributo quando necessario.                                      |
+| Intero              | Numero intero esatto, eventualmente soggetto a limiti positivi o non negativi.                                                        |
+| Decimale esatto     | Numero decimale non rappresentato in virgola mobile; precisione e scala dipendono dal significato specifico.                          |
+| Importo monetario   | Valore decimale esatto in euro con due cifre decimali.                                                                                |
+| Percentuale         | Decimale esatto con limiti e scala stabiliti dalla specifica regola; gli sconti percentuali, ove previsto, sono compresi tra 0 e 100. |
+| Quantità merce      | Decimale esatto strettamente positivo con al massimo tre cifre decimali.                                                              |
+| Data civile         | Data di calendario priva di ora e fuso.                                                                                               |
+| Momento di dominio  | Data e ora locale al minuto, `ZoneId` IANA, offset applicato e corrispondente istante UTC.                                            |
+| Istante tecnico     | Istante UTC con precisione massima al millisecondo.                                                                                   |
+| Booleano            | Valore vero o falso con significato affermativo esplicito.                                                                            |
+| Stato o tipo chiuso | Valore appartenente a un insieme finito definito dal dominio.                                                                         |
+| Riferimento stabile | Collegamento all'identità di un'altra entità, distinto dai relativi codici visibili.                                                  |
 
 Non vengono impiegati numeri in virgola mobile per importi, percentuali, quantità, pesi o valori tariffari. La precisione non già definita viene stabilita nel punto relativo all'elemento interessato, senza imporre una scala globale arbitraria.
 
@@ -611,15 +611,15 @@ Gli identificativi devono garantire che una modifica di nome, codice, data, posi
 
 Il modello distingue le seguenti categorie:
 
-| Categoria | Funzione | Esempio |
-| --- | --- | --- |
-| Identità tecnica stabile | Riconosce permanentemente un'entità e viene usata nei riferimenti interni. | Identità di una nave o di un movimento contabile. |
-| Codice progressivo stabile | Fornisce un codice amministrativo permanente, distinto dall'identità tecnica. | Codice progressivo di un'anagrafica. |
-| Identificativo di dominio | Identifica un documento secondo regole funzionali specifiche. | `1-A/2026` per una fattura. |
-| Codice configurabile | Valore gestito dall'operatore, modificabile e talvolta riutilizzabile. | Codice di un conto, di una categoria o di una voce contabile. |
-| Identificativo naturale o secondario | Dato reale che contribuisce a riconoscere o deduplicare un elemento. | Codice IMO o ragione sociale. |
-| Progressivo di ordinamento | Definisce una posizione modificabile in una sequenza e non l'identità dell'elemento. | Progressivo giornaliero di un movimento contabile. |
-| Codice chiuso | Rappresenta un valore appartenente a un insieme finito. | Tipo `entrata`, `uscita` o `spostamento`. |
+| Categoria                            | Funzione                                                                             | Esempio                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| Identità tecnica stabile             | Riconosce permanentemente un'entità e viene usata nei riferimenti interni.           | Identità di una nave o di un movimento contabile.             |
+| Codice progressivo stabile           | Fornisce un codice amministrativo permanente, distinto dall'identità tecnica.        | Codice progressivo di un'anagrafica.                          |
+| Identificativo di dominio            | Identifica un documento secondo regole funzionali specifiche.                        | `1-A/2026` per una fattura.                                   |
+| Codice configurabile                 | Valore gestito dall'operatore, modificabile e talvolta riutilizzabile.               | Codice di un conto, di una categoria o di una voce contabile. |
+| Identificativo naturale o secondario | Dato reale che contribuisce a riconoscere o deduplicare un elemento.                 | Codice IMO o ragione sociale.                                 |
+| Progressivo di ordinamento           | Definisce una posizione modificabile in una sequenza e non l'identità dell'elemento. | Progressivo giornaliero di un movimento contabile.            |
+| Codice chiuso                        | Rappresenta un valore appartenente a un insieme finito.                              | Tipo `entrata`, `uscita` o `spostamento`.                     |
 
 Le categorie non sono intercambiabili. In particolare, un codice visibile, una chiave naturale o un progressivo di ordinamento non vengono mai usati come riferimento persistente al posto dell'identità tecnica.
 
@@ -643,16 +643,16 @@ Lo `StableId` è globalmente univoco nello spazio dei dati prodotti dall'applica
 
 L'identità viene attribuita secondo il ruolo dell'elemento:
 
-| Elemento | Identificazione logica |
-| --- | --- |
-| Entità autonoma | Possiede un proprio `StableId`. |
-| Identità anagrafica versionata | Possiede uno `StableId` comune a tutte le versioni. |
-| Versione temporale | Possiede un proprio `StableId` e il riferimento obbligatorio all'identità versionata. |
-| Associazione con dati o ciclo di vita propri | Possiede un proprio `StableId`, come una quota tra incasso e fattura. |
-| Componente dipendente modificabile, ordinabile, consolidabile o referenziabile singolarmente | Possiede un proprio `StableId`, pur rimanendo subordinato al proprietario. |
-| Associazione pura senza dati propri | Può essere identificata dalla coppia dei riferimenti, se non deve essere gestita o referenziata autonomamente. |
-| Oggetto valore | Non possiede identità e viene confrontato per contenuto. |
-| Tipo o stato chiuso | È riconosciuto da un codice stabile definito dal dominio e non riceve uno `StableId`. |
+| Elemento                                                                                     | Identificazione logica                                                                                         |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Entità autonoma                                                                              | Possiede un proprio `StableId`.                                                                                |
+| Identità anagrafica versionata                                                               | Possiede uno `StableId` comune a tutte le versioni.                                                            |
+| Versione temporale                                                                           | Possiede un proprio `StableId` e il riferimento obbligatorio all'identità versionata.                          |
+| Associazione con dati o ciclo di vita propri                                                 | Possiede un proprio `StableId`, come una quota tra incasso e fattura.                                          |
+| Componente dipendente modificabile, ordinabile, consolidabile o referenziabile singolarmente | Possiede un proprio `StableId`, pur rimanendo subordinato al proprietario.                                     |
+| Associazione pura senza dati propri                                                          | Può essere identificata dalla coppia dei riferimenti, se non deve essere gestita o referenziata autonomamente. |
+| Oggetto valore                                                                               | Non possiede identità e viene confrontato per contenuto.                                                       |
+| Tipo o stato chiuso                                                                          | È riconosciuto da un codice stabile definito dal dominio e non riceve uno `StableId`.                          |
 
 La presenza di uno `StableId` su un componente non gli attribuisce un ciclo di vita autonomo: eliminazione e validità continuano a dipendere dall'entità proprietaria.
 
@@ -695,16 +695,16 @@ Per le banchine la sequenza è unica per la tipologia `Banchina`, non separata p
 
 Le regole già definite nei documenti precedenti vengono ricondotte al seguente schema:
 
-| Elemento | Identificatore o codice | Modificabilità e riutilizzo |
-| --- | --- | --- |
-| Anagrafica | `StableId` e codice progressivo | Entrambi immutabili e mai riutilizzati; le versioni condividono gli stessi valori. |
-| Versione temporale | `StableId` proprio | Immutabile; decorrenza e contenuto possono cambiare soltanto secondo le regole temporali e di consolidamento. |
-| Fattura | `StableId` e identificativo anno-progressivo-suffisso | L'identificativo di dominio è modificabile prima della prima emissione; dopo diventa immutabile e rimane riservato. |
-| Movimento contabile | `StableId` e progressivo giornaliero | Lo `StableId` è immutabile; il progressivo cambia con inserimenti, eliminazioni, riordini e variazioni della data contabile. |
-| Conto finanziario | `StableId` e codice operativo | Il codice è modificabile anche dopo l'utilizzo e quello liberato può essere riutilizzato. |
-| Categoria o voce contabile | `StableId` e codice configurabile | Il codice è modificabile; rimane riservato durante la disattivazione e viene liberato dalla modifica o dall'eliminazione consentita. |
-| Nave | `StableId`, codice progressivo e codice IMO facoltativo | L'IMO è un identificativo secondario versionabile e rimane riservato alla nave finché l'anagrafica esiste. |
-| Tipo chiuso | Codice tecnico stabile | Non modificabile dall'operatore e non sostituibile con un'identità generata. |
+| Elemento                   | Identificatore o codice                                 | Modificabilità e riutilizzo                                                                                                          |
+| -------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Anagrafica                 | `StableId` e codice progressivo                         | Entrambi immutabili e mai riutilizzati; le versioni condividono gli stessi valori.                                                   |
+| Versione temporale         | `StableId` proprio                                      | Immutabile; decorrenza e contenuto possono cambiare soltanto secondo le regole temporali e di consolidamento.                        |
+| Fattura                    | `StableId` e identificativo anno-progressivo-suffisso   | L'identificativo di dominio è modificabile prima della prima emissione; dopo diventa immutabile e rimane riservato.                  |
+| Movimento contabile        | `StableId` e progressivo giornaliero                    | Lo `StableId` è immutabile; il progressivo cambia con inserimenti, eliminazioni, riordini e variazioni della data contabile.         |
+| Conto finanziario          | `StableId` e codice operativo                           | Il codice è modificabile anche dopo l'utilizzo e quello liberato può essere riutilizzato.                                            |
+| Categoria o voce contabile | `StableId` e codice configurabile                       | Il codice è modificabile; rimane riservato durante la disattivazione e viene liberato dalla modifica o dall'eliminazione consentita. |
+| Nave                       | `StableId`, codice progressivo e codice IMO facoltativo | L'IMO è un identificativo secondario versionabile e rimane riservato alla nave finché l'anagrafica esiste.                           |
+| Tipo chiuso                | Codice tecnico stabile                                  | Non modificabile dall'operatore e non sostituibile con un'identità generata.                                                         |
 
 Le associazioni persistenti usano sempre lo `StableId`, anche quando il codice configurabile corrente viene modificato o assegnato successivamente a un'altra entità.
 
@@ -736,16 +736,16 @@ Un ordinamento deve essere sempre deterministico. Quando i criteri funzionali ri
 
 Il glossario del punto 1 viene esteso come segue:
 
-| Termine di dominio | Nome tecnico |
-| --- | --- |
-| Identità tecnica stabile | `StableId` |
+| Termine di dominio         | Nome tecnico              |
+| -------------------------- | ------------------------- |
+| Identità tecnica stabile   | `StableId`                |
 | Codice progressivo stabile | `StableProgressiveNumber` |
-| Identificativo di dominio | `BusinessIdentifier` |
-| Codice configurabile | `ConfigurableCode` |
-| Identificativo naturale | `NaturalIdentifier` |
-| Progressivo di ordinamento | `SequencePosition` |
-| Identità dell'entità | `entityId` |
-| Identità della versione | `versionId` |
+| Identificativo di dominio  | `BusinessIdentifier`      |
+| Codice configurabile       | `ConfigurableCode`        |
+| Identificativo naturale    | `NaturalIdentifier`       |
+| Progressivo di ordinamento | `SequencePosition`        |
+| Identità dell'entità       | `entityId`                |
+| Identità della versione    | `versionId`               |
 
 I nomi esatti degli attributi possono essere specializzati nel relativo ambito, per esempio `invoiceNumber`, `dailySequence` o `accountCode`, evitando nomi generici quando il significato può risultare ambiguo.
 
@@ -801,13 +801,13 @@ L'eventuale strategia fisica di ereditarietà o separazione delle tabelle viene 
 
 Ogni identità anagrafica contiene:
 
-| Attributo logico | Tipo | Obbligatorio | Significato |
-| --- | --- | --- | --- |
-| `id` | `StableId` | Sì | Identità tecnica immutabile comune a tutte le versioni. |
-| `progressiveNumber` | `StableProgressiveNumber` | Sì | Codice progressivo stabile della specifica tipologia. |
-| `status` | `MasterDataStatus` | Sì | Stato corrente `ACTIVE` oppure `INACTIVE`. |
-| `createdAtUtc` | Istante tecnico | Sì | Istante di creazione dell'identità. |
-| `updatedAtUtc` | Istante tecnico | Sì | Istante dell'ultima modifica persistita all'identità o al suo stato. |
+| Attributo logico    | Tipo                      | Obbligatorio | Significato                                                          |
+| ------------------- | ------------------------- | ------------ | -------------------------------------------------------------------- |
+| `id`                | `StableId`                | Sì           | Identità tecnica immutabile comune a tutte le versioni.              |
+| `progressiveNumber` | `StableProgressiveNumber` | Sì           | Codice progressivo stabile della specifica tipologia.                |
+| `status`            | `MasterDataStatus`        | Sì           | Stato corrente `ACTIVE` oppure `INACTIVE`.                           |
+| `createdAtUtc`      | Istante tecnico           | Sì           | Istante di creazione dell'identità.                                  |
+| `updatedAtUtc`      | Istante tecnico           | Sì           | Istante dell'ultima modifica persistita all'identità o al suo stato. |
 
 Lo stato viene inizializzato a `ACTIVE`, appartiene all'identità e non è versionato. Disattivazione e riattivazione hanno effetto immediato e non modificano la sequenza delle versioni.
 
@@ -817,14 +817,14 @@ Non viene memorizzata come dato autorevole una relazione `currentVersionId`: la 
 
 Ogni versione contiene:
 
-| Attributo logico | Tipo | Obbligatorio | Significato |
-| --- | --- | --- | --- |
-| `id` | `StableId` | Sì | Identità tecnica della singola versione. |
-| `masterDataId` | `StableId` | Sì | Riferimento all'identità anagrafica proprietaria. |
-| `effectiveFrom` | Momento di dominio | No per la versione iniziale; sì per le successive | Decorrenza inclusa della versione. |
-| dati specifici | Tipi definiti per l'anagrafica | Sì secondo l'attributo | Stato descrittivo completo applicabile nell'intervallo. |
-| `createdAtUtc` | Istante tecnico | Sì | Istante tecnico di creazione della versione. |
-| `updatedAtUtc` | Istante tecnico | Sì | Istante tecnico dell'ultima modifica alla versione. |
+| Attributo logico | Tipo                           | Obbligatorio                                      | Significato                                             |
+| ---------------- | ------------------------------ | ------------------------------------------------- | ------------------------------------------------------- |
+| `id`             | `StableId`                     | Sì                                                | Identità tecnica della singola versione.                |
+| `masterDataId`   | `StableId`                     | Sì                                                | Riferimento all'identità anagrafica proprietaria.       |
+| `effectiveFrom`  | Momento di dominio             | No per la versione iniziale; sì per le successive | Decorrenza inclusa della versione.                      |
+| dati specifici   | Tipi definiti per l'anagrafica | Sì secondo l'attributo                            | Stato descrittivo completo applicabile nell'intervallo. |
+| `createdAtUtc`   | Istante tecnico                | Sì                                                | Istante tecnico di creazione della versione.            |
+| `updatedAtUtc`   | Istante tecnico                | Sì                                                | Istante tecnico dell'ultima modifica alla versione.     |
 
 La versione iniziale è riconosciuta dall'assenza di `effectiveFrom`; non richiede un indicatore booleano aggiuntivo. Copre ogni istante precedente alla prima versione con decorrenza e non può essere eliminata.
 
@@ -841,14 +841,14 @@ La versione avente la decorrenza massima non coincide necessariamente con quella
 
 Gli attributi versionati iniziali sono:
 
-| Anagrafica e versione tecnica | Attributi specifici | Vincoli principali |
-| --- | --- | --- |
-| Nave (`Vessel`, `VesselVersion`) | `registeredName`, `imoNumber`, `vesselTypeId`, `size` | Nome obbligatorio; IMO facoltativo; tipologia obbligatoria; dimensione intera non negativa. |
-| Cliente (`Customer`, `CustomerVersion`) | `businessName` | Ragione sociale obbligatoria. |
-| Agenzia (`Agency`, `AgencyVersion`) | `businessName` | Ragione sociale obbligatoria. |
-| Porto (`Port`, `PortVersion`) | `name`, `locality`, `countryCode` | Tutti obbligatori; il fuso operativo è escluso dalla versione descrittiva. |
-| Banchina (`Berth`, `BerthVersion`) | sulla radice `portId`; sulla versione `name` | Porto obbligatorio e immutabile; nome obbligatorio. |
-| Merce (`CargoType`, `CargoTypeVersion`) | `name` | Denominazione obbligatoria. |
+| Anagrafica e versione tecnica           | Attributi specifici                                   | Vincoli principali                                                                          |
+| --------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Nave (`Vessel`, `VesselVersion`)        | `registeredName`, `imoNumber`, `vesselTypeId`, `size` | Nome obbligatorio; IMO facoltativo; tipologia obbligatoria; dimensione intera non negativa. |
+| Cliente (`Customer`, `CustomerVersion`) | `businessName`                                        | Ragione sociale obbligatoria.                                                               |
+| Agenzia (`Agency`, `AgencyVersion`)     | `businessName`                                        | Ragione sociale obbligatoria.                                                               |
+| Porto (`Port`, `PortVersion`)           | `name`, `locality`, `countryCode`                     | Tutti obbligatori; il fuso operativo è escluso dalla versione descrittiva.                  |
+| Banchina (`Berth`, `BerthVersion`)      | sulla radice `portId`; sulla versione `name`          | Porto obbligatorio e immutabile; nome obbligatorio.                                         |
+| Merce (`CargoType`, `CargoTypeVersion`) | `name`                                                | Denominazione obbligatoria.                                                                 |
 
 Non vengono introdotti nella prima versione ulteriori campi descrittivi non richiesti. La loro eventuale aggiunta seguirà la stessa distinzione tra dati identitari, dati versionati e relazioni permanenti.
 
@@ -878,14 +878,14 @@ La sola conservazione delle versioni esistenti non è sufficiente a rispettare l
 
 Il modello introduce quindi il componente dipendente **Prenotazione identificativa (`IdentifierReservation`)**, contenente logicamente:
 
-| Attributo | Significato |
-| --- | --- |
-| `id` | `StableId` della prenotazione. |
-| `ownerId` | Identità anagrafica alla quale il valore è riservato. |
-| `identifierKind` | Tipo di dato identificativo prenotato. |
-| `scopeId` | Eventuale ambito dell'unicità, come il porto per il nome della banchina. |
-| `normalizedKey` | Chiave normalizzata semplice o composta utilizzata nel confronto. |
-| `createdAtUtc` | Istante della prima prenotazione. |
+| Attributo        | Significato                                                              |
+| ---------------- | ------------------------------------------------------------------------ |
+| `id`             | `StableId` della prenotazione.                                           |
+| `ownerId`        | Identità anagrafica alla quale il valore è riservato.                    |
+| `identifierKind` | Tipo di dato identificativo prenotato.                                   |
+| `scopeId`        | Eventuale ambito dell'unicità, come il porto per il nome della banchina. |
+| `normalizedKey`  | Chiave normalizzata semplice o composta utilizzata nel confronto.        |
+| `createdAtUtc`   | Istante della prima prenotazione.                                        |
 
 L'unicità viene verificata sulla combinazione tra tipo, eventuale ambito e chiave normalizzata. La forma fisica delle chiavi semplici e composte verrà precisata insieme ai vincoli e agli indici, evitando concatenazioni testuali ambigue.
 
@@ -899,15 +899,15 @@ Le prenotazioni vengono gestite come segue:
 
 I dati prenotati sono:
 
-| Anagrafica | Chiave prenotata | Ambito |
-| --- | --- | --- |
-| Cliente | ragione sociale normalizzata | Globale tra i clienti. |
-| Agenzia | ragione sociale normalizzata | Globale tra le agenzie. |
-| Nave | nome di registrazione normalizzato | Globale tra le navi. |
-| Nave | codice IMO normalizzato, se presente | Globale tra le navi. |
-| Porto | nome, località e paese normalizzati | Globale tra i porti. |
-| Banchina | nome normalizzato | Singolo `portId`. |
-| Merce | denominazione normalizzata | Globale tra le merci. |
+| Anagrafica | Chiave prenotata                     | Ambito                  |
+| ---------- | ------------------------------------ | ----------------------- |
+| Cliente    | ragione sociale normalizzata         | Globale tra i clienti.  |
+| Agenzia    | ragione sociale normalizzata         | Globale tra le agenzie. |
+| Nave       | nome di registrazione normalizzato   | Globale tra le navi.    |
+| Nave       | codice IMO normalizzato, se presente | Globale tra le navi.    |
+| Porto      | nome, località e paese normalizzati  | Globale tra i porti.    |
+| Banchina   | nome normalizzato                    | Singolo `portId`.       |
+| Merce      | denominazione normalizzata           | Globale tra le merci.   |
 
 La normalizzazione elimina gli spazi iniziali e finali e applica un confronto senza distinzione tra maiuscole e minuscole. Gli spazi interni e il valore visualizzato non vengono modificati salvo ulteriori regole specifiche.
 
@@ -981,20 +981,20 @@ Il codice progressivo rimane definitivamente non riutilizzabile. I dati identifi
 
 Il glossario viene esteso come segue:
 
-| Termine di dominio | Nome tecnico |
-| --- | --- |
-| Anagrafica | `MasterData` |
-| Versione anagrafica | `MasterDataVersion` |
-| Stato anagrafico | `MasterDataStatus` |
-| Nave | `Vessel` |
-| Cliente | `Customer` |
-| Agenzia | `Agency` |
-| Porto | `Port` |
-| Banchina | `Berth` |
-| Merce | `CargoType` |
-| Tipologia nave | `VesselType` |
+| Termine di dominio          | Nome tecnico            |
+| --------------------------- | ----------------------- |
+| Anagrafica                  | `MasterData`            |
+| Versione anagrafica         | `MasterDataVersion`     |
+| Stato anagrafico            | `MasterDataStatus`      |
+| Nave                        | `Vessel`                |
+| Cliente                     | `Customer`              |
+| Agenzia                     | `Agency`                |
+| Porto                       | `Port`                  |
+| Banchina                    | `Berth`                 |
+| Merce                       | `CargoType`             |
+| Tipologia nave              | `VesselType`            |
 | Prenotazione identificativa | `IdentifierReservation` |
-| Decorrenza | `effectiveFrom` |
+| Decorrenza                  | `effectiveFrom`         |
 
 ### 3.10.15 Decisioni già determinate
 
@@ -1047,10 +1047,10 @@ La gerarchia è composta da:
 
 Le cardinalità sono:
 
-| Relazione | Cardinalità e significato |
-| --- | --- |
-| `Vessel` → `Voyage` | Una nave può avere zero o più viaggi; ogni viaggio appartiene esattamente a una nave. |
-| `Voyage` → `PortCall` | Un viaggio contiene una o più visite; ogni visita appartiene esattamente a un viaggio. |
+| Relazione                | Cardinalità e significato                                                                 |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| `Vessel` → `Voyage`      | Una nave può avere zero o più viaggi; ogni viaggio appartiene esattamente a una nave.     |
+| `Voyage` → `PortCall`    | Un viaggio contiene una o più visite; ogni visita appartiene esattamente a un viaggio.    |
 | `PortCall` → `BerthStay` | Una visita contiene uno o più ormeggi; ogni ormeggio appartiene esattamente a una visita. |
 
 Un viaggio non può esistere senza la visita iniziale e una visita non può esistere senza il proprio ormeggio iniziale. La creazione degli elementi necessari avviene nella stessa operazione atomica.
@@ -1076,11 +1076,11 @@ Il contesto corrente si determina dagli elementi aperti; l'intervallo di trasfer
 
 Ogni viaggio, visita e ormeggio possiede un proprio `StableId`. Per rendere stabile l'identità anche durante una ricostruzione controllata, ciascun elemento viene ancorato all'operazione che lo ha aperto:
 
-| Elemento | Operazione di apertura |
-| --- | --- |
-| `Voyage` | Entrata che apre il viaggio. |
-| `PortCall` | Entrata per la prima visita oppure arrivo di uno spostamento tra porti. |
-| `BerthStay` | Entrata per il primo ormeggio oppure arrivo di uno spostamento. |
+| Elemento    | Operazione di apertura                                                  |
+| ----------- | ----------------------------------------------------------------------- |
+| `Voyage`    | Entrata che apre il viaggio.                                            |
+| `PortCall`  | Entrata per la prima visita oppure arrivo di uno spostamento tra porti. |
+| `BerthStay` | Entrata per il primo ormeggio oppure arrivo di uno spostamento.         |
 
 `openingOperationId` è obbligatorio e univoco all'interno della singola tipologia di elemento. La stessa entrata può quindi aprire un viaggio, una visita e un ormeggio, mentre uno spostamento può contemporaneamente chiudere un elemento di origine e aprirne uno di destinazione.
 
@@ -1096,19 +1096,19 @@ Durante una ricostruzione viene conservato lo `StableId` se la stessa operazione
 
 Il viaggio rappresenta il percorso operativo complessivo della nave tra un'entrata e la relativa uscita.
 
-| Attributo logico | Tipo | Obbligatorio | Significato e origine |
-| --- | --- | --- | --- |
-| `id` | `StableId` | Sì | Identità tecnica del viaggio. |
-| `vesselId` | Riferimento a `Vessel` | Sì | Nave alla quale appartiene il viaggio. |
-| `vesselVersionId` | Riferimento a `VesselVersion` | Sì | Versione della nave applicabile all'inizio del viaggio. |
-| `openingOperationId` | Riferimento a `VesselOperation` | Sì | Entrata che apre il viaggio. |
-| `closingOperationId` | Riferimento a `VesselOperation` | No | Uscita che chiude il viaggio. |
-| `startedAt` | Momento di dominio | Sì | Copia derivata dell'istante dell'entrata. |
-| `endedAt` | Momento di dominio | No | Copia derivata dell'istante dell'uscita; assente per il viaggio aperto. |
-| `customerId` | Riferimento a `Customer` | No | Cliente eventualmente specificato sul viaggio. |
-| `agencyId` | Riferimento a `Agency` | No | Agenzia eventualmente specificata sul viaggio. |
-| `createdAtUtc` | Istante tecnico | Sì | Creazione tecnica dell'elemento persistito. |
-| `updatedAtUtc` | Istante tecnico | Sì | Ultimo aggiornamento della struttura o delle assegnazioni. |
+| Attributo logico     | Tipo                            | Obbligatorio | Significato e origine                                                   |
+| -------------------- | ------------------------------- | ------------ | ----------------------------------------------------------------------- |
+| `id`                 | `StableId`                      | Sì           | Identità tecnica del viaggio.                                           |
+| `vesselId`           | Riferimento a `Vessel`          | Sì           | Nave alla quale appartiene il viaggio.                                  |
+| `vesselVersionId`    | Riferimento a `VesselVersion`   | Sì           | Versione della nave applicabile all'inizio del viaggio.                 |
+| `openingOperationId` | Riferimento a `VesselOperation` | Sì           | Entrata che apre il viaggio.                                            |
+| `closingOperationId` | Riferimento a `VesselOperation` | No           | Uscita che chiude il viaggio.                                           |
+| `startedAt`          | Momento di dominio              | Sì           | Copia derivata dell'istante dell'entrata.                               |
+| `endedAt`            | Momento di dominio              | No           | Copia derivata dell'istante dell'uscita; assente per il viaggio aperto. |
+| `customerId`         | Riferimento a `Customer`        | No           | Cliente eventualmente specificato sul viaggio.                          |
+| `agencyId`           | Riferimento a `Agency`          | No           | Agenzia eventualmente specificata sul viaggio.                          |
+| `createdAtUtc`       | Istante tecnico                 | Sì           | Creazione tecnica dell'elemento persistito.                             |
+| `updatedAtUtc`       | Istante tecnico                 | Sì           | Ultimo aggiornamento della struttura o delle assegnazioni.              |
 
 La semantica temporale e il ricalcolo dei riferimenti specificati a cliente e agenzia verranno completati nel punto 8. Tali valori sono gestibili senza consentire la modifica diretta della struttura del viaggio.
 
@@ -1116,20 +1116,20 @@ La semantica temporale e il ricalcolo dei riferimenti specificati a cliente e ag
 
 La visita rappresenta la permanenza della nave presso un singolo porto all'interno di un viaggio.
 
-| Attributo logico | Tipo | Obbligatorio | Significato e origine |
-| --- | --- | --- | --- |
-| `id` | `StableId` | Sì | Identità tecnica della visita. |
-| `voyageId` | Riferimento a `Voyage` | Sì | Viaggio proprietario. |
-| `portId` | Riferimento a `Port` | Sì | Porto della visita. |
-| `portVersionId` | Riferimento a `PortVersion` | Sì | Versione del porto applicabile all'inizio della visita. |
-| `openingOperationId` | Riferimento a `VesselOperation` | Sì | Entrata o spostamento tra porti che apre la visita. |
-| `closingOperationId` | Riferimento a `VesselOperation` | No | Spostamento tra porti o uscita che chiude la visita. |
-| `startedAt` | Momento di dominio | Sì | Istante derivato dell'arrivo nel porto. |
-| `endedAt` | Momento di dominio | No | Istante derivato della partenza dal porto; assente per la visita aperta. |
-| `customerId` | Riferimento a `Customer` | No | Cliente eventualmente specificato sulla visita. |
-| `agencyId` | Riferimento a `Agency` | No | Agenzia eventualmente specificata sulla visita. |
-| `createdAtUtc` | Istante tecnico | Sì | Creazione tecnica dell'elemento persistito. |
-| `updatedAtUtc` | Istante tecnico | Sì | Ultimo aggiornamento della struttura o delle assegnazioni. |
+| Attributo logico     | Tipo                            | Obbligatorio | Significato e origine                                                    |
+| -------------------- | ------------------------------- | ------------ | ------------------------------------------------------------------------ |
+| `id`                 | `StableId`                      | Sì           | Identità tecnica della visita.                                           |
+| `voyageId`           | Riferimento a `Voyage`          | Sì           | Viaggio proprietario.                                                    |
+| `portId`             | Riferimento a `Port`            | Sì           | Porto della visita.                                                      |
+| `portVersionId`      | Riferimento a `PortVersion`     | Sì           | Versione del porto applicabile all'inizio della visita.                  |
+| `openingOperationId` | Riferimento a `VesselOperation` | Sì           | Entrata o spostamento tra porti che apre la visita.                      |
+| `closingOperationId` | Riferimento a `VesselOperation` | No           | Spostamento tra porti o uscita che chiude la visita.                     |
+| `startedAt`          | Momento di dominio              | Sì           | Istante derivato dell'arrivo nel porto.                                  |
+| `endedAt`            | Momento di dominio              | No           | Istante derivato della partenza dal porto; assente per la visita aperta. |
+| `customerId`         | Riferimento a `Customer`        | No           | Cliente eventualmente specificato sulla visita.                          |
+| `agencyId`           | Riferimento a `Agency`          | No           | Agenzia eventualmente specificata sulla visita.                          |
+| `createdAtUtc`       | Istante tecnico                 | Sì           | Creazione tecnica dell'elemento persistito.                              |
+| `updatedAtUtc`       | Istante tecnico                 | Sì           | Ultimo aggiornamento della struttura o delle assegnazioni.               |
 
 Il porto non è modificabile direttamente sulla visita: una correzione richiede la variazione dell'operazione di entrata o dello spostamento che l'ha aperta.
 
@@ -1137,20 +1137,20 @@ Il porto non è modificabile direttamente sulla visita: una correzione richiede 
 
 L'ormeggio rappresenta un intervallo continuativo della visita e, quando conosciuta, la collocazione della nave presso una specifica banchina.
 
-| Attributo logico | Tipo | Obbligatorio | Significato e origine |
-| --- | --- | --- | --- |
-| `id` | `StableId` | Sì | Identità tecnica dell'ormeggio. |
-| `portCallId` | Riferimento a `PortCall` | Sì | Visita proprietaria. |
-| `berthId` | Riferimento a `Berth` | No | Banchina della nave; assente quando non specificata. |
-| `berthVersionId` | Riferimento a `BerthVersion` | No | Versione della banchina applicabile all'inizio dell'ormeggio; presente se e solo se è presente `berthId`. |
-| `openingOperationId` | Riferimento a `VesselOperation` | Sì | Entrata o spostamento che apre l'ormeggio. |
-| `closingOperationId` | Riferimento a `VesselOperation` | No | Spostamento o uscita che chiude l'ormeggio. |
-| `startedAt` | Momento di dominio | Sì | Istante derivato di inizio dell'ormeggio. |
-| `endedAt` | Momento di dominio | No | Istante derivato di fine dell'ormeggio; assente per l'ormeggio aperto. |
-| `customerId` | Riferimento a `Customer` | No | Cliente eventualmente specificato sull'ormeggio. |
-| `agencyId` | Riferimento a `Agency` | No | Agenzia eventualmente specificata sull'ormeggio. |
-| `createdAtUtc` | Istante tecnico | Sì | Creazione tecnica dell'elemento persistito. |
-| `updatedAtUtc` | Istante tecnico | Sì | Ultimo aggiornamento della struttura o delle assegnazioni. |
+| Attributo logico     | Tipo                            | Obbligatorio | Significato e origine                                                                                     |
+| -------------------- | ------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------- |
+| `id`                 | `StableId`                      | Sì           | Identità tecnica dell'ormeggio.                                                                           |
+| `portCallId`         | Riferimento a `PortCall`        | Sì           | Visita proprietaria.                                                                                      |
+| `berthId`            | Riferimento a `Berth`           | No           | Banchina della nave; assente quando non specificata.                                                      |
+| `berthVersionId`     | Riferimento a `BerthVersion`    | No           | Versione della banchina applicabile all'inizio dell'ormeggio; presente se e solo se è presente `berthId`. |
+| `openingOperationId` | Riferimento a `VesselOperation` | Sì           | Entrata o spostamento che apre l'ormeggio.                                                                |
+| `closingOperationId` | Riferimento a `VesselOperation` | No           | Spostamento o uscita che chiude l'ormeggio.                                                               |
+| `startedAt`          | Momento di dominio              | Sì           | Istante derivato di inizio dell'ormeggio.                                                                 |
+| `endedAt`            | Momento di dominio              | No           | Istante derivato di fine dell'ormeggio; assente per l'ormeggio aperto.                                    |
+| `customerId`         | Riferimento a `Customer`        | No           | Cliente eventualmente specificato sull'ormeggio.                                                          |
+| `agencyId`           | Riferimento a `Agency`          | No           | Agenzia eventualmente specificata sull'ormeggio.                                                          |
+| `createdAtUtc`       | Istante tecnico                 | Sì           | Creazione tecnica dell'elemento persistito.                                                               |
+| `updatedAtUtc`       | Istante tecnico                 | Sì           | Ultimo aggiornamento della struttura o delle assegnazioni.                                                |
 
 La banchina deve appartenere al porto della visita. L'assenza di `berthId` rappresenta esplicitamente una banchina non specificata e non un errore di acquisizione.
 
@@ -1225,16 +1225,16 @@ Quando la variazione è consentita, aggiornamento dell'operazione, ricostruzione
 
 Il glossario viene esteso come segue:
 
-| Termine di dominio | Nome tecnico |
-| --- | --- |
-| Viaggio | `Voyage` |
-| Visita portuale | `PortCall` |
-| Ormeggio | `BerthStay` |
-| Operazione di apertura | `openingOperationId` |
-| Operazione di chiusura | `closingOperationId` |
-| Inizio | `startedAt` |
-| Fine | `endedAt` |
-| Intervallo di trasferimento | `TransferInterval` |
+| Termine di dominio          | Nome tecnico         |
+| --------------------------- | -------------------- |
+| Viaggio                     | `Voyage`             |
+| Visita portuale             | `PortCall`           |
+| Ormeggio                    | `BerthStay`          |
+| Operazione di apertura      | `openingOperationId` |
+| Operazione di chiusura      | `closingOperationId` |
+| Inizio                      | `startedAt`          |
+| Fine                        | `endedAt`            |
+| Intervallo di trasferimento | `TransferInterval`   |
 
 `BerthStay` viene preferito a una traduzione generica di ormeggio perché identifica chiaramente l'intervallo di permanenza presso una banchina, anche quando la banchina non è ancora specificata.
 
@@ -1291,11 +1291,11 @@ Il modello deve rappresentare dati comuni e specifici, estremi temporali, posizi
 
 **Operazione nave (`VesselOperation`)** è un'unica entità logica con una tipologia discriminante. Le tipologie appartengono all'insieme chiuso `VesselOperationType`:
 
-| Codice tecnico | Termine di dominio | Estremi temporali |
-| --- | --- | --- |
-| `ENTRY` | Entrata | Un solo istante. |
-| `MOVEMENT` | Spostamento | Partenza e arrivo. |
-| `EXIT` | Uscita | Un solo istante. |
+| Codice tecnico | Termine di dominio | Estremi temporali  |
+| -------------- | ------------------ | ------------------ |
+| `ENTRY`        | Entrata            | Un solo istante.   |
+| `MOVEMENT`     | Spostamento        | Partenza e arrivo. |
+| `EXIT`         | Uscita             | Un solo istante.   |
 
 La tipologia è modificabile tra questi tre valori quando l'operazione non è consolidata e la sequenza risultante rimane valida. Non può invece essere trasformata in una prestazione da catalogo o libera: la categoria operativa rimane immutabile.
 
@@ -1303,17 +1303,17 @@ Entrata, spostamento e uscita non sono entità di catalogo, non possiedono uno s
 
 ### 3.12.3 Attributi comuni di `VesselOperation`
 
-| Attributo logico | Tipo | Obbligatorio | Significato |
-| --- | --- | --- | --- |
-| `id` | `StableId` | Sì | Identità tecnica dell'operazione registrata. |
-| `vesselId` | Riferimento a `Vessel` | Sì | Nave interessata dall'operazione. |
-| `operationType` | `VesselOperationType` | Sì | Tipologia `ENTRY`, `MOVEMENT` oppure `EXIT`. |
-| `executionStatus` | `ExecutionStatus` | Sì | Stato `PLANNED`, `PERFORMED` oppure `MISSED`. |
-| `specifiedCustomerId` | Riferimento a `Customer` | No | Cliente specificato direttamente sull'operazione. |
-| `specifiedAgencyId` | Riferimento a `Agency` | No | Agenzia specificata direttamente sull'operazione. |
-| `notes` | Testo | No | Annotazioni correnti prive di effetti strutturali o economici. |
-| `createdAtUtc` | Istante tecnico | Sì | Istante tecnico di creazione. |
-| `updatedAtUtc` | Istante tecnico | Sì | Istante tecnico dell'ultima modifica. |
+| Attributo logico      | Tipo                     | Obbligatorio | Significato                                                    |
+| --------------------- | ------------------------ | ------------ | -------------------------------------------------------------- |
+| `id`                  | `StableId`               | Sì           | Identità tecnica dell'operazione registrata.                   |
+| `vesselId`            | Riferimento a `Vessel`   | Sì           | Nave interessata dall'operazione.                              |
+| `operationType`       | `VesselOperationType`    | Sì           | Tipologia `ENTRY`, `MOVEMENT` oppure `EXIT`.                   |
+| `executionStatus`     | `ExecutionStatus`        | Sì           | Stato `PLANNED`, `PERFORMED` oppure `MISSED`.                  |
+| `specifiedCustomerId` | Riferimento a `Customer` | No           | Cliente specificato direttamente sull'operazione.              |
+| `specifiedAgencyId`   | Riferimento a `Agency`   | No           | Agenzia specificata direttamente sull'operazione.              |
+| `notes`               | Testo                    | No           | Annotazioni correnti prive di effetti strutturali o economici. |
+| `createdAtUtc`        | Istante tecnico          | Sì           | Istante tecnico di creazione.                                  |
+| `updatedAtUtc`        | Istante tecnico          | Sì           | Istante tecnico dell'ultima modifica.                          |
 
 Cliente e agenzia sono indipendenti e possono essere specificati singolarmente. I riferimenti effettivi, le relative fonti e le versioni applicate alle componenti economiche verranno modellati nel punto 8.
 
@@ -1333,16 +1333,16 @@ I ruoli appartengono all'insieme chiuso `VesselOperationEndpointRole`:
 
 Ogni estremo contiene:
 
-| Attributo logico | Tipo | Obbligatorio | Significato |
-| --- | --- | --- | --- |
-| `operationId` | Riferimento a `VesselOperation` | Sì | Operazione proprietaria. |
-| `endpointRole` | `VesselOperationEndpointRole` | Sì | Ruolo dell'estremo. |
-| `moment` | Momento di dominio | Sì | Valore locale al minuto, fuso IANA, offset e istante UTC. |
-| `vesselVersionId` | Riferimento a `VesselVersion` | Sì | Versione della nave applicabile all'istante dell'estremo. |
-| `portId` | Riferimento a `Port` | Sì | Porto di origine o destinazione secondo il ruolo. |
-| `portVersionId` | Riferimento a `PortVersion` | Sì | Versione del porto applicabile all'istante dell'estremo. |
-| `berthId` | Riferimento a `Berth` | No | Banchina di origine o destinazione, se specificata o conosciuta. |
-| `berthVersionId` | Riferimento a `BerthVersion` | No | Versione della banchina applicabile; presente se e solo se è presente `berthId`. |
+| Attributo logico  | Tipo                            | Obbligatorio | Significato                                                                      |
+| ----------------- | ------------------------------- | ------------ | -------------------------------------------------------------------------------- |
+| `operationId`     | Riferimento a `VesselOperation` | Sì           | Operazione proprietaria.                                                         |
+| `endpointRole`    | `VesselOperationEndpointRole`   | Sì           | Ruolo dell'estremo.                                                              |
+| `moment`          | Momento di dominio              | Sì           | Valore locale al minuto, fuso IANA, offset e istante UTC.                        |
+| `vesselVersionId` | Riferimento a `VesselVersion`   | Sì           | Versione della nave applicabile all'istante dell'estremo.                        |
+| `portId`          | Riferimento a `Port`            | Sì           | Porto di origine o destinazione secondo il ruolo.                                |
+| `portVersionId`   | Riferimento a `PortVersion`     | Sì           | Versione del porto applicabile all'istante dell'estremo.                         |
+| `berthId`         | Riferimento a `Berth`           | No           | Banchina di origine o destinazione, se specificata o conosciuta.                 |
+| `berthVersionId`  | Riferimento a `BerthVersion`    | No           | Versione della banchina applicabile; presente se e solo se è presente `berthId`. |
 
 La versione della nave è associata al singolo estremo anziché alla radice dell'operazione. Uno spostamento tra porti può infatti attraversare una decorrenza anagrafica e le due componenti economiche devono poter utilizzare versioni differenti della nave.
 
@@ -1350,10 +1350,10 @@ La versione della nave è associata al singolo estremo anziché alla radice dell
 
 La tipologia determina in modo esclusivo ruoli e provenienza dei dati:
 
-| Tipologia | Estremi richiesti | Porto | Banchina |
-| --- | --- | --- | --- |
-| `ENTRY` | Un solo `OCCURRENCE` | Porto di arrivo inserito dall'operatore. | Banchina di arrivo facoltativa inserita dall'operatore. |
-| `EXIT` | Un solo `OCCURRENCE` | Porto di origine derivato dalla visita corrente. | Banchina di origine derivata dall'ormeggio corrente, eventualmente non specificata. |
+| Tipologia  | Estremi richiesti       | Porto                                                                                | Banchina                                                                                   |
+| ---------- | ----------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `ENTRY`    | Un solo `OCCURRENCE`    | Porto di arrivo inserito dall'operatore.                                             | Banchina di arrivo facoltativa inserita dall'operatore.                                    |
+| `EXIT`     | Un solo `OCCURRENCE`    | Porto di origine derivato dalla visita corrente.                                     | Banchina di origine derivata dall'ormeggio corrente, eventualmente non specificata.        |
 | `MOVEMENT` | `DEPARTURE` e `ARRIVAL` | Origine derivata dalla visita corrente; destinazione sempre inserita dall'operatore. | Origine derivata dall'ormeggio corrente; destinazione facoltativa inserita dall'operatore. |
 
 Non sono ammesse combinazioni incomplete o estranee alla tipologia: entrata e uscita non possono possedere partenza o arrivo, mentre uno spostamento non può possedere il solo estremo `OCCURRENCE` né uno soltanto tra partenza e arrivo.
@@ -1379,11 +1379,11 @@ Per una nuova entrata o destinazione possono essere selezionati soltanto porto e
 
 `ExecutionStatus` è condiviso con le altre prestazioni e contiene:
 
-| Stato | Significato dell'istante | Effetto strutturale | Fatturabilità potenziale |
-| --- | --- | --- | --- |
-| `PLANNED` | Momento pianificato. | Sì. | No. |
-| `PERFORMED` | Momento effettivo. | Sì. | Sì. |
-| `MISSED` | Momento nel quale l'operazione avrebbe dovuto svolgersi. | No. | Sì. |
+| Stato       | Significato dell'istante                                 | Effetto strutturale | Fatturabilità potenziale |
+| ----------- | -------------------------------------------------------- | ------------------- | ------------------------ |
+| `PLANNED`   | Momento pianificato.                                     | Sì.                 | No.                      |
+| `PERFORMED` | Momento effettivo.                                       | Sì.                 | Sì.                      |
+| `MISSED`    | Momento nel quale l'operazione avrebbe dovuto svolgersi. | No.                 | Sì.                      |
 
 Il modello conserva un solo insieme di estremi, il cui significato dipende dallo stato corrente. Non mantiene contemporaneamente valori pianificati ed effettivi e non registra una transizione automatica allo scadere del momento previsto.
 
@@ -1413,12 +1413,12 @@ Per ogni spostamento, l'istante UTC di arrivo deve essere strettamente successiv
 
 Le operazioni `PLANNED` e `PERFORMED` formano la sequenza che determina le permanenze. La validazione applica i seguenti stati logici, senza richiedere di persisterli come entità autonome:
 
-| Stato logico della nave | Operazione strutturale ammessa | Stato risultante |
-| --- | --- | --- |
-| Fuori da un viaggio | `ENTRY` | Nel porto, con viaggio, visita e ormeggio aperti. |
-| Nel porto | `MOVEMENT` | In trasferimento tra partenza e arrivo, quindi nuovamente nel porto di destinazione. |
-| Nel porto | `EXIT` | Fuori dal viaggio. |
-| In trasferimento | Nessuna nuova operazione | Il trasferimento deve raggiungere il proprio arrivo. |
+| Stato logico della nave | Operazione strutturale ammessa | Stato risultante                                                                     |
+| ----------------------- | ------------------------------ | ------------------------------------------------------------------------------------ |
+| Fuori da un viaggio     | `ENTRY`                        | Nel porto, con viaggio, visita e ormeggio aperti.                                    |
+| Nel porto               | `MOVEMENT`                     | In trasferimento tra partenza e arrivo, quindi nuovamente nel porto di destinazione. |
+| Nel porto               | `EXIT`                         | Fuori dal viaggio.                                                                   |
+| In trasferimento        | Nessuna nuova operazione       | Il trasferimento deve raggiungere il proprio arrivo.                                 |
 
 Ne derivano i vincoli:
 
@@ -1445,15 +1445,15 @@ Devono comunque possedere un contesto coerente:
 
 Ogni operazione possiede una o due **componenti economiche (`VesselOperationCharge`)**. La componente ha una propria identità perché può essere calcolata, associata a una fattura, consolidata e consultata autonomamente.
 
-| Attributo logico | Tipo | Obbligatorio | Significato |
-| --- | --- | --- | --- |
-| `id` | `StableId` | Sì | Identità tecnica autonoma della componente. |
-| `operationId` | Riferimento a `VesselOperation` | Sì | Operazione proprietaria. |
-| `chargeKind` | `VesselOperationChargeKind` | Sì | Tipo economico `ENTRY`, `EXIT` oppure `MOVEMENT`. |
-| `economicEndpointRole` | `VesselOperationEndpointRole` | Sì | Estremo dal quale derivano porto e istante economico. |
-| `manualOverrideAmount` | Importo monetario | No | Eventuale importo manuale che sostituisce l'importo tariffario come base economica effettiva della componente. |
-| `createdAtUtc` | Istante tecnico | Sì | Istante di creazione della componente. |
-| `updatedAtUtc` | Istante tecnico | Sì | Istante dell'ultimo ricalcolo o modifica. |
+| Attributo logico       | Tipo                            | Obbligatorio | Significato                                                                                                    |
+| ---------------------- | ------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------- |
+| `id`                   | `StableId`                      | Sì           | Identità tecnica autonoma della componente.                                                                    |
+| `operationId`          | Riferimento a `VesselOperation` | Sì           | Operazione proprietaria.                                                                                       |
+| `chargeKind`           | `VesselOperationChargeKind`     | Sì           | Tipo economico `ENTRY`, `EXIT` oppure `MOVEMENT`.                                                              |
+| `economicEndpointRole` | `VesselOperationEndpointRole`   | Sì           | Estremo dal quale derivano porto e istante economico.                                                          |
+| `manualOverrideAmount` | Importo monetario               | No           | Eventuale importo manuale che sostituisce l'importo tariffario come base economica effettiva della componente. |
+| `createdAtUtc`         | Istante tecnico                 | Sì           | Istante di creazione della componente.                                                                         |
+| `updatedAtUtc`         | Istante tecnico                 | Sì           | Istante dell'ultimo ricalcolo o modifica.                                                                      |
 
 Per una componente di operazione nave il sistema calcola e conserva sempre l'importo tariffario applicabile. `manualOverrideAmount`, quando presente, è non negativo, appartiene alla singola componente e sostituisce l'importo tariffario come base economica effettiva prima dell'applicazione delle regole dinamiche. Importo tariffario calcolato, eventuale sostituzione manuale e importo base effettivo rimangono distinti e tracciabili; i relativi attributi di calcolo verranno completati nei punti 9 e 10.
 
@@ -1465,12 +1465,12 @@ Stato, note e riferimenti specificati direttamente a cliente e agenzia apparteng
 
 La composizione è deterministica:
 
-| Operazione | Componenti generate | Estremo economico |
-| --- | --- | --- |
-| Entrata | Una componente `ENTRY`. | `OCCURRENCE`. |
-| Uscita | Una componente `EXIT`. | `OCCURRENCE`. |
-| Spostamento nello stesso porto | Una componente `MOVEMENT`. | `DEPARTURE`. |
-| Spostamento tra porti | Una componente `EXIT` e una componente `ENTRY`. | Rispettivamente `DEPARTURE` e `ARRIVAL`. |
+| Operazione                     | Componenti generate                             | Estremo economico                        |
+| ------------------------------ | ----------------------------------------------- | ---------------------------------------- |
+| Entrata                        | Una componente `ENTRY`.                         | `OCCURRENCE`.                            |
+| Uscita                         | Una componente `EXIT`.                          | `OCCURRENCE`.                            |
+| Spostamento nello stesso porto | Una componente `MOVEMENT`.                      | `DEPARTURE`.                             |
+| Spostamento tra porti          | Una componente `EXIT` e una componente `ENTRY`. | Rispettivamente `DEPARTURE` e `ARRIVAL`. |
 
 Per la stessa operazione può esistere al massimo una componente per ciascun `chargeKind`. Non viene memorizzato un importo totale dell'operazione: per uno spostamento tra porti il totale di consultazione è la somma corrente delle due componenti, mentre una fattura utilizza soltanto quella associata.
 
@@ -1570,25 +1570,25 @@ Le combinazioni locali tra tipologia, ruoli e nullabilità devono essere protett
 
 Il glossario viene esteso come segue:
 
-| Termine di dominio | Nome tecnico |
-| --- | --- |
-| Operazione nave | `VesselOperation` |
-| Tipologia operazione nave | `VesselOperationType` |
-| Stato di esecuzione | `ExecutionStatus` |
-| Estremo dell'operazione | `VesselOperationEndpoint` |
-| Ruolo dell'estremo | `VesselOperationEndpointRole` |
-| Istante dell'operazione | `moment` |
-| Entrata | `ENTRY` |
-| Spostamento | `MOVEMENT` |
-| Uscita | `EXIT` |
-| Prevista | `PLANNED` |
-| Effettuata | `PERFORMED` |
-| Mancata | `MISSED` |
-| Partenza | `DEPARTURE` |
-| Arrivo | `ARRIVAL` |
-| Componente economica dell'operazione | `VesselOperationCharge` |
-| Tipo della componente economica | `VesselOperationChargeKind` |
-| Sostituzione manuale dell'importo | `manualOverrideAmount` |
+| Termine di dominio                   | Nome tecnico                  |
+| ------------------------------------ | ----------------------------- |
+| Operazione nave                      | `VesselOperation`             |
+| Tipologia operazione nave            | `VesselOperationType`         |
+| Stato di esecuzione                  | `ExecutionStatus`             |
+| Estremo dell'operazione              | `VesselOperationEndpoint`     |
+| Ruolo dell'estremo                   | `VesselOperationEndpointRole` |
+| Istante dell'operazione              | `moment`                      |
+| Entrata                              | `ENTRY`                       |
+| Spostamento                          | `MOVEMENT`                    |
+| Uscita                               | `EXIT`                        |
+| Prevista                             | `PLANNED`                     |
+| Effettuata                           | `PERFORMED`                   |
+| Mancata                              | `MISSED`                      |
+| Partenza                             | `DEPARTURE`                   |
+| Arrivo                               | `ARRIVAL`                     |
+| Componente economica dell'operazione | `VesselOperationCharge`       |
+| Tipo della componente economica      | `VesselOperationChargeKind`   |
+| Sostituzione manuale dell'importo    | `manualOverrideAmount`        |
 
 ### 3.12.19 Decisioni già determinate
 
@@ -1660,10 +1660,10 @@ Non viene introdotta una radice persistente polimorfica comune. Un'eventuale int
 
 Ogni prestazione possiede una categoria appartenente all'insieme chiuso `ServiceCategory`:
 
-| Codice tecnico | Categoria | Dati specifici |
-| --- | --- | --- |
-| `CATALOG` | Da catalogo | Riferimento obbligatorio a un tipo di prestazione. |
-| `FREE` | Libera | Descrizione e importo base manuale obbligatori. |
+| Codice tecnico | Categoria   | Dati specifici                                     |
+| -------------- | ----------- | -------------------------------------------------- |
+| `CATALOG`      | Da catalogo | Riferimento obbligatorio a un tipo di prestazione. |
+| `FREE`         | Libera      | Descrizione e importo base manuale obbligatori.    |
 
 La categoria è immutabile. Se è stata registrata quella errata, la prestazione deve essere eliminata e ricreata con un nuovo `StableId`, purché l'eliminazione sia consentita.
 
@@ -1676,19 +1676,19 @@ I componenti sono identificati da `serviceActivityId`, non possiedono uno `Stabl
 
 ### 3.13.4 Attributi comuni di `ServiceActivity`
 
-| Attributo logico | Tipo | Obbligatorio | Significato |
-| --- | --- | --- | --- |
-| `id` | `StableId` | Sì | Identità tecnica della prestazione. |
-| `vesselId` | Riferimento a `Vessel` | Sì | Nave alla quale è riferita la prestazione. |
-| `vesselVersionId` | Riferimento a `VesselVersion` | Sì | Versione della nave applicabile all'istante della prestazione. |
-| `category` | `ServiceCategory` | Sì | Categoria immutabile `CATALOG` oppure `FREE`. |
-| `executionStatus` | `ExecutionStatus` | Sì | Stato `PLANNED`, `PERFORMED` oppure `MISSED`. |
-| `moment` | Momento di dominio | Sì | Istante pianificato, effettivo o mancato secondo lo stato. |
-| `specifiedCustomerId` | Riferimento a `Customer` | No | Cliente specificato direttamente sulla prestazione. |
-| `specifiedAgencyId` | Riferimento a `Agency` | No | Agenzia specificata direttamente sulla prestazione. |
-| `notes` | Testo | No | Annotazioni correnti prive di effetti su attribuzione e calcoli. |
-| `createdAtUtc` | Istante tecnico | Sì | Istante tecnico di creazione. |
-| `updatedAtUtc` | Istante tecnico | Sì | Istante tecnico dell'ultima modifica. |
+| Attributo logico      | Tipo                          | Obbligatorio | Significato                                                      |
+| --------------------- | ----------------------------- | ------------ | ---------------------------------------------------------------- |
+| `id`                  | `StableId`                    | Sì           | Identità tecnica della prestazione.                              |
+| `vesselId`            | Riferimento a `Vessel`        | Sì           | Nave alla quale è riferita la prestazione.                       |
+| `vesselVersionId`     | Riferimento a `VesselVersion` | Sì           | Versione della nave applicabile all'istante della prestazione.   |
+| `category`            | `ServiceCategory`             | Sì           | Categoria immutabile `CATALOG` oppure `FREE`.                    |
+| `executionStatus`     | `ExecutionStatus`             | Sì           | Stato `PLANNED`, `PERFORMED` oppure `MISSED`.                    |
+| `moment`              | Momento di dominio            | Sì           | Istante pianificato, effettivo o mancato secondo lo stato.       |
+| `specifiedCustomerId` | Riferimento a `Customer`      | No           | Cliente specificato direttamente sulla prestazione.              |
+| `specifiedAgencyId`   | Riferimento a `Agency`        | No           | Agenzia specificata direttamente sulla prestazione.              |
+| `notes`               | Testo                         | No           | Annotazioni correnti prive di effetti su attribuzione e calcoli. |
+| `createdAtUtc`        | Istante tecnico               | Sì           | Istante tecnico di creazione.                                    |
+| `updatedAtUtc`        | Istante tecnico               | Sì           | Istante tecnico dell'ultima modifica.                            |
 
 Cliente e agenzia possono essere specificati indipendentemente. Riferimenti effettivi, fonti e versioni applicate verranno aggiunti nel punto 8.
 
@@ -1696,16 +1696,16 @@ Cliente e agenzia possono essere specificati indipendentemente. Riferimenti effe
 
 L'attribuzione persistita viene rappresentata dal componente dipendente uno-a-uno **Contesto operativo della prestazione (`ServiceOperationalContext`)**.
 
-| Attributo logico | Tipo | Obbligatorio | Significato |
-| --- | --- | --- | --- |
-| `serviceActivityId` | Riferimento a `ServiceActivity` | Sì | Prestazione proprietaria e identità del componente. |
-| `voyageId` | Riferimento a `Voyage` | Sì | Viaggio applicabile. |
-| `portCallId` | Riferimento a `PortCall` | Sì | Visita applicabile. |
-| `berthStayId` | Riferimento a `BerthStay` | Sì | Ormeggio applicabile. |
-| `portId` | Riferimento a `Port` | Sì | Porto derivato dalla visita. |
-| `portVersionId` | Riferimento a `PortVersion` | Sì | Versione del porto applicabile all'istante della prestazione. |
-| `berthId` | Riferimento a `Berth` | No | Banchina derivata dall'ormeggio, se specificata. |
-| `berthVersionId` | Riferimento a `BerthVersion` | No | Versione della banchina applicabile all'istante; presente se e solo se è presente `berthId`. |
+| Attributo logico    | Tipo                            | Obbligatorio | Significato                                                                                  |
+| ------------------- | ------------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| `serviceActivityId` | Riferimento a `ServiceActivity` | Sì           | Prestazione proprietaria e identità del componente.                                          |
+| `voyageId`          | Riferimento a `Voyage`          | Sì           | Viaggio applicabile.                                                                         |
+| `portCallId`        | Riferimento a `PortCall`        | Sì           | Visita applicabile.                                                                          |
+| `berthStayId`       | Riferimento a `BerthStay`       | Sì           | Ormeggio applicabile.                                                                        |
+| `portId`            | Riferimento a `Port`            | Sì           | Porto derivato dalla visita.                                                                 |
+| `portVersionId`     | Riferimento a `PortVersion`     | Sì           | Versione del porto applicabile all'istante della prestazione.                                |
+| `berthId`           | Riferimento a `Berth`           | No           | Banchina derivata dall'ormeggio, se specificata.                                             |
+| `berthVersionId`    | Riferimento a `BerthVersion`    | No           | Versione della banchina applicabile all'istante; presente se e solo se è presente `berthId`. |
 
 Viaggio, visita e ormeggio vengono conservati direttamente per rendere esplicita l'attribuzione utilizzata da calcoli, fatture, filtri e controlli di consolidamento. Porto e banchina affiancano le relative versioni applicate all'istante della prestazione.
 
@@ -1742,14 +1742,14 @@ Una variazione anagrafica consentita ridetermina i riferimenti e i risultati non
 
 Il catalogo configurabile è composto da entità **Tipo di prestazione (`ServiceType`)**.
 
-| Attributo logico | Tipo | Obbligatorio | Significato |
-| --- | --- | --- | --- |
-| `id` | `StableId` | Sì | Identità tecnica stabile del tipo. |
-| `description` | Testo | Sì | Descrizione corrente, non versionata. |
-| `status` | `ServiceTypeStatus` | Sì | Stato corrente `ACTIVE` oppure `INACTIVE`. |
-| `hasEverBeenUsed` | Booleano | Sì | Indicatore monotono dell'avvenuto utilizzo in almeno una prestazione. |
-| `createdAtUtc` | Istante tecnico | Sì | Istante tecnico di creazione. |
-| `updatedAtUtc` | Istante tecnico | Sì | Istante tecnico dell'ultima modifica. |
+| Attributo logico  | Tipo                | Obbligatorio | Significato                                                           |
+| ----------------- | ------------------- | ------------ | --------------------------------------------------------------------- |
+| `id`              | `StableId`          | Sì           | Identità tecnica stabile del tipo.                                    |
+| `description`     | Testo               | Sì           | Descrizione corrente, non versionata.                                 |
+| `status`          | `ServiceTypeStatus` | Sì           | Stato corrente `ACTIVE` oppure `INACTIVE`.                            |
+| `hasEverBeenUsed` | Booleano            | Sì           | Indicatore monotono dell'avvenuto utilizzo in almeno una prestazione. |
+| `createdAtUtc`    | Istante tecnico     | Sì           | Istante tecnico di creazione.                                         |
+| `updatedAtUtc`    | Istante tecnico     | Sì           | Istante tecnico dell'ultima modifica.                                 |
 
 `hasEverBeenUsed` nasce `false`, diventa `true` nella stessa transazione che crea la prima prestazione riferita al tipo e non torna mai `false`, neppure dopo l'eliminazione di tutte le prestazioni che lo utilizzavano. Il dato è necessario perché l'eliminazione delle prestazioni cancellerebbe altrimenti la prova dell'utilizzo storico.
 
@@ -1780,10 +1780,10 @@ Il tipo iniziale `rinforzo ormeggio` viene creato come normale `ServiceType`: pu
 
 ### 3.13.11 Dati della prestazione da catalogo (`CatalogServiceData`)
 
-| Attributo logico | Tipo | Obbligatorio | Significato |
-| --- | --- | --- | --- |
-| `serviceActivityId` | Riferimento a `ServiceActivity` | Sì | Prestazione proprietaria. |
-| `serviceTypeId` | Riferimento a `ServiceType` | Sì | Tipo configurabile applicato. |
+| Attributo logico    | Tipo                            | Obbligatorio | Significato                   |
+| ------------------- | ------------------------------- | ------------ | ----------------------------- |
+| `serviceActivityId` | Riferimento a `ServiceActivity` | Sì           | Prestazione proprietaria.     |
+| `serviceTypeId`     | Riferimento a `ServiceType`     | Sì           | Tipo configurabile applicato. |
 
 La prestazione da catalogo non possiede una descrizione autonoma né un importo base manuale. La descrizione corrente proviene dal tipo; la fattura emessa ne conserva lo snapshot.
 
@@ -1793,11 +1793,11 @@ La sostituzione di `serviceTypeId` è consentita soltanto verso un tipo `ACTIVE`
 
 ### 3.13.12 Dati della prestazione libera (`FreeServiceData`)
 
-| Attributo logico | Tipo | Obbligatorio | Significato |
-| --- | --- | --- | --- |
-| `serviceActivityId` | Riferimento a `ServiceActivity` | Sì | Prestazione proprietaria. |
-| `description` | Testo | Sì | Descrizione specifica della prestazione. |
-| `manualBaseAmount` | Importo monetario | Sì | Importo base manuale strettamente maggiore di zero. |
+| Attributo logico    | Tipo                            | Obbligatorio | Significato                                         |
+| ------------------- | ------------------------------- | ------------ | --------------------------------------------------- |
+| `serviceActivityId` | Riferimento a `ServiceActivity` | Sì           | Prestazione proprietaria.                           |
+| `description`       | Testo                           | Sì           | Descrizione specifica della prestazione.            |
+| `manualBaseAmount`  | Importo monetario               | Sì           | Importo base manuale strettamente maggiore di zero. |
 
 La prestazione libera non fa riferimento a `ServiceType`, non possiede un peso e non esegue alcun calcolo tariffario. `manualBaseAmount` costituisce l'unica base economica e cambia soltanto mediante una modifica esplicita consentita.
 
@@ -1807,11 +1807,11 @@ Le regole economiche dinamiche possono aumentare, ridurre o azzerare il risultat
 
 Le prestazioni utilizzano `ExecutionStatus` con la stessa semantica del punto 5:
 
-| Stato | Significato del momento | Effetto strutturale | Fatturabilità potenziale |
-| --- | --- | --- | --- |
-| `PLANNED` | Istante pianificato. | Nessuno. | No. |
-| `PERFORMED` | Istante effettivo. | Nessuno. | Sì. |
-| `MISSED` | Istante nel quale avrebbe dovuto svolgersi. | Nessuno. | Sì. |
+| Stato       | Significato del momento                     | Effetto strutturale | Fatturabilità potenziale |
+| ----------- | ------------------------------------------- | ------------------- | ------------------------ |
+| `PLANNED`   | Istante pianificato.                        | Nessuno.            | No.                      |
+| `PERFORMED` | Istante effettivo.                          | Nessuno.            | Sì.                      |
+| `MISSED`    | Istante nel quale avrebbe dovuto svolgersi. | Nessuno.            | Sì.                      |
 
 Il trascorrere del tempo non modifica automaticamente lo stato. Non vengono conservati parallelamente istanti pianificati ed effettivi.
 
@@ -1898,19 +1898,19 @@ I vincoli locali relativi a categorie, componenti, obbligatorietà e valori devo
 
 Il glossario viene esteso come segue:
 
-| Termine di dominio | Nome tecnico |
-| --- | --- |
-| Prestazione ordinaria | `ServiceActivity` |
-| Categoria della prestazione | `ServiceCategory` |
-| Prestazione da catalogo | `CATALOG` |
-| Prestazione libera | `FREE` |
-| Tipo di prestazione | `ServiceType` |
-| Stato del tipo | `ServiceTypeStatus` |
-| Dati della prestazione da catalogo | `CatalogServiceData` |
-| Dati della prestazione libera | `FreeServiceData` |
+| Termine di dominio                   | Nome tecnico                |
+| ------------------------------------ | --------------------------- |
+| Prestazione ordinaria                | `ServiceActivity`           |
+| Categoria della prestazione          | `ServiceCategory`           |
+| Prestazione da catalogo              | `CATALOG`                   |
+| Prestazione libera                   | `FREE`                      |
+| Tipo di prestazione                  | `ServiceType`               |
+| Stato del tipo                       | `ServiceTypeStatus`         |
+| Dati della prestazione da catalogo   | `CatalogServiceData`        |
+| Dati della prestazione libera        | `FreeServiceData`           |
 | Contesto operativo della prestazione | `ServiceOperationalContext` |
-| Importo base manuale | `manualBaseAmount` |
-| Tipo utilizzato almeno una volta | `hasEverBeenUsed` |
+| Importo base manuale                 | `manualBaseAmount`          |
+| Tipo utilizzato almeno una volta     | `hasEverBeenUsed`           |
 
 ### 3.13.20 Decisioni già determinate
 

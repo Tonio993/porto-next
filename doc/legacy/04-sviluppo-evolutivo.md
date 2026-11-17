@@ -66,15 +66,15 @@ Una slice è completata quando:
 
 ### Stack adottato
 
-| Livello | Tecnologia | Motivazione |
-| --- | --- | --- |
-| Interfaccia | Angular 22, TypeScript 6 | Interfaccia web riutilizzabile in una futura distribuzione client-server. |
-| Contratto | HTTP JSON, descritto mediante OpenAPI statico | Stesso confine applicativo in esecuzione locale e remota, senza dipendenze di documentazione caricate a runtime. |
-| Backend | Java 25 LTS, Spring Boot 4.1 e Spring MVC | Stack familiare, supporto AOT corrente e possibilità di conservare invariati dominio e casi d'uso nel passaggio distribuito. |
-| Accesso ai dati | Spring JDBC | Accesso esplicito e dipendenze ridotte; JPA e Hibernate non sono necessari per la prima slice. |
-| Persistenza | SQLite con driver Xerial | Archivio locale singolo, trasferibile e utilizzabile senza installare un server database. |
-| Migrazioni | Flyway | Creazione e aggiornamento ripetibili dello schema. |
-| Test | JUnit e AssertJ; Vitest per Angular | Test rapidi delle regole, della persistenza e del contratto frontend. |
+| Livello         | Tecnologia                                    | Motivazione                                                                                                                  |
+| --------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Interfaccia     | Angular 22, TypeScript 6                      | Interfaccia web riutilizzabile in una futura distribuzione client-server.                                                    |
+| Contratto       | HTTP JSON, descritto mediante OpenAPI statico | Stesso confine applicativo in esecuzione locale e remota, senza dipendenze di documentazione caricate a runtime.             |
+| Backend         | Java 25 LTS, Spring Boot 4.1 e Spring MVC     | Stack familiare, supporto AOT corrente e possibilità di conservare invariati dominio e casi d'uso nel passaggio distribuito. |
+| Accesso ai dati | Spring JDBC                                   | Accesso esplicito e dipendenze ridotte; JPA e Hibernate non sono necessari per la prima slice.                               |
+| Persistenza     | SQLite con driver Xerial                      | Archivio locale singolo, trasferibile e utilizzabile senza installare un server database.                                    |
+| Migrazioni      | Flyway                                        | Creazione e aggiornamento ripetibili dello schema.                                                                           |
+| Test            | JUnit e AssertJ; Vitest per Angular           | Test rapidi delle regole, della persistenza e del contratto frontend.                                                        |
 
 Angular non accede direttamente al database o alle funzioni native del sistema operativo. Tutte le operazioni applicative attraversano l'API Java. Il backend locale viene associato esclusivamente all'indirizzo di loopback; il futuro contenitore desktop sarà responsabile dell'avvio, dell'attesa della readiness e dell'arresto del processo.
 
@@ -119,16 +119,16 @@ I valori sono obiettivi provvisori: verranno confermati mediante il benchmark, c
 
 ### Tecniche analizzate
 
-| Tecnica | Valutazione | Decisione iniziale |
-| --- | --- | --- |
-| Riduzione delle dipendenze e della scansione | Riduce il lavoro reale eseguito all'avvio e mantiene diagnosi immediate. | Adottata: niente JPA/Hibernate, Actuator o generatori OpenAPI a runtime nella prima slice. |
-| Lazy initialization di Spring | Accorcia l'avvio apparente, ma sposta inizializzazioni e possibili errori sulla prima richiesta. | Non adottata; `spring.main.lazy-initialization` resta disabilitata. |
-| JAR estratto | Evita parte del costo di caricamento dei JAR annidati ed è richiesto dalle cache della JVM. | Previsto per il runtime distribuito, non per lo sviluppo. |
-| AOT cache della JVM | Java 25 può riutilizzare classi e dati raccolti durante una training run. È vincolata alla stessa build e versione Java. | Candidato principale per il pacchetto locale. Build e benchmark dedicati sono inclusi. |
-| Spring AOT sulla JVM | Genera in build parte dell'inizializzazione e può essere combinato con la cache della JVM; limita configurazioni dinamiche di bean e profili. | Incluso nel runtime ottimizzato e da verificare con i test completi. |
-| GraalVM native image | Offre il potenziale startup più rapido e un eseguibile autonomo, ma aumenta tempi e complessità della build e richiede output specifici per piattaforma. | Piano di riserva se il runtime JVM ottimizzato non rispetta il budget. |
-| Processo mantenuto in background | Può azzerare quasi del tutto l'attesa ai successivi avvii dell'interfaccia, ma consuma risorse, complica aggiornamento e gestione degli arresti e non migliora il primo avvio. | Non adottato nella prima versione; l'applicazione e il backend condividono lo stesso ciclo di vita. |
-| Avvio anticipato con schermata di attesa | Migliora il tempo percepito ma non riduce il costo reale. | Da introdurre con il contenitore desktop, usando l'endpoint di readiness. |
+| Tecnica                                      | Valutazione                                                                                                                                                                    | Decisione iniziale                                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Riduzione delle dipendenze e della scansione | Riduce il lavoro reale eseguito all'avvio e mantiene diagnosi immediate.                                                                                                       | Adottata: niente JPA/Hibernate, Actuator o generatori OpenAPI a runtime nella prima slice.          |
+| Lazy initialization di Spring                | Accorcia l'avvio apparente, ma sposta inizializzazioni e possibili errori sulla prima richiesta.                                                                               | Non adottata; `spring.main.lazy-initialization` resta disabilitata.                                 |
+| JAR estratto                                 | Evita parte del costo di caricamento dei JAR annidati ed è richiesto dalle cache della JVM.                                                                                    | Previsto per il runtime distribuito, non per lo sviluppo.                                           |
+| AOT cache della JVM                          | Java 25 può riutilizzare classi e dati raccolti durante una training run. È vincolata alla stessa build e versione Java.                                                       | Candidato principale per il pacchetto locale. Build e benchmark dedicati sono inclusi.              |
+| Spring AOT sulla JVM                         | Genera in build parte dell'inizializzazione e può essere combinato con la cache della JVM; limita configurazioni dinamiche di bean e profili.                                  | Incluso nel runtime ottimizzato e da verificare con i test completi.                                |
+| GraalVM native image                         | Offre il potenziale startup più rapido e un eseguibile autonomo, ma aumenta tempi e complessità della build e richiede output specifici per piattaforma.                       | Piano di riserva se il runtime JVM ottimizzato non rispetta il budget.                              |
+| Processo mantenuto in background             | Può azzerare quasi del tutto l'attesa ai successivi avvii dell'interfaccia, ma consuma risorse, complica aggiornamento e gestione degli arresti e non migliora il primo avvio. | Non adottato nella prima versione; l'applicazione e il backend condividono lo stesso ciclo di vita. |
+| Avvio anticipato con schermata di attesa     | Migliora il tempo percepito ma non riduce il costo reale.                                                                                                                      | Da introdurre con il contenitore desktop, usando l'endpoint di readiness.                           |
 
 Il driver SQLite scelto dichiara supporto alla native image. Se questa strada diventerà necessaria, la libreria nativa SQLite verrà estratta durante la build e collocata accanto all'eseguibile, evitando l'estrazione nella cartella temporanea a ogni avvio.
 
@@ -152,24 +152,24 @@ Il driver SQLite scelto dichiara supporto alla native image. Se questa strada di
 
 Il backlog indica una direzione, non un contratto immutabile. Ogni voce verrà divisa ulteriormente prima dell'avvio se non risulta completabile come incremento piccolo.
 
-| Ordine | Slice | Risultato principale | Stato |
-| --- | --- | --- | --- |
-| VS-00 | Walking skeleton | Applicazione avviabile, database locale e primo flusso persistito | In corso |
-| VS-01 | Anagrafiche operative minime | Gestione degli elementi necessari a registrare le operazioni | Da preparare |
-| VS-02 | Entrata della nave | Apertura coerente di viaggio, visita e ormeggio | Da preparare |
-| VS-03 | Spostamento nello stesso porto | Chiusura e apertura degli ormeggi coinvolti | Da preparare |
-| VS-04 | Spostamento tra porti | Chiusura e apertura delle visite con intervallo di trasferimento | Da preparare |
-| VS-05 | Uscita della nave | Chiusura coerente della permanenza e del viaggio | Da preparare |
-| VS-06 | Prestazione da catalogo | Registrazione e attribuzione al contesto operativo | Da preparare |
-| VS-07 | Tariffa e calcolo | Configurazione tariffaria e calcolo verificabile dell'importo | Da preparare |
-| VS-08 | Prestazione libera | Registrazione con descrizione e solo importo manuale | Da preparare |
-| VS-09 | Movimentazione merci | Registrazione di carico o scarico nel contesto corretto | Da preparare |
-| VS-10 | Prima fattura | Composizione, emissione e consolidamento | Da preparare |
-| VS-11 | Incasso | Registrazione e associazione delle quote alle fatture | Da preparare |
-| VS-12 | Contabilità | Conti, movimenti, classificazioni e saldi | Da preparare |
-| VS-13 | Consultazione ed esportazione | Primo resoconto configurabile ed esportabile | Da preparare |
-| VS-14 | Continuità operativa | Backup, verifica e ripristino dell'archivio | Da preparare |
-| VS-15 | Distribuzione | Pacchetto installabile e aggiornamento controllato | Da preparare |
+| Ordine | Slice                          | Risultato principale                                              | Stato        |
+| ------ | ------------------------------ | ----------------------------------------------------------------- | ------------ |
+| VS-00  | Walking skeleton               | Applicazione avviabile, database locale e primo flusso persistito | In corso     |
+| VS-01  | Anagrafiche operative minime   | Gestione degli elementi necessari a registrare le operazioni      | Da preparare |
+| VS-02  | Entrata della nave             | Apertura coerente di viaggio, visita e ormeggio                   | Da preparare |
+| VS-03  | Spostamento nello stesso porto | Chiusura e apertura degli ormeggi coinvolti                       | Da preparare |
+| VS-04  | Spostamento tra porti          | Chiusura e apertura delle visite con intervallo di trasferimento  | Da preparare |
+| VS-05  | Uscita della nave              | Chiusura coerente della permanenza e del viaggio                  | Da preparare |
+| VS-06  | Prestazione da catalogo        | Registrazione e attribuzione al contesto operativo                | Da preparare |
+| VS-07  | Tariffa e calcolo              | Configurazione tariffaria e calcolo verificabile dell'importo     | Da preparare |
+| VS-08  | Prestazione libera             | Registrazione con descrizione e solo importo manuale              | Da preparare |
+| VS-09  | Movimentazione merci           | Registrazione di carico o scarico nel contesto corretto           | Da preparare |
+| VS-10  | Prima fattura                  | Composizione, emissione e consolidamento                          | Da preparare |
+| VS-11  | Incasso                        | Registrazione e associazione delle quote alle fatture             | Da preparare |
+| VS-12  | Contabilità                    | Conti, movimenti, classificazioni e saldi                         | Da preparare |
+| VS-13  | Consultazione ed esportazione  | Primo resoconto configurabile ed esportabile                      | Da preparare |
+| VS-14  | Continuità operativa           | Backup, verifica e ripristino dell'archivio                       | Da preparare |
+| VS-15  | Distribuzione                  | Pacchetto installabile e aggiornamento controllato                | Da preparare |
 
 ## 4.9 Slice corrente – VS-00 Walking skeleton
 

@@ -358,45 +358,45 @@ Il punto comprende:
 
 I punti vengono trattati nell'ordine indicato. Le dipendenze principali sono:
 
-| Punto | Dipendenze principali |
-| --- | --- |
-| 1. Anagrafiche | Costituisce la base comune per tutti gli ambiti successivi. |
-| 2. Viaggi, visite e ormeggi | Dipende dalle anagrafiche di nave, porto e banchina. |
-| 3. Operazioni nave | Dipende dalla struttura delle permanenze e ne determina gli aggiornamenti. |
-| 4. Prestazioni | Dipende dalle permanenze e dalle regole di attribuzione temporale. |
-| 5. Movimentazioni merci | Dipende da anagrafiche e permanenze. |
-| 6. Cliente e agenzia | Dipende dai livelli operativi e dalle prestazioni sui quali vengono specificati. |
-| 7. Tariffe e pesi | Dipende da porti, navi, operazioni e tipi di prestazione. |
-| 8. Regole economiche | Dipende dagli importi tariffari e dagli istanti economici delle attività. |
-| 9. Fatture | Dipende da prestazioni, soggetti e calcoli economici. |
-| 10. Contabilità | Introduce i movimenti utilizzati anche per registrare gli incassi. |
-| 11. Incassi | Dipende da fatture e movimenti contabili in entrata. |
-| 12. Date, orari e fusi | È trasversale ai punti precedenti e ne consolida i comportamenti temporali. |
-| 13. Resoconti | Dipende da tutti gli ambiti dai quali espone dati e misure. |
-| 14. Configurazioni e backup | Dipende dalla definizione dei dati e delle configurazioni da proteggere. |
-| 15. Revisione finale | Dipende dal completamento di tutti i punti precedenti. |
+| Punto                       | Dipendenze principali                                                            |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| 1. Anagrafiche              | Costituisce la base comune per tutti gli ambiti successivi.                      |
+| 2. Viaggi, visite e ormeggi | Dipende dalle anagrafiche di nave, porto e banchina.                             |
+| 3. Operazioni nave          | Dipende dalla struttura delle permanenze e ne determina gli aggiornamenti.       |
+| 4. Prestazioni              | Dipende dalle permanenze e dalle regole di attribuzione temporale.               |
+| 5. Movimentazioni merci     | Dipende da anagrafiche e permanenze.                                             |
+| 6. Cliente e agenzia        | Dipende dai livelli operativi e dalle prestazioni sui quali vengono specificati. |
+| 7. Tariffe e pesi           | Dipende da porti, navi, operazioni e tipi di prestazione.                        |
+| 8. Regole economiche        | Dipende dagli importi tariffari e dagli istanti economici delle attività.        |
+| 9. Fatture                  | Dipende da prestazioni, soggetti e calcoli economici.                            |
+| 10. Contabilità             | Introduce i movimenti utilizzati anche per registrare gli incassi.               |
+| 11. Incassi                 | Dipende da fatture e movimenti contabili in entrata.                             |
+| 12. Date, orari e fusi      | È trasversale ai punti precedenti e ne consolida i comportamenti temporali.      |
+| 13. Resoconti               | Dipende da tutti gli ambiti dai quali espone dati e misure.                      |
+| 14. Configurazioni e backup | Dipende dalla definizione dei dati e delle configurazioni da proteggere.         |
+| 15. Revisione finale        | Dipende dal completamento di tutti i punti precedenti.                           |
 
 Le regole temporali definite nel dominio si applicano a tutti gli ambiti interessati; il punto 12 ne consolida i casi d'uso specifici di configurazione, cambio e correzione dei fusi.
 
 ## 2.7 Stato dell'analisi funzionale
 
-| Punto | Ambito | Stato |
-| --- | --- | --- |
-| 1 | Anagrafiche e versioni temporali | Completato |
-| 2 | Viaggi, visite e ormeggi | Completato |
-| 3 | Operazioni nave | Completato |
-| 4 | Prestazioni | Completato |
-| 5 | Movimentazioni merci | Completato |
-| 6 | Determinazione di cliente e agenzia | Completato |
-| 7 | Tariffe e pesi | Completato |
-| 8 | Regole economiche e fiscali | Completato |
-| 9 | Fatture | Completato |
-| 10 | Contabilità | Completato |
-| 11 | Incassi e ripartizione dei pagamenti | Completato |
-| 12 | Date, orari e fusi operativi | Completato |
-| 13 | Resoconti ed esportazioni | Completato |
-| 14 | Configurazioni generali, backup e ripristino | Completato |
-| 15 | Revisione trasversale e chiusura | Completato |
+| Punto | Ambito                                       | Stato      |
+| ----- | -------------------------------------------- | ---------- |
+| 1     | Anagrafiche e versioni temporali             | Completato |
+| 2     | Viaggi, visite e ormeggi                     | Completato |
+| 3     | Operazioni nave                              | Completato |
+| 4     | Prestazioni                                  | Completato |
+| 5     | Movimentazioni merci                         | Completato |
+| 6     | Determinazione di cliente e agenzia          | Completato |
+| 7     | Tariffe e pesi                               | Completato |
+| 8     | Regole economiche e fiscali                  | Completato |
+| 9     | Fatture                                      | Completato |
+| 10    | Contabilità                                  | Completato |
+| 11    | Incassi e ripartizione dei pagamenti         | Completato |
+| 12    | Date, orari e fusi operativi                 | Completato |
+| 13    | Resoconti ed esportazioni                    | Completato |
+| 14    | Configurazioni generali, backup e ripristino | Completato |
+| 15    | Revisione trasversale e chiusura             | Completato |
 
 ## 2.8 Punto 1 – Anagrafiche e versioni temporali
 
@@ -1361,7 +1361,6 @@ Sono inoltre confermati i seguenti comportamenti:
 I casi d'uso coprono consultazione, registrazione, consuntivazione, modifica, inserimento retroattivo, eliminazione e aggiornamento delle note delle operazioni nave.
 
 Le regole funzionali dell'ambito e le relative decisioni sono state confermate. Il punto è pertanto **completato**.
-
 
 ## 2.11 Punto 4 – Prestazioni
 
@@ -3265,7 +3264,6 @@ I casi d'uso coprono identità e versioni delle regole, condizioni, conseguenze,
 
 Le regole funzionali dell'ambito e le relative decisioni sono state confermate. Il punto è pertanto **completato**.
 
-
 ## 2.16 Punto 9 – Fatture
 
 ### Tema e perimetro
@@ -3855,7 +3853,6 @@ I casi d'uso coprono creazione, composizione economica e informativa, componenti
 
 Le regole funzionali dell'ambito e le relative decisioni sono state confermate. Il punto è pertanto **completato**.
 
-
 ## 2.17 Punto 10 – Contabilità
 
 ### Tema e perimetro
@@ -4376,7 +4373,6 @@ I casi d'uso coprono conti finanziari, movimenti in entrata e in uscita, girocon
 
 Le regole funzionali dell'ambito e le relative decisioni sono state confermate. Il punto è pertanto **completato**.
 
-
 ## 2.18 Punto 11 – Incassi e ripartizione dei pagamenti
 
 ### Tema e perimetro
@@ -4691,7 +4687,6 @@ Sono confermati i seguenti comportamenti:
 I casi d'uso coprono consultazione dell'incasso, ricerca delle fatture, proposta progressiva, modifica manuale, aggiunta successiva, modifica e rimozione delle quote, modifica dell'incasso e aggiornamento automatico delle fatture.
 
 Le regole funzionali dell'ambito e le relative decisioni sono state confermate. Il punto è pertanto **completato**.
-
 
 ## 2.19 Punto 12 – Date, orari e fusi operativi
 
@@ -5498,7 +5493,6 @@ I casi d'uso coprono costruzione ed esecuzione dei resoconti, filtri e riferimen
 
 Le regole funzionali dell'ambito e tutte le relative decisioni sono state confermate. Il punto è pertanto **completato**.
 
-
 ## 2.21 Punto 14 – Configurazioni generali, backup e ripristino
 
 ### Tema e perimetro
@@ -5958,23 +5952,23 @@ La struttura del documento risulta completa:
 - i requisiti del modello di dominio sono rappresentati da almeno un ambito funzionale oppure da una regola trasversale esplicita;
 - la revisione comprende complessivamente `148` casi d'uso.
 
-| Ambito | Sezione | Serie | Casi d'uso | Principale copertura di dominio |
-| --- | --- | --- | ---: | --- |
-| Anagrafiche e versioni | 2.8 | `CU-ANA` | 10 | Identità, codici, versioni, stato corrente, porto e banchina |
-| Viaggi, visite e ormeggi | 2.9 | `CU-PER` | 8 | Struttura della permanenza e ricostruzione temporale |
-| Operazioni nave | 2.10 | `CU-OPN` | 10 | Entrata, spostamento, uscita, sequenze e componenti economiche |
-| Prestazioni | 2.11 | `CU-PRE` | 14 | Catalogo, prestazioni libere, stati e fatturabilità |
-| Movimentazioni merci | 2.12 | `CU-MER` | 7 | Carico, scarico, quantità, contesto e consolidamento informativo |
-| Cliente e agenzia | 2.13 | `CU-SOG` | 8 | Assegnazione, ereditarietà, coppia effettiva e compatibilità |
-| Tariffe e pesi | 2.14 | `CU-TAR` | 10 | Tariffe per porto, scaglioni, pesi e importo base |
-| Regole economiche e fiscali | 2.15 | `CU-ECO` | 12 | Versioni delle regole, condizioni, conseguenze, IVA e bollo |
-| Fatture | 2.16 | `CU-FAT` | 15 | Composizione, sconti, emissione, consolidamento e ritiro |
-| Contabilità | 2.17 | `CU-CON` | 16 | Conti, movimenti, giroconti, categorie, voci e saldi |
-| Incassi | 2.18 | `CU-INC` | 8 | Ripartizione, residui e stati di riscossione |
-| Date, orari e fusi | 2.19 | `CU-TEM` | 10 | Date civili, istanti, fusi, ora legale e correzioni |
-| Resoconti ed esportazioni | 2.20 | `CU-RES` | 10 | Configurazione, misure, tracciabilità ed esportazione |
-| Configurazioni e backup | 2.21 | `CU-CFG` | 10 | Inizializzazione, backup, ripristino e modalità protetta |
-| **Totale** |  |  | **148** |  |
+| Ambito                      | Sezione | Serie    | Casi d'uso | Principale copertura di dominio                                  |
+| --------------------------- | ------- | -------- | ---------: | ---------------------------------------------------------------- |
+| Anagrafiche e versioni      | 2.8     | `CU-ANA` |         10 | Identità, codici, versioni, stato corrente, porto e banchina     |
+| Viaggi, visite e ormeggi    | 2.9     | `CU-PER` |          8 | Struttura della permanenza e ricostruzione temporale             |
+| Operazioni nave             | 2.10    | `CU-OPN` |         10 | Entrata, spostamento, uscita, sequenze e componenti economiche   |
+| Prestazioni                 | 2.11    | `CU-PRE` |         14 | Catalogo, prestazioni libere, stati e fatturabilità              |
+| Movimentazioni merci        | 2.12    | `CU-MER` |          7 | Carico, scarico, quantità, contesto e consolidamento informativo |
+| Cliente e agenzia           | 2.13    | `CU-SOG` |          8 | Assegnazione, ereditarietà, coppia effettiva e compatibilità     |
+| Tariffe e pesi              | 2.14    | `CU-TAR` |         10 | Tariffe per porto, scaglioni, pesi e importo base                |
+| Regole economiche e fiscali | 2.15    | `CU-ECO` |         12 | Versioni delle regole, condizioni, conseguenze, IVA e bollo      |
+| Fatture                     | 2.16    | `CU-FAT` |         15 | Composizione, sconti, emissione, consolidamento e ritiro         |
+| Contabilità                 | 2.17    | `CU-CON` |         16 | Conti, movimenti, giroconti, categorie, voci e saldi             |
+| Incassi                     | 2.18    | `CU-INC` |          8 | Ripartizione, residui e stati di riscossione                     |
+| Date, orari e fusi          | 2.19    | `CU-TEM` |         10 | Date civili, istanti, fusi, ora legale e correzioni              |
+| Resoconti ed esportazioni   | 2.20    | `CU-RES` |         10 | Configurazione, misure, tracciabilità ed esportazione            |
+| Configurazioni e backup     | 2.21    | `CU-CFG` |         10 | Inizializzazione, backup, ripristino e modalità protetta         |
+| **Totale**                  |         |          |    **148** |                                                                  |
 
 ### REV-FUN-02 – Verificare terminologia, attori e stati
 
@@ -5995,17 +5989,17 @@ I codici tecnici stabili, i progressivi visibili, i numeri di fattura e i codici
 
 Le seguenti invarianti risultano coerenti in tutti i punti interessati:
 
-| Invariante | Ambiti coinvolti | Esito della verifica |
-| --- | --- | --- |
-| Protezione della fattura consolidata | Anagrafiche, operazioni, prestazioni, merci, soggetti, tariffe, regole, fatture, tempi | Nessuna modifica può alterare direttamente o indirettamente dati o risultati conservati in una fattura consolidata. |
-| Componenti di uno spostamento tra porti | Operazioni, soggetti, tariffe, fatture, tempi | `Uscita` ed `entrata` sono calcolate, consolidate e fatturate autonomamente; possono appartenere a fatture differenti e in momenti diversi. |
-| Coppia cliente e agenzia della fattura | Soggetti, fatture, merci, incassi | La coppia viene scelta prima della composizione; sono selezionabili soltanto elementi compatibili e gli incassi devono condividere la stessa coppia. |
-| Attribuzione temporale | Permanenze, operazioni, prestazioni, merci, tempi | Porto, viaggio, visita e ormeggio vengono derivati dalla sequenza valida; ogni modifica ricostruisce atomicamente le attribuzioni non consolidate. |
-| Calcolo economico | Tariffe, regole, fatture | Tariffa e peso producono l'importo base alla creazione dell'attività; regole e sconti applicano la sequenza e gli arrotondamenti stabiliti. |
-| Versioni temporali | Anagrafiche, pesi, regole e fusi | Le versioni hanno decorrenze ordinate, intervalli non sovrapposti e simulazione preventiva quando possono influire su dati esistenti. |
-| Distinzione dei fusi | Operazioni, tariffe, regole, resoconti, backup | Il fuso del porto governa le attività portuali; il fuso aziendale ha funzione amministrativa e non viene usato come ripiego implicito. |
-| Coerenza contabile | Contabilità, incassi, fatture, resoconti | Movimenti, quote, saldi e stati di riscossione vengono aggiornati insieme e senza duplicare gli importi nei totali. |
-| Continuità dei dati | Tutti gli ambiti persistenti | Backup e ripristino conservano identità, versioni e valori consolidati senza ricalcolarli o reinterpretarli. |
+| Invariante                              | Ambiti coinvolti                                                                       | Esito della verifica                                                                                                                                 |
+| --------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Protezione della fattura consolidata    | Anagrafiche, operazioni, prestazioni, merci, soggetti, tariffe, regole, fatture, tempi | Nessuna modifica può alterare direttamente o indirettamente dati o risultati conservati in una fattura consolidata.                                  |
+| Componenti di uno spostamento tra porti | Operazioni, soggetti, tariffe, fatture, tempi                                          | `Uscita` ed `entrata` sono calcolate, consolidate e fatturate autonomamente; possono appartenere a fatture differenti e in momenti diversi.          |
+| Coppia cliente e agenzia della fattura  | Soggetti, fatture, merci, incassi                                                      | La coppia viene scelta prima della composizione; sono selezionabili soltanto elementi compatibili e gli incassi devono condividere la stessa coppia. |
+| Attribuzione temporale                  | Permanenze, operazioni, prestazioni, merci, tempi                                      | Porto, viaggio, visita e ormeggio vengono derivati dalla sequenza valida; ogni modifica ricostruisce atomicamente le attribuzioni non consolidate.   |
+| Calcolo economico                       | Tariffe, regole, fatture                                                               | Tariffa e peso producono l'importo base alla creazione dell'attività; regole e sconti applicano la sequenza e gli arrotondamenti stabiliti.          |
+| Versioni temporali                      | Anagrafiche, pesi, regole e fusi                                                       | Le versioni hanno decorrenze ordinate, intervalli non sovrapposti e simulazione preventiva quando possono influire su dati esistenti.                |
+| Distinzione dei fusi                    | Operazioni, tariffe, regole, resoconti, backup                                         | Il fuso del porto governa le attività portuali; il fuso aziendale ha funzione amministrativa e non viene usato come ripiego implicito.               |
+| Coerenza contabile                      | Contabilità, incassi, fatture, resoconti                                               | Movimenti, quote, saldi e stati di riscossione vengono aggiornati insieme e senza duplicare gli importi nei totali.                                  |
+| Continuità dei dati                     | Tutti gli ambiti persistenti                                                           | Backup e ripristino conservano identità, versioni e valori consolidati senza ricalcolarli o reinterpretarli.                                         |
 
 ### REV-FUN-04 – Verificare atomicità, avvisi e blocchi
 
@@ -6054,5 +6048,3 @@ La revisione conferma che il documento:
 - separa chiaramente i requisiti funzionali dalle successive decisioni di interfaccia e implementazione.
 
 Il punto 15 è pertanto **completato**. Con il completamento di tutti i punti da 1 a 15, la **fase 2 – Requisiti funzionali e casi d'uso è formalmente chiusa** e può essere utilizzata come base per la fase successiva di progettazione.
-
-

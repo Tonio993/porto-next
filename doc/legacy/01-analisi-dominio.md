@@ -260,10 +260,10 @@ Un ormeggio ha una data e un'ora di inizio e una data e un'ora di fine, determin
 
 A un ormeggio sono associate le informazioni operative relative alla specifica collocazione della nave, tra cui:
 
-* banchina, eventualmente non specificata;
-* prestazioni attribuite in base all'istante di esecuzione;
-* movimentazioni di merci;
-* eventuali riferimenti specifici a cliente e agenzia.
+- banchina, eventualmente non specificata;
+- prestazioni attribuite in base all'istante di esecuzione;
+- movimentazioni di merci;
+- eventuali riferimenti specifici a cliente e agenzia.
 
 Il cliente e l'agenzia associati all'ormeggio sono opzionali. Quando presenti, sostituiscono i corrispondenti riferimenti definiti sulla visita per tutte le attività dell'ormeggio.
 
@@ -279,9 +279,9 @@ Le tipologie di operazione nave appartengono a un insieme fisso previsto dal sis
 
 Le operazioni previste dal sistema sono:
 
-* **Entrata**;
-* **Uscita**;
-* **Spostamento**.
+- **Entrata**;
+- **Uscita**;
+- **Spostamento**.
 
 Le operazioni nave con stato **prevista** o **effettuata** modificano la struttura operativa del dominio, determinando l'apertura, la chiusura o la transizione tra ormeggi. Le operazioni con stato **mancata** rimangono rilevanti come prestazioni, ma non producono effetti operativi.
 
@@ -291,8 +291,8 @@ L'operazione di uscita determina la chiusura dell'ormeggio corrente, della visit
 
 L'operazione di spostamento indica sempre una data e ora di partenza e una data e ora di arrivo. L'arrivo non può precedere la partenza. Gli effetti operativi ed economici dipendono dalla destinazione:
 
-* se il porto di destinazione coincide con quello della visita corrente, alla partenza viene chiuso l'ormeggio corrente e all'arrivo ne viene aperto uno nuovo nella stessa visita; economicamente viene generata una sola componente di tipo **spostamento**, tariffata nel porto corrente in base alla data di partenza;
-* se il porto di destinazione è differente, alla partenza vengono chiusi l'ormeggio e la visita correnti e all'arrivo vengono aperti una nuova visita e il relativo primo ormeggio nel porto di destinazione, senza chiudere il viaggio; economicamente l'operazione è composta da un'**uscita** tariffata nel porto di partenza in base alla data di partenza e da un'**entrata** tariffata nel porto di destinazione in base alla data di arrivo.
+- se il porto di destinazione coincide con quello della visita corrente, alla partenza viene chiuso l'ormeggio corrente e all'arrivo ne viene aperto uno nuovo nella stessa visita; economicamente viene generata una sola componente di tipo **spostamento**, tariffata nel porto corrente in base alla data di partenza;
+- se il porto di destinazione è differente, alla partenza vengono chiusi l'ormeggio e la visita correnti e all'arrivo vengono aperti una nuova visita e il relativo primo ormeggio nel porto di destinazione, senza chiudere il viaggio; economicamente l'operazione è composta da un'**uscita** tariffata nel porto di partenza in base alla data di partenza e da un'**entrata** tariffata nel porto di destinazione in base alla data di arrivo.
 
 Durante l'intervallo compreso tra partenza e arrivo la nave risulta in trasferimento e non è associata ad alcun ormeggio. Nel trasferimento tra porti non è richiesto l'inserimento del porto di partenza, che viene derivato dalla visita corrente e consolidato come dato storico dell'operazione.
 
@@ -312,9 +312,9 @@ La prestazione rappresenta un'attività richiesta all'azienda nell'ambito di un 
 
 Le prestazioni si distinguono in:
 
-* **operazioni nave**, costituite dalle attività fisse di entrata, spostamento e uscita;
-* **prestazioni a catalogo**, che fanno riferimento a un tipo di prestazione configurabile e seguono le regole del piano tariffario;
-* **prestazioni libere**, definite direttamente mediante una descrizione e un importo.
+- **operazioni nave**, costituite dalle attività fisse di entrata, spostamento e uscita;
+- **prestazioni a catalogo**, che fanno riferimento a un tipo di prestazione configurabile e seguono le regole del piano tariffario;
+- **prestazioni libere**, definite direttamente mediante una descrizione e un importo.
 
 Per inserire una prestazione viene selezionata la nave. La visita e l'ormeggio vengono attribuiti automaticamente in base alla data e all'ora indicate, utilizzando la struttura operativa costruita dalle operazioni nave previste ed effettuate. Una prestazione ordinaria può essere registrata soltanto all'interno dell'intervallo temporale di una visita, dopo la relativa entrata e non oltre l'uscita.
 
@@ -1000,8 +1000,7 @@ La formula applicata oltre l'ultimo scaglione è:
 
 \[
 \text{Valore tariffario} =
-\text{Valore ultimo scaglione}
-+
+\text{Valore ultimo scaglione} +
 \left\lceil
 \frac{\text{Dimensione nave} - \text{Limite massimo ordinario}}
 {\text{Ampiezza scaglione extra}}
@@ -1378,8 +1377,7 @@ La regola dinamica del bollo viene applicata una sola volta al totale ottenuto d
 
 \[
 \text{Totale fattura} =
-\text{Totale dopo tutte le regole e gli sconti, escluso il bollo}
-+ \text{Bollo}
+\text{Totale dopo tutte le regole e gli sconti, escluso il bollo} + \text{Bollo}
 \]
 
 #### Identificazione e numerazione della fattura
@@ -2510,17 +2508,17 @@ Le categorie di spesa, le voci contabili e i conti finanziari non possiedono ver
 
 #### Entità e relazioni principali
 
-| Dominio | Entità e relazioni |
-| --- | --- |
-| Anagrafico | Una nave può avere più viaggi. Un porto contiene più banchine e l'appartenenza della banchina al porto è immutabile. Cliente e agenzia sono soggetti distinti. Una merce può essere utilizzata da più movimentazioni. |
-| Operativo | La struttura è `nave → viaggio → visita → ormeggio`. Ogni visita riguarda un porto e ogni ormeggio appartiene a una visita. Le operazioni nave costruiscono e modificano questa struttura; le altre prestazioni e le movimentazioni merci vi vengono attribuite temporalmente. |
-| Tariffario | Ogni tariffa appartiene a un solo porto e contiene una configurazione completa per ogni tipologia di nave. Ogni configurazione contiene scaglioni ordinari, scaglione extra e tariffa extra. Ogni tipo di prestazione o operazione nave possiede la propria sequenza temporale di pesi. |
-| Economico | Tariffa, scaglione, peso e regole economiche determinano l'importo della prestazione. Ogni regola possiede versioni temporali. Una fattura contiene una o più attività economiche e ogni prestazione o componente economica può appartenere al massimo a una fattura alla volta. Le componenti `uscita` ed `entrata` di uno spostamento tra porti sono fatturabili separatamente e l'operazione può quindi essere collegata a due fatture differenti. La fattura può inoltre riportare movimentazioni merci come informazioni prive di importo. Tutte le attività economiche presenti nella singola fattura condividono la stessa coppia cliente e agenzia. |
-| Contabile | Un conto contiene più movimenti. Un giroconto collega due conti e può produrre un costo. Un'uscita e il costo di un giroconto appartengono a una categoria di spesa. Un movimento può essere associato per intero a più voci contabili, mantenute autonome. |
-| Pagamenti | Un incasso può essere ripartito tra più fatture e una fattura può ricevere più incassi. La relazione è rappresentata da quote positive; la parte non attribuita rimane disponibile. Fattura e incasso devono condividere cliente e agenzia. |
-| Temporale | Le identità anagrafiche, i pesi, le regole economiche e i fusi possiedono le rispettive sequenze temporali. Le tariffe formano una sequenza completa per porto. Gli istanti di dominio conservano valore locale, fuso, offset e istante UTC. |
-| Resoconti | Una configurazione salvata definisce ambito, granularità, riferimento temporale, dimensioni, misure, filtri, raggruppamenti e ordinamenti. I risultati derivano dai dati elementari e rispettano le regole semantiche del dominio. |
-| Configurazione e continuità | Le configurazioni tecniche sono globali e correnti. Il backup conserva l'intero stato persistente e il ripristino lo sostituisce atomicamente, proteggendo preventivamente i dati correnti. Esportazioni e backup rimangono funzioni distinte. |
+| Dominio                     | Entità e relazioni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Anagrafico                  | Una nave può avere più viaggi. Un porto contiene più banchine e l'appartenenza della banchina al porto è immutabile. Cliente e agenzia sono soggetti distinti. Una merce può essere utilizzata da più movimentazioni.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Operativo                   | La struttura è `nave → viaggio → visita → ormeggio`. Ogni visita riguarda un porto e ogni ormeggio appartiene a una visita. Le operazioni nave costruiscono e modificano questa struttura; le altre prestazioni e le movimentazioni merci vi vengono attribuite temporalmente.                                                                                                                                                                                                                                                                                                                                                                              |
+| Tariffario                  | Ogni tariffa appartiene a un solo porto e contiene una configurazione completa per ogni tipologia di nave. Ogni configurazione contiene scaglioni ordinari, scaglione extra e tariffa extra. Ogni tipo di prestazione o operazione nave possiede la propria sequenza temporale di pesi.                                                                                                                                                                                                                                                                                                                                                                     |
+| Economico                   | Tariffa, scaglione, peso e regole economiche determinano l'importo della prestazione. Ogni regola possiede versioni temporali. Una fattura contiene una o più attività economiche e ogni prestazione o componente economica può appartenere al massimo a una fattura alla volta. Le componenti `uscita` ed `entrata` di uno spostamento tra porti sono fatturabili separatamente e l'operazione può quindi essere collegata a due fatture differenti. La fattura può inoltre riportare movimentazioni merci come informazioni prive di importo. Tutte le attività economiche presenti nella singola fattura condividono la stessa coppia cliente e agenzia. |
+| Contabile                   | Un conto contiene più movimenti. Un giroconto collega due conti e può produrre un costo. Un'uscita e il costo di un giroconto appartengono a una categoria di spesa. Un movimento può essere associato per intero a più voci contabili, mantenute autonome.                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Pagamenti                   | Un incasso può essere ripartito tra più fatture e una fattura può ricevere più incassi. La relazione è rappresentata da quote positive; la parte non attribuita rimane disponibile. Fattura e incasso devono condividere cliente e agenzia.                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Temporale                   | Le identità anagrafiche, i pesi, le regole economiche e i fusi possiedono le rispettive sequenze temporali. Le tariffe formano una sequenza completa per porto. Gli istanti di dominio conservano valore locale, fuso, offset e istante UTC.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Resoconti                   | Una configurazione salvata definisce ambito, granularità, riferimento temporale, dimensioni, misure, filtri, raggruppamenti e ordinamenti. I risultati derivano dai dati elementari e rispettano le regole semantiche del dominio.                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Configurazione e continuità | Le configurazioni tecniche sono globali e correnti. Il backup conserva l'intero stato persistente e il ripristino lo sostituisce atomicamente, proteggendo preventivamente i dati correnti. Esportazioni e backup rimangono funzioni distinte.                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 #### Chiusura dell'analisi
 

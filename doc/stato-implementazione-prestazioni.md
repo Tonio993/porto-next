@@ -7,7 +7,7 @@ Aggiornamento del 17 novembre 2026. Questo file contiene lo stato corrente e la 
 - P00–P16 e UI01–UI03 completati. UI03 verificata sulla build Electron, schema v16 invariato, implementazione `2e24749`, base `c1ee663`. [Nota UI03](ui03/revisione-flussi-operativi.md). P16 e revisione tecnica post-P16 restano verificati; [nota e revisione](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 - M1 chiusa sul pacchetto Windows dello schema v9. **M2 chiusa** sull’integrazione P13, schema v14, secondo il piano §7.3. [Evidenze](p13/verifiche.md#verifiche-m2).
 - Revisioni tecniche dopo P12 e P16 completate. **M3 chiusa** sull’integrazione UI03, schema v16: backend completo, 39/39 percorsi desktop su build e 39/39 sul medesimo eseguibile Windows x64; migrazioni cumulative e trasferibilità verificate. [Nota M3](m3/chiusura.md). Prossimo passo funzionale: **P17A — Consuntivare operazioni con replay**. P17–P20 restano da avviare.
-- Preparazione tecnica prima di P17A: **V01 e V02 completati**, prossima attività **V03**. Risultati, prove e passaggio operativo nella [consegna corrente del piano di automazione](piano-automazione-verifiche.md#consegna-corrente). V04–V07 saranno rivalutati dopo il primo utilizzo.
+- Preparazione tecnica prima di P17A: **V01–V03 completati e verificati**; prossimo passo **P17A**, usando il coordinatore come riscontro operativo. Risultati, prove e passaggio operativo nella [consegna corrente del piano di automazione](piano-automazione-verifiche.md#consegna-corrente). V04–V07 saranno rivalutati dopo il primo utilizzo.
 
 ## Avanzamento
 
@@ -62,11 +62,12 @@ Le verifiche complete seguono esclusivamente il [piano §7.3](piano-implementazi
 
 **Verifiche concluse:** backend **296/296**; **39/39 percorsi desktop distinti sulla build**, con riuso dei 38 esiti riusciti della suite completa e ripetizione integrale di Archivi aggiornato e cumulativo rafforzato (**2/2**); **39/39 sul medesimo eseguibile confezionato**. TypeScript ed ESLint passati; check con sola uscita 1 per i cinque avvisi Prettier legacy `00`–`04`. File modificati formattati, UTF-8, collegamenti e differenze Git verificati. Confrontati i cinque file applicativi estratti dall’ASAR e ricontrollati invariati i 138 file della distribuzione prima/dopo i test. Nessun difetto applicativo o di integrità emerso nel perimetro verificato. [Nota M3, copertura e manifest](m3/chiusura.md).
 
-**Passaggio operativo a P17A — Consuntivare operazioni con replay**, ancora da avviare: simulazione della sequenza, confronto e conferma atomica con permanenze, prestazioni, soggetti e componenti economiche coerenti. Punti d’integrazione e limiti nella [nota M3](m3/chiusura.md#limiti-e-passaggio-a-p17a). Nessuna sessione manuale umana o seconda macchina fisica; prova automatizzata fra processi e percorsi sul Windows disponibile. Installer e installazione restano a P20, accessibilità estesa e ulteriori DPI a UI04/P20. Prossima suite integrata completa a M4, salvo trigger anticipati del piano §7.3.
+**Passaggio operativo a P17A — Consuntivare operazioni con replay**, ancora da avviare dopo V01–V03: usare il nuovo flusso di verifica secondo il [passaggio V03](piano-automazione-verifiche.md#consegna-corrente). Per il dominio: simulazione della sequenza, confronto e conferma atomica con permanenze, prestazioni, soggetti e componenti economiche coerenti. Punti d’integrazione e limiti nella [nota M3](m3/chiusura.md#limiti-e-passaggio-a-p17a). Nessuna sessione manuale umana o seconda macchina fisica; prova automatizzata fra processi e percorsi sul Windows disponibile. Installer e installazione restano a P20, accessibilità estesa e ulteriori DPI a UI04/P20. Prossima suite integrata completa a M4, salvo trigger anticipati del piano §7.3.
 
 ## Limiti aperti
 
-- Prettier globale segnala storicamente i cinque documenti legacy `00`–`04`; distinguere questi avvisi da nuove regressioni.
+I cinque avvisi Prettier legacy `00`–`04` sono risolti in [V03](v03/adozione-documentale.md); gli esiti storici, inclusa la consegna M3 sopra, conservano le uscite effettivamente ottenute.
+
 - Prove desktop automatizzate e ispezioni dell'agente. M1–M3 provano trasferibilità fra processi e percorsi sullo stesso Windows, senza seconda macchina fisica. Accessibilità estesa, ulteriori DPI e installazione seguono i checkpoint previsti.
 - I dettagli di ambiente, prove e limiti specifici appartengono alle note collegate. I difetti ancora aperti vanno aggiunti qui con impatto concreto.
 

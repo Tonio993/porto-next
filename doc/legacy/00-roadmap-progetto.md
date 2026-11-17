@@ -58,14 +58,14 @@ Il sistema deve privilegiare correttezza, comprensibilità e conservazione della
 
 ### 2.4 Perimetro funzionale di alto livello
 
-| Ambito | Funzioni comprese |
-| --- | --- |
-| Anagrafiche | Navi, clienti, agenzie, porti, banchine, merci e classificazioni necessarie agli altri processi; identità stabili e variazioni temporali dove previste. |
-| Attività operative | Viaggi, visite, ormeggi, entrate, spostamenti, uscite, prestazioni da catalogo e libere, movimentazioni merci e relativi stati. |
-| Tariffe e calcoli | Tariffe per porto, tipologie e dimensioni delle navi, scaglioni ordinari ed extra, pesi, regole economiche e fiscali, sconti e arrotondamenti. |
-| Fatturazione | Selezione di cliente e agenzia, composizione, informazioni sulle merci, emissione, consolidamento, riscossione, ritiro consentito e ristampa. |
-| Contabilità e incassi | Conti, movimenti, giroconti, costi, categorie di spesa, voci contabili, ripartizione degli incassi, residui e saldi. |
-| Consultazione e continuità | Resoconti configurabili, esportazioni tabellari, configurazioni generali, backup completo, ripristino e modalità protetta. |
+| Ambito                     | Funzioni comprese                                                                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Anagrafiche                | Navi, clienti, agenzie, porti, banchine, merci e classificazioni necessarie agli altri processi; identità stabili e variazioni temporali dove previste. |
+| Attività operative         | Viaggi, visite, ormeggi, entrate, spostamenti, uscite, prestazioni da catalogo e libere, movimentazioni merci e relativi stati.                         |
+| Tariffe e calcoli          | Tariffe per porto, tipologie e dimensioni delle navi, scaglioni ordinari ed extra, pesi, regole economiche e fiscali, sconti e arrotondamenti.          |
+| Fatturazione               | Selezione di cliente e agenzia, composizione, informazioni sulle merci, emissione, consolidamento, riscossione, ritiro consentito e ristampa.           |
+| Contabilità e incassi      | Conti, movimenti, giroconti, costi, categorie di spesa, voci contabili, ripartizione degli incassi, residui e saldi.                                    |
+| Consultazione e continuità | Resoconti configurabili, esportazioni tabellari, configurazioni generali, backup completo, ripristino e modalità protetta.                              |
 
 Le regole di dettaglio appartengono a `01-analisi-dominio.md` e `02-requisiti-funzionali-e-casi-uso.md`.
 
@@ -136,18 +136,18 @@ Il progetto soddisfa la visione quando:
 
 ## 3. Stato generale del progetto
 
-| Fase | Tema | Stato | Risultato principale |
-| --- | --- | --- | --- |
-| 0 | Visione e perimetro iniziale | Completata | Obiettivi, confini e principi raccolti nel presente documento |
-| 1 | Analisi del dominio | Completata | Modello concettuale, relazioni e regole di dominio |
-| 2 | Requisiti funzionali e casi d'uso | Completata | 148 casi d'uso e revisione trasversale conclusiva |
-| 3 | Modello dei dati | Evolutiva | Fondamenti e primi ambiti definiti; completamento guidato dalle slice |
-| 4 | Architettura applicativa | Avviata | Angular, API Java locale, SQLite e strategia misurabile per l'avvio |
-| 5 | Esperienza utente e flussi dell'interfaccia | Evolutiva | Interazioni progettate insieme alla slice che le utilizza |
-| 6 | Prototipi tecnici e validazione dei rischi | Integrata | Rischi affrontati nella prima slice utile o con spike limitati |
-| 7 | Implementazione per vertical slice | Avviata | Backlog ordinato di funzionalità complete e verificabili |
-| 8 | Strategia di test e qualità | Integrata | Test e criteri di accettazione inclusi nella definizione di completamento |
-| 9 | Migrazione, distribuzione e rilascio | Da avviare | Importazione dati, installazione e manutenzione |
+| Fase | Tema                                        | Stato      | Risultato principale                                                      |
+| ---- | ------------------------------------------- | ---------- | ------------------------------------------------------------------------- |
+| 0    | Visione e perimetro iniziale                | Completata | Obiettivi, confini e principi raccolti nel presente documento             |
+| 1    | Analisi del dominio                         | Completata | Modello concettuale, relazioni e regole di dominio                        |
+| 2    | Requisiti funzionali e casi d'uso           | Completata | 148 casi d'uso e revisione trasversale conclusiva                         |
+| 3    | Modello dei dati                            | Evolutiva  | Fondamenti e primi ambiti definiti; completamento guidato dalle slice     |
+| 4    | Architettura applicativa                    | Avviata    | Angular, API Java locale, SQLite e strategia misurabile per l'avvio       |
+| 5    | Esperienza utente e flussi dell'interfaccia | Evolutiva  | Interazioni progettate insieme alla slice che le utilizza                 |
+| 6    | Prototipi tecnici e validazione dei rischi  | Integrata  | Rischi affrontati nella prima slice utile o con spike limitati            |
+| 7    | Implementazione per vertical slice          | Avviata    | Backlog ordinato di funzionalità complete e verificabili                  |
+| 8    | Strategia di test e qualità                 | Integrata  | Test e criteri di accettazione inclusi nella definizione di completamento |
+| 9    | Migrazione, distribuzione e rilascio        | Da avviare | Importazione dati, installazione e manutenzione                           |
 
 ## 4. Fasi completate
 

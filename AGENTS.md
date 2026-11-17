@@ -33,6 +33,8 @@ Suite desktop e pacchetto completi sono associati alle milestone. Cambiamenti a 
 
 Usare `npm test`, che esegue SQLite nel runtime Electron. Riutilizzare build ed esiti ancora validi e ripetere solo controlli falliti o coinvolti dalle correzioni. Evitare ricompilazioni concorrenti con confezionamento/test. I comandi selettivi e completi sono nel piano §7.3.
 
+Usare il [coordinatore e i suoi profili](doc/v02/coordinatore-profili.md#comandi-e-profili), scegliendo esplicitamente documenti e regressioni secondo §7.3. Leggere prima `summary.md`, poi i dettagli delle sole fasi problematiche. La diagnostica resta parziale; il report non determina la chiusura del task.
+
 Test desktop con archivi/preferenze temporanei e renderer offline. Se gli ACL impediscono l'avvio nella sandbox dell'agente, usare il percorso autorizzato documentando il blocco, preservando ACL e sandbox Electron. Seguire gli helper esistenti per le finestre nascoste del pacchetto.
 
 ## Consegna e manutenzione documentale
@@ -41,6 +43,6 @@ Applicare la [guida documentale](doc/guida-documentazione.md#aggiornamento-a-fin
 
 Il piano descrive requisiti, dipendenze e controlli. Il registro descrive lo stato attuale. Il README descrive uso e avvio. Aggiornare ogni fonte quando cambiano i contenuti di cui è responsabile. Conservare lo storico e gli allegati fuori dal percorso di lettura ordinario.
 
-Registrare una sola sintesi degli esiti finali, motivando selezione e riuso e indicando le verifiche pianificate alla milestone. Distinguere build e pacchetto, prove automatizzate e sessioni manuali umane. Segnalare difetti e limiti concreti. I cinque documenti legacy hanno avvisi Prettier storici, da distinguere dalle regressioni correnti.
+Registrare una sola sintesi degli esiti finali, motivando selezione e riuso e indicando le verifiche pianificate alla milestone. Distinguere build e pacchetto, prove automatizzate e sessioni manuali umane. Segnalare difetti e limiti concreti. Preservare gli esiti storici anche quando una segnalazione viene risolta; applicare la [politica di conservazione](doc/guida-documentazione.md#conservazione-delle-evidenze).
 
 Mantenere AGENTS breve e stabile, aggiornandolo per cambiamenti delle regole operative. Il dettaglio di dominio, i log e le cronologie appartengono alle fonti collegate.

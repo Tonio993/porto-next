@@ -7,7 +7,7 @@ Questa guida limita le letture alle informazioni necessarie al task e assegna a 
 1. Leggere il [registro corrente](stato-implementazione-prestazioni.md), poi la sola scheda del task nel piano e le sezioni pertinenti indicate sotto.
 2. Leggere il passaggio operativo della dipendenza immediata e individuare nel codice contratti, servizi, repository e test coinvolti.
 3. Approfondire decisioni, scenari o note precedenti quando una regola, un chiamante o una dipendenza lo richiede. Cercare nel legacy i codici di caso d'uso e i paragrafi pertinenti.
-4. Consultare il piano §7.3 per selezionare i controlli e motivare le regressioni. Riutilizzare i contenuti già disponibili nella conversazione finché restano attuali.
+4. Consultare il piano §7.3 per selezionare i controlli e motivare le regressioni. Usare i [profili del coordinatore](v02/coordinatore-profili.md#comandi-e-profili), leggere prima `summary.md` e approfondire i dettagli delle sole fasi problematiche. Riutilizzare i contenuti già disponibili nella conversazione finché restano attuali.
 
 Usare titoli e ricerche mirate per estrarre sezioni. I collegamenti indicano fonti da consultare secondo l'argomento. Le cronologie delle prove e i manifest servono durante audit, diagnosi e verifica degli artefatti.
 
@@ -56,3 +56,11 @@ Usare titoli e ricerche mirate per estrarre sezioni. I collegamenti indicano fon
 4. **Limiti e prossimo passo** con problemi aperti e punti d'attenzione.
 
 Adattare il dettaglio alla complessità effettiva. Una nota resta completa quando il successore può riconoscere regole nuove, punti d'integrazione e prove disponibili senza ricostruire la cronologia della chat.
+
+## Conservazione delle evidenze
+
+Log completi, JSON nativi dei runner, trace, acquisizioni diagnostiche e artefatti intermedi restano locali in `test-results/verification/<run-id>/`, `test-results/` o `.local/`, già ignorati da Git. Conservare separatamente le esecuzioni, senza sovrascrivere quelle precedenti; non incollare normalmente i log in chat.
+
+Versionare in `doc/<task>/` soltanto riepiloghi, manifest e allegati selezionati necessari a riprodurre o valutare la consegna. Indicare base e modifiche verificate, comandi/argomenti, ambiente, ambito, codici originali, esiti, motivi di selezione/riuso e percorsi delle fonti locali; aggiungere impronte quando utili a identificare gli artefatti. Un percorso locale registrato nel manifest non garantisce che il relativo log sia disponibile dopo un clone. Rendere il riepilogo versionato comprensibile anche senza quei log e conservare gli allegati indispensabili.
+
+Preservare le evidenze M3 e i manifest delle esecuzioni precedenti. Una correzione aggiorna lo stato corrente, senza riscrivere gli esiti storici: gli avvisi legacy risolti in V03 rimangono negli esiti che li avevano rilevati. Non sono previste cancellazioni automatiche né scadenze. Un'eventuale pulizia manuale richiede prima di individuare gli allegati referenziati e conservare quelli necessari alla riproducibilità; questa politica non autorizza cancellazioni durante V03.

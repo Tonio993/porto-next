@@ -1,0 +1,458 @@
+{
+  "task": "V03",
+  "date": "2026-11-17",
+  "base": "1002baf6c70a9ee9044526fea63ec2b63aa7ed39",
+  "branch": "main",
+  "initialWorkingTree": "clean",
+  "schemaVersion": 16,
+  "environment": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "v24.21.0",
+    "prettier": "3.9.10",
+    "npm": "12.2.1",
+    "shell": "PowerShell"
+  },
+  "documents": [
+    "AGENTS.md",
+    "README.md",
+    "doc/guida-documentazione.md",
+    "doc/legacy/00-roadmap-progetto.md",
+    "doc/legacy/01-analisi-dominio.md",
+    "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+    "doc/legacy/03-modello-dati.md",
+    "doc/legacy/04-sviluppo-evolutivo.md",
+    "doc/piano-automazione-verifiche.md",
+    "doc/piano-implementazione-prestazioni.md",
+    "doc/stato-implementazione-prestazioni.md",
+    "doc/v02/coordinatore-profili.md",
+    "doc/v03/adozione-documentale.md",
+    "doc/v03/summary.md"
+  ],
+  "scope": "Solo documentazione; nessuna modifica a src, migrations, scripts, package.json, lockfile o configurazioni.",
+  "legacySemanticComparison": {
+    "parser": "prettier 3.9.10 markdown",
+    "normalization": "AST: solo position e whitespace nei nodi text. Formule delimitate da \\[ e \\]: confronto separato senza whitespace; placeholder ordinati nel confronto AST. Nessuna normalizzazione di codice, URL o struttura della prosa.",
+    "files": [
+      {
+        "file": "doc/legacy/00-roadmap-progetto.md",
+        "beforeSha256": "c41eafc1d2c55ad6acc0d72a9b4aa7f2bf078d0d8e292fe8c92bd4c5998d70f6",
+        "afterSha256": "7dad151e4f9801483b9ac96c06e07e04a3eaeb2652f75ee3d0472559ea1471ee",
+        "semanticAstSha256": "5a8ad11edc1273795f0f8ebc70093c3b78eeb9583f2e01eb91463620a6481d42",
+        "mathBlocks": 0,
+        "mathTokensSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "equal": true
+      },
+      {
+        "file": "doc/legacy/01-analisi-dominio.md",
+        "beforeSha256": "28056e06df86a4d266c52e6ed843ca18c3c7a6fe7ee702bf63336e5640771471",
+        "afterSha256": "cd581ad153560250542083f22720edd75e522eb3906f43cee97f2c60b9dd4332",
+        "semanticAstSha256": "598c23b312e50c4c3e5642e150887dcdf61bbc931aa6e905969cc5a65608f236",
+        "mathBlocks": 3,
+        "mathTokensSha256": "4fd384f592a2808325809d55d44ef7ac8112690788e6dd984509f35c3753aba1",
+        "equal": true
+      },
+      {
+        "file": "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+        "beforeSha256": "2096675affd3bf19c1ffb9a88740d4bad1d33262698cecb43b817856997d1cad",
+        "afterSha256": "d5d03ee0426a01e95cc719c57f2a54feaeedddc0d2b7df421f9d7d07fe43fa8f",
+        "semanticAstSha256": "98c5cc7f3c535a705c6980c16299ff024c61f9849e6410ac5e3e92932c6061a8",
+        "mathBlocks": 0,
+        "mathTokensSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "equal": true
+      },
+      {
+        "file": "doc/legacy/03-modello-dati.md",
+        "beforeSha256": "f7c1687d9df01fea0042e47a9a3062f6e935a33bb79e4ca0396ac42609d8d598",
+        "afterSha256": "022d4ae37e4f1c86b5d9d1f8aeb9b3adf3aa97bc5efdc87e9c130ae7b5274c2f",
+        "semanticAstSha256": "859e35ce8613ce769c519c1f4208b3a895996fb6ff42c3e3457ffd22d741b7ad",
+        "mathBlocks": 0,
+        "mathTokensSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "equal": true
+      },
+      {
+        "file": "doc/legacy/04-sviluppo-evolutivo.md",
+        "beforeSha256": "c05e90c210a22b111150e8c59ca18111a838a00786f439f36a174cbd6c620cb4",
+        "afterSha256": "5dfde39fa5d93ca61a8723fc64b8cb99bc83bd9f577a6a9754124cea66c49f59",
+        "semanticAstSha256": "0040eb806707cfbf25e0ad68e24168f90601447ab2f911de50e99fbb6b35c020",
+        "mathBlocks": 0,
+        "mathTokensSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "equal": true
+      }
+    ]
+  },
+  "beforeFormatting": {
+    "command": [
+      "C:\\nvm4w\\nodejs\\node.exe",
+      "scripts/verification/coordinator.mjs",
+      "documentazione",
+      "--document",
+      "AGENTS.md"
+    ],
+    "directory": "test-results/verification/2026-11-17T15-40-30.612Z-coordinator-8N0HMz",
+    "outcome": "known-warning",
+    "coordinatorExitCode": 2,
+    "formattingStatus": "known-warning",
+    "originalProcessExitCode": 1,
+    "differences": {
+      "legacy": [
+        "doc/legacy/00-roadmap-progetto.md",
+        "doc/legacy/01-analisi-dominio.md",
+        "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+        "doc/legacy/03-modello-dati.md",
+        "doc/legacy/04-sviluppo-evolutivo.md"
+      ],
+      "regressions": []
+    },
+    "execution": "test-results/verification/2026-11-17T15-40-30.612Z-coordinator-8N0HMz/formatting/execution.json",
+    "stdoutSha256": "ebe82dad128d5e5d8936334ceac09492f3c60bd9e0b4a16cc7fd7075513b33de",
+    "stderrSha256": "2287d73d48a8b21837c02885f99746eca682c3a032d171142c89ef86aea2eb6a"
+  },
+  "comparison": {
+    "scope": "Tre controlli documentali sugli stessi 14 Markdown; snapshot prima della compilazione finale delle evidenze. Nessuna modifica fra i due percorsi.",
+    "identicalInputSha256": true,
+    "inputSha256": {
+      "AGENTS.md": "1ce757bef09435597fc846891ea53d89ba75e6d8f88ea63a47e3d3ceaf4bb963",
+      "README.md": "dd6fbc4f9715d6d9b830efe866f38ee114693b509901e792c8f705abad52c2ba",
+      "doc/guida-documentazione.md": "2d980df2d039306cafa311ff251362cd597e8c63837b9405d3b4efcfd41e467d",
+      "doc/legacy/00-roadmap-progetto.md": "7dad151e4f9801483b9ac96c06e07e04a3eaeb2652f75ee3d0472559ea1471ee",
+      "doc/legacy/01-analisi-dominio.md": "cd581ad153560250542083f22720edd75e522eb3906f43cee97f2c60b9dd4332",
+      "doc/legacy/02-requisiti-funzionali-e-casi-uso.md": "d5d03ee0426a01e95cc719c57f2a54feaeedddc0d2b7df421f9d7d07fe43fa8f",
+      "doc/legacy/03-modello-dati.md": "022d4ae37e4f1c86b5d9d1f8aeb9b3adf3aa97bc5efdc87e9c130ae7b5274c2f",
+      "doc/legacy/04-sviluppo-evolutivo.md": "5dfde39fa5d93ca61a8723fc64b8cb99bc83bd9f577a6a9754124cea66c49f59",
+      "doc/piano-automazione-verifiche.md": "57f972532807631b965e89a96d1593dea15da4c68f2ea550a2d107433a5625f2",
+      "doc/piano-implementazione-prestazioni.md": "d714537cb498345cef86f5f5de87254605479822ae2d38343b34042bf750cef5",
+      "doc/stato-implementazione-prestazioni.md": "c2757bb91d76758fc4cfae6bd9caa46c7499190f001fd820f564aacc2f545623",
+      "doc/v02/coordinatore-profili.md": "a8d0afe4e0f98c14658e1c95b60ef76f7630f3b45e95c7a3174f1f449d04c8b1",
+      "doc/v03/adozione-documentale.md": "8d411258681171753a2d8a9b3869ec9671935d949403a63c2cc3b200d9ba3bed",
+      "doc/v03/summary.md": "ac28cf73333345c1df5e1f6abc871f01d2e9f579e9434ba151c02b1747875084"
+    },
+    "direct": {
+      "commandsToStart": 3,
+      "outcomesToCombineManually": 3,
+      "toolCalls": {
+        "exec_command": 3,
+        "write_stdin": 2,
+        "total": 5
+      },
+      "readBytes": 692,
+      "readLines": 16,
+      "executions": [
+        {
+          "command": {
+            "executable": "C:\\nvm4w\\nodejs\\node.exe",
+            "args": [
+              "scripts/verification/documents.mjs",
+              "AGENTS.md",
+              "README.md",
+              "doc/guida-documentazione.md",
+              "doc/legacy/00-roadmap-progetto.md",
+              "doc/legacy/01-analisi-dominio.md",
+              "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+              "doc/legacy/03-modello-dati.md",
+              "doc/legacy/04-sviluppo-evolutivo.md",
+              "doc/piano-automazione-verifiche.md",
+              "doc/piano-implementazione-prestazioni.md",
+              "doc/stato-implementazione-prestazioni.md",
+              "doc/v02/coordinatore-profili.md",
+              "doc/v03/adozione-documentale.md",
+              "doc/v03/summary.md"
+            ]
+          },
+          "exitCode": 0,
+          "stdout": {
+            "bytes": 626,
+            "lines": 14,
+            "sha256": "14078ebeb3113b68a4b20179f1834b463467d1e25efeed4870a81fd9bb08c0f2"
+          },
+          "stderr": {
+            "bytes": 0,
+            "lines": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "localEvidence": ".local/v03/documents.json"
+        },
+        {
+          "command": {
+            "executable": "git",
+            "args": ["diff", "--check"]
+          },
+          "exitCode": 0,
+          "stdout": {
+            "bytes": 0,
+            "lines": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stderr": {
+            "bytes": 0,
+            "lines": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "localEvidence": ".local/v03/diff.json"
+        },
+        {
+          "command": {
+            "executable": "C:\\nvm4w\\nodejs\\node.exe",
+            "args": ["node_modules/prettier/bin/prettier.cjs", "--check", "."]
+          },
+          "exitCode": 0,
+          "stdout": {
+            "bytes": 66,
+            "lines": 2,
+            "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+          },
+          "stderr": {
+            "bytes": 0,
+            "lines": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "localEvidence": ".local/v03/formatting.json"
+        }
+      ]
+    },
+    "coordinator": {
+      "commandsToStart": 1,
+      "outcomesToCombineManually": 0,
+      "summaryReads": 1,
+      "toolCalls": {
+        "exec_command": 2,
+        "write_stdin": 1,
+        "total": 3
+      },
+      "readBytes": 1230,
+      "readLines": 28,
+      "execution": {
+        "command": {
+          "executable": "C:\\nvm4w\\nodejs\\node.exe",
+          "args": [
+            "scripts/verification/coordinator.mjs",
+            "documentazione",
+            "--document",
+            "AGENTS.md",
+            "--document",
+            "README.md",
+            "--document",
+            "doc/guida-documentazione.md",
+            "--document",
+            "doc/legacy/00-roadmap-progetto.md",
+            "--document",
+            "doc/legacy/01-analisi-dominio.md",
+            "--document",
+            "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+            "--document",
+            "doc/legacy/03-modello-dati.md",
+            "--document",
+            "doc/legacy/04-sviluppo-evolutivo.md",
+            "--document",
+            "doc/piano-automazione-verifiche.md",
+            "--document",
+            "doc/piano-implementazione-prestazioni.md",
+            "--document",
+            "doc/stato-implementazione-prestazioni.md",
+            "--document",
+            "doc/v02/coordinatore-profili.md",
+            "--document",
+            "doc/v03/adozione-documentale.md",
+            "--document",
+            "doc/v03/summary.md"
+          ]
+        },
+        "exitCode": 0,
+        "stdout": {
+          "bytes": 310,
+          "lines": 7,
+          "sha256": "bd3deac211ce541eea10412f7dec8fd8bc7fb90659d76c607f65d4c1425a10b8"
+        },
+        "stderr": {
+          "bytes": 0,
+          "lines": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "summary": {
+          "bytes": 920,
+          "lines": 21,
+          "sha256": "46b3137fed503f134e0d4ec8a3f62851733f6427b2cae375c8ad3bb025e44bd7"
+        },
+        "directory": "test-results/verification/2026-11-17T15-51-04.658Z-coordinator-RUthUM"
+      }
+    },
+    "method": "Avvii di comandi e aggregazione delle uscite sono azioni richieste all’operatore/agente, non clic umani. Conteggio exec_command e polling write_stdin nei due percorsi; esclusi functions.exec/wait, predisposizione e letture comuni di audit. Byte UTF-8 e righe newline dei payload stdout/stderr restituiti, più il summary integrale del coordinatore; esclusi comandi e involucri degli strumenti. Polling dipendenti dalla sessione, non proprietà del profilo.",
+    "actualTokensMeasured": false,
+    "savingsPercentEstimated": false,
+    "conclusion": "Meno avvii e aggregazione manuale, ma più output letto nel piccolo caso documentale riuscito. Nessuna conclusione sui token o sul lavoro diagnostico backend/desktop; riscontro operativo a P17A."
+  },
+  "preservedEvidenceSha256": {
+    "doc/m3/allegati/build-sha256.json": "78a31b01e5bd59db5f41acbabf3b4f27759002fa918d5dbf11ab7222c09efb33",
+    "doc/m3/allegati/copertura.md": "f9a1e9d0393a788dd9b6efa82da532a0f8d6fa0cebff9a91ff1f0279a3a0fb0f",
+    "doc/m3/allegati/esiti.json": "c583f8cff807f9c60c74f8e3b5ed5332f61d5dc75e3f16df31e4523871dd7732",
+    "doc/m3/allegati/package-dopo-tests-sha256.json": "c2b866520db49a66d62d1c87fe7829896255f193e7a1f8619becfdc2d3ef282c",
+    "doc/m3/allegati/package-prima-tests-sha256.json": "c2b866520db49a66d62d1c87fe7829896255f193e7a1f8619becfdc2d3ef282c",
+    "doc/m3/chiusura.md": "f5716fadbfe0341e8b70ed6d723249480efbdf0f4079563a7764c83be531cced",
+    "doc/v01/risultati-strutturati.md": "1a5156f4a62096cfb8b04969745bf21b683b6f2359ff423baa2fa71e4c3abdb8",
+    "doc/v01/verifiche.json": "8888e11167d0bdb766e178af6b30d0529f225798a96690c7d5c80cea47376dda",
+    "doc/v02/verifiche.json": "6b12a68d6e610b74f93afe6b09bb6041b32d55df1d782a64ac51df36bdefbf6e"
+  },
+  "reuse": {
+    "sources": ["doc/m3/chiusura.md", "doc/m3/allegati/esiti.json", "doc/v02/verifiche.json"],
+    "reason": "Sole modifiche documentali; nessuna invalidazione applicativa. Nessuna nuova prova backend/desktop/pacchetto o sessione umana.",
+    "nextFullCampaign": "M4 salvo trigger anticipati del piano §7.3"
+  },
+  "retention": "doc/guida-documentazione.md#conservazione-delle-evidenze; nessuna cancellazione automatica o manuale eseguita.",
+  "next": "P17A con riscontro operativo; rivalutare V04–V07 dopo tale utilizzo.",
+  "finalDocumentation": {
+    "command": {
+      "executable": "C:\\nvm4w\\nodejs\\node.exe",
+      "args": [
+        "scripts/verification/coordinator.mjs",
+        "documentazione",
+        "--document",
+        "AGENTS.md",
+        "--document",
+        "README.md",
+        "--document",
+        "doc/guida-documentazione.md",
+        "--document",
+        "doc/legacy/00-roadmap-progetto.md",
+        "--document",
+        "doc/legacy/01-analisi-dominio.md",
+        "--document",
+        "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+        "--document",
+        "doc/legacy/03-modello-dati.md",
+        "--document",
+        "doc/legacy/04-sviluppo-evolutivo.md",
+        "--document",
+        "doc/piano-automazione-verifiche.md",
+        "--document",
+        "doc/piano-implementazione-prestazioni.md",
+        "--document",
+        "doc/stato-implementazione-prestazioni.md",
+        "--document",
+        "doc/v02/coordinatore-profili.md",
+        "--document",
+        "doc/v03/adozione-documentale.md",
+        "--document",
+        "doc/v03/summary.md"
+      ]
+    },
+    "directory": "test-results/verification/2026-11-17T15-54-18.391Z-coordinator-JEQqMY",
+    "coverage": "requested-profile",
+    "completed": true,
+    "outcome": "passed",
+    "coordinatorExitCode": 0,
+    "phases": [
+      {
+        "id": "documents",
+        "status": "passed",
+        "command": {
+          "executable": "C:\\nvm4w\\nodejs\\node.exe",
+          "args": [
+            "C:\\Other\\porto-next\\scripts\\verification\\documents.mjs",
+            "AGENTS.md",
+            "README.md",
+            "doc/guida-documentazione.md",
+            "doc/legacy/00-roadmap-progetto.md",
+            "doc/legacy/01-analisi-dominio.md",
+            "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+            "doc/legacy/03-modello-dati.md",
+            "doc/legacy/04-sviluppo-evolutivo.md",
+            "doc/piano-automazione-verifiche.md",
+            "doc/piano-implementazione-prestazioni.md",
+            "doc/stato-implementazione-prestazioni.md",
+            "doc/v02/coordinatore-profili.md",
+            "doc/v03/adozione-documentale.md",
+            "doc/v03/summary.md"
+          ]
+        },
+        "originalProcessExitCode": 0,
+        "details": "test-results/verification/2026-11-17T15-54-18.391Z-coordinator-JEQqMY/documents/execution.json",
+        "executionSha256": "5b9e856225776d4ce2369adfaedc9ffea24c811b8daef761a0f505b42426229f",
+        "stdoutSha256": "14078ebeb3113b68a4b20179f1834b463467d1e25efeed4870a81fd9bb08c0f2",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "id": "diff",
+        "status": "passed",
+        "command": {
+          "executable": "git",
+          "args": ["diff", "--check"]
+        },
+        "originalProcessExitCode": 0,
+        "details": "test-results/verification/2026-11-17T15-54-18.391Z-coordinator-JEQqMY/diff/execution.json",
+        "executionSha256": "a3f3f2c104d9c8bb3043836f6168851b0339cbd5279d864fa8e0e9212a64c8e3",
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "id": "formatting",
+        "status": "passed",
+        "command": {
+          "executable": "C:\\nvm4w\\nodejs\\node.exe",
+          "args": ["node_modules/prettier/bin/prettier.cjs", "--check", "."]
+        },
+        "originalProcessExitCode": 0,
+        "details": "test-results/verification/2026-11-17T15-54-18.391Z-coordinator-JEQqMY/formatting/execution.json",
+        "executionSha256": "cc9906925d5bed6b3f59db644a210a31f00a3a36f7ea9ae89f91cdb1828a19f4",
+        "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "notRequested": [
+      "typescript-node",
+      "typescript-web",
+      "eslint",
+      "fixtures",
+      "backend",
+      "build",
+      "desktop",
+      "package",
+      "packaged-desktop"
+    ],
+    "markdownInputSha256": {
+      "AGENTS.md": "1ce757bef09435597fc846891ea53d89ba75e6d8f88ea63a47e3d3ceaf4bb963",
+      "README.md": "dd6fbc4f9715d6d9b830efe866f38ee114693b509901e792c8f705abad52c2ba",
+      "doc/guida-documentazione.md": "2d980df2d039306cafa311ff251362cd597e8c63837b9405d3b4efcfd41e467d",
+      "doc/legacy/00-roadmap-progetto.md": "7dad151e4f9801483b9ac96c06e07e04a3eaeb2652f75ee3d0472559ea1471ee",
+      "doc/legacy/01-analisi-dominio.md": "cd581ad153560250542083f22720edd75e522eb3906f43cee97f2c60b9dd4332",
+      "doc/legacy/02-requisiti-funzionali-e-casi-uso.md": "d5d03ee0426a01e95cc719c57f2a54feaeedddc0d2b7df421f9d7d07fe43fa8f",
+      "doc/legacy/03-modello-dati.md": "022d4ae37e4f1c86b5d9d1f8aeb9b3adf3aa97bc5efdc87e9c130ae7b5274c2f",
+      "doc/legacy/04-sviluppo-evolutivo.md": "5dfde39fa5d93ca61a8723fc64b8cb99bc83bd9f577a6a9754124cea66c49f59",
+      "doc/piano-automazione-verifiche.md": "08872c4cfffb9f583355f569a8a7bacbbf466d92363fdfe5131f442447abd44c",
+      "doc/piano-implementazione-prestazioni.md": "d714537cb498345cef86f5f5de87254605479822ae2d38343b34042bf750cef5",
+      "doc/stato-implementazione-prestazioni.md": "c2757bb91d76758fc4cfae6bd9caa46c7499190f001fd820f564aacc2f545623",
+      "doc/v02/coordinatore-profili.md": "a8d0afe4e0f98c14658e1c95b60ef76f7630f3b45e95c7a3174f1f449d04c8b1",
+      "doc/v03/adozione-documentale.md": "4e65052b6043613fe6e5ed4ce75c8397f6219e81a4d1db12043aadc7fde92ec9",
+      "doc/v03/summary.md": "5891cc7630ffada0f8100026bde87aa9d5d961532dbb4d3b910127242d27a060"
+    },
+    "planSha256": "854ea2f59c6a526ed60b1e910ad6bedac63a20a02bf6c7d72a8ac98c1e57a3e2",
+    "resultsSha256": "bb8fcc258f077fd0f0801fa8083b00571ef48c70509466e513e5418bec4792fd",
+    "summarySha256": "46b3137fed503f134e0d4ec8a3f62851733f6427b2cae375c8ad3bb025e44bd7",
+    "selectedSummary": "doc/v03/summary.md",
+    "evidenceRecording": "Il manifest viene completato dopo l’esecuzione e sottoposto separatamente a Prettier; i 14 Markdown hanno le impronte dell’esecuzione conclusiva."
+  },
+  "gitReview": {
+    "onlyDocumentation": true,
+    "modifiedTracked": [
+      "AGENTS.md",
+      "README.md",
+      "doc/guida-documentazione.md",
+      "doc/legacy/00-roadmap-progetto.md",
+      "doc/legacy/01-analisi-dominio.md",
+      "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+      "doc/legacy/03-modello-dati.md",
+      "doc/legacy/04-sviluppo-evolutivo.md",
+      "doc/piano-automazione-verifiche.md",
+      "doc/piano-implementazione-prestazioni.md",
+      "doc/stato-implementazione-prestazioni.md",
+      "doc/v02/coordinatore-profili.md"
+    ],
+    "addedUntracked": [
+      "doc/v03/adozione-documentale.md",
+      "doc/v03/summary.md",
+      "doc/v03/verifiche.json"
+    ],
+    "markdownCoverageComplete": true,
+    "applicationInfrastructureAndHistoricalEvidenceDiffExitCode": 0,
+    "noCommitRequested": true
+  }
+}

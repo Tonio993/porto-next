@@ -124,7 +124,26 @@ Le [istruzioni dello spike](spikes/p00/README.md) distinguono le prove eseguite 
 
 ## Verifiche e distribuzione
 
-Per frequenza, selezione dei test e riuso della build applicare il [piano §7.3](doc/piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). I comandi seguenti coprono i diversi controlli e si scelgono secondo lo step o la milestone da verificare.
+Per frequenza, selezione dei test e riuso della build applicare il [piano §7.3](doc/piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento), matrice autorevole della copertura. Il coordinatore avvia i controlli e raccoglie gli esiti separati; documenti e regressioni rimangono una scelta esplicita.
+
+```powershell
+# Ripetere --document per ogni Markdown modificato.
+npm.cmd run verify -- documentazione --document README.md --document AGENTS.md
+# Step: backend completo e percorsi desktop scelti secondo §7.3.
+npm.cmd run verify -- step --document README.md --desktop tests/e2e/archives.spec.ts
+# Milestone: desktop completo su build e medesimo pacchetto Windows.
+npm.cmd run verify -- milestone --document README.md
+# Indagine mirata: resta diagnostica parziale anche quando passa.
+npm.cmd run verify -- diagnostica --phase backend --backend tests/unit/archive-service.test.ts
+```
+
+I quattro profili sono `documentazione`, `step`, `milestone` e `diagnostica`. `.cmd` preserva gli argomenti in PowerShell; è disponibile anche `node scripts/verification/coordinator.mjs <profilo> ...`. [Fasi, dipendenze, opzioni ed esiti](doc/v02/coordinatore-profili.md) descrivono i comandi effettivi. `diagnostica` non sostituisce la verifica completa di step o milestone; i profili non eseguono ispezioni grafiche né decidono la chiusura di una consegna.
+
+Ogni invocazione crea `test-results/verification/<data-UTC>-coordinator-<suffisso>/` con `summary.md`, `plan.json`, `results.json` e dettagli per fase. Leggere prima **`summary.md`**, poi approfondire **soltanto le fasi problematiche**: primo errore, `issues`, conteggi, comando di riproduzione e log collegati. Non serve leggere ordinariamente tutti i JSON o incollare i log in chat. L'uscita è `0` per tutte le fasi richieste passate in un profilo completo, `1` per fallimenti senza incompletezze, `2` per incompletezze/blocchi, soli avvisi noti o diagnostica; i codici originali dei processi restano nei dettagli. Un'uscita positiva non chiude automaticamente task o milestone.
+
+I report completi restano locali; riepiloghi e manifest selezionati vengono versionati quando necessari alla riproducibilità, secondo la [politica di conservazione](doc/guida-documentazione.md#conservazione-delle-evidenze), senza cancellazioni automatiche. I cinque avvisi di formattazione legacy `00`–`04` sono risolti in [V03](doc/v03/adozione-documentale.md); le vecchie esecuzioni conservano gli esiti originali.
+
+I comandi diretti restano disponibili. Eseguirli separatamente dal coordinatore per evitare sovrapposizioni sugli artefatti:
 
 ```powershell
 npm run check
@@ -138,7 +157,7 @@ npm run dist:win
 - `check`: TypeScript, ESLint e formattazione.
 - `test`: test del backend nel runtime Node di Electron, con database temporanei reali.
 - `test:report`: raccolta esplicita di una esecuzione Vitest o Playwright con `summary.md`, JSON completo, log e artefatti; [comandi e formato V01](doc/v01/risultati-strutturati.md#comandi-disponibili).
-- `test:report:fixtures`: verifica isolata della raccolta, inclusi errori, salti, interruzioni e retry.
+- `test:report:fixtures`: fixture isolate di raccolta e coordinatore, inclusi errori, salti, interruzioni e retry.
 - `test:e2e`: build e test su Electron con dialoghi nativi simulati; la finestra di test resta nascosta. Verifica anche il funzionamento offline e la persistenza dopo il riavvio. Non occorre scaricare un browser Playwright separato.
 - `pack`: applicazione non installata in `dist/win-unpacked/`.
 - `test:packaged`: esegue l'intera suite desktop sul pacchetto Windows, con dati temporanei isolati.

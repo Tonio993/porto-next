@@ -1,0 +1,1119 @@
+{
+  "date": "2026-11-17",
+  "base": "4132d39",
+  "implementation": "2e24749",
+  "schema": 16,
+  "environment": {
+    "platform": "win32",
+    "architecture": "x64",
+    "windows": "10.0.26200",
+    "node": "v24.21.0",
+    "npm": "12.2.1",
+    "electron": "45.2.3",
+    "builder": "26.18.0"
+  },
+  "backend": {
+    "command": "npm test",
+    "passed": 296,
+    "files": 28,
+    "exitCode": 0,
+    "log": ".local/m3-backend-full.log",
+    "sha256": "ba624f623fb322d163a4fdc4a3dcf3b2b2c427fcde3f1acd7f691e1fb94ec26c"
+  },
+  "check": {
+    "command": "npm run check",
+    "exitCode": 1,
+    "typeScript": "passed",
+    "eslint": "passed",
+    "prettierLegacy": [
+      "doc/legacy/00-roadmap-progetto.md",
+      "doc/legacy/01-analisi-dominio.md",
+      "doc/legacy/02-requisiti-funzionali-e-casi-uso.md",
+      "doc/legacy/03-modello-dati.md",
+      "doc/legacy/04-sviluppo-evolutivo.md"
+    ],
+    "log": ".local/m3-check-conclusive.log",
+    "sha256": "a6507b7f72a296124f2f4368f3eaaca537eb9caa7cb75c8bd434e48fa2fc9d52"
+  },
+  "build": {
+    "command": "node node_modules/@playwright/test/cli.js test --output test-results/m3-desktop",
+    "passed": 39,
+    "runs": [
+      {
+        "log": ".local/m3-desktop-full.log",
+        "sha256": "2f50126f7c9d262d588606e9a57ee82c39a1a3624352f4fff9138746a8ff15e1",
+        "paths": [
+          {
+            "status": "failed",
+            "location": "tests/e2e/archives.spec.ts:20:1",
+            "title": "gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio",
+            "duration": "22.3s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/assignments.spec.ts:102:1",
+            "title": "P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline",
+            "duration": "2.0m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/assignments.spec.ts:252:1",
+            "title": "P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricamento e nuova sessione",
+            "duration": "34.9s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/berths.spec.ts:11:1",
+            "title": "amministra le banchine dal porto e conserva dati e contesto nel percorso Electron",
+            "duration": "2.2m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/catalog-async.spec.ts:58:1",
+            "title": "P08 catalogo: risposte tardive di dettaglio ed elenco, editor chiuso e cambio sessione",
+            "duration": "34.7s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/catalog.spec.ts:11:1",
+            "title": "P08 catalogo: v8 popolato, pesi esatti, ciclo di vita, conflitti, copie e riapertura offline",
+            "duration": "1.7m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/inter-port-movements.spec.ts:61:1",
+            "title": "P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità, ricalcoli e riapertura offline",
+            "duration": "1.4m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/inter-port-movements.spec.ts:236:1",
+            "title": "P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome",
+            "duration": "48.4s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/milestone-migrations.spec.ts:49:1",
+            "title": "M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferibilità",
+            "duration": "17.0s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/movements.spec.ts:44:1",
+            "title": "P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa alla partenza e persistenza offline",
+            "duration": "2.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/movements.spec.ts:256:1",
+            "title": "P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione",
+            "duration": "1.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/operations-async.spec.ts:16:1",
+            "title": "P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione",
+            "duration": "1.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/operations.spec.ts:11:1",
+            "title": "P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia, copie e riapertura offline",
+            "duration": "3.0m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/port-async.spec.ts:14:1",
+            "title": "scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza senza scrivere",
+            "duration": "31.4s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/port-lifecycle.spec.ts:11:1",
+            "title": "gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del porto offline",
+            "duration": "1.8m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/ports.spec.ts:11:1",
+            "title": "crea e consulta porti offline, li ritrova al riavvio e mantiene le copie indipendenti",
+            "duration": "48.7s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:59:3",
+            "title": "P14 funzionale: prestazioni libere, migrazione e contesto",
+            "duration": "39.1s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:59:3",
+            "title": "P14 asincrono: prestazioni libere, migrazione e contesto",
+            "duration": "37.6s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:236:1",
+            "title": "P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE conservata",
+            "duration": "40.1s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:389:1",
+            "title": "P15 asincrono: selettore catalogo ignora risposte precedenti e conserva la selezione fra ricerche",
+            "duration": "27.8s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:433:3",
+            "title": "P16 FREE: ciclo di vita, ricerca, conflitto e riapertura",
+            "duration": "1.7m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:433:3",
+            "title": "P16 CATALOG: ciclo di vita, ricerca, conflitto e riapertura",
+            "duration": "2.3m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:711:1",
+            "title": "P16 asincrono: filtri, anteprima obsoleta e note con esito incerto richiedono rilettura",
+            "duration": "49.6s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:841:3",
+            "title": "post-P16 FREE: creazione e consuntivazione con risposta persa richiedono rilettura",
+            "duration": "1.0m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:841:3",
+            "title": "post-P16 CATALOG: creazione e consuntivazione con risposta persa richiedono rilettura",
+            "duration": "1.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:985:1",
+            "title": "P16 ricerca: soggetti ereditati, porto e banchina, filtri vuoti e ispezione minima",
+            "duration": "48.0s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/subjects-async.spec.ts:68:3",
+            "title": "P06 Clienti: scarta risposte tardive di dettaglio, decorrenza e archivio precedente",
+            "duration": "36.5s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/subjects-async.spec.ts:68:3",
+            "title": "P06 Agenzie: scarta risposte tardive di dettaglio, decorrenza e archivio precedente",
+            "duration": "38.5s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/subjects.spec.ts:23:3",
+            "title": "P06 Clienti: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+            "duration": "2.4m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/subjects.spec.ts:23:3",
+            "title": "P06 Agenzie: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+            "duration": "2.4m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/tariffs-async.spec.ts:59:1",
+            "title": "P09 asincronia: selezioni, liste, risoluzione a editor chiuso, calcolo superato, futuro corrente e cambio sessione",
+            "duration": "1.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/tariffs.spec.ts:19:1",
+            "title": "P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo storico, conflitti e riapertura offline",
+            "duration": "1.9m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/time.spec.ts:11:1",
+            "title": "configura il fuso per archivio e risolve gap e occorrenze offline",
+            "duration": "29.3s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/ui01.spec.ts:34:1",
+            "title": "UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti reali",
+            "duration": "48.8s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/ui02.spec.ts:27:1",
+            "title": "UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notifiche ed effetti estesi",
+            "duration": "1.0m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/ui03-states.spec.ts:15:1",
+            "title": "UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento e nuova sessione",
+            "duration": "53.4s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/ui03.spec.ts:22:1",
+            "title": "UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle due dimensioni",
+            "duration": "1.0m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/vessels-async.spec.ts:63:3",
+            "title": "P07 Navi: risposte tardive, cambio sessione e futuro → corrente senza scritture",
+            "duration": "42.6s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/vessels.spec.ts:20:3",
+            "title": "P07 Navi: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+            "duration": "2.6m"
+          }
+        ],
+        "summary": [
+          "",
+          "  Slow test file: tests\\e2e\\services.spec.ts (10.2m)",
+          "  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel",
+          "  1 failed",
+          "    tests\\e2e\\archives.spec.ts:20:1 › gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio ",
+          "  38 passed (47.2m)"
+        ]
+      },
+      {
+        "log": ".local/m3-build-final-regressions.log",
+        "sha256": "a5c9f0d44ac5017f23d93241d3d26d1c1072edff18838cb39b5cd08f71f46f12",
+        "paths": [
+          {
+            "status": "passed",
+            "location": "tests/e2e/archives.spec.ts:20:1",
+            "title": "gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio",
+            "duration": "31.7s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/milestone-migrations.spec.ts:115:1",
+            "title": "M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferibilità",
+            "duration": "16.9s"
+          }
+        ],
+        "summary": [
+          " ",
+          "(Use `node --trace-warnings ...` to show where the warning was created)",
+          "  ok 1 tests\\e2e\\archives.spec.ts:20:1 › gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio (31.7s)",
+          "  ok 2 tests\\e2e\\milestone-migrations.spec.ts:115:1 › M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferibilità (16.9s)",
+          "",
+          "  2 passed (50.0s)"
+        ]
+      }
+    ],
+    "tests": [
+      {
+        "status": "passed",
+        "location": "tests/e2e/archives.spec.ts:20:1",
+        "title": "gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio",
+        "duration": "31.7s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/assignments.spec.ts:102:1",
+        "title": "P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline",
+        "duration": "2.0m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/assignments.spec.ts:252:1",
+        "title": "P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricamento e nuova sessione",
+        "duration": "34.9s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/berths.spec.ts:11:1",
+        "title": "amministra le banchine dal porto e conserva dati e contesto nel percorso Electron",
+        "duration": "2.2m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/catalog-async.spec.ts:58:1",
+        "title": "P08 catalogo: risposte tardive di dettaglio ed elenco, editor chiuso e cambio sessione",
+        "duration": "34.7s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/catalog.spec.ts:11:1",
+        "title": "P08 catalogo: v8 popolato, pesi esatti, ciclo di vita, conflitti, copie e riapertura offline",
+        "duration": "1.7m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/inter-port-movements.spec.ts:61:1",
+        "title": "P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità, ricalcoli e riapertura offline",
+        "duration": "1.4m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/inter-port-movements.spec.ts:236:1",
+        "title": "P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome",
+        "duration": "48.4s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/milestone-migrations.spec.ts:115:1",
+        "title": "M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferibilità",
+        "duration": "16.9s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/movements.spec.ts:44:1",
+        "title": "P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa alla partenza e persistenza offline",
+        "duration": "2.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/movements.spec.ts:256:1",
+        "title": "P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione",
+        "duration": "1.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/operations-async.spec.ts:16:1",
+        "title": "P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione",
+        "duration": "1.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/operations.spec.ts:11:1",
+        "title": "P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia, copie e riapertura offline",
+        "duration": "3.0m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/port-async.spec.ts:14:1",
+        "title": "scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza senza scrivere",
+        "duration": "31.4s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/port-lifecycle.spec.ts:11:1",
+        "title": "gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del porto offline",
+        "duration": "1.8m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/ports.spec.ts:11:1",
+        "title": "crea e consulta porti offline, li ritrova al riavvio e mantiene le copie indipendenti",
+        "duration": "48.7s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:59:3",
+        "title": "P14 funzionale: prestazioni libere, migrazione e contesto",
+        "duration": "39.1s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:59:3",
+        "title": "P14 asincrono: prestazioni libere, migrazione e contesto",
+        "duration": "37.6s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:236:1",
+        "title": "P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE conservata",
+        "duration": "40.1s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:389:1",
+        "title": "P15 asincrono: selettore catalogo ignora risposte precedenti e conserva la selezione fra ricerche",
+        "duration": "27.8s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:433:3",
+        "title": "P16 FREE: ciclo di vita, ricerca, conflitto e riapertura",
+        "duration": "1.7m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:433:3",
+        "title": "P16 CATALOG: ciclo di vita, ricerca, conflitto e riapertura",
+        "duration": "2.3m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:711:1",
+        "title": "P16 asincrono: filtri, anteprima obsoleta e note con esito incerto richiedono rilettura",
+        "duration": "49.6s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:841:3",
+        "title": "post-P16 FREE: creazione e consuntivazione con risposta persa richiedono rilettura",
+        "duration": "1.0m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:841:3",
+        "title": "post-P16 CATALOG: creazione e consuntivazione con risposta persa richiedono rilettura",
+        "duration": "1.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:985:1",
+        "title": "P16 ricerca: soggetti ereditati, porto e banchina, filtri vuoti e ispezione minima",
+        "duration": "48.0s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/subjects-async.spec.ts:68:3",
+        "title": "P06 Clienti: scarta risposte tardive di dettaglio, decorrenza e archivio precedente",
+        "duration": "36.5s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/subjects-async.spec.ts:68:3",
+        "title": "P06 Agenzie: scarta risposte tardive di dettaglio, decorrenza e archivio precedente",
+        "duration": "38.5s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/subjects.spec.ts:23:3",
+        "title": "P06 Clienti: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+        "duration": "2.4m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/subjects.spec.ts:23:3",
+        "title": "P06 Agenzie: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+        "duration": "2.4m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/tariffs-async.spec.ts:59:1",
+        "title": "P09 asincronia: selezioni, liste, risoluzione a editor chiuso, calcolo superato, futuro corrente e cambio sessione",
+        "duration": "1.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/tariffs.spec.ts:19:1",
+        "title": "P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo storico, conflitti e riapertura offline",
+        "duration": "1.9m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/time.spec.ts:11:1",
+        "title": "configura il fuso per archivio e risolve gap e occorrenze offline",
+        "duration": "29.3s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/ui01.spec.ts:34:1",
+        "title": "UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti reali",
+        "duration": "48.8s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/ui02.spec.ts:27:1",
+        "title": "UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notifiche ed effetti estesi",
+        "duration": "1.0m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/ui03-states.spec.ts:15:1",
+        "title": "UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento e nuova sessione",
+        "duration": "53.4s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/ui03.spec.ts:22:1",
+        "title": "UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle due dimensioni",
+        "duration": "1.0m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/vessels-async.spec.ts:63:3",
+        "title": "P07 Navi: risposte tardive, cambio sessione e futuro → corrente senza scritture",
+        "duration": "42.6s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/vessels.spec.ts:20:3",
+        "title": "P07 Navi: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+        "duration": "2.6m"
+      }
+    ]
+  },
+  "packaged": {
+    "command": "node scripts/test-packaged.mjs",
+    "executable": "dist/win-unpacked/Porto Next.exe",
+    "passed": 39,
+    "runs": [
+      {
+        "log": ".local/m3-packaged-full.log",
+        "sha256": "68340900c958521427ec992ed9e11ec4a4aae69130576f9aa74f875b467fa486",
+        "paths": [
+          {
+            "status": "passed",
+            "location": "tests/e2e/archives.spec.ts:20:1",
+            "title": "gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio",
+            "duration": "1.2m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/assignments.spec.ts:102:1",
+            "title": "P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline",
+            "duration": "2.0m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/assignments.spec.ts:252:1",
+            "title": "P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricamento e nuova sessione",
+            "duration": "35.5s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/berths.spec.ts:11:1",
+            "title": "amministra le banchine dal porto e conserva dati e contesto nel percorso Electron",
+            "duration": "2.2m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/catalog-async.spec.ts:58:1",
+            "title": "P08 catalogo: risposte tardive di dettaglio ed elenco, editor chiuso e cambio sessione",
+            "duration": "38.9s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/catalog.spec.ts:11:1",
+            "title": "P08 catalogo: v8 popolato, pesi esatti, ciclo di vita, conflitti, copie e riapertura offline",
+            "duration": "1.7m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/inter-port-movements.spec.ts:61:1",
+            "title": "P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità, ricalcoli e riapertura offline",
+            "duration": "1.6m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/inter-port-movements.spec.ts:236:1",
+            "title": "P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome",
+            "duration": "48.3s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/milestone-migrations.spec.ts:115:1",
+            "title": "M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferibilità",
+            "duration": "16.6s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/movements.spec.ts:44:1",
+            "title": "P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa alla partenza e persistenza offline",
+            "duration": "2.2m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/movements.spec.ts:256:1",
+            "title": "P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione",
+            "duration": "1.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/operations-async.spec.ts:16:1",
+            "title": "P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione",
+            "duration": "1.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/operations.spec.ts:11:1",
+            "title": "P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia, copie e riapertura offline",
+            "duration": "3.2m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/port-async.spec.ts:14:1",
+            "title": "scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza senza scrivere",
+            "duration": "31.3s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/port-lifecycle.spec.ts:11:1",
+            "title": "gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del porto offline",
+            "duration": "1.8m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/ports.spec.ts:11:1",
+            "title": "crea e consulta porti offline, li ritrova al riavvio e mantiene le copie indipendenti",
+            "duration": "1.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:59:3",
+            "title": "P14 funzionale: prestazioni libere, migrazione e contesto",
+            "duration": "45.4s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:59:3",
+            "title": "P14 asincrono: prestazioni libere, migrazione e contesto",
+            "duration": "36.3s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:236:1",
+            "title": "P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE conservata",
+            "duration": "46.5s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:391:1",
+            "title": "P15 asincrono: selettore catalogo ignora risposte precedenti e conserva la selezione fra ricerche",
+            "duration": "28.2s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:435:3",
+            "title": "P16 FREE: ciclo di vita, ricerca, conflitto e riapertura",
+            "duration": "1.8m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:435:3",
+            "title": "P16 CATALOG: ciclo di vita, ricerca, conflitto e riapertura",
+            "duration": "2.3m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:715:1",
+            "title": "P16 asincrono: filtri, anteprima obsoleta e note con esito incerto richiedono rilettura",
+            "duration": "50.1s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:845:3",
+            "title": "post-P16 FREE: creazione e consuntivazione con risposta persa richiedono rilettura",
+            "duration": "1.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:845:3",
+            "title": "post-P16 CATALOG: creazione e consuntivazione con risposta persa richiedono rilettura",
+            "duration": "1.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/services.spec.ts:991:1",
+            "title": "P16 ricerca: soggetti ereditati, porto e banchina, filtri vuoti e ispezione minima",
+            "duration": "51.5s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/subjects-async.spec.ts:68:3",
+            "title": "P06 Clienti: scarta risposte tardive di dettaglio, decorrenza e archivio precedente",
+            "duration": "36.4s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/subjects-async.spec.ts:68:3",
+            "title": "P06 Agenzie: scarta risposte tardive di dettaglio, decorrenza e archivio precedente",
+            "duration": "36.4s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/subjects.spec.ts:23:3",
+            "title": "P06 Clienti: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+            "duration": "2.5m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/subjects.spec.ts:23:3",
+            "title": "P06 Agenzie: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+            "duration": "2.5m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/tariffs-async.spec.ts:59:1",
+            "title": "P09 asincronia: selezioni, liste, risoluzione a editor chiuso, calcolo superato, futuro corrente e cambio sessione",
+            "duration": "1.1m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/tariffs.spec.ts:19:1",
+            "title": "P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo storico, conflitti e riapertura offline",
+            "duration": "2.0m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/time.spec.ts:11:1",
+            "title": "configura il fuso per archivio e risolve gap e occorrenze offline",
+            "duration": "30.3s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/ui01.spec.ts:34:1",
+            "title": "UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti reali",
+            "duration": "1.3m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/ui02.spec.ts:27:1",
+            "title": "UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notifiche ed effetti estesi",
+            "duration": "1.6m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/ui03-states.spec.ts:15:1",
+            "title": "UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento e nuova sessione",
+            "duration": "55.4s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/ui03.spec.ts:22:1",
+            "title": "UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle due dimensioni",
+            "duration": "1.2m"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/vessels-async.spec.ts:63:3",
+            "title": "P07 Navi: risposte tardive, cambio sessione e futuro → corrente senza scritture",
+            "duration": "42.8s"
+          },
+          {
+            "status": "passed",
+            "location": "tests/e2e/vessels.spec.ts:20:3",
+            "title": "P07 Navi: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+            "duration": "2.7m"
+          }
+        ],
+        "summary": [
+          "  ok 39 tests\\e2e\\vessels.spec.ts:20:3 › P07 Navi: migrazione, ciclo di vita, bozze, copie e riavvio offline (2.7m)",
+          "",
+          "  Slow test file: tests\\e2e\\services.spec.ts (10.5m)",
+          "  Slow test file: tests\\e2e\\subjects.spec.ts (5.0m)",
+          "  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel",
+          "  39 passed (50.9m)"
+        ]
+      }
+    ],
+    "tests": [
+      {
+        "status": "passed",
+        "location": "tests/e2e/archives.spec.ts:20:1",
+        "title": "gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio",
+        "duration": "1.2m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/assignments.spec.ts:102:1",
+        "title": "P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline",
+        "duration": "2.0m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/assignments.spec.ts:252:1",
+        "title": "P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricamento e nuova sessione",
+        "duration": "35.5s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/berths.spec.ts:11:1",
+        "title": "amministra le banchine dal porto e conserva dati e contesto nel percorso Electron",
+        "duration": "2.2m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/catalog-async.spec.ts:58:1",
+        "title": "P08 catalogo: risposte tardive di dettaglio ed elenco, editor chiuso e cambio sessione",
+        "duration": "38.9s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/catalog.spec.ts:11:1",
+        "title": "P08 catalogo: v8 popolato, pesi esatti, ciclo di vita, conflitti, copie e riapertura offline",
+        "duration": "1.7m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/inter-port-movements.spec.ts:61:1",
+        "title": "P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità, ricalcoli e riapertura offline",
+        "duration": "1.6m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/inter-port-movements.spec.ts:236:1",
+        "title": "P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome",
+        "duration": "48.3s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/milestone-migrations.spec.ts:115:1",
+        "title": "M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferibilità",
+        "duration": "16.6s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/movements.spec.ts:44:1",
+        "title": "P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa alla partenza e persistenza offline",
+        "duration": "2.2m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/movements.spec.ts:256:1",
+        "title": "P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione",
+        "duration": "1.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/operations-async.spec.ts:16:1",
+        "title": "P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione",
+        "duration": "1.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/operations.spec.ts:11:1",
+        "title": "P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia, copie e riapertura offline",
+        "duration": "3.2m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/port-async.spec.ts:14:1",
+        "title": "scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza senza scrivere",
+        "duration": "31.3s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/port-lifecycle.spec.ts:11:1",
+        "title": "gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del porto offline",
+        "duration": "1.8m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/ports.spec.ts:11:1",
+        "title": "crea e consulta porti offline, li ritrova al riavvio e mantiene le copie indipendenti",
+        "duration": "1.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:59:3",
+        "title": "P14 funzionale: prestazioni libere, migrazione e contesto",
+        "duration": "45.4s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:59:3",
+        "title": "P14 asincrono: prestazioni libere, migrazione e contesto",
+        "duration": "36.3s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:236:1",
+        "title": "P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE conservata",
+        "duration": "46.5s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:391:1",
+        "title": "P15 asincrono: selettore catalogo ignora risposte precedenti e conserva la selezione fra ricerche",
+        "duration": "28.2s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:435:3",
+        "title": "P16 FREE: ciclo di vita, ricerca, conflitto e riapertura",
+        "duration": "1.8m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:435:3",
+        "title": "P16 CATALOG: ciclo di vita, ricerca, conflitto e riapertura",
+        "duration": "2.3m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:715:1",
+        "title": "P16 asincrono: filtri, anteprima obsoleta e note con esito incerto richiedono rilettura",
+        "duration": "50.1s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:845:3",
+        "title": "post-P16 FREE: creazione e consuntivazione con risposta persa richiedono rilettura",
+        "duration": "1.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:845:3",
+        "title": "post-P16 CATALOG: creazione e consuntivazione con risposta persa richiedono rilettura",
+        "duration": "1.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/services.spec.ts:991:1",
+        "title": "P16 ricerca: soggetti ereditati, porto e banchina, filtri vuoti e ispezione minima",
+        "duration": "51.5s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/subjects-async.spec.ts:68:3",
+        "title": "P06 Clienti: scarta risposte tardive di dettaglio, decorrenza e archivio precedente",
+        "duration": "36.4s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/subjects-async.spec.ts:68:3",
+        "title": "P06 Agenzie: scarta risposte tardive di dettaglio, decorrenza e archivio precedente",
+        "duration": "36.4s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/subjects.spec.ts:23:3",
+        "title": "P06 Clienti: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+        "duration": "2.5m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/subjects.spec.ts:23:3",
+        "title": "P06 Agenzie: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+        "duration": "2.5m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/tariffs-async.spec.ts:59:1",
+        "title": "P09 asincronia: selezioni, liste, risoluzione a editor chiuso, calcolo superato, futuro corrente e cambio sessione",
+        "duration": "1.1m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/tariffs.spec.ts:19:1",
+        "title": "P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo storico, conflitti e riapertura offline",
+        "duration": "2.0m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/time.spec.ts:11:1",
+        "title": "configura il fuso per archivio e risolve gap e occorrenze offline",
+        "duration": "30.3s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/ui01.spec.ts:34:1",
+        "title": "UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti reali",
+        "duration": "1.3m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/ui02.spec.ts:27:1",
+        "title": "UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notifiche ed effetti estesi",
+        "duration": "1.6m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/ui03-states.spec.ts:15:1",
+        "title": "UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento e nuova sessione",
+        "duration": "55.4s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/ui03.spec.ts:22:1",
+        "title": "UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle due dimensioni",
+        "duration": "1.2m"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/vessels-async.spec.ts:63:3",
+        "title": "P07 Navi: risposte tardive, cambio sessione e futuro → corrente senza scritture",
+        "duration": "42.8s"
+      },
+      {
+        "status": "passed",
+        "location": "tests/e2e/vessels.spec.ts:20:3",
+        "title": "P07 Navi: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+        "duration": "2.7m"
+      }
+    ]
+  },
+  "testSources": {
+    "tests/e2e/archives.spec.ts": "49c1f6e5bed47f2f3e839e4877d1007c589b81245b90e3079ba10d4761ad2e0f",
+    "tests/e2e/assignments.spec.ts": "4d7bc117e9e7f81de1d06acc2ccf5e48c9fb8709febca5b4a6f3fcb8c6f97e28",
+    "tests/e2e/berths.spec.ts": "965966a3e9631b358a7fd5f764dab17dd03d2da975683ed59f8b6a53f52615ef",
+    "tests/e2e/catalog-async.spec.ts": "29496848a3e58aedecedd89ec9b0787f50a90f5ee14c2638b2337de166d53dad",
+    "tests/e2e/catalog.spec.ts": "565619e56befa5993125920d0b2138a9c317409260d58f908fdad33dd147124e",
+    "tests/e2e/inter-port-movements.spec.ts": "a55e93a1c336fb55206d5118047df9f7b391046c37ccb7b777b97cb3939a83d4",
+    "tests/e2e/milestone-migrations.spec.ts": "05e0b06659f3703ac123ebadf6a2c13643c7427a2efdeb719fe2bd04098150b1",
+    "tests/e2e/movements.spec.ts": "423f532c7b50757070038a549eb2f4c8cdb9fd8d05734db26e3487aeb424ea9c",
+    "tests/e2e/operations-async.spec.ts": "c7bdabdab04899bd98bc551d409c5ae9de099bee695759aed00606103bf3bd91",
+    "tests/e2e/operations-support.ts": "e5c8261def7febd1e4bf46beac3ad60acf4adde640c21fa89d3d92a3d14543dc",
+    "tests/e2e/operations.spec.ts": "b7030aa5a4d89a2c144a52380488d0df6dbe97f6918c51e2a00116c7f2812790",
+    "tests/e2e/port-async.spec.ts": "1b9c87b2db67bee442916f1888508af8e49a8dbb0ba229834103b015173d7480",
+    "tests/e2e/port-lifecycle.spec.ts": "f9e53fa59d557157fe70200fcab765410f2a10594037a67e958d7214957782bc",
+    "tests/e2e/ports.spec.ts": "78a9baae25c2ac6d5b962f157f5f938ed37b517d7dbf6c211e035a29763ee280",
+    "tests/e2e/services.spec.ts": "a93d893c73f38483c611aa536b72824ce6537c5de88df43f28fefe6d0be6f060",
+    "tests/e2e/subjects-async.spec.ts": "1035fa471c09ecb952aaea335f7356e6640549af9a43103a88c5d1902a897833",
+    "tests/e2e/subjects.spec.ts": "53337c48b372156687defcc02ef266c5b1689bb655d588d2b41fd8d21eca986b",
+    "tests/e2e/tariffs-async.spec.ts": "82afffecc91695007614ee694384771762622d65c181e5166c096546cb36c784",
+    "tests/e2e/tariffs.spec.ts": "5d4872ca9db94b6558b84b57fa1cab6d9f500c188527de2083aa19c020a24b55",
+    "tests/e2e/time.spec.ts": "0ea649119672bf88b67740e2e758f20f17aeccf2eaa1de817c4cf94ed2cc685b",
+    "tests/e2e/ui01.spec.ts": "5d63dd8d177535d17f8c04db07b5fd1139b630c68cc34988ab3bdf47da768d25",
+    "tests/e2e/ui02.spec.ts": "e4ef756bb08bef2f14d3496e169b3132adc88dff47a59c538bc53d36dca0cb8d",
+    "tests/e2e/ui03-states.spec.ts": "9ce044618b3dfaf4f91bef0b4ef3c7594a6f20717c40582c7d01a016e164056d",
+    "tests/e2e/ui03.spec.ts": "e59f26cddf2093f7dc776323f2240178aab79eb774ffa3baba849e4226b7d59a",
+    "tests/e2e/vessels-async.spec.ts": "187340bed86f5714f92b51e3f79ee56454a9ab2a77abb0597e5826149983e4de",
+    "tests/e2e/vessels.spec.ts": "69502fb44d7d7cf80ccce33c229f861f03833aff44a953bd58dfb265d2fcb994",
+    "tests/unit/agency-service.test.ts": "f9bf19e064724cd97866a8b8e02e652fcad5541cef83f3df2f8c1de768cd15c2",
+    "tests/unit/archive-controller.test.ts": "3119f05943d3a876cbac35c4fe11288e37a6854330e04bedfef350f31df1babc",
+    "tests/unit/archive-coordinator.test.ts": "1d5ba5004725fca73498ca8610b0d41c5494676be2973c0c35dec73ae207cbe7",
+    "tests/unit/archive-service.test.ts": "ecb413db129a7b30fb1971eb16597c4cdc4ac645c1a839bec2d8b40aff7c8030",
+    "tests/unit/assignment-service.test.ts": "5cace120c73c6da914b010175c3afafd4a5905b65b74ae9ed6edaef83ee82abd",
+    "tests/unit/berth-service.test.ts": "dfc6234427da8bcc47b1da5a97ae0bd163cddd296cac7a3c5992664319cba0fd",
+    "tests/unit/catalog-migration.test.ts": "f0fd4d21ce70571b07bf467eb5afbeddcc7058e4a9ea36b1a3848f0ea4ab3dd7",
+    "tests/unit/catalog-service.test.ts": "77e9931b26dec24f49a37754256e04725850498c54743e28df7acdac4686d904",
+    "tests/unit/customer-service.test.ts": "8332c69eab425af7e57818411ec55adc05d86972798cc5219d79199e006af836",
+    "tests/unit/effective-subjects-migration.test.ts": "bb6b56a84edee9e5c78554bff821288dc4347be0d05791a7b64d03cdf54a69c2",
+    "tests/unit/inter-port-migration.test.ts": "777b3f0d1509ea05073bbbf4745f307564ea4c94a2fa77af705616f4b4dc44a1",
+    "tests/unit/movements-migration.test.ts": "db83326c91c9054814d1ea04542032b4d1720219e65b181f3dbd5673567b2ed1",
+    "tests/unit/operation-service.test.ts": "c3637c05b572fd1f5315af9ceff958b2fb4b4fb42837f88210a5e201aac6fcbf",
+    "tests/unit/operations-migration.test.ts": "7537c8a97c1a0bcfd320545dd15e6928fd9adf11e6d54804b87dd21577bbc1ab",
+    "tests/unit/port-lifecycle.test.ts": "7a06d8566bc418c3c41c6fc85e6f4ed00256a44c6bacbdbeb297762c5947f322",
+    "tests/unit/port-service.test.ts": "26302e68ea08ef4dd26491ae67d6d940f1b8a10905ab3b2d52db034fd193aa2c",
+    "tests/unit/preview-store.test.ts": "7d1a2519955923dfa877301fc879d39b4fa755747a083776609044e411fb8374",
+    "tests/unit/recent-store.test.ts": "e2687d237ba35fb5b8f114c22b31a3d9766be67d5e36c86ffcf92cb332eb188c",
+    "tests/unit/response-scope.test.ts": "5382b382b00d845df9a18c14a8dc87fde370e1c80d713f22ad16390bfa199cde",
+    "tests/unit/service-service.test.ts": "4c4b3436712f03b510abe074f201d88827a85b1ba0d7795890cea733f0391815",
+    "tests/unit/services-migration.test.ts": "6ea400d75e777bffd5b8ef4d1ccf07dc793e86e7f59a83f5747d85ba2a5c08f0",
+    "tests/unit/subjects-migration.test.ts": "ea45f87dcee8e4383036d98901d349fdbdde8a151c0664717ea6d591beba3fe6",
+    "tests/unit/tariff-service.test.ts": "6607e793bdca32cce17993e249ca3a745b3e85284749d769933152ab0ca19059",
+    "tests/unit/tariffs-migration.test.ts": "4bb9f457d288e35cbe2a36b3097ff748f8650ecff5429b6bd62cd11e385e758b",
+    "tests/unit/time-service.test.ts": "fea72a4b70e8a48b3a73c152d51017fe163593c4ac7f66204ee65d52de6e5260",
+    "tests/unit/values.test.ts": "c3a75e8377e7d94361d9e2d7a1e7ba7e65315d62da570048a27868f8623fb127",
+    "tests/unit/vessel-service.test.ts": "63cf14f3203ce63bd7b2ec476a27073d84fc3946c00e4b5938b980aeb5c72835",
+    "tests/unit/vessels-migration.test.ts": "99e06aa6ad9b21eb273dd5e7d2c9641de894e5d6fb03169c47f8c75ef1d17f01",
+    "playwright.config.ts": "5d9b81e21efd2c6217aaecc59d1660e0d4351732377bae58aaf7f04f6140b1b5",
+    "vitest.config.ts": "35a17da688442a3e266bdbe3d363cecfe24a28b78a5c9df886e182347b48db94"
+  },
+  "limits": {
+    "secondPhysicalMachine": false,
+    "humanManualSession": false,
+    "agentVisualInspection": "UI03 reused",
+    "installer": false
+  },
+  "runtimeDiagnostic": {
+    "generatedDuringTests": "dist/win-unpacked/debug.log",
+    "content": "Crashpad registration_protocol_win.cc / TransactNamedPipe 0xE9",
+    "size": 9462,
+    "sha256": "19e94bf7a7443e32d7934fa413197654cb8c36ab203463b3760350a54ea5e392",
+    "preservedAt": ".local/m3-packaged-runtime-debug.log",
+    "removedFromDistribution": true,
+    "originalDistributionFilesChanged": 0
+  },
+  "testCommit": "fa9b912a23e8fff3b782a7e6e49401de8f4158a8"
+}

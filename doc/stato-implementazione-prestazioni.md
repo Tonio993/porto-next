@@ -6,7 +6,7 @@ Aggiornamento del 17 novembre 2026. Questo file contiene lo stato corrente e la 
 
 - P00–P16 e UI01–UI03 completati. UI03 verificata sulla build Electron, schema v16 invariato, implementazione `2e24749`, base `c1ee663`. [Nota UI03](ui03/revisione-flussi-operativi.md). P16 e revisione tecnica post-P16 restano verificati; [nota e revisione](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 - M1 chiusa sul pacchetto Windows dello schema v9. **M2 chiusa** sull’integrazione P13, schema v14, secondo il piano §7.3. [Evidenze](p13/verifiche.md#verifiche-m2).
-- Revisioni tecniche dopo P12 e P16 completate. Prossimo passo: **chiusura M3** sull’integrazione UI03, con le prove complete §7.3. P17–P20 restano da avviare.
+- Revisioni tecniche dopo P12 e P16 completate. **M3 chiusa** sull’integrazione UI03, schema v16: backend completo, 39/39 percorsi desktop su build e 39/39 sul medesimo eseguibile Windows x64; migrazioni cumulative e trasferibilità verificate. [Nota M3](m3/chiusura.md). Prossimo passo: **P17A — Consuntivare operazioni con replay**. P17–P20 restano da avviare.
 
 ## Avanzamento
 
@@ -41,30 +41,32 @@ Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bl
 
 ## Revisioni UI e milestone
 
-| Attività | Stato       | Chiusura o prossima verifica                                                                                                                          |
-| -------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| UI01     | Completato  | [Convenzioni iniziali](ui01/revisione-post-p04.md).                                                                                                   |
-| UI02     | Completato  | [Consolidamento anagrafiche/catalogo](ui02/revisione-anagrafiche-e-catalogo.md).                                                                      |
-| UI03     | Completato  | [Revisione dei flussi P09–P16](ui03/revisione-flussi-operativi.md), verificata sulla build Electron, schema v16.                                      |
-| UI04     | Da avviare  | In P20.                                                                                                                                               |
-| M1       | Chiusa      | Schema v9, build e pacchetto verificati. [Evidenze](ui02/revisione-anagrafiche-e-catalogo.md#verifiche-ui02-e-m1).                                    |
-| M2       | Chiusa      | Schema v14: suite complete su build e medesimo eseguibile Windows, migrazioni cumulative e trasferibilità. [Evidenze](p13/verifiche.md#verifiche-m2). |
-| M3       | Pianificata | Dopo UI03, con prove integrate §7.3; revisione tecnica post-P16 completata.                                                                           |
-| M4       | Pianificata | Dopo P19.                                                                                                                                             |
-| M5       | Pianificata | P20, con UI04 e generazione installer.                                                                                                                |
+| Attività | Stato       | Chiusura o prossima verifica                                                                                                                                 |
+| -------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| UI01     | Completato  | [Convenzioni iniziali](ui01/revisione-post-p04.md).                                                                                                          |
+| UI02     | Completato  | [Consolidamento anagrafiche/catalogo](ui02/revisione-anagrafiche-e-catalogo.md).                                                                             |
+| UI03     | Completato  | [Revisione dei flussi P09–P16](ui03/revisione-flussi-operativi.md), verificata sulla build Electron, schema v16.                                             |
+| UI04     | Da avviare  | In P20.                                                                                                                                                      |
+| M1       | Chiusa      | Schema v9, build e pacchetto verificati. [Evidenze](ui02/revisione-anagrafiche-e-catalogo.md#verifiche-ui02-e-m1).                                           |
+| M2       | Chiusa      | Schema v14: suite complete su build e medesimo eseguibile Windows, migrazioni cumulative e trasferibilità. [Evidenze](p13/verifiche.md#verifiche-m2).        |
+| M3       | Chiusa      | Schema v16, integrazione UI03: suite complete su build e medesimo pacchetto Windows x64, migrazioni v1–v15 e trasferibilità v16. [Evidenze](m3/chiusura.md). |
+| M4       | Pianificata | Dopo P19.                                                                                                                                                    |
+| M5       | Pianificata | P20, con UI04 e generazione installer.                                                                                                                       |
 
 Le verifiche complete seguono esclusivamente il [piano §7.3](piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). Le revisioni tecniche dopo P12 e P16 sono completate e documentate nelle rispettive note [P12](p12/spostamento-tra-porti.md#revisione-tecnica-dopo-p12) e [P16](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 
-## Consegna corrente — UI03
+## Consegna corrente — M3
 
-**UI03 completata e verificata sulla build Electron, schema v16 invariato.** Implementazione e test nel commit `2e24749`, base effettiva `c1ee663`, branch `main` inizialmente pulito. Revisionati consultazione, filtri, dettaglio e anteprime delle prestazioni, operazioni, permanenze e fonti dei soggetti. Preservato e verificato il recupero delle scritture incerte post-P16. Suite backend completa **296/296**, invarianti SQLite e **22/22 percorsi desktop distinti** verificati con riuso motivato; TypeScript, ESLint e build passati, con i soli cinque avvisi Prettier legacy noti. Confrontate cinque schermate iniziali e otto finali a 960×700 e 1440×960. Decisioni, convenzioni, esiti e impronte nella [nota UI03](ui03/revisione-flussi-operativi.md).
+**M3 chiusa e verificata sulla build integrata UI03 e sul medesimo eseguibile Windows x64, schema v16 invariato.** Base `4132d39`, branch `main` inizialmente pulito; test M3 nel commit `fa9b912`. Riusata la build conclusiva UI03 e le sue 13 schermate, con impronte coincidenti; nessuna modifica applicativa o nuova migrazione. Estesa e rinominata la prova cumulativa a tutte le origini v1–v15 e al v16 corrente, con dati rappresentativi, UUID, letture IPC FREE/CATALOG, importi esatti, soggetti, riferimenti, metadati, integrità, FK, copie preventive, backup e Salva con nome. Tutte le copie trasferite sono riaperte in un secondo processo con percorso e preferenze differenti sullo stesso Windows.
 
-**Passaggio alla chiusura M3, ancora aperta**: occorrono suite desktop completa, migrazioni cumulative e pacchetto Windows integrato finale con tutta la suite sul medesimo eseguibile, secondo §7.3. Nessun nuovo pacchetto o sessione manuale umana in UI03. P17 non è avviato. M2 resta chiusa sull’integrazione v14.
+**Verifiche concluse:** backend **296/296**; **39/39 percorsi desktop distinti sulla build**, con riuso dei 38 esiti riusciti della suite completa e ripetizione integrale di Archivi aggiornato e cumulativo rafforzato (**2/2**); **39/39 sul medesimo eseguibile confezionato**. TypeScript ed ESLint passati; check con sola uscita 1 per i cinque avvisi Prettier legacy `00`–`04`. File modificati formattati, UTF-8, collegamenti e differenze Git verificati. Confrontati i cinque file applicativi estratti dall’ASAR e ricontrollati invariati i 138 file della distribuzione prima/dopo i test. Nessun difetto applicativo o di integrità emerso nel perimetro verificato. [Nota M3, copertura e manifest](m3/chiusura.md).
+
+**Passaggio operativo a P17A — Consuntivare operazioni con replay**, ancora da avviare: simulazione della sequenza, confronto e conferma atomica con permanenze, prestazioni, soggetti e componenti economiche coerenti. Punti d’integrazione e limiti nella [nota M3](m3/chiusura.md#limiti-e-passaggio-a-p17a). Nessuna sessione manuale umana o seconda macchina fisica; prova automatizzata fra processi e percorsi sul Windows disponibile. Installer e installazione restano a P20, accessibilità estesa e ulteriori DPI a UI04/P20. Prossima suite integrata completa a M4, salvo trigger anticipati del piano §7.3.
 
 ## Limiti aperti
 
 - Prettier globale segnala storicamente i cinque documenti legacy `00`–`04`; distinguere questi avvisi da nuove regressioni.
-- Prove desktop automatizzate e ispezioni dell'agente. M1 e M2 provano trasferibilità fra processi e percorsi sullo stesso Windows, senza seconda macchina fisica. Accessibilità estesa, ulteriori DPI e installazione seguono i checkpoint previsti.
+- Prove desktop automatizzate e ispezioni dell'agente. M1–M3 provano trasferibilità fra processi e percorsi sullo stesso Windows, senza seconda macchina fisica. Accessibilità estesa, ulteriori DPI e installazione seguono i checkpoint previsti.
 - I dettagli di ambiente, prove e limiti specifici appartengono alle note collegate. I difetti ancora aperti vanno aggiunti qui con impatto concreto.
 
 ## Storico

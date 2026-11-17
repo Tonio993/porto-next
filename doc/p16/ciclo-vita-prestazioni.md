@@ -1,6 +1,6 @@
 # P16 — Ciclo di vita delle prestazioni ordinarie
 
-P16 completato e verificato sulla build Electron il 16 novembre 2026. Implementazione nel commit `8c5f0e7`, base `9b5314c`. Branch `main` inizialmente pulito, senza modifiche preesistenti. Schema **v16**, senza nuove migrazioni o modifiche a quelle distribuite. Stato corrente nel [registro](../stato-implementazione-prestazioni.md).
+P16 completato e verificato sulla build Electron il 16 novembre 2026. Implementazione nel commit `8c5f0e7`, base `9b5314c`. Branch `main` inizialmente pulito, senza modifiche preesistenti. Schema **v16**, senza nuove migrazioni o modifiche a quelle distribuite. Anche la [revisione tecnica post-P16](#revisione-tecnica-post-p16) è completata e verificata. Stato corrente nel [registro](../stato-implementazione-prestazioni.md).
 
 ## Decisioni e integrazioni
 
@@ -56,6 +56,43 @@ Identificazione della build; manifest completo locale `.local/p16-build-sha256.j
 | `out/preload/index.js`                  | `610c780fdc34d1a0e51990be8b935249c49ae08945527ce3510d161d348ce179` |
 | `out/renderer/assets/index-B8YqqUle.js` | `f65b18d8baa8f0681101a0a4efb6bf8a5e998f1d8a3a2b2ed881fa9e87cd4648` |
 
+## Revisione tecnica post-P16
+
+Revisione del 16 novembre 2026 sull’integrazione P14–P16, a partire da `7962c86` su `main`, inizialmente pulito. P16 e le sue evidenze erano già nei commit `8c5f0e7` e `7962c86`, successivi alla base indicata `9b5314c`: conservati come base della revisione. Correzioni e test nel commit `1dcacd4`, distinguibili con `git diff 7962c86 1dcacd4`. Schema **v16** invariato, nessuna migrazione aggiunta o modificata.
+
+Esaminati contratti e chiamanti degli otto canali Prestazioni, validazione diretta e guardie mittente/frame, confini del contesto e gap/overlap, versioni all’istante e tuple storiche, FREE/CATALOG e importi esatti, riferimenti disattivati e utilizzo monotono, transazioni/no-op/rollback, anteprime, ricerca su soggetti effettivi e protezioni asincrone. Riletti anche `subjectPlan`, gli impatti anagrafici/tariffari e i selettori condivisi modificati in P16. La separazione fra dominio, casi d’uso e persistenza è conservata; non sono emerse duplicazioni che giustifichino un nuovo livello condiviso.
+
+Correzioni circoscritte:
+
+- **FK con PK implicita.** `foreignReferences` assumeva `id` quando una FK ometteva le colonne destinatarie. Una tabella esterna, anche vuota, con `REFERENCES service_activity_subjects` faceva fallire l’anteprima con `UNEXPECTED`, perché la PK reale è `service_id`. Ora usa `PRAGMA table_info` e l’ordine della PK, anche composta. I test coprono righe esterne di un’altra prestazione, CASCADE, nuovo riferimento dopo l’anteprima, blocco alla conferma senza scritture, successiva eliminazione e integrità SQLite; estesa anche la regressione dei porti con FK esplicite/implicite a identità e versioni.
+- **Nuova registrazione con risposta persa.** Il precedente ricaricamento riabilitava la scrittura prima della rilettura, anche se questa falliva. `Verifica registrazione` ora attende una ricerca riuscita per nave, categoria e istante UTC, verifica il contesto persistito e mostra i candidati, con paginazione e bozza conservata. L’operatore controlla l’elenco prima di riprenderla: più prestazioni nello stesso minuto sono legittime, quindi non si deduce un’identità dai soli valori né si ripete automaticamente la creazione.
+- **Recupero di modifiche già applicate.** La rilettura riallinea anche lo stato dell’archivio nel renderer, inclusa la risposta `NOT_FOUND` dopo un’eliminazione riuscita. Una consuntivazione già avvenuta riparte come modifica, conservando PERFORMED/MISSED letto dal backend; prima rimaneva in modalità di consuntivazione e poteva restare bloccata sulla revisione precedente. La correzione resta locale a Prestazioni, senza cambiare hook, coordinatore o API condivise.
+
+Le nuove regressioni desktop FREE/CATALOG simulano la perdita della risposta dopo il commit di creazione, consuntivazione ed eliminazione, oltre a una verifica fallita e una ritardata. Confermano conservazione della bozza, esito persistito, assenza di registrazioni duplicate e possibilità di proseguire dopo la rilettura. La prova SQLite e quella di creazione incerta falliscono sulla base precedente; il percorso desktop ha inoltre riprodotto il mancato riallineamento della revisione durante il recupero della consuntivazione.
+
+Verifiche selezionate secondo [§7.3](../piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento):
+
+- **296/296 test backend su 28 file** con `npm test`, SQLite reale nel runtime Electron; log `.local/post-p16-tests-full.log`. Incluse le nuove prove delle FK, `foreign_key_check` vuoto e `integrity_check=ok`, oltre alle invarianti, migrazioni, guardie IPC e integrazioni P14–P16 esistenti. Esito riutilizzato dopo gli ultimi affinamenti del solo renderer, che non modificano backend o test unitari.
+- `npm run check` sul codice applicativo finale: TypeScript ed ESLint passati, uscita 1 per i soli cinque documenti legacy Prettier noti; log `.local/post-p16-check-final.log`. Formattazione dei file modificati, UTF-8, collegamenti e differenze Git controllati separatamente.
+- `npm run build` passata; log `.local/post-p16-build-final.log`. Le serie desktop usano questa stessa build, senza ricompilazioni concorrenti. Nessun cambiamento a runtime, dipendenze native, risorse distribuite o confezionamento: nessun trigger anticipato di pacchetto.
+- **17/17 percorsi desktop** sulla build finale: i due nuovi FREE/CATALOG e quindici regressioni; log `.local/post-p16-recovery-final.log` e `.local/post-p16-desktop-final.log`. Ripetuti tutti gli otto percorsi Prestazioni preesistenti, incluse migrazioni v14/v15 popolate→v16, tipi storici, filtri, bozze, conflitti, note incerte e risposte obsolete. La selezione comprende inoltre i sette percorsi dei chiamanti della funzione FK condivisa: porti, banchine, clienti, agenzie, navi, catalogo e tariffe. Riusate le evidenze P16 di assegnazioni e spostamenti, i cui flussi e selettori non sono cambiati nella revisione. Suite desktop completa, migrazioni cumulative e pacchetto integrato rimangono a M3, dopo UI03.
+
+Comandi desktop sulla build pronta:
+
+```powershell
+node node_modules/@playwright/test/cli.js test tests/e2e/services.spec.ts --grep post-P16 --output test-results/post-p16-recovery-final
+node node_modules/@playwright/test/cli.js test tests/e2e/services.spec.ts tests/e2e/port-lifecycle.spec.ts tests/e2e/berths.spec.ts tests/e2e/subjects.spec.ts tests/e2e/vessels.spec.ts tests/e2e/catalog.spec.ts tests/e2e/tariffs.spec.ts --grep-invert post-P16 --output test-results/post-p16-regressions
+```
+
+Prove automatizzate con archivi/preferenze temporanei e renderer offline; avvii esterni alla sandbox dell’agente secondo l’autorizzazione già indicata nelle verifiche P16, preservando ACL e isolamento Electron. Ispezionate dall’agente le schermate del [recupero della creazione a 960×700](schermate/post-p16-recupero-incerto-minimo.png) e della [consuntivazione mancata riletta a 1440×960](schermate/post-p16-consuntivazione-riletta-desktop.png): messaggio di verifica, elenco, stato persistito e azioni leggibili e raggiungibili. Nessuna sessione manuale umana; UI03 mantiene l’ispezione estesa dei flussi.
+
+Build della revisione; manifest locale `.local/post-p16-build-sha256.json`. Preload e CSS coincidono con le impronte P16 riportate sopra:
+
+| Artefatto                               | SHA256                                                             |
+| --------------------------------------- | ------------------------------------------------------------------ |
+| `out/main/index.js`                     | `6eeb6a20bb736b20666fc3347844f4c0d327aaadf86357e2e00a3fa71405759b` |
+| `out/renderer/assets/index-BxSJN7VN.js` | `208cad20f6f00c82f731861cbba6d53eb1e42b7a9856ea10b81b7b79f1d523a3` |
+
 ## Limiti e passaggio operativo
 
-Nessun difetto di integrità noto nel perimetro verificato. Revisione tecnica post-P16 e **UI03** sono i prossimi passi: controllare trasversalmente duplicazioni, contratti e invarianti, poi i flussi completi e le interazioni della ricerca e delle anteprime. Integrare le correzioni prima di **M3**, ancora aperta: suite desktop completa, migrazioni cumulative e pacchetto Windows finale sul medesimo eseguibile secondo §7.3. Questa consegna riguarda lo step sulla build, senza sessione manuale umana o nuovo pacchetto. Correzioni strutturali delle operazioni rimangono P17, versioni dei pesi P19; fatture e idoneità economica definitiva non sono anticipate.
+Nessun difetto di integrità noto nel perimetro verificato. **Revisione tecnica post-P16 completata; prossimo passo UI03**: verificare i flussi operativi completi, le interazioni di ricerca e anteprime e il recupero degli esiti incerti ora corretto, con l’ispezione estesa prevista dal piano. Integrare le correzioni UI03 prima di **M3**, ancora aperta: suite desktop completa, migrazioni cumulative e pacchetto Windows finale sul medesimo eseguibile secondo §7.3. Questa consegna riguarda lo step sulla build, senza sessione manuale umana o nuovo pacchetto. Correzioni strutturali delle operazioni rimangono P17, versioni dei pesi P19; fatture e idoneità economica definitiva non sono anticipate.

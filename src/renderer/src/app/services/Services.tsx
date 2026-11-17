@@ -99,11 +99,12 @@ export function Services({
   // Check the persisted context before applying a preview/write DTO or allowing a retry.
   const executeServiceCommand = async <T,>(operation: () => Promise<ApplicationResult<T>>) => {
     const result = await archives.execute(operation)
-    if (result.ok) {
-      const state = await window.archives.getState()
-      const observed = state.ok ? state.value.context : null
+    if (result.ok || result.error.code === 'NOT_FOUND') {
+      const state = await archives.update(() => window.archives.getState())
+      const observed = state?.context
       if (
         !observed ||
+        !result.context ||
         observed.sessionId !== result.context.sessionId ||
         observed.archiveId !== result.context.archiveId ||
         observed.revision !== result.context.revision
@@ -169,7 +170,7 @@ export function Services({
     mode: Draft['mode'],
     snapshot: ArchiveContextDto,
   ): Draft => ({
-    mode,
+    mode: mode === 'COMPLETE' && value.executionStatus !== 'PLANNED' ? 'UPDATE' : mode,
     original: value,
     context: snapshot,
     category: value.category,
@@ -179,7 +180,10 @@ export function Services({
       vesselId: value.vesselId,
       interpretationPortId: value.context.portId,
       moment: { localDateTime: value.moment.localDateTime, selectedOffset: value.moment.offset },
-      executionStatus: mode === 'COMPLETE' ? 'PERFORMED' : value.executionStatus,
+      executionStatus:
+        mode === 'COMPLETE' && value.executionStatus === 'PLANNED'
+          ? 'PERFORMED'
+          : value.executionStatus,
       description: value.description,
       base: value.base,
       notes: value.notes,
@@ -199,10 +203,12 @@ export function Services({
     invalidateEditor()
     if (draft.original) {
       const r = await command.request(() =>
-        window.services.get({
-          context: { sessionId: context.sessionId },
-          query: { id: draft.original!.id },
-        }),
+        executeServiceCommand(() =>
+          window.services.get({
+            context: { sessionId: draft.context.sessionId },
+            query: { id: draft.original!.id },
+          }),
+        ),
       )
       if (r?.ok) {
         setDraft(fromDetail(r.value, draft.mode, r.context))
@@ -215,6 +221,52 @@ export function Services({
         setNotice('La prestazione non esiste più.')
         setUncertain(false)
       }
+    } else if (uncertain) {
+      const r = await command.request(() =>
+        executeServiceCommand(async () => {
+          const resolved = await window.services.resolveMoment({
+            context: { sessionId: draft.context.sessionId },
+            query: {
+              vesselId: draft.values.vesselId,
+              interpretationPortId: draft.values.interpretationPortId,
+              moment: draft.values.moment,
+            },
+          })
+          if (!resolved.ok) return resolved
+          if (resolved.value.resolution.status !== 'RESOLVED')
+            throw new Error('Il momento della registrazione richiede una verifica.')
+          const utc = resolved.value.resolution.moment.utc
+          const result = await window.services.list({
+            context: { sessionId: draft.context.sessionId },
+            query: {
+              vesselId: draft.values.vesselId,
+              category: draft.category,
+              fromUtc: utc,
+              toUtc: utc,
+              page: 1,
+              pageSize: 25,
+            },
+          })
+          return result.ok ? { ...result, value: { list: result.value, utc } } : result
+        }),
+      )
+      if (!r?.ok) return
+      // Show all candidates at the submitted instant before allowing an explicit retry.
+      // Multiple ordinary services may legitimately have identical data.
+      listing.invalidate()
+      reading.invalidate()
+      setVesselId(draft.values.vesselId)
+      setFilters({ category: draft.category, fromUtc: r.value.utc, toUtc: r.value.utc })
+      setPage(1)
+      setList(r.value.list)
+      setSelected(null)
+      setDetail(null)
+      setDraft({ ...draft, context: r.context })
+      setUncertain(false)
+      setOpen(false)
+      setNotice(
+        'Verifica nell’elenco le prestazioni già registrate al momento della bozza prima di riprenderla. I valori inseriti sono conservati.',
+      )
     } else {
       setDraft({ ...draft, context })
       setUncertain(false)
@@ -823,7 +875,7 @@ export function Services({
             )}
             {(stale || uncertain) && (
               <Button variant="default" disabled={busy} onClick={() => void reloadDraft()}>
-                Ricarica bozza
+                {uncertain && !draft.original ? 'Verifica registrazione' : 'Ricarica bozza'}
               </Button>
             )}
             {preview && (

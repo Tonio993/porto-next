@@ -19,6 +19,7 @@ import { OperationService } from '../../src/backend/application/operations/opera
 import { OperationRepository } from '../../src/backend/infrastructure/database/operation-repository'
 import { ServiceService } from '../../src/backend/application/services/service-service'
 import { ServiceRepository } from '../../src/backend/infrastructure/database/service-repository'
+import { foreignReferences } from '../../src/backend/infrastructure/database/port-references'
 import type { ApplicationResult } from '../../src/shared/contracts/application'
 import type { CreateOperationDto } from '../../src/shared/contracts/operations'
 import type {
@@ -1344,6 +1345,58 @@ it('P16: eliminazione fisica ordinata, rollback dei soggetti, utilizzo storico, 
   expect(sql().prepare('SELECT * FROM service_activity_subjects').all()).toEqual([])
   expect(new CatalogRepository(db()).get(saved.serviceTypeId!).hasEverBeenUsed).toBe(true)
   expect(new CatalogRepository(db()).deleteBlockers(saved.serviceTypeId!).length).toBeGreaterThan(0)
+  integrity()
+})
+it('post-P16: FK con PK implicita ai soggetti, anche vuote o di altre prestazioni, riesaminate alla conferma', async () => {
+  const saved = value(await create()),
+    other = value(await create({ ...input(), description: 'Altra prestazione' })),
+    metadata = db().metadata()
+  sql().exec(
+    'CREATE TABLE external_implicit (service_id TEXT REFERENCES service_activity_subjects ON DELETE CASCADE)',
+  )
+  const change = { operation: 'DELETE' as const, id: saved.id }
+  expect(value(await previewChange(change)).blockers).toEqual([])
+  sql().prepare('INSERT INTO external_implicit VALUES (?)').run(other.id)
+  const pre = value(await previewChange(change))
+  expect(pre.blockers).toEqual([])
+  // Simulate an external reference arriving after preview, without changing the revision.
+  sql().prepare('INSERT INTO external_implicit VALUES (?)').run(saved.id)
+  expect(value(await previewChange(change)).blockers).toMatchObject([
+    { reference: { label: 'external_implicit: 1 riferimenti' } },
+  ])
+  expect(
+    await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }),
+  ).toMatchObject(failure('PREVIEW_BLOCKED'))
+  expect(all()).toHaveLength(2)
+  expect(db().metadata()).toEqual(metadata)
+  sql().prepare('DELETE FROM external_implicit WHERE service_id=?').run(saved.id)
+  value(await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }))
+  expect(all()).toEqual([other])
+  expect(sql().prepare('SELECT * FROM external_implicit').all()).toEqual([{ service_id: other.id }])
+  expect(BigInt(context().revision)).toBe(BigInt(metadata.revision) + 1n)
+  integrity()
+})
+it('post-P16: le FK composte implicite rispettano l’ordine della PK, distinto da quello delle colonne', () => {
+  sql().exec(`
+    CREATE TABLE external_parent (service_id TEXT, slot TEXT, PRIMARY KEY(slot,service_id));
+    CREATE TABLE external_child (slot TEXT, service_id TEXT,
+      FOREIGN KEY(slot,service_id) REFERENCES external_parent ON DELETE CASCADE);
+    INSERT INTO external_parent VALUES ('target','slot'),('other','slot');
+    INSERT INTO external_child VALUES ('slot','other');
+  `)
+  const blockers = () =>
+    foreignReferences(
+      db(),
+      { kind: 'SERVICE_ACTIVITY', id: 'target', label: '' },
+      null,
+      'external_parent',
+      ['target'],
+      [],
+      'service_id',
+    )
+  expect(blockers()).toEqual([])
+  sql().exec("INSERT INTO external_child VALUES ('slot','target')")
+  expect(blockers()).toMatchObject([{ reference: { label: 'external_child: 1 riferimenti' } }])
   integrity()
 })
 it('P16: no-op, anteprime obsolete, namespace, scadenza, sessione e rollback dopo UPDATE', async () => {

@@ -345,42 +345,45 @@ it('un errore SQL dopo la prenotazione annulla chiave, dati, revisione e timesta
   expect((await history()).port.version.name).toBe('Mai prenotato')
 })
 
-it('analizza riferimenti reali, permette disattivazione e riattivazione e blocca eliminazione senza cascade', async () => {
-  sql().exec(
-    'CREATE TABLE linked_ports (id INTEGER PRIMARY KEY, port_id TEXT REFERENCES ports(id));',
-  )
-  sql().prepare('INSERT INTO linked_ports VALUES (1, ?)').run(port.id)
-  const blocked = value(
-    await ports.previewDelete({ context: context(), payload: { portId: port.id } }),
-  )
-  expect(blocked.status).toBe('BLOCKED')
-  expect(blocked.blockers[0].reference.label).toContain('linked_ports')
-  expect(
-    await ports.confirmDelete({
-      context: blocked.context,
-      payload: { previewId: blocked.previewId },
-    }),
-  ).toMatchObject({ ok: false, error: { code: 'PREVIEW_BLOCKED' } })
-  const deactivate = value(
-    await ports.previewDeactivate({ context: context(), payload: { portId: port.id } }),
-  )
-  value(
-    await ports.confirmDeactivate({
-      context: deactivate.context,
-      payload: { previewId: deactivate.previewId },
-    }),
-  )
-  expect((await history()).port.status).toBe('INACTIVE')
-  expect(sql().prepare('SELECT count(*) FROM linked_ports').pluck().get()).toBe(1)
-  value(await ports.reactivate({ context: context(), payload: { portId: port.id } }))
-  expect((await history()).port.status).toBe('ACTIVE')
-  const initial = (await history()).versions.items[0]
-  sql().exec(
-    'CREATE TABLE linked_versions (id INTEGER PRIMARY KEY, version_id TEXT REFERENCES port_versions(id))',
-  )
-  sql().prepare('INSERT INTO linked_versions VALUES (1, ?)').run(initial.id)
-  expect(value(await update(initial.id, 'Modifica referenziata')).status).toBe('BLOCKED')
-})
+it.each(['(id)', ''])(
+  'analizza riferimenti reali con chiave %s, permette disattivazione e riattivazione e blocca eliminazione senza cascade',
+  async (columns) => {
+    sql().exec(
+      `CREATE TABLE linked_ports (id INTEGER PRIMARY KEY, port_id TEXT REFERENCES ports${columns});`,
+    )
+    sql().prepare('INSERT INTO linked_ports VALUES (1, ?)').run(port.id)
+    const blocked = value(
+      await ports.previewDelete({ context: context(), payload: { portId: port.id } }),
+    )
+    expect(blocked.status).toBe('BLOCKED')
+    expect(blocked.blockers[0].reference.label).toContain('linked_ports')
+    expect(
+      await ports.confirmDelete({
+        context: blocked.context,
+        payload: { previewId: blocked.previewId },
+      }),
+    ).toMatchObject({ ok: false, error: { code: 'PREVIEW_BLOCKED' } })
+    const deactivate = value(
+      await ports.previewDeactivate({ context: context(), payload: { portId: port.id } }),
+    )
+    value(
+      await ports.confirmDeactivate({
+        context: deactivate.context,
+        payload: { previewId: deactivate.previewId },
+      }),
+    )
+    expect((await history()).port.status).toBe('INACTIVE')
+    expect(sql().prepare('SELECT count(*) FROM linked_ports').pluck().get()).toBe(1)
+    value(await ports.reactivate({ context: context(), payload: { portId: port.id } }))
+    expect((await history()).port.status).toBe('ACTIVE')
+    const initial = (await history()).versions.items[0]
+    sql().exec(
+      `CREATE TABLE linked_versions (id INTEGER PRIMARY KEY, version_id TEXT REFERENCES port_versions${columns})`,
+    )
+    sql().prepare('INSERT INTO linked_versions VALUES (1, ?)').run(initial.id)
+    expect(value(await update(initial.id, 'Modifica referenziata')).status).toBe('BLOCKED')
+  },
+)
 
 it('elimina atomicamente il porto e libera le chiavi senza riutilizzare il progressivo', async () => {
   await confirm(value(await insert('Storico')))

@@ -65,6 +65,7 @@ export function foreignReferences(
     if (owned.includes(name)) continue
     const keys = database.sqlite.prepare(`PRAGMA foreign_key_list(${quote(name)})`).all() as {
       id: number
+      seq: number
       table: string
       from: string
       to: string | null
@@ -76,8 +77,23 @@ export function foreignReferences(
       const ids =
         target === identityTable ? [reference.id] : target === versionTable ? versionIds : []
       if (!ids.length) continue
+      // REFERENCES parent without a column list targets its actual primary key,
+      // in PK order. Owned rows need not use a column named "id".
+      const primaryKey = columns.some(({ to }) => to === null)
+        ? (
+            database.sqlite.prepare(`PRAGMA table_info(${quote(key.table)})`).all() as {
+              name: string
+              pk: number
+            }[]
+          )
+            .filter(({ pk }) => pk > 0)
+            .sort((a, b) => a.pk - b.pk)
+        : []
       const matches = columns
-        .map(({ from, to }) => `parent.${quote(to ?? 'id')} = child.${quote(from)}`)
+        .map(
+          ({ from, to, seq }) =>
+            `parent.${quote(to ?? primaryKey[seq].name)} = child.${quote(from)}`,
+        )
         .join(' AND ')
       const count = database.sqlite
         .prepare(

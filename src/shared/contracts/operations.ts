@@ -114,7 +114,26 @@ export interface VoyageDto extends StayIntervalDto {
 export interface OperationPreviewDto extends ChangePreviewDto {
   operationValues: VesselOperationDto
 }
+export interface CompleteOperationDto {
+  id: string
+  values: CreateOperationDto
+}
+export interface OperationCompletionPreviewDto extends OperationPreviewDto {
+  before: VesselOperationDto
+}
 export interface OperationApi {
+  resolveCompletionMoment(
+    request: QueryRequest<CompleteOperationDto>,
+  ): Promise<ApplicationResult<OperationMomentDto>>
+  previewComplete(
+    request: CommandRequest<CompleteOperationDto>,
+  ): Promise<ApplicationResult<OperationCompletionPreviewDto>>
+  completionEffects(
+    request: QueryRequest<{ previewId: string; page: number; pageSize: number }>,
+  ): Promise<ApplicationResult<OperationCompletionPreviewDto>>
+  confirmComplete(
+    request: CommandRequest<{ previewId: string }>,
+  ): Promise<ApplicationResult<VesselOperationDto>>
   contextAt(
     request: QueryRequest<{ vesselId: string; instant: string }>,
   ): Promise<ApplicationResult<OperationalContextDto>>
@@ -139,6 +158,10 @@ export interface OperationApi {
   ): Promise<ApplicationResult<OperationPreviewDto>>
 }
 export const operationChannels = {
+  resolveCompletionMoment: 'operations:resolve-completion-moment',
+  previewComplete: 'operations:preview-complete',
+  completionEffects: 'operations:completion-effects',
+  confirmComplete: 'operations:confirm-complete',
   contextAt: 'operations:context-at',
   list: 'operations:list',
   get: 'operations:get',

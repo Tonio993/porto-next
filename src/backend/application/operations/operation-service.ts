@@ -1,4 +1,5 @@
 import { subjectPlan } from './subject-resolution'
+import { OperationCompletion } from './operation-completion'
 import { randomUUID } from 'node:crypto'
 import type {
   OperationApi,
@@ -87,6 +88,14 @@ function parseMoment(
 }
 export class OperationService implements OperationApi {
   constructor(private readonly coordinator: ArchiveCoordinator) {}
+  resolveCompletionMoment: OperationApi['resolveCompletionMoment'] = (request) =>
+    new OperationCompletion(this.coordinator).resolveCompletionMoment(request)
+  previewComplete: OperationApi['previewComplete'] = (request) =>
+    new OperationCompletion(this.coordinator).previewComplete(request)
+  completionEffects: OperationApi['completionEffects'] = (request) =>
+    new OperationCompletion(this.coordinator).completionEffects(request)
+  confirmComplete: OperationApi['confirmComplete'] = (request) =>
+    new OperationCompletion(this.coordinator).confirmComplete(request)
   contextAt: OperationApi['contextAt'] = (request) =>
     this.coordinator.query(request, (s, q) => {
       const i = record(q, ['vesselId', 'instant']),
@@ -557,7 +566,7 @@ export class OperationService implements OperationApi {
         pageSize,
       },
       warnings: [
-        'L’importo è una base in EUR. Consuntivazione e correzioni strutturali non sono ancora disponibili.',
+        'L’importo è una base in EUR. Le correzioni generali della cronologia non sono ancora disponibili.',
       ],
       blockers: [],
       operationValues: {

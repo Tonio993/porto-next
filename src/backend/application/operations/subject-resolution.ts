@@ -50,12 +50,14 @@ export function subjectPlan(
     assignment?: AssignmentChangeDto
     pending?: VesselOperationDto & { openingIds: SubjectOpeningIds }
     versionChange?: SubjectVersionChange
+    operations?: VesselOperationDto[]
+    openings?: ReadonlyMap<string, SubjectOpeningIds>
   } = {},
 ) {
   const repository = new AssignmentRepository(database)
-  const operations = new OperationRepository(database).all()
+  const operations = options.operations ?? new OperationRepository(database).all()
   if (options.pending) operations.push(options.pending)
-  const openings = repository.openings()
+  const openings = new Map(options.openings ?? repository.openings())
   if (options.pending) openings.set(options.pending.id, options.pending.openingIds)
   const timelines = new Map(
     [...new Set(operations.map((o) => o.vesselId))].map((vesselId) => [
@@ -169,6 +171,7 @@ export function subjectPlan(
   }
   return {
     updates: [...updates, ...serviceUpdates],
+    serviceUpdates,
     effects: [...updates, ...serviceUpdates].flatMap((u) => u.effects),
     subjectsForService,
     values,

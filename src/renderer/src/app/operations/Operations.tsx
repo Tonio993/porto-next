@@ -1,5 +1,6 @@
 import type { AssignmentTarget } from '../../../../shared/contracts/assignments'
 import { AssignmentEditor } from './AssignmentEditor'
+import { OperationCompletionEditor } from './OperationCompletionEditor'
 import { useEffect, useRef, useState } from 'react'
 import { Button, Fieldset, Group, Modal, Select, Stack, Textarea, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
@@ -42,6 +43,14 @@ export function Operations({
   const [assignmentTarget, setAssignmentTarget] = useState<AssignmentTarget | null>(null),
     [assignmentOpen, setAssignmentOpen] = useState(false)
   const assignmentTrigger = useRef<HTMLElement | null>(null)
+  const [completion, setCompletion] = useState<{
+    operation: VesselOperationDto
+    context: ArchiveContextDto
+    trigger: HTMLElement | null
+  } | null>(null)
+  const [completionOpen, setCompletionOpen] = useState(false),
+    [completionDone, setCompletionDone] = useState(false)
+  const [detailRevision, setDetailRevision] = useState<string | null>(null)
   const assign = (target: AssignmentTarget) => {
     assignmentTrigger.current = document.activeElement as HTMLElement
     setAssignmentTarget(target)
@@ -79,9 +88,9 @@ export function Operations({
     { request: readDetail } = detailRequest
   const busy = archives.busy || archives.commandBusy || commandRequest.loading
   useEffect(() => {
-    onDialogChange(open || assignmentOpen)
+    onDialogChange(open || assignmentOpen || completionOpen)
     return () => onDialogChange(false)
-  }, [open, assignmentOpen, onDialogChange])
+  }, [open, assignmentOpen, completionOpen, onDialogChange])
   useEffect(() => {
     if (!vesselId) return
     void readList(() =>
@@ -109,7 +118,10 @@ export function Operations({
     void readDetail(() =>
       window.operations.get({ context: { sessionId: context.sessionId }, query: { id: selected } }),
     ).then((r) => {
-      if (r?.ok) setDetail(r.value)
+      if (r?.ok) {
+        setDetail(r.value)
+        setDetailRevision(r.context.revision)
+      }
     })
   }, [readDetail, context.sessionId, context.revision, selected, reload])
   useEffect(() => {
@@ -322,7 +334,8 @@ export function Operations({
         </Button>
       </Group>
       <p className="operations-future">
-        Consuntivazione e correzioni strutturali: non ancora disponibili.
+        Consuntiva le operazioni previste dal dettaglio. Correzioni generali ed eliminazioni restano
+        indisponibili.
       </p>
       {assignmentTarget && !assignmentOpen && (
         <Button variant="default" onClick={() => setAssignmentOpen(true)}>
@@ -392,6 +405,23 @@ export function Operations({
                   Assegna soggetti all’operazione
                 </Button>
                 <OperationDetail operation={detail} />
+                {detail.executionStatus === 'PLANNED' && (
+                  <Button
+                    disabled={busy || detailRevision !== context.revision}
+                    onClick={() => {
+                      if (!completion || completion.operation.id !== detail.id || completionDone)
+                        setCompletion({
+                          operation: detail,
+                          context,
+                          trigger: document.activeElement as HTMLElement,
+                        })
+                      setCompletionDone(false)
+                      setCompletionOpen(true)
+                    }}
+                  >
+                    Consuntiva operazione
+                  </Button>
+                )}
               </>
             ) : (
               <p>Seleziona un’operazione per consultare dati e calcolo.</p>
@@ -579,6 +609,30 @@ export function Operations({
             assignmentTrigger.current?.focus()
           }}
         />
+      )}
+      {completion && (
+        <OperationCompletionEditor
+          key={completion.operation.id + completion.context.revision}
+          opened={completionOpen}
+          operation={completion.operation}
+          originalContext={completion.context}
+          archives={archives}
+          trigger={completion.trigger}
+          onClose={() => setCompletionOpen(false)}
+          onApplied={(value) => {
+            setCompletionDone(true)
+            setSelected(value.id)
+            setDetail(value)
+            setDetailRevision(null)
+            setReload((n) => n + 1)
+            setNotice('Esito dell’operazione verificato.')
+          }}
+        />
+      )}
+      {completion && !completionOpen && !completionDone && (
+        <Button variant="light" disabled={busy} onClick={() => setCompletionOpen(true)}>
+          Riprendi consuntivazione
+        </Button>
       )}
       <Modal
         opened={open}

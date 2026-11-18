@@ -36,6 +36,8 @@ I file desktop/unitari sono argomenti strutturati, senza opzioni runner libere c
 
 ## Piano, dipendenze e report
 
+La [rifinitura successiva a V03](../v03/output-compatto.md) introduce `--verbose` per riepilogo e progressi per fase. Normalmente `summary.md` omette fasi passate senza particolarità e fasi non richieste; `summary.verbose.md` conserva la vista di tutte le fasi senza riesecuzione. Entrambi sono aggiornati durante il coordinamento. Comandi, selezione, JSON v1, codici e dipendenze descritti sotto restano invariati.
+
 [coordinator.mjs](../../scripts/verification/coordinator.mjs) espone `createPlan`, `coordinate`, `readCollector` e `runSummary`. Le iniezioni `cwd`, `runCollect`, `runExecute` e `progress` servono alle fixture isolate. `collect` conserva le API V01 e aggiunge `env`, `outputRoot` e `onDirectory`: ambiente effettivo registrato, output annidato nella fase, notifica del tentativo prima dell'avvio del processo.
 
 Ogni invocazione valida crea una directory nuova `test-results/verification/<data-UTC>-coordinator-<suffisso>/`:

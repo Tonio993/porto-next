@@ -25,6 +25,7 @@ export async function collect({
   env = process.env,
   outputRoot = resolve(cwd, 'test-results/verification'),
   onDirectory,
+  verbose = false,
 }) {
   if (!['vitest', 'playwright'].includes(runner))
     throw new Error('Runner ammessi: vitest, playwright')
@@ -201,7 +202,12 @@ export async function collect({
     JSON.stringify(result, null, 2) + '\n',
     'utf8',
   )
-  await writeFile(resolve(directory, 'summary.md'), summary(result), 'utf8')
+  await writeFile(resolve(directory, 'summary.md'), summary(result, { verbose }), 'utf8')
+  await writeFile(
+    resolve(directory, 'summary.verbose.md'),
+    summary(result, { verbose: true }),
+    'utf8',
+  )
   return { directory, result }
 }
 
@@ -276,20 +282,27 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const { values, positionals } = parseArgs({
       args: head,
       allowPositionals: true,
-      options: { phase: { type: 'string' }, scope: { type: 'string' } },
+      options: {
+        phase: { type: 'string' },
+        scope: { type: 'string' },
+        verbose: { type: 'boolean' },
+      },
     })
     if (positionals.length !== 1)
       throw new Error(
         'Uso: npm run test:report -- <vitest|playwright> --phase <fase> --scope <ambito> -- [argomenti runner]',
       )
+    console.log(`[${positionals[0]} · ${values.phase}] avvio`)
     const { directory, result } = await collect({
       runner: positionals[0],
       phase: values.phase,
       scope: values.scope,
       args: separator < 0 ? [] : argv.slice(separator + 1),
       signal: abort.signal,
+      verbose: values.verbose,
     })
-    console.log(`${result.outcome}: ${resolve(directory, 'summary.md')}`)
+    console.log(summary(result, { verbose: values.verbose }).trimEnd())
+    console.log(`Report: ${resolve(directory, 'summary.md')}`)
     process.exitCode = result.exitCode
   } catch (error) {
     console.error(error.message)

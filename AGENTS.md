@@ -33,7 +33,7 @@ Suite desktop e pacchetto completi sono associati alle milestone. Cambiamenti a 
 
 Usare `npm test`, che esegue SQLite nel runtime Electron. Riutilizzare build ed esiti ancora validi e ripetere solo controlli falliti o coinvolti dalle correzioni. Evitare ricompilazioni concorrenti con confezionamento/test. I comandi selettivi e completi sono nel piano §7.3.
 
-Usare il [coordinatore e i suoi profili](doc/v02/coordinatore-profili.md#comandi-e-profili), scegliendo esplicitamente documenti e regressioni secondo §7.3. Leggere prima `summary.md`, poi i dettagli delle sole fasi problematiche. La diagnostica resta parziale; il report non determina la chiusura del task.
+Usare il [coordinatore e i suoi profili](doc/v02/coordinatore-profili.md#comandi-e-profili), scegliendo esplicitamente documenti e regressioni secondo §7.3. Leggere prima `summary.md`, poi i dettagli delle sole fasi problematiche; `summary.verbose.md` e `--verbose` espongono i dettagli su richiesta. La diagnostica resta parziale; il report non determina la chiusura del task.
 
 Test desktop con archivi/preferenze temporanei e renderer offline. Se gli ACL impediscono l'avvio nella sandbox dell'agente, usare il percorso autorizzato documentando il blocco, preservando ACL e sandbox Electron. Seguire gli helper esistenti per le finestre nascoste del pacchetto.
 

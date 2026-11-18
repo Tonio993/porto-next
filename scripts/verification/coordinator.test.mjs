@@ -66,6 +66,60 @@ function drivers(events = [], customize = {}) {
   }
 }
 
+test('presentazione: progressi compatti/dettagliati e report persistenti senza cambiare comandi o esiti', async () => {
+  const cwd = await fixture()
+  const executions = []
+  for (const verbose of [false, true]) {
+    const events = [],
+      progress = []
+    const completed = await coordinate(options('documentazione', { verbose }), {
+      cwd,
+      ...drivers(events),
+      progress: (line) => progress.push(line),
+    })
+    executions.push({ result: completed.result, events })
+    assert.equal(progress.length, verbose ? 8 : 2)
+    assert.match(progress[0], /documentazione.*avvio.*summary.md/)
+    assert.match(progress.at(-1), /passed.*finale: true.*requested-profile.*uscita: 0/)
+    const text = await readFile(resolve(completed.directory, 'summary.md'), 'utf8')
+    assert.equal(text.includes('documents: passed'), verbose)
+    assert.match(
+      await readFile(resolve(completed.directory, 'summary.verbose.md'), 'utf8'),
+      /documents: passed/,
+    )
+  }
+  assert.deepEqual(executions[0].events, executions[1].events)
+  const stable = (run) => ({
+    outcome: run.outcome,
+    exitCode: run.exitCode,
+    coverage: run.coverage,
+    phases: run.phases.map(({ id, status, process, counts }) => ({ id, status, process, counts })),
+  })
+  assert.deepEqual(stable(executions[0].result), stable(executions[1].result))
+  const progress = []
+  const { result } = await coordinate(options('diagnostica', { phases: ['build', 'desktop'] }), {
+    cwd,
+    ...drivers([], { execute: (id) => (id === 'build' ? { ...ok(), exitCode: 9 } : ok()) }),
+    progress: (line) => progress.push(line),
+  })
+  assert.equal(result.exitCode, 2)
+  assert.ok(progress.some((line) => /build: failed.*processo 9/.test(line)))
+  assert.ok(progress.some((line) => /desktop: blocked/.test(line)))
+  assert.ok(!progress.some((line) => /typescript.*passed/.test(line)))
+  await writeFile(resolve(cwd, '.local/verification.lock'), '{"pid":0}')
+  const blockedProgress = [],
+    blockedEvents = []
+  await coordinate(options('milestone'), {
+    cwd,
+    ...drivers(blockedEvents),
+    progress: (line) => blockedProgress.push(line),
+  })
+  assert.equal(blockedEvents.length, 0)
+  assert.equal(blockedProgress.filter((line) => /: blocked/.test(line)).length, 8)
+  assert.ok(blockedProgress.includes('Altre 4 fasi problematiche nei report completi.'))
+  await unlink(resolve(cwd, '.local/verification.lock'))
+})
+
 test('profili: piano completo, diagnostica parziale e selezione esplicita senza riduzioni implicite', () => {
   assert.throws(() => createPlan({ profile: 'step' }), /document/)
   assert.throws(() => createPlan(options('step', { desktop: [] })), /desktop/)

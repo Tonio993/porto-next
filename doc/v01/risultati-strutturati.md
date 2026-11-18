@@ -26,6 +26,8 @@ Reporter, destinazione dei report e output Playwright sono riservati alla raccol
 
 ## File e contratto v1
 
+La [rifinitura successiva a V03](../v03/output-compatto.md) compatta la sola presentazione: `summary.md` mantiene esito, completezza, ambito, codici, conteggi e problemi; riproduzione e collegamenti estesi sono in `summary.verbose.md`, disponibili anche con `--verbose` prima di `--`. In caso di problemi la riproduzione resta nel riepilogo compatto. Il JSON v1 e i log conservano integralmente il contratto seguente; la descrizione originaria di `summary.md` nella tabella indica ora il contenuto della vista dettagliata.
+
 Ogni chiamata crea una directory nuova `test-results/verification/<data-UTC>-<suffisso>/`. Non usa report residui e non modifica altre esecuzioni.
 
 | File                       | Contenuto                                                                                                                                                       |

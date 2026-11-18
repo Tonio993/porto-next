@@ -143,6 +143,8 @@ Ogni invocazione crea `test-results/verification/<data-UTC>-coordinator-<suffiss
 
 I report completi restano locali; riepiloghi e manifest selezionati vengono versionati quando necessari alla riproducibilità, secondo la [politica di conservazione](doc/guida-documentazione.md#conservazione-delle-evidenze), senza cancellazioni automatiche. I cinque avvisi di formattazione legacy `00`–`04` sono risolti in [V03](doc/v03/adozione-documentale.md); le vecchie esecuzioni conservano gli esiti originali.
 
+Coordinatore e collector mostrano normalmente l'esito globale e i soli problemi, con conteggi e collegamenti ai risultati completi. Il coordinatore stampa avvio/conclusione e problemi significativi; lo stato rimane aggiornato su disco. Per il riepilogo dettagliato aprire `summary.verbose.md`, senza ripetere le verifiche. `--verbose` seleziona il riepilogo dettagliato e abilita i progressi per fase del coordinatore: `npm.cmd run verify -- documentazione --document README.md --verbose`. Nel collector usare l'opzione prima del separatore del runner: `npm.cmd run test:report -- vitest --phase backend --scope 'backend completo' --verbose`. [Limiti dei dettagli e confronto osservato](doc/v03/output-compatto.md).
+
 I comandi diretti restano disponibili. Eseguirli separatamente dal coordinatore per evitare sovrapposizioni sugli artefatti:
 
 ```powershell

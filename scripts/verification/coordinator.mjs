@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 import { collect, commandText, execute } from './collect.mjs'
 import { formattingDetails } from './formatting.mjs'
+import { clean, countsText, details, noteworthy } from './presentation.mjs'
 
 const repository = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const ids = [
@@ -192,30 +193,41 @@ export function readCollector(result) {
   return { status, outcome, process: original, collectorExitCode: result.exitCode, issues, counts }
 }
 
-export function runSummary(run) {
-  const clean = (value) =>
-    String(value)
-      .replace(/[\r\n|]/g, ' ')
-      .slice(0, 230)
+function phaseText(phase) {
+  return `${phase.id}: ${phase.status} (processo ${phase.process?.exitCode ?? '—'}, collector ${phase.collectorExitCode ?? '—'})${phase.reason ? `; ${clean(phase.reason)}` : ''}`
+}
+
+export function runSummary(run, { verbose = false } = {}) {
+  const required = run.phases.filter((p) => p.requested)
+  const complete = run.completed && required.length > 0 && run.outcome !== 'incomplete'
+  const totals = required
+    .filter((p) => p.counts)
+    .reduce((sum, p) => {
+      for (const [key, value] of Object.entries(p.counts)) sum[key] = (sum[key] ?? 0) + value
+      return sum
+    }, {})
+  const selected = run.phases.filter((p) => verbose || noteworthy(p))
+  // Le righe di fase restano corte; ragioni e conteggi hanno un budget separato.
+  const shown = selected.slice(0, verbose ? run.phases.length : 8)
+  const problems = [
+    ...run.issues,
+    ...selected.flatMap((p) => [
+      ...(p.counts ? [`${p.id}: ${countsText(p.counts)}`] : []),
+      ...(p.formatting?.legacy ?? []).map((file) => `${p.id}: avviso ${file}`),
+      ...(p.formatting?.regressions ?? []).map((file) => `${p.id}: differenza ${file}`),
+    ]),
+  ]
   return [
-    `# ${run.profile}: ${run.outcome}`,
-    '',
-    `Copertura: ${run.coverage}. Finale: ${run.completed}. Uscita coordinatore: ${run.exitCode}. Nessuna attestazione di chiusura task/milestone.`,
-    '',
-    '[Piano](plan.json) · [Risultati e dettagli](results.json)',
-    '',
-    '| Fase | Stato | Processo / collector | Dettagli |',
-    '| --- | --- | --- | --- |',
-    ...run.phases.map(
-      (p) =>
-        `| ${p.id} | ${p.status} | ${p.process?.exitCode ?? '—'} / ${p.collectorExitCode ?? '—'} | ${p.details ? `[report](${p.details})` : clean(p.reason ?? '—')}${p.counts ? `; ${p.counts.passed}/${p.counts.total}, saltati ${p.counts.skipped}, flaky ${p.counts.flaky}, incompleti ${p.counts.incomplete}` : ''} |`,
-    ),
-    '',
-    ...run.issues.slice(0, 5).map((issue) => `- ${clean(issue)}`),
-    ...run.phases
-      .filter((p) => p.reason && p.requested)
-      .slice(0, 8)
-      .map((p) => `- ${p.id}: ${clean(p.reason)}`),
+    `# ${run.profile}: ${required.length ? run.outcome : 'incomplete'}`,
+    `Completezza: ${complete ? 'completa' : 'incompleta'}; finale: ${run.completed}. Copertura: ${run.coverage}. Uscita: ${run.exitCode}.`,
+    `Fasi richieste: ${required.length}; passate: ${required.filter((p) => p.status === 'passed').length}; problematiche: ${required.filter(noteworthy).length}.${totals.total ? ` ${countsText(totals)}` : ''}`,
+    '[Risultati completi](results.json) · [Piano](plan.json) · [Dettagli](summary.verbose.md)',
+    ...shown.map((p) => `- ${phaseText(p)}${p.details ? `; [report](${p.details})` : ''}`),
+    ...(selected.length > shown.length
+      ? [`- Altre ${selected.length - shown.length} fasi problematiche nei report completi.`]
+      : []),
+    ...details(problems, { verbose }),
+    ...(verbose ? ['', 'Nessuna attestazione di chiusura task/milestone.'] : []),
     '',
   ].join('\n')
 }
@@ -263,10 +275,24 @@ export async function coordinate(
   }
   const save = async () => {
     await writeFile(resolve(directory, 'results.json'), JSON.stringify(run, null, 2) + '\n', 'utf8')
-    await writeFile(resolve(directory, 'summary.md'), runSummary(run), 'utf8')
+    await writeFile(resolve(directory, 'summary.md'), runSummary(run, options), 'utf8')
+    await writeFile(
+      resolve(directory, 'summary.verbose.md'),
+      runSummary(run, { verbose: true }),
+      'utf8',
+    )
   }
   await writeFile(resolve(directory, 'plan.json'), JSON.stringify(plan, null, 2) + '\n', 'utf8')
   await save()
+  progress(`[${run.profile}] avvio: ${resolve(directory, 'summary.md')}`)
+  const reported = new Set()
+  const problemProgress = (phase) => {
+    const text = clean(phaseText(phase))
+    if (noteworthy(phase) && !reported.has(text)) {
+      if (options.verbose || reported.size < 8) progress(text)
+      reported.add(text)
+    }
+  }
   const lockPath = resolve(cwd, '.local/verification.lock')
   let lock
   try {
@@ -279,6 +305,7 @@ export async function coordinate(
       for (const phase of run.phases.filter((p) => p.requested)) {
         phase.status = 'blocked'
         phase.reason = 'Lock di altra esecuzione'
+        problemProgress(phase)
       }
     }
     if (lock) {
@@ -289,6 +316,7 @@ export async function coordinate(
       for (const phase of run.phases.filter((p) => p.requested)) {
         if (signal?.aborted) {
           phase.reason = 'Esecuzione interrotta prima della fase'
+          problemProgress(phase)
           continue
         }
         const blocked = phase.dependencies.filter(
@@ -298,6 +326,7 @@ export async function coordinate(
           phase.status = 'blocked'
           phase.reason = `Dipendenze non riuscite: ${blocked.join(', ')}`
           await save()
+          problemProgress(phase)
           continue
         }
         phase.status = 'running'
@@ -306,7 +335,7 @@ export async function coordinate(
         await mkdir(phaseDirectory)
         phase.details = `${phase.id}/execution.json`
         await save()
-        progress(`[${phase.id}] avvio — ${phase.scope}`)
+        if (options.verbose) progress(`[${phase.id}] avvio — ${phase.scope}`)
         const abort = new AbortController()
         const cancel = () => abort.abort(signal.reason)
         signal?.addEventListener('abort', cancel, { once: true })
@@ -375,6 +404,7 @@ export async function coordinate(
               env,
               signal: abort.signal,
               outputRoot: resolve(phaseDirectory, 'collection'),
+              verbose: options.verbose,
               onDirectory: async (path) => {
                 phase.collectorDirectory = relativePath(path)
                 await save()
@@ -419,9 +449,8 @@ export async function coordinate(
             'utf8',
           )
           await save()
-          progress(
-            `[${phase.id}] ${phase.status}${phase.process ? ` (processo ${phase.process.exitCode})` : ''}`,
-          )
+          if (options.verbose && !noteworthy(phase)) progress(phaseText(phase))
+          problemProgress(phase)
         }
       }
     }
@@ -453,7 +482,12 @@ export async function coordinate(
     run.exitCode =
       run.outcome === 'failed' ? 1 : run.outcome !== 'passed' || run.coverage === 'partial' ? 2 : 0
     await save()
-    progress(`${run.outcome} · ${run.coverage}: ${resolve(directory, 'summary.md')}`)
+    if (!options.verbose && reported.size > 8)
+      progress(`Altre ${reported.size - 8} fasi problematiche nei report completi.`)
+    for (const issue of details(run.issues, options)) progress(issue)
+    progress(
+      `[${run.profile}] ${run.outcome}; finale: ${run.completed}; copertura: ${run.coverage}; uscita: ${run.exitCode}.`,
+    )
   }
   return { directory, result: run }
 }
@@ -471,6 +505,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         phase: { type: 'string', multiple: true },
         backend: { type: 'string', multiple: true },
         'timeout-ms': { type: 'string' },
+        verbose: { type: 'boolean' },
       },
     })
     if (positionals.length !== 1)
@@ -485,6 +520,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         phases: values.phase,
         backend: values.backend,
         timeoutMs: values['timeout-ms'] === undefined ? undefined : Number(values['timeout-ms']),
+        verbose: values.verbose,
       },
       { signal: abort.signal },
     )

@@ -1,5 +1,7 @@
 # V03 — Avvisi e adozione documentale
 
+Questa nota e il manifest conservano la consegna V03 originale. La successiva [rifinitura dell'output compatto](output-compatto.md), base `6f22965`, registra separatamente implementazione e nuovo confronto effettivo; V04–V07 mantengono numeri e ambito.
+
 Base `1002baf`, branch `main` inizialmente pulito, schema applicativo v16 invariato. Stato ed esiti finali nella [consegna corrente](../piano-automazione-verifiche.md#consegna-corrente); [manifest selezionato](verifiche.json) e [riepilogo finale](summary.md). Frequenza e copertura restano nel [piano §7.3](../piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento).
 
 ## Decisioni e adozione
@@ -50,3 +52,13 @@ Le prove applicative valide M3 e V02 sono riusate perché sorgenti applicativi, 
 Riprendere [M3 → P17A](../m3/chiusura.md#limiti-e-passaggio-a-p17a): consuntivazione con replay e conferma atomica. Usare il profilo `step`, motivare i file desktop e i documenti scelti in base ai chiamanti reali e verificare le invarianti introdotte. Leggere prima `summary.md`; approfondire soltanto fasi problematiche, `issues`, conteggi e comando di riproduzione. Una diagnostica resta parziale.
 
 Durante P17A registrare comandi manuali, chiamate agli strumenti e volume effettivamente letto, distinguendoli dai token e senza confrontare perimetri diversi come equivalenti. Rivalutare V04–V07 dopo tale utilizzo. V03 non introduce consolidamento, cache, riuso automatico o ottimizzazioni dei test. Restano i limiti ambientali e operativi del [coordinatore V02](../v02/coordinatore-profili.md#piano-dipendenze-e-report).
+
+## Consegna originaria V03
+
+**V03 completato e verificato il 17 novembre 2026**, base `1002baf`, branch `main` inizialmente pulito; schema applicativo v16 invariato. Correzione della sola formattazione dei cinque legacy `00`–`04`, con struttura Markdown equivalente; adozione dei quattro profili in README, piano §7.3 e AGENTS, conservazione senza cancellazioni automatiche e confronto osservabile su un perimetro documentale comune. [Dettagli e limiti](adozione-documentale.md), [manifest selezionato](verifiche.json), [riepilogo finale](summary.md). La sintesi storica V02 è conservata nella [sua nota](../v02/coordinatore-profili.md#verifiche-e-passaggio-a-v03).
+
+**Verifiche finali:** profilo `documentazione` con `--document` ripetuto per tutti i Markdown modificati; UTF-8, destinazioni/ancore locali, differenze Git e Prettier globale passati. Nessun avviso residuo: Prettier `0`, fase `passed`, coordinatore `0`; invariati script, configurazioni, esclusioni e codici di uscita. Confronto AST dei cinque legacy rispetto alla base e token delle formule invariati, conservando titoli, elenchi, tabelle, codice e URL. Il confronto controllato registra 3→1 comandi da avviare e 5→3 chiamate agli strumenti (polling inclusi), con output letto aumentato da 692 byte/16 righe a 1.230 byte/28 righe; non misura token né dimostra risparmi percentuali. Una sola sintesi delle prove in questa sezione, con misure e fonti nella nota/manifest.
+
+Riusate le prove applicative [M3](../m3/chiusura.md) e [V02](../v02/verifiche.json): nessuna modifica a codice, SQL, dipendenze, runtime o confezionamento; nessuna nuova campagna backend, desktop, pacchetto o sessione manuale umana. Le suite integrate complete restano a **M4**, salvo trigger anticipati del §7.3. Evidenze e uscite storiche preservate, compresi gli avvisi realmente ottenuti prima di V03.
+
+**Passaggio operativo a P17A — Consuntivare operazioni con replay:** riprendere il [passaggio M3](../m3/chiusura.md#limiti-e-passaggio-a-p17a), scegliere e motivare documenti e regressioni secondo §7.3, usare `step` e leggere `summary.md` prima dei dettagli delle sole fasi problematiche. Registrare nel task funzionale operazioni, chiamate e output effettivamente letto come riscontro del flusso. La diagnostica resta parziale e il coordinatore non chiude il task. Rivalutare **V04–V07 dopo P17A**; nessun consolidamento, cache o ottimizzazione anticipata.

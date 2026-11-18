@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { stripVTControlCharacters } from 'node:util'
+import { clean, countsText, details } from './presentation.mjs'
 
 const statuses = ['passed', 'failed', 'skipped', 'incomplete', 'flaky', 'expected-failure']
 const array = (value, name) => {
@@ -311,42 +311,30 @@ export function finalize(metadata, data) {
   }
 }
 
-const clean = (value) =>
-  stripVTControlCharacters(String(value))
-    .replaceAll('\n', ' ')
-    .replaceAll('\r', ' ')
-    .replaceAll('`', "'")
-    .slice(0, 260)
 function describeError(error) {
   if (typeof error === 'string') return error
   const location = error.location ?? error.stacks?.[0]
   const file = location?.file ?? error.file
   return `${file ? `${file}:${location?.line ?? '?'} — ` : ''}${error.message ?? error.stack ?? JSON.stringify(error)}`
 }
-export function summary(result) {
+export function summary(result, { verbose = false } = {}) {
   const c = result.counts
+  const complete = result.outcome !== 'incomplete' && c.total > 0
+  const failedAttempts = result.cases.reduce(
+    (sum, test) => sum + test.attempts.filter((a) => a.status === 'failed').length,
+    0,
+  )
   const lines = [
-    `# ${result.runner} · ${result.phase}: ${result.outcome}`,
-    '',
-    `Ambito: ${clean(result.scope)}. Uscita processo: ${result.process.exitCode ?? 'assente'}; raccolta: ${result.exitCode}. Durata: ${result.durationMs} ms.`,
-    '',
-    `${c.total} casi: ${c.passed} passati, ${c.failed} falliti, ${c.skipped} saltati, ${c.flaky} flaky, ${c['expected-failure']} fallimenti attesi, ${c.incomplete} incompleti. ${c.attempts} tentativi; ${c.retried} casi con retry.`,
-    '',
-    `Riproduzione (PowerShell, cwd ${clean(result.environment.cwd)}):`,
-    '',
-    '```powershell',
-    result.reproduction,
-    '```',
-    '',
-    '[Risultati completi](results.json) · [Metadati](execution.json) · [stdout](stdout.log) · [stderr](stderr.log) · [Artefatti](artifacts/)',
+    `# ${clean(result.runner)} · ${clean(result.phase)}: ${complete ? result.outcome : 'incomplete'}`,
+    `Completezza: ${complete ? 'completa' : 'incompleta'}. Copertura: ambito richiesto (${clean(result.scope)}), non attesta il task. Uscita processo: ${result.process.exitCode ?? 'assente'}; raccolta: ${result.exitCode}.`,
+    `${countsText(c)} Tentativi falliti: ${failedAttempts}.`,
+    '[Risultati completi](results.json) · [Dettagli](summary.verbose.md)',
   ]
-  if (result.availableReports?.length)
-    lines.push(result.availableReports.map((path) => `[${path}](${path})`).join(' · '))
   const problems = [
     ...result.issues,
     ...result.errors.map(describeError),
     ...result.cases
-      .filter((t) => t.status !== 'passed')
+      .filter((t) => t.status !== 'passed' || t.attempts.some((a) => a.status === 'failed'))
       .map((t) => {
         const error = t.attempts.flatMap((a) => a.errors ?? [])[0] ?? t.errors?.[0]
         return `${t.status}: ${t.file}:${t.location?.line ?? '?'} — ${t.titlePath.join(' > ')}${error ? ` — ${describeError(error)}` : ''}`
@@ -354,10 +342,24 @@ export function summary(result) {
   ]
   if (result.issues.length && !result.errors.length && result.diagnostics?.stderrExcerpt)
     problems.unshift(`Diagnostica stderr (estratto): ${result.diagnostics.stderrExcerpt}`)
-  if (problems.length) {
-    lines.push('', ...problems.slice(0, 8).map((p) => `- ${clean(p)}`))
-    if (problems.length > 8)
-      lines.push(`- Altri ${problems.length - 8} dettagli in results.json e nei report nativi.`)
+  lines.push(...details(problems, { verbose }))
+  if (verbose || problems.length) {
+    lines.push(
+      '',
+      `Riproduzione (PowerShell, cwd ${clean(result.environment.cwd)}):`,
+      '',
+      '```powershell',
+      result.reproduction,
+      '```',
+    )
+  }
+  if (verbose) {
+    lines.push(
+      '',
+      `Durata: ${result.durationMs} ms.`,
+      '[Metadati](execution.json) · [stdout](stdout.log) · [stderr](stderr.log) · [Artefatti](artifacts/)',
+      ...(result.availableReports ?? []).map((path) => `[${path}](${path})`),
+    )
   }
   return `${lines.join('\n')}\n`
 }

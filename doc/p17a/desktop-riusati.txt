@@ -1,0 +1,26 @@
+P17A — 20 percorsi desktop completati prima dell’interruzione della fase.
+Fonte: test-results/verification/2026-11-18T09-40-43.977Z-coordinator-3j02Sl/desktop/collection/2026-11-18T09-48-38.927Z-hhosUJ/stdout.log
+SHA256 fonte completa: 28dc310f0e055d39c1cc586e920adc0c494b506e74fee192c5c392606589bff5
+Questi sono esiti individuali terminali del runner. Il collector aggregato resta incompleto (report nativo assente, 0 casi raccolti); non viene riscritto né dichiarato riuscito.
+Input di questi test invariati dalla base; codice dei percorsi riusati invariato. L'ultimo messaggio visivo riguarda soltanto il nuovo editor P17A, verificato con quattro percorsi separati sulla build finale. Nessuna equivalenza con una suite integrale di milestone.
+
+  ok  1 tests\e2e\assignments.spec.ts:102:1 › P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline (2.1m)
+  ok  2 tests\e2e\assignments.spec.ts:252:1 › P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricamento e nuova sessione (37.0s)
+  ok  3 tests\e2e\inter-port-movements.spec.ts:61:1 › P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità, ricalcoli e riapertura offline (1.4m)
+  ok  4 tests\e2e\inter-port-movements.spec.ts:236:1 › P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome (50.5s)
+  ok  5 tests\e2e\movements.spec.ts:44:1 › P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa alla partenza e persistenza offline (2.1m)
+  ok  6 tests\e2e\movements.spec.ts:256:1 › P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione (1.1m)
+  ok 11 tests\e2e\operations-async.spec.ts:16:1 › P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione (1.2m)
+  ok 12 tests\e2e\operations.spec.ts:11:1 › P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia, copie e riapertura offline (3.1m)
+  ok 13 tests\e2e\services.spec.ts:59:3 › P14 funzionale: prestazioni libere, migrazione e contesto (44.8s)
+  ok 14 tests\e2e\services.spec.ts:59:3 › P14 asincrono: prestazioni libere, migrazione e contesto (40.9s)
+  ok 15 tests\e2e\services.spec.ts:236:1 › P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE conservata (43.8s)
+  ok 16 tests\e2e\services.spec.ts:391:1 › P15 asincrono: selettore catalogo ignora risposte precedenti e conserva la selezione fra ricerche (30.6s)
+  ok 17 tests\e2e\services.spec.ts:435:3 › P16 FREE: ciclo di vita, ricerca, conflitto e riapertura (1.9m)
+  ok 18 tests\e2e\services.spec.ts:435:3 › P16 CATALOG: ciclo di vita, ricerca, conflitto e riapertura (2.4m)
+  ok 19 tests\e2e\services.spec.ts:715:1 › P16 asincrono: filtri, anteprima obsoleta e note con esito incerto richiedono rilettura (53.7s)
+  ok 20 tests\e2e\services.spec.ts:845:3 › post-P16 FREE: creazione e consuntivazione con risposta persa richiedono rilettura (1.1m)
+  ok 21 tests\e2e\services.spec.ts:845:3 › post-P16 CATALOG: creazione e consuntivazione con risposta persa richiedono rilettura (1.2m)
+  ok 22 tests\e2e\services.spec.ts:991:1 › P16 ricerca: soggetti ereditati, porto e banchina, filtri vuoti e ispezione minima (56.3s)
+  ok 23 tests\e2e\subjects-async.spec.ts:68:3 › P06 Clienti: scarta risposte tardive di dettaglio, decorrenza e archivio precedente (42.3s)
+  ok 24 tests\e2e\subjects-async.spec.ts:68:3 › P06 Agenzie: scarta risposte tardive di dettaglio, decorrenza e archivio precedente (37.9s)

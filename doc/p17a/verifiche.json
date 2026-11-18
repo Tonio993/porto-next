@@ -1,0 +1,943 @@
+{
+  "task": "P17A",
+  "date": "2026-11-18",
+  "base": "de23f7198b204cc5cf2a1505f3f2dcef7aa65ae4",
+  "branch": "main",
+  "initialWorkingTree": "clean",
+  "schemaVersion": 16,
+  "configuration": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "v24.21.0",
+    "npm": "12.2.1",
+    "electron": "45.2.3",
+    "backendWorkers": 1,
+    "backendEnvironment": {
+      "VITEST_MAX_WORKERS": "1"
+    },
+    "desktopWorkers": 1,
+    "offlineRenderer": true,
+    "temporaryArchivesAndPreferences": true,
+    "agentSandbox": "external authorized path; ACL and Electron sandbox unchanged"
+  },
+  "requestedProfile": {
+    "directory": "test-results/verification/2026-11-18T09-40-43.977Z-coordinator-3j02Sl",
+    "summary": "# step: incomplete\nCompletezza: incompleta; finale: true. Copertura: requested-profile. Uscita: 2.\nFasi richieste: 10; passate: 9; problematiche: 1. 317 casi: 317 passati, 0 falliti, 0 saltati, 0 flaky, 0 fallimenti attesi, 0 incompleti; 317 tentativi, 0 casi con retry.\n[Risultati completi](results.json) · [Piano](plan.json) · [Dettagli](summary.verbose.md)\n- desktop: incomplete (processo 1, collector 1); Timeout fase: 1800000 ms; [report](desktop/collection/2026-11-18T09-48-38.927Z-hhosUJ/summary.md)\n- desktop: 0 casi: 0 passati, 0 falliti, 0 saltati, 0 flaky, 0 fallimenti attesi, 0 incompleti; 0 tentativi, 0 casi con retry.\n",
+    "command": "$env:VITEST_MAX_WORKERS='1'; node scripts/verification/coordinator.mjs step --document README.md --document doc/p17a/consuntivazione-operazioni.md --desktop tests/e2e/operation-completion.spec.ts --desktop tests/e2e/operations.spec.ts --desktop tests/e2e/operations-async.spec.ts --desktop tests/e2e/movements.spec.ts --desktop tests/e2e/inter-port-movements.spec.ts --desktop tests/e2e/assignments.spec.ts --desktop tests/e2e/subjects.spec.ts --desktop tests/e2e/subjects-async.spec.ts --desktop tests/e2e/services.spec.ts --desktop tests/e2e/ui03.spec.ts --desktop tests/e2e/ui03-states.spec.ts",
+    "completed": true,
+    "exitCode": 2,
+    "phases": [
+      {
+        "id": "documents",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 1381
+      },
+      {
+        "id": "diff",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 402
+      },
+      {
+        "id": "typescript-node",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 8817
+      },
+      {
+        "id": "typescript-web",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 4954
+      },
+      {
+        "id": "eslint",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 82933
+      },
+      {
+        "id": "formatting",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 17688
+      },
+      {
+        "id": "fixtures",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 56854
+      },
+      {
+        "id": "backend",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null,
+          "runtime": {
+            "executable": "C:\\Other\\porto-next\\node_modules\\electron\\dist\\electron.exe",
+            "args": [
+              "node_modules/vitest/vitest.mjs",
+              "run",
+              "--includeTaskLocation",
+              "--reporter=default",
+              "--reporter=json",
+              "--reporter=C:\\Other\\porto-next\\scripts\\verification\\vitest-context.mjs",
+              "--outputFile=C:\\Other\\porto-next\\test-results\\verification\\2026-11-18T09-40-43.977Z-coordinator-3j02Sl\\backend\\collection\\2026-11-18T09-43-37.126Z-6ooz8M\\native\\report.json"
+            ],
+            "exitCode": 0,
+            "signal": null,
+            "error": null,
+            "environment": {
+              "ELECTRON_RUN_AS_NODE": "1"
+            }
+          }
+        },
+        "collectorExitCode": 0,
+        "counts": {
+          "passed": 317,
+          "failed": 0,
+          "skipped": 0,
+          "incomplete": 0,
+          "flaky": 0,
+          "expected-failure": 0,
+          "total": 317,
+          "attempts": 317,
+          "retried": 0
+        },
+        "issues": [],
+        "collectorDirectory": "backend/collection/2026-11-18T09-43-37.126Z-6ooz8M",
+        "durationMs": 222074
+      },
+      {
+        "id": "build",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 79695
+      },
+      {
+        "id": "desktop",
+        "status": "incomplete",
+        "process": {
+          "exitCode": 1,
+          "closeCode": 1,
+          "signal": null,
+          "error": null,
+          "interrupted": "Timeout fase: 1800000 ms"
+        },
+        "collectorExitCode": 1,
+        "counts": {
+          "passed": 0,
+          "failed": 0,
+          "skipped": 0,
+          "incomplete": 0,
+          "flaky": 0,
+          "expected-failure": 0,
+          "total": 0,
+          "attempts": 0,
+          "retried": 0
+        },
+        "issues": [
+          "Il runner non ha completato il report di contesto",
+          "Campo suites assente o non valido",
+          "Report nativo assente o malformato: ENOENT: no such file or directory, open 'C:\\Other\\porto-next\\test-results\\verification\\2026-11-18T09-40-43.977Z-coordinator-3j02Sl\\desktop\\collection\\2026-11-18T09-48-38.927Z-hhosUJ\\native\\report.json'",
+          "Processo interrotto: Timeout fase: 1800000 ms"
+        ],
+        "collectorDirectory": "desktop/collection/2026-11-18T09-48-38.927Z-hhosUJ",
+        "durationMs": 3397545
+      }
+    ]
+  },
+  "earlierAttempts": [
+    {
+      "source": ".local/p17a-backend-target.log",
+      "cases": 15,
+      "passed": 8,
+      "failed": 7,
+      "reason": "Fixture MOVEMENT con campi ENTRY inattesi; controllo FK includeva componenti posseduti. Esiti sostituiti dalle verifiche finali, log preservato."
+    },
+    {
+      "source": ".local/p17a-backend-target-2.log",
+      "cases": 15,
+      "passed": 13,
+      "failed": 2,
+      "reason": "Fixture con offset originario incompatibile col nuovo porto; correzione degli input, non del fuso applicativo."
+    },
+    {
+      "source": ".local/p17a-backend-target-3.log",
+      "cases": 15,
+      "passed": 15,
+      "failed": 0
+    },
+    {
+      "source": "test-results/verification/2026-11-18T09-37-52.812Z-pisPvA",
+      "cases": 21,
+      "passed": 21,
+      "failed": 0,
+      "nativeProcessExitCode": 0,
+      "collectorExitCode": 0,
+      "arguments": ["tests/unit/operation-completion.test.ts", "--maxWorkers=1"]
+    },
+    {
+      "source": "test-results/verification/2026-11-18T09-33-32.876Z-GbWOZW",
+      "cases": 3,
+      "passed": 0,
+      "failed": 3,
+      "nativeProcessExitCode": 1,
+      "collectorExitCode": 1,
+      "reason": "Fixture preload con contesto renderer non riallineato: azione correttamente disabilitata. Preparazione corretta tramite reload del renderer."
+    },
+    {
+      "source": ".local/p17a-build-1.log",
+      "shellExitCode": 1,
+      "nativeProcessExitCode": null,
+      "reason": "Output npm su stderr convertito da PowerShell in NativeCommandError; artefatti emessi. La build autorevole è quella del coordinatore con uscita nativa raccolta."
+    }
+  ],
+  "selectiveCompletion": {
+    "directory": "test-results/verification/2026-11-18T10-49-42.133Z-coordinator-okBvdi",
+    "command": "node scripts/verification/coordinator.mjs diagnostica --phase desktop --timeout-ms 3600000 --desktop tests/e2e/operation-completion.spec.ts --desktop tests/e2e/subjects.spec.ts --desktop tests/e2e/ui03.spec.ts --desktop tests/e2e/ui03-states.spec.ts",
+    "completed": true,
+    "exitCode": 2,
+    "phases": [
+      {
+        "id": "typescript-node",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 3347
+      },
+      {
+        "id": "typescript-web",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 43150
+      },
+      {
+        "id": "build",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "durationMs": 56028
+      },
+      {
+        "id": "desktop",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        },
+        "collectorExitCode": 0,
+        "counts": {
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0,
+          "incomplete": 0,
+          "flaky": 0,
+          "expected-failure": 0,
+          "total": 8,
+          "attempts": 8,
+          "retried": 0
+        },
+        "issues": [],
+        "collectorDirectory": "desktop/collection/2026-11-18T10-51-24.726Z-VnW5vv",
+        "durationMs": 592669
+      }
+    ],
+    "note": "La diagnostica ha copertura parziale e uscita coordinatore 2 anche con tutte le fasi riuscite. Il profilo include TypeScript e build per dipendenza: ricompilazione registrata, non presentata come cache."
+  },
+  "finalOperationDesktop": {
+    "directory": "test-results/verification/2026-11-18T11-04-17.779Z-gdPerf",
+    "command": "& 'C:\\nvm4w\\nodejs\\node.exe' 'C:\\Other\\porto-next\\scripts\\verification\\collect.mjs' 'playwright' '--phase' 'p17a-final-desktop' '--scope' 'Quattro percorsi P17A sulla build finale con blocchi in testa' '--' 'tests/e2e/operation-completion.spec.ts'",
+    "process": {
+      "exitCode": 0,
+      "closeCode": 0,
+      "signal": null,
+      "error": null,
+      "interrupted": null
+    },
+    "exitCode": 0,
+    "counts": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "incomplete": 0,
+      "flaky": 0,
+      "expected-failure": 0,
+      "total": 4,
+      "attempts": 4,
+      "retried": 0
+    },
+    "cases": [
+      {
+        "id": "7db7ed794c55054be10a61045d76d962a54c09bcf8ce3c9d1675ab4dd61212d8",
+        "file": "operation-completion.spec.ts",
+        "titlePath": [
+          "P17A: entrata effettuata, anteprima prima/dopo, errore per campo, focus e permanenze alla misura minima"
+        ],
+        "status": "passed",
+        "expectedStatus": "passed",
+        "durationMs": 33486,
+        "attempts": [
+          {
+            "status": "passed",
+            "retry": 0,
+            "durationMs": 33486
+          }
+        ]
+      },
+      {
+        "id": "78e9e4224e508c60e18e2d08e44df86d14d62611a752ecaf2a45b49461872472",
+        "file": "operation-completion.spec.ts",
+        "titlePath": [
+          "P17A: mancata bloccata da prestazione, poi spostamento mancato con riattribuzione FREE/CATALOG e conferma"
+        ],
+        "status": "passed",
+        "expectedStatus": "passed",
+        "durationMs": 43210,
+        "attempts": [
+          {
+            "status": "passed",
+            "retry": 0,
+            "durationMs": 43210
+          }
+        ]
+      },
+      {
+        "id": "678b1b2d8608ba9602c700934c74c818f37afb326aed212463b2cbb96778cf32",
+        "file": "operation-completion.spec.ts",
+        "titlePath": [
+          "P17A: bozze obsolete, risposta ritardata e conferma persa con rilettura fallita/ritardata senza duplicazioni"
+        ],
+        "status": "passed",
+        "expectedStatus": "passed",
+        "durationMs": 34908,
+        "attempts": [
+          {
+            "status": "passed",
+            "retry": 0,
+            "durationMs": 34908
+          }
+        ]
+      },
+      {
+        "id": "008b85eb034f32b2e81bd7cf5abbeb9920dcfe028338632c7f5efaad85e10c65",
+        "file": "operation-completion.spec.ts",
+        "titlePath": [
+          "P17A: spostamento esterno effettuato, fusi distinti, due componenti e identità fra anteprima e conferma"
+        ],
+        "status": "passed",
+        "expectedStatus": "passed",
+        "durationMs": 22484,
+        "attempts": [
+          {
+            "status": "passed",
+            "retry": 0,
+            "durationMs": 22484
+          }
+        ]
+      }
+    ],
+    "reason": "Ripetizione integrale dei quattro percorsi dopo l’aggiunta del blocco visibile in testa al confronto. Nuova build esplicita npm run build, codice nativo 0, distinta dal pacchetto."
+  },
+  "residualDesktopCases": [
+    {
+      "id": "fc47cdef783c3291d37e4ec1ffc1848048f0a91dae3ae97a9e93697ea877cf6f",
+      "file": "subjects.spec.ts",
+      "titlePath": ["P06 Clienti: migrazione, ciclo di vita, bozze, copie e riavvio offline"],
+      "status": "passed",
+      "expectedStatus": "passed",
+      "durationMs": 149237,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 149237
+        }
+      ]
+    },
+    {
+      "id": "aff0fb0d338399cb3988755f6a255ccf115551c90cc016c01df4a9c6ac2ff639",
+      "file": "subjects.spec.ts",
+      "titlePath": ["P06 Agenzie: migrazione, ciclo di vita, bozze, copie e riavvio offline"],
+      "status": "passed",
+      "expectedStatus": "passed",
+      "durationMs": 148719,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 148719
+        }
+      ]
+    },
+    {
+      "id": "f5d238bdb6f4b0e94a96fa796cb71196ace558bcf62dac068eed181a227b292b",
+      "file": "ui03-states.spec.ts",
+      "titlePath": [
+        "UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento e nuova sessione"
+      ],
+      "status": "passed",
+      "expectedStatus": "passed",
+      "durationMs": 54933,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 54933
+        }
+      ]
+    },
+    {
+      "id": "74459e4fe02331108f4e1765416a5e607d803e5be518a07ed7fd54bffdc60c92",
+      "file": "ui03.spec.ts",
+      "titlePath": [
+        "UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle due dimensioni"
+      ],
+      "status": "passed",
+      "expectedStatus": "passed",
+      "durationMs": 67528,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "durationMs": 67528
+        }
+      ]
+    }
+  ],
+  "manualDesktopConsolidation": {
+    "distinctPaths": 28,
+    "reusedTerminalPassed": 20,
+    "completedNativeCases": 8,
+    "evidence": "doc/p17a/desktop-riusati.txt",
+    "rules": "Consolidamento manuale per §7.3; i 20 ok individuali sono conservati testualmente, distinti dai 0 casi del collector incompleto. I quattro P17A vengono ripetuti; Clienti/Agenzie e UI03 completano i residui. Il report step resta incompleto e la diagnostica resta parziale.",
+    "originalFailure": "Tre test P17A fermati da selettori/preparazione delle fixture. Clienti EPERM durante pulizia cartella temporanea; fase fermata a 1800000 ms e report nativo non concluso. Timeout dei singoli test e retry invariati."
+  },
+  "validationNotes": {
+    "selection": "Nuovo editor e regressioni dei chiamanti di Operations e del piano condiviso soggetti/prestazioni. Schema invariato: test SQLite/FK/rollback e riapertura nelle 21 prove P17A; migrazioni della suite backend e percorsi Prestazioni selezionati. Suite desktop e pacchetto completi a M4.",
+    "reuse": "Backend completo invariato dopo gli ultimi affinamenti esclusivamente renderer/test desktop. Correzioni dei test verificate dal completamento diagnostico; successivo riepilogo dei blocchi in testa al confronto verificato con build finale esplicita e ripetizione dei quattro P17A. TypeScript node/web e ESLint mirato finali passati; resto del controllo globale riusato. Formattazione globale ricontrollata nel profilo documentazione finale.",
+    "humanManualSessions": 0,
+    "secondPhysicalMachine": false,
+    "packagingTriggered": false
+  },
+  "sourceSha256": {
+    "src/backend/application/operations/operation-service.ts": "7bf7c50ce116b94a2aec2b9bd0277421b701dba2e37f39a1549e5d2bc3a69be1",
+    "src/backend/application/operations/subject-resolution.ts": "632d3521fab95a96f502225990b4ef71063aea2956cf0e91a48141ebdc133e1d",
+    "src/preload/index.ts": "abce420e722f4e93880af250e2433bc17bc4ed99df8daf6f9594612570a3fa26",
+    "src/renderer/src/app/operations/Operations.tsx": "f8321074080f863cec0b8e48a114a449d6599ec35d3c340fc8d6c3e47fdb3876",
+    "src/shared/contracts/operations.ts": "feef0caca52600dc53b89a50aa57a7d71f655126fbf83ca4205c666bc4e245dd",
+    "src/backend/application/operations/operation-completion.ts": "2c87efc77771f42a077b468dbd1a5bea9762e380f1a8455ee695a9b4b00e3eff",
+    "src/backend/domain/operations/replay.ts": "73b85d93b4fe2467742fa6df18f26552b889f83662a6b07721c7363a41d663af",
+    "src/backend/infrastructure/database/operation-replay-repository.ts": "29563f37df0346ea676bfe00bda16c57f874edb9ca11ba68d39478e150ad2169",
+    "src/renderer/src/app/operations/OperationCompletionEditor.tsx": "04b4e3a814f15f16d16a304b897d2b82225148ad6616a6d7db4880edff23646c",
+    "tests/e2e/operation-completion.spec.ts": "89e2f1831a85ac2746b9de1e967a08ae3ea9dce209fa839f5a9f3b6a45b2372d",
+    "tests/unit/operation-completion.test.ts": "a86a43a985e101954f011c4aba8113557b9c6c4ba77cb650fe80fff885832eb3"
+  },
+  "buildSha256": {
+    "out/main/index.js": "d8cb5f349a75cba5fc5b202213728b0403a2fd77744457462d3beb522f4503f5",
+    "out/preload/index.js": "c6703a3606a7fa5e10dd7868d4e8212f28dce2a0b69aeae6af0add346380f847",
+    "out/renderer/assets/index-D6D2Y5Lo.js": "072ec594ede3154a9a0bef57081bd50ae12f6a9e331b6d12ef13e85f01e3e195",
+    "out/renderer/assets/index-DluJBYNQ.css": "fdde8f53c66fb7b4bc4ec1a45fc5659311f697864e7bca224950495f523cc338",
+    "out/renderer/index.html": "8c30f7a4792d8f655be75bb6bf76b43b3fcfb5022b7ccb91336acbef838765d5"
+  },
+  "buildUnchangedAfterFinalDesktop": true,
+  "finalScreenshotsSha256": {
+    "doc/p17a/schermate/anteprima-minimo.png": "e5629b88d27893a43ea142465c71ddf4ea8eb693b5d33654b1272f9604609566",
+    "doc/p17a/schermate/esterno-prima-dopo-desktop.png": "1ea63589f3806712f0a47afa4dd729ed8b6eff56993bf7cc9cf19718a55b4af3",
+    "doc/p17a/schermate/orfana-bloccata-desktop.png": "1b076beacbc2b1a5eb978c0c394764dd3cf3969e2278e9f9a3e63ccbed7ab1b9"
+  },
+  "visualInspections": {
+    "tool": "view_image",
+    "earlierImages": 2,
+    "finalImages": 3,
+    "note": "Cinque immagini effettivamente ispezionate, separate dal campione testuale. Le tre finali sono versionate."
+  },
+  "historicalScreenshotsRestored": [
+    {
+      "path": "doc/p13/schermate/p13-assegnazioni-desktop.png",
+      "restoredSha256": "ddc49b1311383d1db09bd7abd6db1186342f74e524004dd541e0952cffcf5d1e",
+      "generatedCopy": ".local/p17a-generated-p13/p13-assegnazioni-desktop.png",
+      "generatedSha256": "dfa0b1d37a391c99dc76eff421d19ecb92de2bef9e4bd7feee17815fc214181c"
+    },
+    {
+      "path": "doc/p13/schermate/p13-componenti-minimo.png",
+      "restoredSha256": "026e8c50a76bc62448fe9737464cf297df32a1835c30002c76fe58e333e5bf93",
+      "generatedCopy": ".local/p17a-generated-p13/p13-componenti-minimo.png",
+      "generatedSha256": "1df8bd7997ebe6323535bc1c3fe9c679cf6f169614cf2a2139eff4fa192a2e17"
+    }
+  ],
+  "operationsAndToolEvidence": {
+    "scope": "Inventario qualitativo delle letture iniziali e dello sviluppo; campione quantitativo esplicito delle chiamate successive. Le misure contano soltanto output shell restituito e letto, senza metadati del wrapper, byte non restituiti o equivalenze con token/costi.",
+    "initialInventory": [
+      "Git branch/status/HEAD/diff: main pulito su de23f71",
+      "AGENTS, guida, registro, piano P17A e §§2.2–2.4/7.3, passaggio M3",
+      "UI03, recupero post-P16, P00 D04, CU-OPN-06 legacy",
+      "Coordinatore/profili e consegna automazione",
+      "Contratti, validatore sequenza, repository/FK reali, attribuzioni e ricalcoli, renderer e test esistenti"
+    ],
+    "developmentInventory": [
+      "Scrittura dei moduli di replay, persistenza e caso d’uso, integrazioni IPC/preload/editor",
+      "Prove mirate native e collector, controllo tipi/lint/Prettier e build",
+      "Una chiamata apply_patch scaduta nel riesame automatico, ritentata riuscitamente; alcuni contesti patch corretti dopo formattazione",
+      "Avvio step con selezione esplicita; summary.md prima delle diagnosi delle sole fasi problematiche",
+      "Letture di immagini e revisione finale di documenti e Git registrate nella nota"
+    ],
+    "sampleCalls": 47,
+    "byteMeasuredCalls": 46,
+    "returnedOutputUtf8Bytes": 79709,
+    "returnedOutputLines": 1424,
+    "sample": [
+      {
+        "operation": "Lettura stato build, ambiente e differenze",
+        "tool": "exec_command",
+        "outputLines": 24,
+        "exitCode": 0
+      },
+      {
+        "operation": "Lettura CLI collector e contratti per prove desktop",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 4362,
+        "outputLines": 143,
+        "exitCode": 0
+      },
+      {
+        "operation": "Lettura stato prove, protezione risposte e sezione uso README",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 5836,
+        "outputLines": 59,
+        "exitCode": 0
+      },
+      {
+        "operation": "Lettura prioritaria summary desktop mirato",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 0,
+        "outputLines": 0,
+        "exitCode": 0
+      },
+      {
+        "operation": "Avvio collector backend mirato con --maxWorkers=1",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 38,
+        "outputLines": 1,
+        "sessionId": 60442
+      },
+      {
+        "operation": "Individuazione report e lettura differenze prima della verifica finale",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 2041,
+        "outputLines": 12,
+        "exitCode": 0
+      },
+      {
+        "operation": "Lettura summary backend mirato ampliato",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 409,
+        "outputLines": 4,
+        "exitCode": 0
+      },
+      {
+        "operation": "Formattazione esplicita prima di step",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 797,
+        "outputLines": 13,
+        "exitCode": 0
+      },
+      {
+        "operation": "Avvio coordinatore step: documenti e 11 file desktop espliciti; VITEST_MAX_WORKERS=1",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 115,
+        "outputLines": 1,
+        "sessionId": 1509
+      },
+      {
+        "operation": "Summary step e revisione contratti/integrazioni condivise",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 6510,
+        "outputLines": 131,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary step e revisione recupero conferme incerte",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 4349,
+        "outputLines": 115,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary step in corso e stato ESLint",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1274,
+        "outputLines": 41,
+        "exitCode": 0
+      },
+      {
+        "operation": "Lettura compatta avanzamento step",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 437,
+        "outputLines": 7,
+        "exitCode": 0
+      },
+      {
+        "operation": "Revisione conflitto diretto e summary step",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 2937,
+        "outputLines": 55,
+        "exitCode": 0
+      },
+      {
+        "operation": "Formattazione correzione conflitti diretti e summary step",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 549,
+        "outputLines": 9,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary e tempi delle fasi, lettura ambiente coordinatore",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 2733,
+        "outputLines": 56,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary e confronto input finali con inizio build",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 661,
+        "outputLines": 10,
+        "exitCode": 0
+      },
+      {
+        "operation": "ESLint degli ultimi due input modificati dopo il controllo globale",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 0,
+        "outputLines": 0,
+        "sessionId": 55117
+      },
+      {
+        "operation": "Summary step e individuazione prove grafiche/report",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 642,
+        "outputLines": 23,
+        "exitCode": 1
+      },
+      {
+        "operation": "Summary desktop e ricerca acquisizioni P17A",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 451,
+        "outputLines": 5,
+        "exitCode": 1
+      },
+      {
+        "operation": "Summary prima di ispezionare le schermate",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 451,
+        "outputLines": 5,
+        "exitCode": 1
+      },
+      {
+        "operation": "Summary step e collocazione report desktop",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 840,
+        "outputLines": 18,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary e diagnosi limitata desktop prolungato (28 righe finali)",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1447,
+        "outputLines": 14,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary e diagnosi mirata dei nuovi casi desktop",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 2988,
+        "outputLines": 22,
+        "exitCode": 0
+      },
+      {
+        "operation": "Lettura soli tre error-context dei casi P17A falliti",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 14902,
+        "outputLines": 304,
+        "exitCode": 0
+      },
+      {
+        "operation": "Formattazione, TypeScript node e ESLint del test desktop corretto",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 45,
+        "outputLines": 1,
+        "sessionId": 99759
+      },
+      {
+        "operation": "Summary e avanzamento delle regressioni dopo diagnosi P17A",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1610,
+        "outputLines": 12,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary e verifica prosecuzione regressioni",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1114,
+        "outputLines": 9,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary e stato regressioni Prestazioni",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1119,
+        "outputLines": 10,
+        "exitCode": 0
+      },
+      {
+        "operation": "Correzione interazione tastiera del test e summary",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 964,
+        "outputLines": 9,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary e durata fase desktop per pianificare il riuso",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 968,
+        "outputLines": 9,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary in attesa di ripetizione P17A, copertura focus dopo conferma",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1005,
+        "outputLines": 9,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary e verifica casi residui",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1215,
+        "outputLines": 11,
+        "exitCode": 0
+      },
+      {
+        "operation": "Diagnosi finale del timeout di fase e formattazione test prima del completamento selettivo",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 2327,
+        "outputLines": 23,
+        "exitCode": 0
+      },
+      {
+        "operation": "Verifica contesto parziale e controlli finali del test aggiornato",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1234,
+        "outputLines": 32,
+        "sessionId": 82156
+      },
+      {
+        "operation": "Completamento selettivo coordinatore diagnostica desktop: 8 percorsi, fase 60 minuti, build riusata",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 122,
+        "outputLines": 1,
+        "sessionId": 39025
+      },
+      {
+        "operation": "Verifica evidenze del caso interrotto e summary del completamento selettivo",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1213,
+        "outputLines": 10,
+        "exitCode": 0
+      },
+      {
+        "operation": "Diagnosi puntuale Clienti e dipendenze del profilo diagnostica",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 3392,
+        "outputLines": 77,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary e diagnosi del completamento selettivo dopo correzioni test",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1166,
+        "outputLines": 13,
+        "exitCode": 1
+      },
+      {
+        "operation": "Summary del completamento selettivo e riuso casi riusciti",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1254,
+        "outputLines": 12,
+        "exitCode": 0
+      },
+      {
+        "operation": "Summary conclusivo dei residui desktop",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 776,
+        "outputLines": 9,
+        "exitCode": 0
+      },
+      {
+        "operation": "Lettura contratto risultati riusciti per manifest selezionato e stato build finale",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 2285,
+        "outputLines": 81,
+        "exitCode": 0
+      },
+      {
+        "operation": "Snapshot SHA256 build finale e collector dei quattro P17A finali",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 41,
+        "outputLines": 1,
+        "sessionId": 30082
+      },
+      {
+        "operation": "Summary e checkpoint grafici della build finale",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 307,
+        "outputLines": 2,
+        "exitCode": 0
+      },
+      {
+        "operation": "Lettura prioritaria summary finale 4/4 e percorsi delle immagini",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 892,
+        "outputLines": 7,
+        "exitCode": 0
+      },
+      {
+        "operation": "Controllo finale branch, stato, differenze e artefatti della build prima della consegna",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 1795,
+        "outputLines": 37,
+        "exitCode": 0
+      },
+      {
+        "operation": "Conservazione acquisizioni generate P13 e ripristino byte per byte delle immagini storiche",
+        "tool": "exec_command",
+        "outputUtf8Bytes": 96,
+        "outputLines": 1,
+        "exitCode": 0
+      }
+    ],
+    "limitations": "Le chiamate iniziali non furono misurate in byte. Campione non equivalente all’intero task e non confrontabile con V03 come risparmio a parità di perimetro."
+  },
+  "next": "P17B. Suite integrate desktop/pacchetto a M4 salvo trigger; rivalutare V04–V07 sul riscontro P17A senza implementazioni anticipate.",
+  "finalDocumentation": {
+    "directory": "test-results/verification/2026-11-18T11-17-47.341Z-coordinator-kLq4rW",
+    "command": "node scripts/verification/coordinator.mjs documentazione --document README.md --document doc/stato-implementazione-prestazioni.md --document doc/piano-automazione-verifiche.md --document doc/p17a/consuntivazione-operazioni.md",
+    "completed": true,
+    "exitCode": 0,
+    "phases": [
+      {
+        "id": "documents",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        }
+      },
+      {
+        "id": "diff",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        }
+      },
+      {
+        "id": "formatting",
+        "status": "passed",
+        "process": {
+          "exitCode": 0,
+          "closeCode": 0,
+          "signal": null,
+          "error": null,
+          "interrupted": null
+        }
+      }
+    ],
+    "reuse": "Dopo questo profilo viene aggiunta soltanto la presente provenienza JSON, con controllo Prettier mirato e git diff --check; Markdown, link e sorgenti applicativi restano invariati."
+  },
+  "finalReview": {
+    "branch": "main",
+    "head": "de23f7198b204cc5cf2a1505f3f2dcef7aa65ae4",
+    "historicalP13DiffEmpty": true,
+    "buildUnchangedAfterFinalDesktop": true,
+    "commitCreated": false
+  }
+}

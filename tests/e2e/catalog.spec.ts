@@ -58,10 +58,10 @@ test('P08 catalogo: v8 popolato, pesi esatti, ciclo di vita, conflitti, copie e 
     )
     await page.getByRole('button', { name: 'Apri archivio', exact: true }).click()
     await expect(page.getByTestId('archive-path')).toHaveText(path)
-    expect(readdirSync(folder).some((n) => n.includes('.prima-v16-'))).toBe(true)
+    expect(readdirSync(folder).some((n) => n.includes('.prima-v17-'))).toBe(true)
     expect(await page.evaluate(() => window.archives.getState())).toMatchObject({
       ok: true,
-      value: { active: { schemaVersion: 16 }, context: { revision: '12' } },
+      value: { active: { schemaVersion: 17 }, context: { revision: '12' } },
     })
     await page.getByRole('button', { name: 'Catalogo e tariffe', exact: true }).click()
     const list = page.getByRole('region', { name: 'Elenco tipi di prestazione' }),

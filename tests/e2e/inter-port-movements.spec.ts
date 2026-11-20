@@ -25,6 +25,14 @@ async function start(
   arrival = '2026-05-03T11:30',
   status = 'Prevista',
 ) {
+  if (await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).isVisible()) {
+    await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).click()
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Scarta bozza', exact: true })
+      .click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+  }
   await page.getByRole('button', { name: 'Nuovo spostamento', exact: true }).click()
   const modal = page.getByRole('dialog')
   await modal.getByRole('combobox', { name: 'Stato', exact: true }).click()
@@ -87,10 +95,10 @@ test('P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità
     await operationFixture(app, path, 12, true)
     await page.getByRole('button', { name: 'Apri archivio', exact: true }).click()
     await expect(page.getByTestId('archive-path')).toHaveText(path)
-    expect(readdirSync(folder).some((n) => n.includes('.prima-v16-'))).toBe(true)
+    expect(readdirSync(folder).some((n) => n.includes('.prima-v17-'))).toBe(true)
     expect(await page.evaluate(() => window.archives.getState())).toMatchObject({
       ok: true,
-      value: { active: { schemaVersion: 16 }, context: { revision: '42' } },
+      value: { active: { schemaVersion: 17 }, context: { revision: '42' } },
     })
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(960, 700))
     await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()
@@ -99,7 +107,7 @@ test('P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità
     await submit(modal)
     await expect(modal.getByText(/strettamente successivo/)).toBeVisible()
     await page.keyboard.press('Escape')
-    await expect(page.getByRole('button', { name: 'Nuovo spostamento', exact: true })).toBeFocused()
+    await expect(page.getByRole('button', { name: 'Riprendi bozza', exact: true })).toBeFocused()
     modal = await start(page)
     await modal.getByRole('combobox', { name: 'Banchina (facoltativa)', exact: true }).click()
     await page.getByRole('option', { name: '2 · Molo Londra', exact: true }).click()
@@ -289,7 +297,9 @@ test('P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardi
     await expect(modal.getByText('Bozza obsoleta', { exact: true })).toBeVisible()
     await releaseOperation(app)
     await expect(modal.getByLabel('Componente EXIT', { exact: true })).toHaveCount(0)
-    await submit(modal)
+    await expect(
+      modal.getByRole('button', { name: 'Verifica e mostra anteprima', exact: true }),
+    ).toBeDisabled()
     await expect(modal.getByText(/cambiati|ricarica|revisione/i).first()).toBeVisible()
     await modal.getByRole('button', { name: 'Ricarica bozza', exact: true }).click()
     await submit(modal)

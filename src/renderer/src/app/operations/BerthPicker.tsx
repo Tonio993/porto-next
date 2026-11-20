@@ -12,12 +12,14 @@ export function BerthPicker({
   onChange,
   disabled,
   historical = false,
+  retained,
 }: {
   context: ArchiveContextDto
   portId: string
   value: string | null
   onChange: (value: string | null) => void
   historical?: boolean
+  retained?: { id: string; label: string } | null
   disabled: boolean
 }) {
   const [page, setPage] = useState(1),
@@ -36,7 +38,13 @@ export function BerthPicker({
     })
   }, [request, context.sessionId, context.revision, portId, page, historical])
   const options =
-    list?.items.map((b) => ({ value: b.id, label: `${b.code} · ${b.version.name}` })) ?? []
+    list?.items.map((b) => ({
+      value: b.id,
+      label: `${b.code} · ${b.version.name}${b.selectable ? '' : ' · Disattivata'}`,
+      ...(retained !== undefined ? { disabled: !b.selectable && b.id !== retained?.id } : {}),
+    })) ?? []
+  if (retained && retained.id === value && !options.some((o) => o.value === value))
+    options.unshift({ value: retained.id, label: retained.label })
   if (chosen?.value === value && !options.some((o) => o.value === value)) options.unshift(chosen)
   return (
     <>

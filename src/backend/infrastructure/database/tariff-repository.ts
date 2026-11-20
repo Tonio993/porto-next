@@ -85,6 +85,45 @@ export class TariffRepository {
       )
     return this.get(row.id)
   }
+  sequence(portId: string): TariffDto[] {
+    const rows = this.database.sqlite
+      .prepare('SELECT id FROM tariffs WHERE port_id=? ORDER BY effective_from')
+      .all(portId) as { id: string }[]
+    return rows.map(({ id }) => this.get(id))
+  }
+  /** Save surviving identities first; retire obsolete children only after charge/service updates. */
+  update(tariff: TariffDto) {
+    const sql = this.database.sqlite,
+      m = tariff.effectiveMoment
+    sql
+      .prepare(
+        'UPDATE tariffs SET effective_from=?,effective_local_date_time=?,effective_zone_id=?,effective_utc_offset=? WHERE id=?',
+      )
+      .run(m.utc, m.localDateTime, m.zoneId, m.offset, tariff.id)
+    for (const c of tariff.configurations) {
+      sql
+        .prepare('UPDATE tariff_configurations SET extra_width=?,extra_value=? WHERE id=?')
+        .run(c.extraWidth, c.extraValue, c.id)
+      for (const b of c.brackets)
+        sql
+          .prepare(
+            'INSERT INTO tariff_brackets VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value',
+          )
+          .run(b.id, c.id, b.upperLimit, b.value)
+    }
+  }
+  retire(before: TariffDto, after: TariffDto | null) {
+    const sql = this.database.sqlite
+    const retained = new Set(
+      after?.configurations.flatMap((c) => c.brackets.map((b) => b.id)) ?? [],
+    )
+    for (const c of before.configurations) {
+      for (const b of c.brackets)
+        if (!retained.has(b.id)) sql.prepare('DELETE FROM tariff_brackets WHERE id=?').run(b.id)
+      if (!after) sql.prepare('DELETE FROM tariff_configurations WHERE id=?').run(c.id)
+    }
+    if (!after) sql.prepare('DELETE FROM tariffs WHERE id=?').run(before.id)
+  }
   neighbors(portId: string, instant: string) {
     const sql = this.database.sqlite
     if (

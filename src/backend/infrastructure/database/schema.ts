@@ -275,11 +275,18 @@ export const weightVersions = sqliteTable(
     sequenceId: text('sequence_id')
       .notNull()
       .references(() => weightSequences.id),
+    legacyInitialFrom: text('legacy_initial_from'),
     effectiveFrom: text('effective_from'),
+    effectiveLocalDateTime: text('effective_local_date_time'),
+    effectiveZoneId: text('effective_zone_id'),
+    effectiveUtcOffset: text('effective_utc_offset'),
     weight: text('weight').notNull(),
   },
   (table) => [
     uniqueIndex('weight_version_owner').on(table.id, table.sequenceId),
+    uniqueIndex('weight_effective_unique')
+      .on(table.sequenceId, table.effectiveFrom)
+      .where(sql`${table.effectiveFrom} IS NOT NULL`),
     uniqueIndex('weight_initial_unique')
       .on(table.sequenceId)
       .where(sql`${table.effectiveFrom} IS NULL`),

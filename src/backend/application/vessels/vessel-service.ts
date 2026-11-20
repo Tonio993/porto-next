@@ -254,7 +254,7 @@ export class VesselService implements VesselApi {
     return this.coordinator.command(request, (session, payload): VesselPreviewDto => {
       const now = this.now()
       const change = this.parse(session, payload, now)
-      const { effects, blockers, warnings } = this.analyse(session, change, now)
+      const { effects, blockers, warnings, impacts } = this.analyse(session, change, now)
       const context = session.context()
       return {
         ...session.previews.put(previewNamespace, context, change),
@@ -265,7 +265,7 @@ export class VesselService implements VesselApi {
           created: effects.filter(({ action }) => action === 'CREATE').length,
           updated: effects.filter(({ action }) => action === 'UPDATE').length,
           deleted: effects.filter(({ action }) => action === 'DELETE').length,
-          recalculated: effects.filter((e) => e.reference.kind === 'OPERATION_CHARGE').length,
+          recalculated: impacts?.recalculated ?? 0,
           reattributed: 0,
         },
         effects: { items: effects.slice(0, 50), total: effects.length, page: 1, pageSize: 50 },

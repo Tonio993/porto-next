@@ -117,6 +117,13 @@ const vessels: VesselApi = {
 contextBridge.exposeInMainWorld('vessels', vessels)
 
 const catalog: CatalogApi = {
+  weightHistory: (request) => ipcRenderer.invoke(catalogChannels.weightHistory, request),
+  getWeight: (request) => ipcRenderer.invoke(catalogChannels.getWeight, request),
+  resolveWeightMoment: (request) =>
+    ipcRenderer.invoke(catalogChannels.resolveWeightMoment, request),
+  previewWeight: (request) => ipcRenderer.invoke(catalogChannels.previewWeight, request),
+  confirmWeight: (request) => ipcRenderer.invoke(catalogChannels.confirmWeight, request),
+  weightEffects: (request) => ipcRenderer.invoke(catalogChannels.weightEffects, request),
   list: (request) => ipcRenderer.invoke(catalogChannels.list, request),
   get: (request) => ipcRenderer.invoke(catalogChannels.get, request),
   fixedWeights: (request) => ipcRenderer.invoke(catalogChannels.fixedWeights, request),
@@ -129,6 +136,12 @@ const catalog: CatalogApi = {
 contextBridge.exposeInMainWorld('catalog', catalog)
 
 const tariffs: TariffApi = {
+  previewUpdate: (request) => ipcRenderer.invoke(tariffChannels.previewUpdate, request),
+  confirmUpdate: (request) => ipcRenderer.invoke(tariffChannels.confirmUpdate, request),
+  previewDelete: (request) => ipcRenderer.invoke(tariffChannels.previewDelete, request),
+  confirmDelete: (request) => ipcRenderer.invoke(tariffChannels.confirmDelete, request),
+  updateEffects: (request) => ipcRenderer.invoke(tariffChannels.updateEffects, request),
+  deletionEffects: (request) => ipcRenderer.invoke(tariffChannels.deletionEffects, request),
   list: (request) => ipcRenderer.invoke(tariffChannels.list, request),
   get: (request) => ipcRenderer.invoke(tariffChannels.get, request),
   copyConfigurations: (request) => ipcRenderer.invoke(tariffChannels.copyConfigurations, request),
@@ -143,6 +156,18 @@ contextBridge.exposeInMainWorld('tariffs', tariffs)
 const operations: OperationApi = {
   resolveCompletionMoment: (request) =>
     ipcRenderer.invoke(operationChannels.resolveCompletionMoment, request),
+  resolveCorrectionMoment: (request) =>
+    ipcRenderer.invoke(operationChannels.resolveCorrectionMoment, request),
+  previewDelete: (request) => ipcRenderer.invoke(operationChannels.previewDelete, request),
+  deletionEffects: (request) => ipcRenderer.invoke(operationChannels.deletionEffects, request),
+  confirmDelete: (request) => ipcRenderer.invoke(operationChannels.confirmDelete, request),
+  updateNotes: (request) => ipcRenderer.invoke(operationChannels.updateNotes, request),
+  previewCorrect: (request) => ipcRenderer.invoke(operationChannels.previewCorrect, request),
+  correctionEffects: (request) => ipcRenderer.invoke(operationChannels.correctionEffects, request),
+  confirmCorrect: (request) => ipcRenderer.invoke(operationChannels.confirmCorrect, request),
+  previewInsert: (request) => ipcRenderer.invoke(operationChannels.previewInsert, request),
+  insertionEffects: (request) => ipcRenderer.invoke(operationChannels.insertionEffects, request),
+  confirmInsert: (request) => ipcRenderer.invoke(operationChannels.confirmInsert, request),
   previewComplete: (request) => ipcRenderer.invoke(operationChannels.previewComplete, request),
   completionEffects: (request) => ipcRenderer.invoke(operationChannels.completionEffects, request),
   confirmComplete: (request) => ipcRenderer.invoke(operationChannels.confirmComplete, request),

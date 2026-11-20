@@ -11,11 +11,13 @@ export function VesselPicker({
   value,
   onChange,
   disabled,
+  retainedId,
 }: {
   context: ArchiveContextDto
   value: string | null
   onChange: (id: string | null) => void
   disabled?: boolean
+  retainedId?: string
 }) {
   const [search, setSearch] = useState(''),
     [page, setPage] = useState(1),
@@ -58,6 +60,7 @@ export function VesselPicker({
   const options =
     list?.items.map((v) => ({
       value: v.id,
+      ...(retainedId !== undefined ? { disabled: !v.selectable && v.id !== retainedId } : {}),
       label: `${v.code} · ${v.version.registeredName}${v.selectable ? '' : ' · Disattivata'}`,
     })) ?? []
   if (chosen?.value === value && !options.some((o) => o.value === value)) options.unshift(chosen)

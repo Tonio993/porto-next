@@ -25,6 +25,14 @@ async function start(
   arrival = '2026-05-03T13:00',
   status = 'Prevista',
 ) {
+  if (await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).isVisible()) {
+    await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).click()
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Scarta bozza', exact: true })
+      .click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+  }
   await page.getByRole('button', { name: 'Nuovo spostamento', exact: true }).click()
   const modal = page.getByRole('dialog')
   await modal.getByRole('combobox', { name: 'Stato', exact: true }).click()
@@ -70,10 +78,10 @@ test('P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa
     await operationFixture(app, path, 11)
     await page.getByRole('button', { name: 'Apri archivio', exact: true }).click()
     await expect(page.getByTestId('archive-path')).toHaveText(path)
-    expect(readdirSync(folder).some((n) => n.includes('.prima-v16-'))).toBe(true)
+    expect(readdirSync(folder).some((n) => n.includes('.prima-v17-'))).toBe(true)
     expect(await page.evaluate(() => window.archives.getState())).toMatchObject({
       ok: true,
-      value: { active: { schemaVersion: 16 }, context: { revision: '42' } },
+      value: { active: { schemaVersion: 17 }, context: { revision: '42' } },
     })
     await page.evaluate(async (ids) => {
       const state = await window.archives.getState()
@@ -111,7 +119,7 @@ test('P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa
     await submit(modal)
     await expect(modal.getByText(/strettamente successivo/)).toBeVisible()
     await page.keyboard.press('Escape')
-    await expect(page.getByRole('button', { name: 'Nuovo spostamento', exact: true })).toBeFocused()
+    await expect(page.getByRole('button', { name: 'Riprendi bozza', exact: true })).toBeFocused()
     modal = await start(page)
     await modal.getByLabel('Sostituzione manuale della base').fill('0')
     await submit(modal)
@@ -296,6 +304,9 @@ test('P11 asincronia: risoluzione arrivo, query di contesto, selezione, revision
     await modal.getByRole('button', { name: 'Verifica estremi', exact: true }).click()
     await expect(modal.getByText('Scegli l’occorrenza dell’orario.', { exact: true })).toBeVisible()
     await page.keyboard.press('Escape')
+    await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).click()
+    await modal.getByRole('button', { name: 'Scarta bozza', exact: true }).click()
+    await expect(modal).toHaveCount(0)
     await page.getByRole('button', { name: 'Permanenze', exact: true }).click()
     await page.getByLabel('Istante UTC', { exact: true }).fill('2026-05-03T10:30')
     await delayOperationResponse(app, 'operations:context-at')
@@ -318,7 +329,9 @@ test('P11 asincronia: risoluzione arrivo, query di contesto, selezione, revision
       if (!r.ok) throw Error(r.error.message)
     })
     await expect(modal.getByText('Bozza obsoleta', { exact: true })).toBeVisible()
-    await submit(modal)
+    await expect(
+      modal.getByRole('button', { name: 'Verifica e mostra anteprima', exact: true }),
+    ).toBeDisabled()
     await expect(modal.getByText(/cambiati|ricarica|revisione/i).first()).toBeVisible()
     await modal.getByRole('button', { name: 'Ricarica bozza', exact: true }).click()
     await submit(modal)

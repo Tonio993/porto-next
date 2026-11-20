@@ -73,14 +73,26 @@ it('migra v9 popolato conservando tutte le righe, revisioni e backup; aggiunge l
   fixture(path)
   const before = snapshot(path)
   expect(await archives.open(path)).toMatchObject({
-    schemaVersion: 16,
+    schemaVersion: 17,
     updatedAt: '2026-02-01T00:00:00.000Z',
   })
   expect(archives.context()?.revision).toBe('42')
   const after = snapshot(path)
-  expect(after.version).toBe(16)
-  for (const [table, rows] of Object.entries(before.rows)) expect(after.rows[table]).toEqual(rows)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v16-'))!
+  expect(after.version).toBe(17)
+  for (const [table, rows] of Object.entries(before.rows))
+    expect(
+      table === 'weight_versions'
+        ? (after.rows[table] as Record<string, unknown>[]).map((row) =>
+            Object.fromEntries(
+              Object.keys((rows as Record<string, unknown>[])[0] ?? {}).map((key) => [
+                key,
+                row[key],
+              ]),
+            ),
+          )
+        : after.rows[table],
+    ).toEqual(rows)
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v17-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
   expect(after.rows.tariffs).toEqual([])
   expect(after.rows.tariff_configurations).toEqual([])
@@ -104,6 +116,6 @@ it('rollback dopo creazione parziale delle tabelle conserva v9, dati e sessione 
   await expect(archives.open(path)).rejects.toThrow()
   expect(snapshot(path)).toEqual(before)
   expect(archives.context()).toEqual(context)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v16-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v17-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
 })

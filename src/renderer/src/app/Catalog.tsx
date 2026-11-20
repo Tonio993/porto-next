@@ -1,3 +1,4 @@
+import { WeightHistory } from './weights/WeightHistory'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Pagination, Select, Stack, TextInput } from '@mantine/core'
 import type { ApplicationErrorDto, ArchiveContextDto } from '../../../shared/contracts/application'
@@ -30,6 +31,13 @@ export function Catalog({
   onDialogChange: (open: boolean) => void
 }) {
   const context = archives.state.context!
+  const [weightWindow, setWeightWindow] = useState<{
+    sequenceId: string
+    label: string
+    opened: boolean
+    uncertain: boolean
+    trigger: HTMLElement | null
+  } | null>(null)
   const [reload, setReload] = useState(0)
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('ALL')
@@ -68,10 +76,11 @@ export function Catalog({
     { request: readFixed } = fixedRequest
   const busy = archives.busy || archives.commandBusy || commandRequest.loading
   const dialogOpen = !!draft || confirmOpen
+  const anyDialogOpen = dialogOpen || !!weightWindow?.opened
   useEffect(() => {
-    onDialogChange(dialogOpen)
+    onDialogChange(anyDialogOpen)
     return () => onDialogChange(false)
-  }, [dialogOpen, onDialogChange])
+  }, [anyDialogOpen, onDialogChange])
   useEffect(() => {
     void readList(() =>
       window.catalog.list({
@@ -105,6 +114,16 @@ export function Catalog({
       if (result?.ok) setFixed([...result.value])
     })
   }, [readFixed, context.sessionId, context.revision, reload])
+  const openWeights = (sequenceId: string, label: string) => {
+    if (weightWindow) return
+    setWeightWindow({
+      sequenceId,
+      label,
+      opened: true,
+      uncertain: false,
+      trigger: document.activeElement instanceof HTMLElement ? document.activeElement : null,
+    })
+  }
   const fieldError = (name: string) => issues.find((issue) => issue.path[0] === name)?.message
   const close = () => {
     if (busy) return
@@ -240,6 +259,25 @@ export function Catalog({
           {notice}
         </StateMessage>
       )}
+      {weightWindow && !weightWindow.opened && (
+        <StateMessage title="Bozza peso conservata" kind="warning">
+          <Group>
+            <Button
+              disabled={busy || dialogOpen}
+              onClick={() => setWeightWindow({ ...weightWindow, opened: true })}
+            >
+              Riprendi bozza peso
+            </Button>
+            <Button
+              variant="default"
+              disabled={busy || weightWindow.uncertain}
+              onClick={() => setWeightWindow(null)}
+            >
+              Scarta bozza peso
+            </Button>
+          </Group>
+        </StateMessage>
+      )}
       <div className="ports-workspace">
         <section className="archive-panel port-list" aria-label="Elenco tipi di prestazione">
           <Group className="port-list-heading" justify="space-between">
@@ -360,6 +398,13 @@ export function Catalog({
                   ? 'Già utilizzato: eliminazione non consentita.'
                   : 'Mai utilizzato.'}
               </p>
+              <Button
+                variant="light"
+                disabled={busy || !!weightWindow}
+                onClick={() => openWeights(detail.initialWeight.sequenceId, detail.description)}
+              >
+                Cronologia pesi
+              </Button>
               <Group gap="xs">
                 <Button
                   variant="default"
@@ -413,18 +458,48 @@ export function Catalog({
           {fixed.map((item) => (
             <p key={item.operation}>
               <strong>{operationLabels[item.operation]}</strong>:{' '}
-              {item.initialWeight.weight.replace('.', ',')} · senza decorrenza
+              {item.initialWeight.weight.replace('.', ',')} · peso iniziale senza decorrenza
+              <Button
+                ml="sm"
+                size="compact-sm"
+                variant="light"
+                disabled={busy || !!weightWindow}
+                onClick={() =>
+                  openWeights(item.initialWeight.sequenceId, operationLabels[item.operation])
+                }
+              >
+                Cronologia pesi {operationLabels[item.operation]}
+              </Button>
             </p>
           ))}
-          <StateMessage title="Pesi iniziali">
-            Ogni tipo ha una sequenza autonoma. Le variazioni successive dei pesi saranno
-            disponibili in una fase successiva.
+          <StateMessage title="Sequenze dei pesi">
+            Ogni operazione fissa e tipo configurabile ha una cronologia autonoma. Apri la
+            cronologia per inserire, correggere o eliminare versioni datate e consultarne gli
+            effetti.
           </StateMessage>
-          <Button mt="sm" variant="default" disabled>
-            Variazioni dei pesi · in preparazione
-          </Button>
         </section>
       </div>
+      {weightWindow && (
+        <WeightHistory
+          sequenceId={weightWindow.sequenceId}
+          label={weightWindow.label}
+          opened={weightWindow.opened}
+          archives={archives}
+          trigger={weightWindow.trigger}
+          onClose={(keep) =>
+            setWeightWindow((old) => (keep && old ? { ...old, opened: false } : null))
+          }
+          onUncertainChange={(uncertain) =>
+            setWeightWindow((old) =>
+              old && old.uncertain !== uncertain ? { ...old, uncertain } : old,
+            )
+          }
+          onApplied={() => {
+            setReload((n) => n + 1)
+            setNotice('Peso aggiornato e calcoli ricalcolati.')
+          }}
+        />
+      )}
       <Modal
         opened={dialogOpen}
         onClose={close}

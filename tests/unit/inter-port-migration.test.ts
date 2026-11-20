@@ -187,7 +187,7 @@ it('P12: migra v12 popolato preservando ogni riga, int64, tuple, identità, meta
   v12(path)
   const before = snapshot(path)
   const opened = await archives.open(path)
-  expect(opened.schemaVersion).toBe(16)
+  expect(opened.schemaVersion).toBe(17)
   const after = snapshot(path)
   for (const [table, records] of Object.entries(before.rows)) {
     const actual = after.rows[table]
@@ -199,7 +199,7 @@ it('P12: migra v12 popolato preservando ogni riga, int64, tuple, identità, meta
   expect(
     new OperationRepository(archives.coordinator.requireSession().database).stays(vesselId, 1, 25),
   ).toEqual(hierarchy)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v16-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v17-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
   expect(sql().pragma('foreign_key_check')).toEqual([])
   expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
@@ -216,7 +216,7 @@ it('P12: FK restrittiva interrompe la sostituzione dopo la copia e conserva v12 
     snapshot(
       join(
         folder,
-        readdirSync(folder).find((n) => n.includes('.prima-v16-'))!,
+        readdirSync(folder).find((n) => n.includes('.prima-v17-'))!,
       ),
     ),
   ).toEqual(before)
@@ -238,6 +238,6 @@ it('P12: rollback dopo copia e sostituzione delle componenti ripristina interame
   await expect(archives.open(path)).rejects.toThrow()
   expect(snapshot(path)).toEqual(before)
   expect(context()).toEqual(active)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v16-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v17-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
 })

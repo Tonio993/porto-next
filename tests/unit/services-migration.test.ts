@@ -205,16 +205,27 @@ it('P14: v14 popolato → v15 conserva tutte le righe, tuple, int64, revisioni e
   previous(path)
   const before = snapshot(path),
     original = new OperationRepository(archives.coordinator.requireSession().database).all()
-  expect((await archives.open(path)).schemaVersion).toBe(16)
+  expect((await archives.open(path)).schemaVersion).toBe(17)
   const after = snapshot(path)
   for (const [table, records] of Object.entries(before.rows))
-    expect(after.rows[table]).toEqual(records)
+    expect(
+      table === 'weight_versions'
+        ? (after.rows[table] as Record<string, unknown>[]).map((row) =>
+            Object.fromEntries(
+              Object.keys((records as Record<string, unknown>[])[0] ?? {}).map((key) => [
+                key,
+                row[key],
+              ]),
+            ),
+          )
+        : after.rows[table],
+    ).toEqual(records)
   expect(after.rows.service_activities).toEqual([])
   expect(after.rows.service_activity_subjects).toEqual([])
   expect(new OperationRepository(archives.coordinator.requireSession().database).all()).toEqual(
     original,
   )
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v16-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v17-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
   expect(sql().pragma('foreign_key_check')).toEqual([])
   expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
@@ -230,7 +241,7 @@ it('P14: errore dopo creazione delle tabelle annulla migrazione e conserva sessi
   await expect(archives.open(path)).rejects.toThrow()
   expect(snapshot(path)).toEqual(before)
   expect(context()).toEqual(active)
-  const backup = readdirSync(folder).find((n) => n.includes('.prima-v16-'))!
+  const backup = readdirSync(folder).find((n) => n.includes('.prima-v17-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
 })
 
@@ -242,7 +253,7 @@ it('P15: v15 popolato → v16 conserva FREE, soggetti, operazioni, revisione e c
     context: { sessionId: context().sessionId },
     query: { vesselId, page: 1, pageSize: 25 },
   })
-  expect((await archives.open(path)).schemaVersion).toBe(16)
+  expect((await archives.open(path)).schemaVersion).toBe(17)
   const after = snapshot(path)
   for (const [table, records] of Object.entries(before.rows)) {
     const columns = Object.keys((records as Record<string, unknown>[])[0] ?? {})
@@ -257,7 +268,7 @@ it('P15: v15 popolato → v16 conserva FREE, soggetti, operazioni, revisione e c
     query: { vesselId, page: 1, pageSize: 25 },
   })
   expect(value(actual)).toEqual(value(original))
-  const backup = readdirSync(folder).find((n) => n.startsWith('v15.ormeggi.prima-v16-'))!
+  const backup = readdirSync(folder).find((n) => n.startsWith('v15.ormeggi.prima-v17-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
   expect(sql().pragma('foreign_key_check')).toEqual([])
   expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
@@ -273,6 +284,6 @@ it('P15: errore dopo ricostruzione e copia dei soggetti annulla ogni effetto del
   await expect(archives.open(path)).rejects.toThrow()
   expect(snapshot(path)).toEqual(before)
   expect(context()).toEqual(active)
-  const backup = readdirSync(folder).find((n) => n.startsWith('v15-failure.ormeggi.prima-v16-'))!
+  const backup = readdirSync(folder).find((n) => n.startsWith('v15-failure.ormeggi.prima-v17-'))!
   expect(snapshot(join(folder, backup))).toEqual(before)
 })

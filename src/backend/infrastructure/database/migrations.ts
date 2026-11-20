@@ -1,3 +1,4 @@
+import weightVersionsSql from '../../../../migrations/0017_weight_versions.sql?raw'
 import catalogServicesSql from '../../../../migrations/0016_catalog_services.sql?raw'
 import freeServicesSql from '../../../../migrations/0015_free_services.sql?raw'
 import effectiveSubjectsSql from '../../../../migrations/0014_effective_subjects.sql?raw'
@@ -19,7 +20,7 @@ import { ArchiveError } from '../../../shared/errors/archive-error'
 import subjectsSql from '../../../../migrations/0007_customers_agencies.sql?raw'
 
 export const APPLICATION_ID = 0x504f5254
-export const SCHEMA_VERSION = 16
+export const SCHEMA_VERSION = 17
 
 const migrations = [
   { version: 1, sql: initialSql },
@@ -38,6 +39,7 @@ const migrations = [
   { version: 14, sql: effectiveSubjectsSql },
   { version: 15, sql: freeServicesSql },
   { version: 16, sql: catalogServicesSql },
+  { version: 17, sql: weightVersionsSql },
 ]
 
 export function migrate(database: Database.Database, fromVersion: number): void {

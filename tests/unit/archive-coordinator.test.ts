@@ -284,12 +284,12 @@ describe('migrazione da v1', () => {
     const info = await service.open(file('v1'))
     expect(info).toMatchObject({
       name: 'Archivio storico',
-      schemaVersion: 16,
+      schemaVersion: 17,
       createdAt: '2020-01-01T00:00:00.000Z',
       updatedAt: '2021-01-01T00:00:00.000Z',
     })
     expect(context().revision).toBe('0')
-    const backup = readdirSync(folder).find((name) => name.includes('.prima-v16-'))!
+    const backup = readdirSync(folder).find((name) => name.includes('.prima-v17-'))!
     const snapshot = new Database(join(folder, backup), { readonly: true })
     try {
       expect(snapshot.pragma('user_version', { simple: true })).toBe(1)
@@ -305,7 +305,7 @@ describe('migrazione da v1', () => {
     }
     await service.close()
     await service.open(file('v1'))
-    expect(readdirSync(folder).filter((name) => name.includes('.prima-v16-'))).toHaveLength(1)
+    expect(readdirSync(folder).filter((name) => name.includes('.prima-v17-'))).toHaveLength(1)
   })
 
   it('una migrazione fallita non altera il v1 e conserva la sessione precedente', async () => {

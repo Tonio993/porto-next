@@ -1,8 +1,11 @@
 import { subjectPlan } from './subject-resolution'
 import { OperationCompletion } from './operation-completion'
+import { OperationInsertion } from './operation-insertion'
+import { OperationRemoval } from './operation-removal'
 import { randomUUID } from 'node:crypto'
 import type {
   OperationApi,
+  CreateOperationDto,
   OperationMomentInput,
   OperationMomentDto,
   VesselOperationDto,
@@ -28,7 +31,7 @@ import { momentInput } from '../tariffs/tariff-input'
 import { calculateBase } from '../tariffs/calculate-base'
 
 const namespace = 'OPERATION_CREATE'
-type PreparedOperation = VesselOperationDto & { openingIds: OpeningIds }
+export type PreparedOperation = VesselOperationDto & { openingIds: OpeningIds }
 const kind = (value: unknown) => {
   const type = (value as { operationType?: unknown } | null)?.operationType
   if (type !== 'ENTRY' && type !== 'EXIT' && type !== 'MOVEMENT')
@@ -88,6 +91,14 @@ function parseMoment(
 }
 export class OperationService implements OperationApi {
   constructor(private readonly coordinator: ArchiveCoordinator) {}
+  previewDelete: OperationApi['previewDelete'] = (request) =>
+    new OperationRemoval(this.coordinator).previewDelete(request)
+  deletionEffects: OperationApi['deletionEffects'] = (request) =>
+    new OperationRemoval(this.coordinator).deletionEffects(request)
+  confirmDelete: OperationApi['confirmDelete'] = (request) =>
+    new OperationRemoval(this.coordinator).confirmDelete(request)
+  updateNotes: OperationApi['updateNotes'] = (request) =>
+    new OperationRemoval(this.coordinator).updateNotes(request)
   resolveCompletionMoment: OperationApi['resolveCompletionMoment'] = (request) =>
     new OperationCompletion(this.coordinator).resolveCompletionMoment(request)
   previewComplete: OperationApi['previewComplete'] = (request) =>
@@ -96,6 +107,25 @@ export class OperationService implements OperationApi {
     new OperationCompletion(this.coordinator).completionEffects(request)
   confirmComplete: OperationApi['confirmComplete'] = (request) =>
     new OperationCompletion(this.coordinator).confirmComplete(request)
+  resolveCorrectionMoment: OperationApi['resolveCorrectionMoment'] = (request) =>
+    new OperationCompletion(this.coordinator, true).resolveCompletionMoment(request)
+  previewCorrect: OperationApi['previewCorrect'] = (request) =>
+    new OperationCompletion(this.coordinator, true).previewComplete(request)
+  correctionEffects: OperationApi['correctionEffects'] = (request) =>
+    new OperationCompletion(this.coordinator, true).completionEffects(request)
+  confirmCorrect: OperationApi['confirmCorrect'] = (request) =>
+    new OperationCompletion(this.coordinator, true).confirmComplete(request)
+  private insertion() {
+    return new OperationInsertion(this.coordinator, (s, input, identity) =>
+      this.prepare(s, input, true, identity),
+    )
+  }
+  previewInsert: OperationApi['previewInsert'] = (request) =>
+    this.insertion().previewInsert(request)
+  insertionEffects: OperationApi['insertionEffects'] = (request) =>
+    this.insertion().insertionEffects(request)
+  confirmInsert: OperationApi['confirmInsert'] = (request) =>
+    this.insertion().confirmInsert(request)
   contextAt: OperationApi['contextAt'] = (request) =>
     this.coordinator.query(request, (s, q) => {
       const i = record(q, ['vesselId', 'instant']),
@@ -220,7 +250,7 @@ export class OperationService implements OperationApi {
     }
     return result
   }
-  private validate(s: ArchiveApplicationSession, operation: VesselOperationDto) {
+  private validate(s: ArchiveApplicationSession, operation: VesselOperationDto, sequence = true) {
     const now = new Date().toISOString(),
       e = operation.endpoint
     new VesselRepository(s.database, now).requireSelectable(operation.vesselId)
@@ -234,10 +264,11 @@ export class OperationService implements OperationApi {
           destination.berthId,
         )
     }
-    validateOperationSequence([
-      ...new OperationRepository(s.database).all(operation.vesselId),
-      operation,
-    ])
+    if (sequence)
+      validateOperationSequence([
+        ...new OperationRepository(s.database).all(operation.vesselId),
+        operation,
+      ])
   }
   private effects(s: ArchiveApplicationSession, op: PreparedOperation): ChangeEffectDto[] {
     const reference = {
@@ -374,161 +405,185 @@ export class OperationService implements OperationApi {
     )
     return effects
   }
+  private prepare(
+    s: ArchiveApplicationSession,
+    payload: CreateOperationDto,
+    retrospective = false,
+    identity?: PreparedOperation,
+  ): PreparedOperation {
+    const { input, target } = parseMoment(payload, [
+      'executionStatus',
+      'notes',
+      'manualOverrideAmount',
+      ...(kind(payload) === 'MOVEMENT' &&
+      Object.hasOwn(payload as object, 'arrivalManualOverrideAmount')
+        ? ['arrivalManualOverrideAmount']
+        : []),
+    ])
+    if (!['PLANNED', 'PERFORMED', 'MISSED'].includes(input.executionStatus as string))
+      throw new ArchiveError('VALIDATION_ERROR', 'Stato operativo non valido.')
+    if (
+      input.notes !== null &&
+      (typeof input.notes !== 'string' || [...input.notes].length > 10000)
+    )
+      throw new ArchiveError(
+        'VALIDATION_ERROR',
+        'Le note possono contenere al massimo 10000 caratteri.',
+        [{ path: ['notes'], code: 'INVALID_TEXT', message: 'Controlla le note.' }],
+      )
+    const override =
+      input.manualOverrideAmount === null
+        ? null
+        : Money.parse(input.manualOverrideAmount, 'manualOverrideAmount').text
+    const arrivalOverride =
+      !Object.hasOwn(input, 'arrivalManualOverrideAmount') ||
+      input.arrivalManualOverrideAmount === null
+        ? null
+        : Money.parse(input.arrivalManualOverrideAmount, 'arrivalManualOverrideAmount').text
+    const resolved = this.resolve(s, target)
+    if (
+      arrivalOverride !== null &&
+      target.operationType === 'MOVEMENT' &&
+      target.destinationPortId === resolved.portId
+    )
+      throw new ArchiveError(
+        'VALIDATION_ERROR',
+        'La sostituzione all’arrivo è ammessa solo per lo spostamento tra porti.',
+        [
+          {
+            path: ['arrivalManualOverrideAmount'],
+            code: 'NOT_APPLICABLE',
+            message: 'Lo spostamento interno ha una sola componente alla partenza.',
+          },
+        ],
+      )
+    if (
+      resolved.resolution.status !== 'RESOLVED' ||
+      resolved.arrivalResolution?.status === 'CHOICE_REQUIRED'
+    )
+      throw new ArchiveError(
+        'LOCAL_TIME_AMBIGUOUS',
+        'Scegli esplicitamente l’occorrenza del momento operativo.',
+      )
+    const moment = resolved.resolution.moment,
+      now = new Date().toISOString()
+    const ports = new PortRepository(s.database, () => now),
+      berths = new BerthRepository(s.database, now)
+    const endpoint = (
+      portId: string,
+      berthId: string | null,
+      moment: OperationEndpointDto['moment'],
+      role: OperationEndpointDto['role'],
+    ): OperationEndpointDto => {
+      const applicable = <T extends { effectiveFrom: string | null; effectiveTo: string | null }>(
+        versions: readonly T[],
+      ) =>
+        versions.find(
+          (v) =>
+            (!v.effectiveFrom || v.effectiveFrom <= moment.utc) &&
+            (!v.effectiveTo || moment.utc < v.effectiveTo),
+        )!
+      const portVersion = applicable(ports.versions(portId)),
+        berthVersion = berthId ? applicable(berths.versions(berthId)) : null
+      const vesselVersion = applicable(
+        new VesselRepository(s.database, now).versions(target.vesselId),
+      )
+      const original = role === 'ARRIVAL' ? identity?.arrival : identity?.endpoint
+      if (identity && !original)
+        throw new ArchiveError(
+          'PREVIEW_BLOCKED',
+          'Gli estremi sono cambiati. Genera una nuova anteprima.',
+        )
+      return {
+        id: original?.id ?? randomUUID(),
+        role,
+        vesselVersionId: vesselVersion.id,
+        moment,
+        portId,
+        portVersionId: portVersion.id,
+        portName: portVersion.name,
+        berthId,
+        berthVersionId: berthVersion?.id ?? null,
+        berthName: berthVersion?.name ?? null,
+      }
+    }
+    const operation: PreparedOperation = {
+      openingIds: identity?.openingIds ?? {
+        ...(target.operationType === 'MOVEMENT'
+          ? new OperationRepository(s.database).openIds(target.vesselId, moment.utc)
+          : { voyageId: randomUUID(), portCallId: randomUUID() }),
+        ...(target.operationType === 'MOVEMENT' && target.destinationPortId !== resolved.portId
+          ? { portCallId: randomUUID() }
+          : {}),
+        berthStayId: randomUUID(),
+      },
+      id: identity?.id ?? randomUUID(),
+      vesselId: target.vesselId,
+      vesselVersionId: '',
+      operationType: target.operationType,
+      executionStatus: input.executionStatus as VesselOperationDto['executionStatus'],
+      notes: input.notes as string | null,
+      endpoint: endpoint(
+        resolved.portId,
+        resolved.berthId,
+        moment,
+        target.operationType === 'MOVEMENT' ? 'DEPARTURE' : 'OCCURRENCE',
+      ),
+      arrival:
+        target.operationType === 'MOVEMENT' && resolved.arrivalResolution?.status === 'RESOLVED'
+          ? endpoint(
+              target.destinationPortId,
+              target.destinationBerthId,
+              resolved.arrivalResolution.moment,
+              'ARRIVAL',
+            )
+          : null,
+      charges: [],
+      totalBase: '0.00',
+    }
+    this.validate(s, operation, !retrospective)
+    const external = operation.arrival && operation.arrival.portId !== operation.endpoint.portId
+    operation.charges = (
+      external
+        ? [
+            { endpoint: operation.endpoint, kind: 'EXIT' as const, override },
+            { endpoint: operation.arrival!, kind: 'ENTRY' as const, override: arrivalOverride },
+          ]
+        : [{ endpoint: operation.endpoint, kind: target.operationType, override }]
+    ).map(({ endpoint: e, kind, override }) => {
+      const calculation = calculateBase(s.database, {
+        portId: e.portId,
+        vesselId: target.vesselId,
+        moment: e.moment,
+        activity: { kind: 'OPERATION', operation: kind },
+      })
+      const original = identity?.charges.find(
+        (c) => c.chargeKind === kind && c.economicEndpointRole === e.role,
+      )
+      if (identity && !original)
+        throw new ArchiveError(
+          'PREVIEW_BLOCKED',
+          'Il contesto economico è cambiato. Genera una nuova anteprima.',
+        )
+      return {
+        subjects: { customer: null, agency: null },
+        id: original?.id ?? randomUUID(),
+        chargeKind: kind,
+        economicEndpointRole: e.role,
+        calculation,
+        manualOverrideAmount: override,
+        effectiveBase: override ?? calculation.base,
+      }
+    })
+    operation.vesselVersionId = operation.endpoint.vesselVersionId
+    operation.totalBase = operationTotal(operation.charges)
+    if (!retrospective)
+      operation.charges = subjectPlan(s.database, { pending: operation }).subjectsFor(operation)
+    return operation
+  }
   previewCreate: OperationApi['previewCreate'] = (request) =>
     this.coordinator.command(request, (s, payload) => {
-      const { input, target } = parseMoment(payload, [
-        'executionStatus',
-        'notes',
-        'manualOverrideAmount',
-        ...(kind(payload) === 'MOVEMENT' &&
-        Object.hasOwn(payload as object, 'arrivalManualOverrideAmount')
-          ? ['arrivalManualOverrideAmount']
-          : []),
-      ])
-      if (!['PLANNED', 'PERFORMED', 'MISSED'].includes(input.executionStatus as string))
-        throw new ArchiveError('VALIDATION_ERROR', 'Stato operativo non valido.')
-      if (
-        input.notes !== null &&
-        (typeof input.notes !== 'string' || [...input.notes].length > 10000)
-      )
-        throw new ArchiveError(
-          'VALIDATION_ERROR',
-          'Le note possono contenere al massimo 10000 caratteri.',
-          [{ path: ['notes'], code: 'INVALID_TEXT', message: 'Controlla le note.' }],
-        )
-      const override =
-        input.manualOverrideAmount === null
-          ? null
-          : Money.parse(input.manualOverrideAmount, 'manualOverrideAmount').text
-      const arrivalOverride =
-        !Object.hasOwn(input, 'arrivalManualOverrideAmount') ||
-        input.arrivalManualOverrideAmount === null
-          ? null
-          : Money.parse(input.arrivalManualOverrideAmount, 'arrivalManualOverrideAmount').text
-      const resolved = this.resolve(s, target)
-      if (
-        arrivalOverride !== null &&
-        target.operationType === 'MOVEMENT' &&
-        target.destinationPortId === resolved.portId
-      )
-        throw new ArchiveError(
-          'VALIDATION_ERROR',
-          'La sostituzione all’arrivo è ammessa solo per lo spostamento tra porti.',
-          [
-            {
-              path: ['arrivalManualOverrideAmount'],
-              code: 'NOT_APPLICABLE',
-              message: 'Lo spostamento interno ha una sola componente alla partenza.',
-            },
-          ],
-        )
-      if (
-        resolved.resolution.status !== 'RESOLVED' ||
-        resolved.arrivalResolution?.status === 'CHOICE_REQUIRED'
-      )
-        throw new ArchiveError(
-          'LOCAL_TIME_AMBIGUOUS',
-          'Scegli esplicitamente l’occorrenza del momento operativo.',
-        )
-      const moment = resolved.resolution.moment,
-        now = new Date().toISOString()
-      const ports = new PortRepository(s.database, () => now),
-        berths = new BerthRepository(s.database, now)
-      const endpoint = (
-        portId: string,
-        berthId: string | null,
-        moment: OperationEndpointDto['moment'],
-        role: OperationEndpointDto['role'],
-      ): OperationEndpointDto => {
-        const applicable = <T extends { effectiveFrom: string | null; effectiveTo: string | null }>(
-          versions: readonly T[],
-        ) =>
-          versions.find(
-            (v) =>
-              (!v.effectiveFrom || v.effectiveFrom <= moment.utc) &&
-              (!v.effectiveTo || moment.utc < v.effectiveTo),
-          )!
-        const portVersion = applicable(ports.versions(portId)),
-          berthVersion = berthId ? applicable(berths.versions(berthId)) : null
-        const vesselVersion = applicable(
-          new VesselRepository(s.database, now).versions(target.vesselId),
-        )
-        return {
-          id: randomUUID(),
-          role,
-          vesselVersionId: vesselVersion.id,
-          moment,
-          portId,
-          portVersionId: portVersion.id,
-          portName: portVersion.name,
-          berthId,
-          berthVersionId: berthVersion?.id ?? null,
-          berthName: berthVersion?.name ?? null,
-        }
-      }
-      const operation: PreparedOperation = {
-        openingIds: {
-          ...(target.operationType === 'MOVEMENT'
-            ? new OperationRepository(s.database).openIds(target.vesselId, moment.utc)
-            : { voyageId: randomUUID(), portCallId: randomUUID() }),
-          ...(target.operationType === 'MOVEMENT' && target.destinationPortId !== resolved.portId
-            ? { portCallId: randomUUID() }
-            : {}),
-          berthStayId: randomUUID(),
-        },
-        id: randomUUID(),
-        vesselId: target.vesselId,
-        vesselVersionId: '',
-        operationType: target.operationType,
-        executionStatus: input.executionStatus as VesselOperationDto['executionStatus'],
-        notes: input.notes as string | null,
-        endpoint: endpoint(
-          resolved.portId,
-          resolved.berthId,
-          moment,
-          target.operationType === 'MOVEMENT' ? 'DEPARTURE' : 'OCCURRENCE',
-        ),
-        arrival:
-          target.operationType === 'MOVEMENT' && resolved.arrivalResolution?.status === 'RESOLVED'
-            ? endpoint(
-                target.destinationPortId,
-                target.destinationBerthId,
-                resolved.arrivalResolution.moment,
-                'ARRIVAL',
-              )
-            : null,
-        charges: [],
-        totalBase: '0.00',
-      }
-      this.validate(s, operation)
-      const external = operation.arrival && operation.arrival.portId !== operation.endpoint.portId
-      operation.charges = (
-        external
-          ? [
-              { endpoint: operation.endpoint, kind: 'EXIT' as const, override },
-              { endpoint: operation.arrival!, kind: 'ENTRY' as const, override: arrivalOverride },
-            ]
-          : [{ endpoint: operation.endpoint, kind: target.operationType, override }]
-      ).map(({ endpoint: e, kind, override }) => {
-        const calculation = calculateBase(s.database, {
-          portId: e.portId,
-          vesselId: target.vesselId,
-          moment: e.moment,
-          activity: { kind: 'OPERATION', operation: kind },
-        })
-        return {
-          subjects: { customer: null, agency: null },
-          id: randomUUID(),
-          chargeKind: kind,
-          economicEndpointRole: e.role,
-          calculation,
-          manualOverrideAmount: override,
-          effectiveBase: override ?? calculation.base,
-        }
-      })
-      operation.vesselVersionId = operation.endpoint.vesselVersionId
-      operation.totalBase = operationTotal(operation.charges)
-      operation.charges = subjectPlan(s.database, { pending: operation }).subjectsFor(operation)
+      const operation = this.prepare(s, payload)
       const entry = s.previews.put(namespace, s.context(), operation)
       return this.previewDto(s, operation, entry, 1, 50)
     })
@@ -566,7 +621,7 @@ export class OperationService implements OperationApi {
         pageSize,
       },
       warnings: [
-        'L’importo è una base in EUR. Le correzioni generali della cronologia non sono ancora disponibili.',
+        'L’importo è una base in EUR. Le correzioni della cronologia richiedono una nuova anteprima.',
       ],
       blockers: [],
       operationValues: {

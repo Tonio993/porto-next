@@ -23,6 +23,9 @@ export interface CreateTariffDto {
   moment: MomentInputDto
   configurations: readonly TariffConfigurationInput[]
 }
+export interface UpdateTariffDto extends Omit<CreateTariffDto, 'portId'> {
+  id: string
+}
 export interface TariffSummaryDto extends VersionIntervalDto {
   effectiveFrom: string
   effectiveMoment: ResolvedMomentDto
@@ -69,6 +72,24 @@ export interface BaseCalculationDto {
   steps: readonly string[]
 }
 export interface TariffApi {
+  previewUpdate(
+    request: CommandRequest<UpdateTariffDto>,
+  ): Promise<ApplicationResult<TariffPreviewDto>>
+  confirmUpdate(
+    request: CommandRequest<{ previewId: string }>,
+  ): Promise<ApplicationResult<TariffDto>>
+  previewDelete(
+    request: CommandRequest<{ id: string }>,
+  ): Promise<ApplicationResult<TariffPreviewDto>>
+  confirmDelete(
+    request: CommandRequest<{ previewId: string }>,
+  ): Promise<ApplicationResult<{ id: string }>>
+  updateEffects(
+    request: QueryRequest<{ previewId: string; page: number; pageSize: number }>,
+  ): Promise<ApplicationResult<TariffPreviewDto>>
+  deletionEffects(
+    request: QueryRequest<{ previewId: string; page: number; pageSize: number }>,
+  ): Promise<ApplicationResult<TariffPreviewDto>>
   list(
     request: QueryRequest<{ portId: string; page: number; pageSize: number }>,
   ): Promise<ApplicationResult<PageDto<TariffSummaryDto>>>
@@ -93,6 +114,12 @@ export interface TariffApi {
   ): Promise<ApplicationResult<BaseCalculationDto>>
 }
 export const tariffChannels = {
+  previewUpdate: 'tariffs:preview-update',
+  confirmUpdate: 'tariffs:confirm-update',
+  previewDelete: 'tariffs:preview-delete',
+  confirmDelete: 'tariffs:confirm-delete',
+  updateEffects: 'tariffs:update-effects',
+  deletionEffects: 'tariffs:deletion-effects',
   list: 'tariffs:list',
   get: 'tariffs:get',
   copyConfigurations: 'tariffs:copy-configurations',

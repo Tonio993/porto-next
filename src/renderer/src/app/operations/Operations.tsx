@@ -1,9 +1,20 @@
 import type { AssignmentTarget } from '../../../../shared/contracts/assignments'
 import { AssignmentEditor } from './AssignmentEditor'
 import { OperationCompletionEditor } from './OperationCompletionEditor'
+import { OperationMaintenanceEditor } from './OperationMaintenanceEditor'
 import { useEffect, useRef, useState } from 'react'
-import { Button, Fieldset, Group, Modal, Select, Stack, Textarea, TextInput } from '@mantine/core'
-import type { ArchiveContextDto } from '../../../../shared/contracts/application'
+import {
+  Button,
+  Fieldset,
+  Group,
+  Menu,
+  Modal,
+  Select,
+  Stack,
+  Textarea,
+  TextInput,
+} from '@mantine/core'
+import type { ApplicationResult, ArchiveContextDto } from '../../../../shared/contracts/application'
 import type {
   OperationPreviewDto,
   VesselOperationDto,
@@ -28,6 +39,7 @@ import { BerthPicker } from './BerthPicker'
 import { OperationDetail, executionLabels, operationLabels } from './OperationDetail'
 
 type Draft = {
+  retrospective: boolean
   context: ArchiveContextDto
   values: CreateOperationDto
   override: string
@@ -47,9 +59,19 @@ export function Operations({
     operation: VesselOperationDto
     context: ArchiveContextDto
     trigger: HTMLElement | null
+    correction: boolean
   } | null>(null)
   const [completionOpen, setCompletionOpen] = useState(false),
     [completionDone, setCompletionDone] = useState(false)
+  const [maintenance, setMaintenance] = useState<{
+    operation: VesselOperationDto
+    context: ArchiveContextDto
+    trigger: HTMLElement | null
+    mode: 'DELETE' | 'NOTES'
+  } | null>(null)
+  const [maintenanceOpen, setMaintenanceOpen] = useState(false)
+  const [maintenanceDone, setMaintenanceDone] = useState(false)
+  const [maintenanceUncertain, setMaintenanceUncertain] = useState(false)
   const [detailRevision, setDetailRevision] = useState<string | null>(null)
   const assign = (target: AssignmentTarget) => {
     assignmentTrigger.current = document.activeElement as HTMLElement
@@ -67,6 +89,18 @@ export function Operations({
   const [draft, setDraft] = useState<Draft | null>(null),
     [open, setOpen] = useState(false),
     [preview, setPreview] = useState<OperationPreviewDto | null>(null)
+  const [pendingOperation, setPendingOperation] = useState<{
+    id: string
+    context: ArchiveContextDto
+  } | null>(null)
+  const [reloadRequired, setReloadRequired] = useState(false)
+  const active = useRef(true)
+  useEffect(() => {
+    active.current = true
+    return () => {
+      active.current = false
+    }
+  }, [])
   const [resolution, setResolution] = useState<OperationMomentDto | null>(null),
     [error, setError] = useState<string | null>(null),
     [dialogError, setDialogError] = useState<string | null>(null),
@@ -76,6 +110,8 @@ export function Operations({
   const [contextInstant, setContextInstant] = useState(''),
     [operationalContext, setOperationalContext] = useState<OperationalContextDto | null>(null)
   const trigger = useRef<HTMLElement | null>(null)
+  const insertionTrigger = useRef<HTMLButtonElement | null>(null)
+  const resumeDraft = useRef<HTMLButtonElement | null>(null)
   const listRequest = useApplicationRequest(context, setError),
     stayRequest = useApplicationRequest(context, setError),
     detailRequest = useApplicationRequest(context, setError),
@@ -86,11 +122,89 @@ export function Operations({
   const { request: readList } = listRequest,
     { request: readStays } = stayRequest,
     { request: readDetail } = detailRequest
-  const busy = archives.busy || archives.commandBusy || commandRequest.loading
+  const busy =
+    archives.busy || archives.commandBusy || commandRequest.loading || effectsRequest.loading
+  const stale =
+    reloadRequired ||
+    (!!draft &&
+      (draft.context.revision !== context.revision ||
+        draft.context.sessionId !== context.sessionId ||
+        draft.context.archiveId !== context.archiveId))
+  const disabled = busy || stale || !!pendingOperation
+  const checked = async <T,>(call: () => Promise<ApplicationResult<T>>) => {
+    const result = await archives.execute(call)
+    if (
+      !result.ok &&
+      ['REVISION_CONFLICT', 'ARCHIVE_SESSION_CHANGED'].includes(result.error.code)
+    ) {
+      if (active.current) setReloadRequired(true)
+      await archives.update(() => window.archives.getState())
+    }
+    if (result.ok || result.error.code === 'NOT_FOUND') {
+      const state = await archives.update(() => window.archives.getState())
+      if (
+        !state?.context ||
+        !result.context ||
+        state.context.sessionId !== result.context.sessionId ||
+        state.context.archiveId !== result.context.archiveId ||
+        state.context.revision !== result.context.revision
+      )
+        throw Error('Risposta superata')
+    }
+    return result
+  }
+  const applied = (operation: VesselOperationDto) => {
+    setOpen(false)
+    setDraft(null)
+    setPreview(null)
+    setPendingOperation(null)
+    setReloadRequired(false)
+    setSelected(operation.id)
+    setDetail(operation)
+    setDetailRevision(null)
+    setNotice('Esito della registrazione verificato.')
+    setReload((n) => n + 1)
+  }
+  const reloadDraft = async () => {
+    if (!draft || busy) return
+    invalidateEditor()
+    if (pendingOperation) {
+      const result = await commandRequest.request(() =>
+        checked(() =>
+          window.operations.get({
+            context: { sessionId: pendingOperation.context.sessionId },
+            query: { id: pendingOperation.id },
+          }),
+        ),
+      )
+      if (!active.current) return
+      if (result?.ok) applied(result.value)
+      else if (result && !result.ok && result.error.code === 'NOT_FOUND' && result.context) {
+        setPendingOperation(null)
+        setReloadRequired(false)
+        setDraft({ ...draft, context: result.context })
+        setDialogError(null)
+        setNotice('Operazione assente: puoi generare una nuova anteprima della bozza conservata.')
+      }
+      return
+    }
+    const result = await commandRequest.request(() =>
+      checked(() =>
+        window.operations.list({
+          context: { sessionId: draft.context.sessionId },
+          query: { vesselId: draft.values.vesselId, page: 1, pageSize: 1 },
+        }),
+      ),
+    )
+    if (result?.ok && active.current) {
+      setDraft({ ...draft, context: result.context })
+      setReloadRequired(false)
+    }
+  }
   useEffect(() => {
-    onDialogChange(open || assignmentOpen || completionOpen)
+    onDialogChange(open || assignmentOpen || completionOpen || maintenanceOpen)
     return () => onDialogChange(false)
-  }, [open, assignmentOpen, completionOpen, onDialogChange])
+  }, [open, assignmentOpen, completionOpen, maintenanceOpen, onDialogChange])
   useEffect(() => {
     if (!vesselId) return
     void readList(() =>
@@ -145,11 +259,19 @@ export function Operations({
     invalidateEditor()
     setOpen(false)
   }
-  const start = (type: 'ENTRY' | 'EXIT' | 'MOVEMENT') => {
-    if (!vesselId) return
-    trigger.current = document.activeElement as HTMLElement
+  const start = (type: 'ENTRY' | 'EXIT' | 'MOVEMENT', retrospective = false) => {
+    if (!vesselId || draft || pendingOperation) return
+    if (maintenance && !maintenanceDone) {
+      setNotice('Esiste una bozza: riprendila o scartala prima di iniziare un’altra modifica.')
+      return
+    }
+    trigger.current = retrospective
+      ? insertionTrigger.current
+      : (document.activeElement as HTMLElement)
     invalidateEditor()
+    setReloadRequired(false)
     setDraft({
+      retrospective,
       context,
       override: '',
       arrivalOverride: '',
@@ -205,7 +327,7 @@ export function Operations({
     if (r?.ok) setResolution(r.value)
   }
   const previewCreate = async () => {
-    if (!draft) return
+    if (!draft || disabled) return
     setDialogError(null)
     let override: string | null = null
     override = draft.override.trim() ? moneyInput(draft.override) : null
@@ -219,8 +341,8 @@ export function Operations({
       return
     }
     const r = await commandRequest.request(() =>
-      archives.execute(() =>
-        window.operations.previewCreate({
+      checked(() =>
+        (draft.retrospective ? window.operations.previewInsert : window.operations.previewCreate)({
           context: draft.context,
           payload: {
             ...draft.values,
@@ -235,29 +357,29 @@ export function Operations({
     if (r?.ok) setPreview(r.value)
   }
   const confirm = async () => {
-    if (!preview) return
+    if (!preview || !draft || disabled || preview.status !== 'READY') return
+    const pending = { id: preview.operationValues.id, context: preview.context }
     const r = await commandRequest.request(() =>
-      archives.execute(() =>
-        window.operations.confirmCreate({
+      checked(() =>
+        (draft.retrospective ? window.operations.confirmInsert : window.operations.confirmCreate)({
           context: preview.context,
           payload: { previewId: preview.previewId },
         }),
       ),
     )
-    if (r?.ok) {
-      setOpen(false)
-      setDraft(null)
+    if (!active.current) return
+    if (r?.ok) applied(r.value)
+    else if (!r || (!r.ok && r.error.code === 'UNEXPECTED')) {
+      setPendingOperation(pending)
       setPreview(null)
-      setSelected(r.value.id)
-      setDetail(r.value)
-      setNotice('Operazione registrata.')
-      setReload((n) => n + 1)
     }
   }
   const effects = async (page: number) => {
     if (!preview) return
     const r = await effectsRequest.request(() =>
-      window.operations.previewEffects({
+      (draft?.retrospective
+        ? window.operations.insertionEffects
+        : window.operations.previewEffects)({
         context: { sessionId: context.sessionId },
         query: { previewId: preview.previewId, page, pageSize: 50 },
       }),
@@ -265,6 +387,11 @@ export function Operations({
     if (r?.ok) setPreview(r.value)
   }
   const selectedVessel = (id: string | null) => {
+    if (draft) {
+      setDialogError('Completa o scarta esplicitamente la bozza prima di cambiare nave.')
+      setOpen(true)
+      return
+    }
     contextRequest.invalidate()
     setOperationalContext(null)
     listRequest.invalidate()
@@ -285,17 +412,42 @@ export function Operations({
       <Group justify="space-between">
         <h2>Cronologia nave</h2>
         <Group>
-          <Button disabled={!vesselId || busy} onClick={() => start('ENTRY')}>
+          <Button disabled={!vesselId || busy || !!draft} onClick={() => start('ENTRY')}>
             Nuova entrata
           </Button>
-          <Button disabled={!vesselId || busy} variant="light" onClick={() => start('EXIT')}>
+          <Button
+            disabled={!vesselId || busy || !!draft}
+            variant="light"
+            onClick={() => start('EXIT')}
+          >
             Nuova uscita
           </Button>
-          <Button disabled={!vesselId || busy} variant="light" onClick={() => start('MOVEMENT')}>
+          <Button
+            disabled={!vesselId || busy || !!draft}
+            variant="light"
+            onClick={() => start('MOVEMENT')}
+          >
             Nuovo spostamento
           </Button>
+          <Menu>
+            <Menu.Target>
+              <Button
+                ref={insertionTrigger}
+                disabled={!vesselId || busy || !!draft}
+                variant="default"
+              >
+                Inserisci operazione retroattiva
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item onClick={() => start('ENTRY', true)}>Entrata retroattiva</Menu.Item>
+              <Menu.Item onClick={() => start('EXIT', true)}>Uscita retroattiva</Menu.Item>
+              <Menu.Item onClick={() => start('MOVEMENT', true)}>Spostamento retroattivo</Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
           {draft && !open && (
             <Button
+              ref={resumeDraft}
               variant="default"
               onClick={() => {
                 trigger.current = document.activeElement as HTMLElement
@@ -307,7 +459,12 @@ export function Operations({
           )}
         </Group>
       </Group>
-      <VesselPicker context={context} value={vesselId} onChange={selectedVessel} disabled={busy} />
+      <VesselPicker
+        context={context}
+        value={vesselId}
+        onChange={selectedVessel}
+        disabled={busy || !!draft}
+      />
       {error && (
         <StateMessage kind="error" title="Consultazione non disponibile">
           {error}
@@ -334,8 +491,8 @@ export function Operations({
         </Button>
       </Group>
       <p className="operations-future">
-        Consuntiva le operazioni previste dal dettaglio. Correzioni generali ed eliminazioni restano
-        indisponibili.
+        Consuntiva, correggi o elimina le operazioni dal dettaglio. Puoi aggiornare separatamente le
+        sole note.
       </p>
       {assignmentTarget && !assignmentOpen && (
         <Button variant="default" onClick={() => setAssignmentOpen(true)}>
@@ -405,13 +562,87 @@ export function Operations({
                   Assegna soggetti all’operazione
                 </Button>
                 <OperationDetail operation={detail} />
+                <Group>
+                  {(['NOTES', 'DELETE'] as const).map((mode) => (
+                    <Button
+                      key={mode}
+                      color={mode === 'DELETE' ? 'red' : undefined}
+                      variant="light"
+                      disabled={busy || detailRevision !== context.revision}
+                      onClick={() => {
+                        if (
+                          draft ||
+                          (completion && !completionDone) ||
+                          (maintenance &&
+                            !maintenanceDone &&
+                            (maintenance.operation.id !== detail.id || maintenance.mode !== mode))
+                        ) {
+                          setNotice(
+                            'Esiste una bozza: riprendila o scartala prima di iniziare un’altra modifica.',
+                          )
+                          return
+                        }
+                        if (!maintenance || maintenanceDone)
+                          setMaintenance({
+                            operation: detail,
+                            context,
+                            mode,
+                            trigger: document.activeElement as HTMLElement,
+                          })
+                        setMaintenanceDone(false)
+                        setMaintenanceOpen(true)
+                      }}
+                    >
+                      {mode === 'DELETE' ? 'Elimina operazione' : 'Modifica solo note'}
+                    </Button>
+                  ))}
+                </Group>
+                <Button
+                  disabled={busy || detailRevision !== context.revision}
+                  onClick={() => {
+                    if (
+                      (maintenance && !maintenanceDone) ||
+                      (completion &&
+                        !completionDone &&
+                        (completion.operation.id !== detail.id || !completion.correction))
+                    ) {
+                      setNotice(
+                        'Esiste una bozza: riprendila o scartala prima di iniziare un’altra modifica.',
+                      )
+                      return
+                    }
+                    if (!completion || completionDone)
+                      setCompletion({
+                        operation: detail,
+                        context,
+                        correction: true,
+                        trigger: document.activeElement as HTMLElement,
+                      })
+                    setCompletionDone(false)
+                    setCompletionOpen(true)
+                  }}
+                >
+                  Correggi operazione
+                </Button>
                 {detail.executionStatus === 'PLANNED' && (
                   <Button
                     disabled={busy || detailRevision !== context.revision}
                     onClick={() => {
-                      if (!completion || completion.operation.id !== detail.id || completionDone)
+                      if (
+                        (maintenance && !maintenanceDone) ||
+                        (completion &&
+                          !completionDone &&
+                          (completion.operation.id !== detail.id || completion.correction))
+                      ) {
+                        setNotice(
+                          'Esiste una bozza: riprendila o scartala prima di iniziare un’altra modifica.',
+                        )
+                        return
+                      }
+                      if (!completion || completionDone)
                         setCompletion({
                           operation: detail,
+                          correction: false,
                           context,
                           trigger: document.activeElement as HTMLElement,
                         })
@@ -610,9 +841,54 @@ export function Operations({
           }}
         />
       )}
+      {maintenance && (
+        <OperationMaintenanceEditor
+          key={maintenance.operation.id + maintenance.context.revision + maintenance.mode}
+          operation={maintenance.operation}
+          mode={maintenance.mode}
+          opened={maintenanceOpen}
+          originalContext={maintenance.context}
+          archives={archives}
+          trigger={maintenance.trigger}
+          onClose={() => setMaintenanceOpen(false)}
+          onUncertainChange={setMaintenanceUncertain}
+          onApplied={(value) => {
+            setMaintenanceDone(true)
+            setMaintenanceOpen(false)
+            setMaintenanceUncertain(false)
+            setSelected(value?.id ?? null)
+            setDetail(value)
+            setDetailRevision(null)
+            setReload((n) => n + 1)
+            setNotice(
+              value
+                ? 'Note aggiornate: esito verificato.'
+                : 'Operazione eliminata: assenza verificata.',
+            )
+          }}
+        />
+      )}
+      {maintenance && !maintenanceOpen && !maintenanceDone && (
+        <Group>
+          <Button variant="light" disabled={busy} onClick={() => setMaintenanceOpen(true)}>
+            {maintenance.mode === 'DELETE' ? 'Riprendi eliminazione' : 'Riprendi modifica note'}
+          </Button>
+          <Button
+            variant="default"
+            disabled={busy || maintenanceUncertain}
+            onClick={() => {
+              setMaintenance(null)
+              setMaintenanceDone(true)
+            }}
+          >
+            Scarta bozza della modifica
+          </Button>
+        </Group>
+      )}
       {completion && (
         <OperationCompletionEditor
-          key={completion.operation.id + completion.context.revision}
+          key={completion.operation.id + completion.context.revision + completion.correction}
+          correction={completion.correction}
           opened={completionOpen}
           operation={completion.operation}
           originalContext={completion.context}
@@ -621,6 +897,7 @@ export function Operations({
           onClose={() => setCompletionOpen(false)}
           onApplied={(value) => {
             setCompletionDone(true)
+            setVesselId(value.vesselId)
             setSelected(value.id)
             setDetail(value)
             setDetailRevision(null)
@@ -630,45 +907,83 @@ export function Operations({
         />
       )}
       {completion && !completionOpen && !completionDone && (
-        <Button variant="light" disabled={busy} onClick={() => setCompletionOpen(true)}>
-          Riprendi consuntivazione
-        </Button>
+        <Group>
+          <Button variant="light" disabled={busy} onClick={() => setCompletionOpen(true)}>
+            {completion.correction ? 'Riprendi correzione' : 'Riprendi consuntivazione'}
+          </Button>
+          <Button
+            variant="default"
+            disabled={busy}
+            onClick={() => {
+              setCompletion(null)
+              setCompletionDone(true)
+            }}
+          >
+            Scarta bozza della modifica
+          </Button>
+        </Group>
       )}
       <Modal
         opened={open}
         onClose={close}
         title={
           preview
-            ? 'Anteprima registrazione'
-            : draft?.values.operationType === 'ENTRY'
-              ? 'Nuova entrata'
-              : draft?.values.operationType === 'MOVEMENT'
-                ? 'Nuovo spostamento'
-                : 'Nuova uscita'
+            ? draft?.retrospective
+              ? 'Anteprima inserimento retroattivo'
+              : 'Anteprima registrazione'
+            : draft?.retrospective
+              ? 'Inserisci operazione retroattiva'
+              : draft?.values.operationType === 'ENTRY'
+                ? 'Nuova entrata'
+                : draft?.values.operationType === 'MOVEMENT'
+                  ? 'Nuovo spostamento'
+                  : 'Nuova uscita'
         }
         size="xl"
         closeOnEscape={!busy}
         closeOnClickOutside={false}
         withCloseButton={!busy}
-        onExitTransitionEnd={() => trigger.current?.isConnected && trigger.current.focus()}
+        returnFocus={false}
+        onExitTransitionEnd={() => {
+          if (trigger.current?.isConnected && !trigger.current.matches(':disabled'))
+            trigger.current.focus()
+          else resumeDraft.current?.focus()
+        }}
       >
         {dialogError && (
           <StateMessage kind="error" title="Registrazione non disponibile">
             {dialogError}
           </StateMessage>
         )}
-        {draft && context.revision !== draft.context.revision && (
+        {draft && stale && (
           <StateMessage kind="warning" title="Bozza obsoleta">
             I dati sono cambiati. Ricarica esplicitamente la bozza per proseguire.
           </StateMessage>
         )}
+        {pendingOperation && (
+          <StateMessage kind="warning" title="Esito della scrittura da verificare">
+            Rileggi l’operazione prima di proseguire. La bozza è conservata; non ripetere la
+            conferma.
+          </StateMessage>
+        )}
         {preview ? (
           <>
+            {draft?.retrospective && (
+              <section aria-label="Prima dell’inserimento">
+                <h3>Prima</h3>
+                <p>
+                  Operazione assente. Le permanenze e le attribuzioni attuali sono riportate negli
+                  effetti.
+                </p>
+                <h3>Dopo l’inserimento</h3>
+              </section>
+            )}
             <OperationDetail operation={preview.operationValues} />
             <PortConfirmation
+              cancelDisabled={busy || !!pendingOperation}
               preview={preview}
               revision={context.revision}
-              disabled={busy || effectsRequest.loading}
+              disabled={disabled}
               onConfirm={() => void confirm()}
               onCancel={() => {
                 effectsRequest.invalidate()
@@ -682,9 +997,10 @@ export function Operations({
             <Stack>
               <Select
                 label="Stato"
+                data-autofocus
                 value={draft.values.executionStatus}
                 data={Object.entries(executionLabels).map(([value, label]) => ({ value, label }))}
-                disabled={busy}
+                disabled={disabled}
                 allowDeselect={false}
                 onChange={(v) => change({ ...draft.values, executionStatus: v as ExecutionStatus })}
               />
@@ -694,7 +1010,7 @@ export function Operations({
                     context={context}
                     label="Porto di arrivo"
                     value={draft.values.portId || null}
-                    disabled={busy}
+                    disabled={disabled}
                     onChange={(id) =>
                       change({
                         ...draft.values,
@@ -718,7 +1034,7 @@ export function Operations({
                           berthId: id,
                         })
                       }
-                      disabled={busy}
+                      disabled={disabled}
                     />
                   )}
                 </>
@@ -741,7 +1057,7 @@ export function Operations({
                           moment: { ...draft.values.moment, selectedOffset: null },
                         } as CreateOperationDto)
                       }
-                      disabled={busy}
+                      disabled={disabled}
                     />
                   </details>
                 </>
@@ -752,7 +1068,7 @@ export function Operations({
                     context={context}
                     label="Porto di destinazione"
                     value={draft.values.destinationPortId || null}
-                    disabled={busy}
+                    disabled={disabled}
                     onChange={(id) =>
                       change({
                         ...draft.values,
@@ -776,7 +1092,7 @@ export function Operations({
                       context={context}
                       portId={draft.values.destinationPortId}
                       value={draft.values.destinationBerthId}
-                      disabled={busy}
+                      disabled={disabled}
                       onChange={(id) => {
                         if (draft.values.operationType === 'MOVEMENT')
                           change({ ...draft.values, destinationBerthId: id })
@@ -799,7 +1115,7 @@ export function Operations({
                 onChange={(m) => change({ ...draft.values, moment: m })}
                 resolution={resolution?.resolution ?? null}
                 onResolve={() => void resolve()}
-                disabled={busy || momentRequest.loading}
+                disabled={disabled}
               />
               {draft.values.operationType === 'MOVEMENT' && (
                 <TariffMomentFields
@@ -813,14 +1129,14 @@ export function Operations({
                   }}
                   resolution={resolution?.arrivalResolution ?? null}
                   onResolve={() => void resolve()}
-                  disabled={busy || momentRequest.loading}
+                  disabled={disabled}
                 />
               )}
               <TextInput
                 label="Sostituzione manuale della base (EUR, facoltativa)"
                 description="Anche zero. Il calcolo tariffario resta conservato."
                 value={draft.override}
-                disabled={busy}
+                disabled={disabled}
                 onChange={(e) => {
                   invalidateEditor()
                   setDraft({ ...draft, override: e.currentTarget.value })
@@ -831,7 +1147,7 @@ export function Operations({
                   label="Sostituzione manuale all’arrivo (EUR, facoltativa)"
                   description="Solo tra porti: ENTRY all’arrivo. Il campo precedente sostituisce EXIT alla partenza; nello stesso porto sostituisce MOVEMENT."
                   value={draft.arrivalOverride}
-                  disabled={busy}
+                  disabled={disabled}
                   onChange={(e) => {
                     invalidateEditor()
                     setDraft({ ...draft, arrivalOverride: e.currentTarget.value })
@@ -842,26 +1158,31 @@ export function Operations({
                 label="Note"
                 value={draft.values.notes ?? ''}
                 maxLength={10000}
-                disabled={busy}
+                disabled={disabled}
                 onChange={(e) => change({ ...draft.values, notes: e.currentTarget.value || null })}
               />
               <Group className="form-actions">
                 <Button variant="default" onClick={close} disabled={busy}>
                   Chiudi
                 </Button>
+                <Button variant="default" disabled={busy} onClick={() => void reloadDraft()}>
+                  {pendingOperation ? 'Verifica esito della scrittura' : 'Ricarica bozza'}
+                </Button>
                 <Button
-                  variant="default"
-                  disabled={busy}
+                  variant="subtle"
+                  disabled={busy || !!pendingOperation}
                   onClick={() => {
                     invalidateEditor()
-                    setDraft({ ...draft, context })
+                    setDraft(null)
+                    setReloadRequired(false)
+                    setOpen(false)
                   }}
                 >
-                  Ricarica bozza
+                  Scarta bozza
                 </Button>
                 <Button
                   disabled={
-                    busy ||
+                    disabled ||
                     !draft.values.moment.localDateTime ||
                     (draft.values.operationType === 'ENTRY' && !draft.values.portId) ||
                     (draft.values.operationType === 'MOVEMENT' &&

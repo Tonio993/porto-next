@@ -101,7 +101,7 @@ async function current(page: Page) {
 }
 test('P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline', async ({
   playwright,
-}) => {
+}, testInfo) => {
   test.setTimeout(240_000)
   const folder = mkdtempSync(join(tmpdir(), 'porto-p13-')),
     path = join(folder, 'a.ormeggi'),
@@ -122,7 +122,7 @@ test('P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, c
       } = await setup(app, path),
       errors: string[] = []
     page.on('pageerror', (e) => errors.push(e.message))
-    expect(readdirSync(folder).some((n) => n.includes('.prima-v16-'))).toBe(true)
+    expect(readdirSync(folder).some((n) => n.includes('.prima-v17-'))).toBe(true)
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(960, 700))
     await page.getByRole('button', { name: 'Permanenze', exact: true }).click()
     const voyage = page.getByRole('button', { name: 'Assegna soggetti al viaggio', exact: true })
@@ -192,9 +192,8 @@ test('P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, c
     )
     await page.getByLabel('Componente ENTRY', { exact: true }).scrollIntoViewIfNeeded()
     if (!process.env.PORTO_PACKAGED_EXE) {
-      mkdirSync(resolve('doc/p13/schermate'), { recursive: true })
       await page.screenshot({
-        path: resolve('doc/p13/schermate/p13-componenti-minimo.png'),
+        path: testInfo.outputPath('p13-componenti-minimo.png'),
         animations: 'disabled',
       })
     }
@@ -203,7 +202,7 @@ test('P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, c
     await expect(modal.getByLabel('Soggetti effettivi')).toHaveCount(2)
     if (!process.env.PORTO_PACKAGED_EXE)
       await page.screenshot({
-        path: resolve('doc/p13/schermate/p13-assegnazioni-desktop.png'),
+        path: testInfo.outputPath('p13-assegnazioni-desktop.png'),
         animations: 'disabled',
       })
     await page.keyboard.press('Escape')

@@ -69,10 +69,10 @@ test('P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo
     )
     await page.getByRole('button', { name: 'Apri archivio', exact: true }).click()
     await expect(page.getByTestId('archive-path')).toHaveText(path)
-    expect(readdirSync(folder).some((n) => n.includes('.prima-v16-'))).toBe(true)
+    expect(readdirSync(folder).some((n) => n.includes('.prima-v17-'))).toBe(true)
     expect(await page.evaluate(() => window.archives.getState())).toMatchObject({
       ok: true,
-      value: { active: { schemaVersion: 16 }, context: { revision: '42' } },
+      value: { active: { schemaVersion: 17 }, context: { revision: '42' } },
     })
     const ids = await page.evaluate(async () => {
       const state = await window.archives.getState()

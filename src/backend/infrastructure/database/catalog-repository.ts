@@ -108,7 +108,9 @@ export class CatalogRepository {
       .run(id, description, normalizedIdentifier(description))
     this.sql.prepare('INSERT INTO weight_sequences VALUES (?, ?, NULL)').run(sequenceId, id)
     this.sql
-      .prepare('INSERT INTO weight_versions VALUES (?, ?, NULL, ?)')
+      .prepare(
+        'INSERT INTO weight_versions (id,sequence_id,effective_from,weight) VALUES (?, ?, NULL, ?)',
+      )
       .run(randomUUID(), sequenceId, weight)
     return this.get(id)
   }
@@ -156,7 +158,11 @@ export class CatalogRepository {
       reference,
       'service_types',
       'weight_versions',
-      [type.initialWeight.id],
+      (
+        this.sql
+          .prepare('SELECT id FROM weight_versions WHERE sequence_id=?')
+          .all(type.initialWeight.sequenceId) as { id: string }[]
+      ).map((v) => v.id),
       owned,
     )
     blockers.push(

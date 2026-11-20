@@ -21,6 +21,10 @@
     "src/shared/**/*.ts",
     "src/renderer/src/api/numeric-input.ts",
     "src/renderer/src/api/response-scope.ts",
+    "src/renderer/src/api/operation-correction-outcome.ts",
+    "src/renderer/src/api/operation-deletion-outcome.ts",
+    "src/renderer/src/api/tariff-maintenance-outcome.ts",
+    "src/renderer/src/api/weight-change-outcome.ts",
     "doc/p00/contratti.ts",
     "doc/p00/scenari.mts",
     "tests/**/*.ts"

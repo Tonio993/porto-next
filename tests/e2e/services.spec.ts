@@ -74,7 +74,7 @@ for (const scenario of ['funzionale', 'asincrono'] as const)
       const page = await setup(app, path),
         errors: string[] = []
       page.on('pageerror', (e) => errors.push(e.message))
-      expect(readdirSync(folder).some((n) => n.includes('.prima-v16-'))).toBe(true)
+      expect(readdirSync(folder).some((n) => n.includes('.prima-v17-'))).toBe(true)
       const modal = page.getByRole('dialog')
       const open = async () => {
         await page.getByRole('button', { name: 'Nuova prestazione libera', exact: true }).click()
@@ -268,7 +268,7 @@ test('P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE c
     page.on('pageerror', (e) => errors.push(e.message))
     await page.getByRole('button', { name: 'Apri archivio', exact: true }).click()
     await expect(page.getByTestId('archive-path')).toHaveText(path)
-    expect(readdirSync(folder).some((n) => n.includes('.prima-v16-'))).toBe(true)
+    expect(readdirSync(folder).some((n) => n.includes('.prima-v17-'))).toBe(true)
     await page.getByRole('button', { name: 'Prestazioni', exact: true }).click()
     await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
     await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()

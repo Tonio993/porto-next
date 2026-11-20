@@ -38,6 +38,9 @@ const labels: Record<string, string> = {
   size: 'Dimensione',
   locality: 'Località',
   countryCode: 'Paese',
+  effectiveMoment: 'Decorrenza locale, fuso e offset',
+  configurations: 'Configurazioni tariffarie',
+  calculation: 'Calcolo teorico e riferimenti',
   effectiveFrom: 'Inizio (UTC)',
   effectiveTo: 'Fine esclusa (UTC)',
   status: 'Stato',
@@ -53,6 +56,7 @@ const labels: Record<string, string> = {
 export function PortConfirmation({
   preview,
   disabled,
+  cancelDisabled = disabled,
   revision,
   onConfirm,
   onCancel,
@@ -60,6 +64,7 @@ export function PortConfirmation({
 }: {
   preview: ChangePreviewDto
   disabled: boolean
+  cancelDisabled?: boolean
   revision: string
   onConfirm: () => void
   onCancel: () => void
@@ -170,12 +175,15 @@ export function PortConfirmation({
         </Button>
       </Group>
       <Group mt="md" className="form-actions">
-        <Button variant="default" disabled={disabled} onClick={onCancel}>
+        <Button variant="default" disabled={cancelDisabled} onClick={onCancel}>
           Chiudi anteprima
         </Button>
         <Button
           color={
             [
+              'OPERATION_DELETE',
+              'TARIFF_DELETE',
+              'WEIGHT_DELETE',
               'DELETE_PORT',
               'DELETE_BERTH',
               'DELETE_CUSTOMER',

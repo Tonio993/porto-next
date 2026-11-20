@@ -1,3 +1,5 @@
+import type { ConflictDto } from '../../../shared/contracts/application'
+import type { ServiceActivityDto } from '../../../shared/contracts/services'
 import { ServiceRepository } from '../../infrastructure/database/service-repository'
 import type { ChangeEffectDto } from '../../../shared/contracts/master-data'
 import type { VesselOperationDto, OperationChargeDto } from '../../../shared/contracts/operations'
@@ -70,58 +72,104 @@ export function tariffOperationImpacts(
   tariff: TariffDto,
   next: string | null,
 ) {
-  const updates = new OperationRepository(database).all().flatMap((op) =>
-    op.charges
-      .filter(
-        (c) =>
-          c.calculation.portId === tariff.portId &&
-          c.calculation.moment.utc >= tariff.effectiveFrom &&
-          (!next || c.calculation.moment.utc < next),
+  return tariffSequenceImpacts(database, (portId, utc) =>
+    portId === tariff.portId && utc >= tariff.effectiveFrom && (!next || utc < next)
+      ? tariff
+      : undefined,
+  )
+}
+
+/** undefined leaves an interval untouched; null reports an uncovered economic endpoint. */
+export function tariffSequenceImpacts(
+  database: DatabaseSession,
+  resolve: (portId: string, utc: string) => TariffDto | null | undefined,
+) {
+  return economicSequenceImpacts(database, (portId, utc) => {
+    const tariff = resolve(portId, utc)
+    return tariff ? { tariff } : tariff
+  })
+}
+
+/** Shared read-only plan for tariff or weight sequences. Each charge owns its economic endpoint. */
+export function economicSequenceImpacts(
+  database: DatabaseSession,
+  resolve: (
+    portId: string,
+    utc: string,
+    activity: import('../../../shared/contracts/tariffs').TariffActivity,
+  ) => Parameters<typeof calculateBase>[2] | null,
+) {
+  const effects: ChangeEffectDto[] = []
+  const blockers: ConflictDto[] = []
+  const updates: { operationId: string; after: OperationChargeDto }[] = []
+  const uncovered = (reference: ChangeEffectDto['reference'], portId: string, utc: string) =>
+    blockers.push({
+      reference,
+      reason:
+        'Nessuna tariffa copre il porto ' +
+        portId +
+        ' al momento ' +
+        utc +
+        '. Conserva o anticipa la prima decorrenza.',
+    })
+  for (const op of new OperationRepository(database).all())
+    for (const before of op.charges) {
+      const { portId, moment } = before.calculation
+      const simulated = resolve(portId, moment.utc, before.calculation.activity)
+      const reference = {
+        kind: 'OPERATION_CHARGE' as const,
+        id: before.id,
+        label: 'Componente ' + before.chargeKind + ' · ' + op.executionStatus + ' · ' + moment.utc,
+      }
+      if (simulated === undefined) continue
+      if (simulated === null) {
+        uncovered(reference, portId, moment.utc)
+        continue
+      }
+      const after = recalculate(database, op, before, simulated)
+      const changed = diff(
+        reference,
+        { ...before.calculation, effectiveBase: before.effectiveBase },
+        { ...after.calculation, effectiveBase: after.effectiveBase },
       )
-      .map((before) => ({
-        operationId: op.id,
-        before,
-        after: recalculate(database, op, before, { tariff }),
-      })),
-  )
-  const effects = updates.flatMap(({ before, after }) =>
-    diff(
-      {
-        kind: 'OPERATION_CHARGE',
-        id: after.id,
-        label: 'Componente ' + after.chargeKind + ' · ' + after.calculation.moment.utc,
-      },
-      { ...before.calculation, effectiveBase: before.effectiveBase },
-      { ...after.calculation, effectiveBase: after.effectiveBase },
-    ),
-  )
+      if (changed.length) {
+        effects.push(...changed)
+        updates.push({ operationId: op.id, after })
+      }
+    }
   const services = new ServiceRepository(database)
-  const serviceUpdates = services
-    .all()
-    .filter(
-      (s) =>
-        s.category === 'CATALOG' &&
-        s.context.portId === tariff.portId &&
-        s.moment.utc >= tariff.effectiveFrom &&
-        (!next || s.moment.utc < next),
-    )
-    .map((before) => ({ before, after: recalculateService(database, before, { tariff }) }))
-  effects.push(
-    ...serviceUpdates.flatMap(({ before, after }) =>
-      diff(
-        { kind: 'SERVICE_ACTIVITY', id: before.id, label: before.description },
-        { ...before },
-        { ...after },
-      ),
-    ),
-  )
+  const serviceUpdates: ServiceActivityDto[] = []
+  for (const before of services.all()) {
+    if (before.category !== 'CATALOG') continue
+    const simulated = resolve(before.context.portId, before.moment.utc, {
+      kind: 'CATALOG',
+      serviceTypeId: before.serviceTypeId,
+    })
+    const reference = {
+      kind: 'SERVICE_ACTIVITY' as const,
+      id: before.id,
+      label: before.description + ' · ' + before.executionStatus + ' · ' + before.moment.utc,
+    }
+    if (simulated === undefined) continue
+    if (simulated === null) {
+      uncovered(reference, before.context.portId, before.moment.utc)
+      continue
+    }
+    const after = recalculateService(database, before, simulated)
+    const changed = diff(reference, { ...before }, { ...after })
+    if (changed.length) {
+      effects.push(...changed)
+      serviceUpdates.push(after)
+    }
+  }
   return {
     effects,
+    blockers,
     recalculated: updates.length + serviceUpdates.length,
     apply: () => {
       const repository = new OperationRepository(database)
       for (const u of updates) repository.saveCharge(u.operationId, u.after)
-      for (const u of serviceUpdates) services.saveAttribution(u.after)
+      for (const u of serviceUpdates) services.saveAttribution(u)
     },
   }
 }

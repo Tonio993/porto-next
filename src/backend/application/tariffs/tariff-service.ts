@@ -1,3 +1,4 @@
+import { TariffMaintenance } from './tariff-maintenance'
 import { tariffOperationImpacts } from '../operations/operation-impacts'
 import { randomUUID } from 'node:crypto'
 import type { TariffApi, TariffDto } from '../../../shared/contracts/tariffs'
@@ -15,7 +16,17 @@ import { tariffInsertionBlockers } from './tariff-impacts'
 
 const namespace = 'TARIFF_CREATE'
 export class TariffService implements TariffApi {
-  constructor(private readonly coordinator: ArchiveCoordinator) {}
+  private readonly maintenance: TariffMaintenance
+  constructor(private readonly coordinator: ArchiveCoordinator) {
+    this.maintenance = new TariffMaintenance(coordinator)
+  }
+  previewUpdate: TariffApi['previewUpdate'] = (request) => this.maintenance.previewUpdate(request)
+  confirmUpdate: TariffApi['confirmUpdate'] = (request) => this.maintenance.confirmUpdate(request)
+  previewDelete: TariffApi['previewDelete'] = (request) => this.maintenance.previewDelete(request)
+  confirmDelete: TariffApi['confirmDelete'] = (request) => this.maintenance.confirmDelete(request)
+  updateEffects: TariffApi['updateEffects'] = (request) => this.maintenance.updateEffects(request)
+  deletionEffects: TariffApi['deletionEffects'] = (request) =>
+    this.maintenance.deletionEffects(request)
   list: TariffApi['list'] = (request) =>
     this.coordinator.query(request, (session, query) => {
       const input = record(query, ['portId', 'page', 'pageSize'])

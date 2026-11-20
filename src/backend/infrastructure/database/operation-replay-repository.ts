@@ -38,22 +38,25 @@ const managed = ['voyages', 'port_calls', 'berth_stays', 'service_activities']
 /** A read-only persistence plan; actual FK constraints, including composite/CASCADE, are inspected. */
 export function replayPersistence(
   database: DatabaseSession,
-  vesselId: string,
+  vesselId: string | readonly string[],
   voyages: readonly VoyageDto[],
 ) {
   const sql = database.sqlite
+  const vessels = JSON.stringify(typeof vesselId === 'string' ? [vesselId] : vesselId)
   const previous: Record<Table, Row[]> = {
-    voyages: sql.prepare('SELECT * FROM voyages WHERE vessel_id=?').all(vesselId) as Row[],
+    voyages: sql
+      .prepare('SELECT * FROM voyages WHERE vessel_id IN (SELECT value FROM json_each(?))')
+      .all(vessels) as Row[],
     port_calls: sql
       .prepare(
-        'SELECT * FROM port_calls WHERE voyage_id IN (SELECT id FROM voyages WHERE vessel_id=?)',
+        'SELECT * FROM port_calls WHERE voyage_id IN (SELECT id FROM voyages WHERE vessel_id IN (SELECT value FROM json_each(?)))',
       )
-      .all(vesselId) as Row[],
+      .all(vessels) as Row[],
     berth_stays: sql
       .prepare(
-        'SELECT b.* FROM berth_stays b JOIN port_calls p ON p.id=b.port_call_id JOIN voyages v ON v.id=p.voyage_id WHERE v.vessel_id=?',
+        'SELECT b.* FROM berth_stays b JOIN port_calls p ON p.id=b.port_call_id JOIN voyages v ON v.id=p.voyage_id WHERE v.vessel_id IN (SELECT value FROM json_each(?))',
       )
-      .all(vesselId) as Row[],
+      .all(vessels) as Row[],
   }
   const next: Record<Table, Row[]> = { voyages: [], port_calls: [], berth_stays: [] }
   const interval = (v: StayIntervalDto) => ({
@@ -156,6 +159,17 @@ export function operationReplacementBlockers(
   after: VesselOperationDto,
 ): ConflictDto[] {
   const blockers: ConflictDto[] = []
+  if (!isDeepStrictEqual(before, after))
+    blockers.push(
+      ...foreignReferences(
+        database,
+        { kind: 'VESSEL_OPERATION', id: before.id, label: 'Operazione modificata' },
+        'vessel_operations',
+        'vessel_operations',
+        [],
+        [...managed, 'operation_endpoints', 'operation_charges'],
+      ),
+    )
   for (const e of [before.endpoint, ...(before.arrival ? [before.arrival] : [])]) {
     const replacement = e.role === 'ARRIVAL' ? after.arrival : after.endpoint
     if (!isDeepStrictEqual(e, replacement))
@@ -197,41 +211,119 @@ export function operationReplacementBlockers(
   return blockers
 }
 
+/** Includes references to every owned row before any explicit deletion. */
+export function operationDeletionBlockers(
+  database: DatabaseSession,
+  operation: VesselOperationDto,
+): ConflictDto[] {
+  const ref = {
+    kind: 'VESSEL_OPERATION' as const,
+    id: operation.id,
+    label: 'Operazione da eliminare',
+  }
+  return [
+    ...foreignReferences(
+      database,
+      ref,
+      'vessel_operations',
+      'vessel_operations',
+      [],
+      [...managed, 'operation_endpoints', 'operation_charges'],
+    ),
+    ...[operation.endpoint, ...(operation.arrival ? [operation.arrival] : [])].flatMap((e) =>
+      foreignReferences(
+        database,
+        { ...ref, id: e.id, label: 'Estremo operativo da eliminare' },
+        'operation_endpoints',
+        'operation_endpoints',
+        [],
+        [...managed, 'operation_charges'],
+      ),
+    ),
+    ...operation.charges.flatMap((c) =>
+      foreignReferences(
+        database,
+        { kind: 'OPERATION_CHARGE', id: c.id, label: 'Componente economica da eliminare' },
+        'operation_charges',
+        'operation_charge_subjects',
+        [c.id],
+        ['operation_charge_subjects'],
+        'charge_id',
+      ),
+    ),
+  ]
+}
+
+export function removeOperation(database: DatabaseSession, operation: VesselOperationDto): void {
+  const sql = database.sqlite
+  for (const c of operation.charges) {
+    sql.prepare('DELETE FROM operation_charge_subjects WHERE charge_id=?').run(c.id)
+    sql.prepare('DELETE FROM operation_charges WHERE id=?').run(c.id)
+  }
+  sql.prepare('DELETE FROM operation_endpoints WHERE operation_id=?').run(operation.id)
+  sql.prepare('DELETE FROM vessel_operations WHERE id=?').run(operation.id)
+}
+
 export function replaceOperation(
   database: DatabaseSession,
   before: VesselOperationDto,
   after: VesselOperationDto,
 ): void {
   const sql = database.sqlite
-  sql
-    .prepare(
-      'UPDATE vessel_operations SET vessel_version_id=?,execution_status=?,notes=? WHERE id=?',
-    )
-    .run(after.vesselVersionId, after.executionStatus, after.notes, after.id)
-  const endpoints = [after.endpoint, ...(after.arrival ? [after.arrival] : [])]
-  if (after.arrival && after.endpoint.moment.utc >= before.arrival!.moment.utc) endpoints.reverse()
-  for (const e of endpoints) {
-    const m = momentToColumns(e.moment)
-    sql
-      .prepare(
-        'UPDATE operation_endpoints SET vessel_version_id=?,port_id=?,port_version_id=?,berth_id=?,berth_version_id=?,local_date_time=?,zone_id=?,utc_offset=?,utc=? WHERE id=?',
-      )
-      .run(
-        e.vesselVersionId,
-        e.portId,
-        e.portVersionId,
-        e.berthId,
-        e.berthVersionId,
-        m.local_date_time,
-        m.zone_id,
-        m.utc_offset,
-        m.utc,
-        e.id,
-      )
-  }
+  // Delete owned subjects and obsolete charges explicitly, before changing shape.
   for (const c of before.charges.filter((c) => !after.charges.some((a) => a.id === c.id))) {
     sql.prepare('DELETE FROM operation_charge_subjects WHERE charge_id=?').run(c.id)
     sql.prepare('DELETE FROM operation_charges WHERE id=?').run(c.id)
+  }
+  const endpoints = [after.endpoint, ...(after.arrival ? [after.arrival] : [])]
+  const previous = [before.endpoint, ...(before.arrival ? [before.arrival] : [])]
+  for (const e of previous.filter((e) => !endpoints.some((a) => a.id === e.id)))
+    sql.prepare('DELETE FROM operation_endpoints WHERE id=?').run(e.id)
+  sql
+    .prepare(
+      'UPDATE vessel_operations SET vessel_id=?,vessel_version_id=?,operation_type=?,execution_status=?,notes=? WHERE id=?',
+    )
+    .run(
+      after.vesselId,
+      after.vesselVersionId,
+      after.operationType,
+      after.executionStatus,
+      after.notes,
+      after.id,
+    )
+  // Existing movement triggers check the other endpoint immediately. Moving
+  // both past the previous arrival therefore requires updating arrival first.
+  if (after.arrival && before.arrival && after.endpoint.moment.utc >= before.arrival.moment.utc)
+    endpoints.reverse()
+  for (const e of endpoints) {
+    const original = previous.find((p) => p.id === e.id)
+    if (before.vesselId === after.vesselId && isDeepStrictEqual(original, e)) continue
+    const m = momentToColumns(e.moment)
+    const values = [
+      after.vesselId,
+      e.role,
+      e.vesselVersionId,
+      e.portId,
+      e.portVersionId,
+      e.berthId,
+      e.berthVersionId,
+      m.local_date_time,
+      m.zone_id,
+      m.utc_offset,
+      m.utc,
+    ]
+    if (original)
+      sql
+        .prepare(
+          'UPDATE operation_endpoints SET vessel_id=?,role=?,vessel_version_id=?,port_id=?,port_version_id=?,berth_id=?,berth_version_id=?,local_date_time=?,zone_id=?,utc_offset=?,utc=? WHERE id=?',
+        )
+        .run(...values, e.id)
+    else
+      sql
+        .prepare(
+          'INSERT INTO operation_endpoints (vessel_id,role,vessel_version_id,port_id,port_version_id,berth_id,berth_version_id,local_date_time,zone_id,utc_offset,utc,id,operation_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        )
+        .run(...values, e.id, after.id)
   }
   new OperationRepository(database).saveCharges(after)
 }
@@ -242,4 +334,15 @@ export function assertReplayIntegrity(database: DatabaseSession) {
       'PREVIEW_BLOCKED',
       'La consuntivazione viola un riferimento persistente: nessuna modifica è stata applicata.',
     )
+}
+
+/** Descriptive update: deliberately does not reconstruct chronology or calculations. */
+export function updateOperationNotes(
+  database: DatabaseSession,
+  id: string,
+  notes: string | null,
+): void {
+  database.sqlite
+    .prepare('UPDATE vessel_operations SET notes=? WHERE id=? AND notes IS NOT ?')
+    .run(notes, id, notes)
 }

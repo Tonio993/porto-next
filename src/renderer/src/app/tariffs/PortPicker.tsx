@@ -11,12 +11,14 @@ export function PortPicker({
   onChange,
   disabled,
   label = 'Porto',
+  retainedId,
 }: {
   context: ArchiveContextDto
   value: string | null
   onChange: (id: string | null) => void
   disabled?: boolean
   label?: string
+  retainedId?: string
 }) {
   const [search, setSearch] = useState(''),
     [page, setPage] = useState(1)
@@ -43,6 +45,9 @@ export function PortPicker({
   const options =
     list?.items.map((p) => ({
       value: p.id,
+      ...(retainedId !== undefined
+        ? { disabled: p.status !== 'ACTIVE' && p.id !== retainedId }
+        : {}),
       label: `${p.code} · ${p.version.name}${p.status === 'INACTIVE' ? ' · Disattivato' : ''}`,
     })) ?? []
   if (chosen?.value === value && !options.some((o) => o.value === value)) options.unshift(chosen)

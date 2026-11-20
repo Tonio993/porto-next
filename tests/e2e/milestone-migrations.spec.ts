@@ -112,11 +112,11 @@ async function snapshot(app: ElectronApplication, path: string) {
   }, path)
 }
 
-test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferibilità', async ({
+test('M4: migrazioni cumulative v1–v16 e v17 corrente, dati, copie e trasferibilità', async ({
   playwright,
 }) => {
   test.setTimeout(300_000)
-  const folder = mkdtempSync(join(tmpdir(), 'porto-m3-migrations-'))
+  const folder = mkdtempSync(join(tmpdir(), 'porto-m4-migrations-'))
   const env: Record<string, string> = {
     ...process.env,
     PORTO_TEST_USER_DATA: join(folder, 'prefs'),
@@ -135,7 +135,7 @@ test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferib
       .sort()
       .map((n) => readFileSync(join('migrations', n), 'utf8'))
     const transferredSnapshots = []
-    for (let version = 1; version <= 16; version++) {
+    for (let version = 1; version <= 17; version++) {
       const path = join(folder, `v${version}.ormeggi`)
       await app.evaluate(
         ({ app }, { path, version, migrations, fixtureIds }) => {
@@ -156,7 +156,7 @@ test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferib
             db.pragma('application_id = 0x504f5254')
             db.pragma(`user_version = ${version}`)
             seed(
-              "INSERT INTO archive_metadata (singleton,id,name,created_at,updated_at) VALUES (1,'00000000-0000-4000-8000-000000000001','M3 popolato — società','2026-01-01T00:00:00.000Z','2026-02-01T00:00:00.000Z')",
+              "INSERT INTO archive_metadata (singleton,id,name,created_at,updated_at) VALUES (1,'00000000-0000-4000-8000-000000000001','M4 popolato — società','2026-01-01T00:00:00.000Z','2026-02-01T00:00:00.000Z')",
             )
             if (version >= 2) seed('UPDATE archive_metadata SET revision=42')
             if (version >= 3)
@@ -190,7 +190,7 @@ test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferib
               INSERT INTO tariff_configurations VALUES ('tc','t','STANDARD',200,'5'),('tp','t','PASSENGER',200,'5'),('ta','t','ADM',200,'5');
               INSERT INTO tariff_brackets VALUES ('tb','tc',1600,'100'),('bp','tp',1600,'100'),('ba','ta',1600,'100');`)
             if (version >= 11) {
-              seed(`INSERT INTO vessel_operations (id,vessel_id,vessel_version_id,operation_type,execution_status,notes,created_at) VALUES ('op','v','vv','ENTRY','PERFORMED','Cumulativo M3','2026-01-01T00:00:00.000Z');
+              seed(`INSERT INTO vessel_operations (id,vessel_id,vessel_version_id,operation_type,execution_status,notes,created_at) VALUES ('op','v','vv','ENTRY','PERFORMED','Cumulativo M4','2026-01-01T00:00:00.000Z');
                 INSERT INTO operation_endpoints (id,operation_id,vessel_id,role,port_id,port_version_id,berth_id,berth_version_id,local_date_time,zone_id,utc_offset,utc${version >= 12 ? ',vessel_version_id' : ''}) VALUES ('end','op','v','OCCURRENCE','p','pv','b','bv','2026-06-01T12:00','Europe/Rome','+02:00','2026-06-01T10:00:00.000Z'${version >= 12 ? ",'vv'" : ''});
                 INSERT INTO operation_charges SELECT 'charge','op','ENTRY','OCCURRENCE','t','tc','tb',s.id,w.id,'vv','STANDARD',9007199254740991,1600,'100',200,'5',45035996273697,w.weight,22517998136858500,22517998136858500,9223372036854775807,9223372036854775807,'[]' FROM weight_sequences s JOIN weight_versions w ON w.sequence_id=s.id WHERE s.operation_type='ENTRY';
                 INSERT INTO voyages (id,vessel_id,vessel_version_id,opening_operation_id,started_at) VALUES ('voyage','v','vv','op','2026-06-01T10:00:00.000Z');
@@ -234,7 +234,7 @@ test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferib
                 ('free-planned','FREE','v','vv','PLANNED','Libera prevista',9007199254740993,NULL,'2026-06-01T12:31','Europe/Rome','+02:00','2026-06-01T10:31:00.000Z','voyage','call','stay','p','pv','b','bv',NULL,NULL,'2026-01-01T00:00:00.000Z'),
                 ('free-missed','FREE','v','vv','MISSED','Libera mancata',1,NULL,'2026-06-01T12:32','Europe/Rome','+02:00','2026-06-01T10:32:00.000Z','voyage','call','stay','p','pv','b','bv',NULL,NULL,'2026-01-01T00:00:00.000Z');
                 INSERT INTO service_activity_subjects SELECT id,'c','cv',CASE WHEN customer_id IS NULL THEN 'VOYAGE' ELSE 'SERVICE_ACTIVITY' END,CASE WHEN customer_id IS NULL THEN 'voyage' ELSE id END,'a','av','PORT_CALL','call' FROM service_activities;`)
-            if (version === 16) {
+            if (version >= 16) {
               seed(`UPDATE service_types SET has_ever_been_used=1;
                 INSERT INTO service_activities (id,category,vessel_id,vessel_version_id,execution_status,base_cents,local_date_time,zone_id,utc_offset,utc,voyage_id,port_call_id,berth_stay_id,port_id,port_version_id,berth_id,berth_version_id,service_type_id,tariff_id,configuration_id,bracket_id,weight_sequence_id,weight_version_id,calculation,created_at)
                   SELECT 'catalog','CATALOG','v','vv','PERFORMED',22517998136858500,'2026-06-01T12:33','Europe/Rome','+02:00','2026-06-01T10:33:00.000Z','voyage','call','stay','p','pv','b','bv',s.service_type_id,'t','tc','tb',s.id,w.id,
@@ -243,6 +243,16 @@ test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferib
                     'tariffId','t','tariffEffectiveFrom','2025-01-01T00:00:00.000Z','configurationId','tc','bracketId','tb','upperLimit',1600,'ordinaryValue','100','extraWidth',200,'extraValue','5','extraCount',45035996273697,'tariffValue','225179981368585.00','weightSequenceId',s.id,'weightVersionId',w.id,'weight',w.weight,'base','225179981368585.00','steps',json_array('Traccia catalogo conservata')),
                   '2026-01-01T00:00:00.000Z' FROM weight_sequences s JOIN weight_versions w ON w.sequence_id=s.id WHERE s.service_type_id IS NOT NULL;
                 INSERT INTO service_activity_subjects VALUES ('catalog','c','cv','VOYAGE','voyage','a','av','PORT_CALL','call');`)
+            }
+            if (version >= 16) {
+              db.exec(`CREATE TABLE external_weights (
+                version_id TEXT NOT NULL, sequence_id TEXT NOT NULL, note TEXT NOT NULL,
+                FOREIGN KEY(version_id, sequence_id) REFERENCES weight_versions(id, sequence_id) ON DELETE CASCADE);
+                INSERT INTO external_weights SELECT id,sequence_id,'Dipendente esterno conservato' FROM weight_versions;`)
+            }
+            if (version === 17) {
+              db.exec(`INSERT INTO weight_versions(id,sequence_id,weight,effective_from,effective_local_date_time,effective_zone_id,effective_utc_offset)
+                SELECT 'dated-weight',id,'1.1234567890123456789','2027-01-01T00:00:00.000Z','2026-12-31T19:00','America/New_York','-05:00' FROM weight_sequences WHERE operation_type='ENTRY';`)
             }
           } finally {
             db.close()
@@ -259,7 +269,7 @@ test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferib
       const open = await page.evaluate(() => window.archives.open())
       expect(open).toMatchObject({
         ok: true,
-        value: { active: { schemaVersion: 16 }, context: { revision: version === 1 ? '0' : '42' } },
+        value: { active: { schemaVersion: 17 }, context: { revision: version === 1 ? '0' : '42' } },
       })
       if (open.ok && version >= 15) {
         const sessionId = open.value.context!.sessionId
@@ -289,7 +299,7 @@ test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferib
             subjects: { customer: { id: fixtureIds.c }, agency: { id: fixtureIds.a } },
           },
         })
-        if (version === 16) {
+        if (version >= 16) {
           const catalog = await page.evaluate(
             ({ sessionId, id }) => window.services.get({ context: { sessionId }, query: { id } }),
             { sessionId, id: fixtureIds.catalog },
@@ -314,23 +324,36 @@ test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferib
       expect(after.integrity).toEqual([{ integrity_check: 'ok' }])
       expect(after.foreignKeys).toEqual([])
       expect(after.applicationId).toBe(0x504f5254)
-      expect(after.version).toBe(16)
+      expect(after.version).toBe(17)
       for (const [table, rows] of Object.entries(before.rows)) {
         // Migrations may add columns, but must preserve every existing row and value.
         const columns = Object.keys(rows[0] ?? {})
         expect(
           after.rows[table].map((row: Record<string, unknown>) =>
-            Object.fromEntries(columns.map((column) => [column, row[column]])),
+            Object.fromEntries(
+              columns.map((column) => [
+                column,
+                row[
+                  table === 'weight_versions' && version < 17 && column === 'effective_from'
+                    ? 'legacy_initial_from'
+                    : column
+                ],
+              ]),
+            ),
           ),
           'v' + version + ': ' + table,
         ).toEqual(rows)
       }
-      expect(after.rows.weight_versions).toHaveLength(4)
+      expect(after.rows.weight_versions).toHaveLength(version === 17 ? 5 : 4)
+      for (const row of after.rows.weight_versions) {
+        expect(row.legacy_initial_from).toBeNull()
+        if (version < 17) expect(row.effective_from).toBeNull()
+      }
       const backups = readdirSync(folder).filter((n) =>
-        n.startsWith('v' + version + '.ormeggi.prima-v16-'),
+        n.startsWith('v' + version + '.ormeggi.prima-v17-'),
       )
-      expect(backups).toHaveLength(version < 16 ? 1 : 0)
-      if (version < 16) expect(await snapshot(app, join(folder, backups[0]))).toEqual(before)
+      expect(backups).toHaveLength(version < 17 ? 1 : 0)
+      if (version < 17) expect(await snapshot(app, join(folder, backups[0]))).toEqual(before)
       else expect(after).toEqual(before)
       if (version >= 11)
         expect(after.rows.operation_charges[0].effective_base_cents).toBe('9223372036854775807')
@@ -381,6 +404,51 @@ test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferib
       transferredSnapshots.push({ version, path: transferred, expected: after })
       expect((await page.evaluate(() => window.archives.close())).ok).toBe(true)
     }
+    // Fail after the ALTERs in 0017, while keeping an already open session usable.
+    const broken = join(folder, 'rollback-v16.ormeggi')
+    const future = join(folder, 'future.ormeggi')
+    const activePath = transferredSnapshots.at(-1)!.path
+    await app.evaluate(
+      ({ app, dialog }, { folder, broken, future, activePath }) => {
+        const module = process.getBuiltinModule('module') as typeof import('node:module')
+        const fs = process.getBuiltinModule('fs') as typeof import('node:fs')
+        const Database = module.createRequire(app.getAppPath() + '/package.json')('better-sqlite3')
+        const backup = fs.readdirSync(folder).find((n) => n.startsWith('v16.ormeggi.prima-v17-'))!
+        fs.copyFileSync(joinPath(folder, backup), broken)
+        function joinPath(a: string, b: string) {
+          return a + '/' + b
+        }
+        const db = new Database(broken)
+        db.exec('CREATE INDEX weight_effective_unique ON archive_metadata(name)')
+        db.close()
+        fs.copyFileSync(activePath, future)
+        const f = new Database(future)
+        f.pragma('user_version=18')
+        f.close()
+        dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [activePath] })
+      },
+      { folder, broken, future, activePath },
+    )
+    expect((await page.evaluate(() => window.archives.open())).ok).toBe(true)
+    const active = await page.evaluate(() => window.archives.getState())
+    for (const rejected of [broken, future]) {
+      const before = await snapshot(app, rejected)
+      const bytes = readFileSync(rejected)
+      await app.evaluate(({ dialog }, path) => {
+        dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] })
+      }, rejected)
+      expect((await page.evaluate(() => window.archives.open())).ok).toBe(false)
+      expect(await snapshot(app, rejected)).toEqual(before)
+      expect(readFileSync(rejected)).toEqual(bytes)
+      expect(await page.evaluate(() => window.archives.getState())).toEqual(active)
+      if (rejected === broken) {
+        const backup = readdirSync(folder).find((n) =>
+          n.startsWith('rollback-v16.ormeggi.prima-v17-'),
+        )!
+        expect(await snapshot(app, join(folder, backup))).toEqual(before)
+      }
+    }
+    expect((await page.evaluate(() => window.archives.close())).ok).toBe(true)
     // A different process, path and empty preferences on this Windows host; not a second physical machine.
     const other = await playwright._electron.launch({
       ...options,
@@ -402,8 +470,8 @@ test('M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferib
           ok: true,
           value: {
             active: {
-              schemaVersion: 16,
-              name: 'M3 popolato — società',
+              schemaVersion: 17,
+              name: 'M4 popolato — società',
               updatedAt: '2026-02-01T00:00:00.000Z',
             },
             context: { revision: version === 1 ? '0' : '42' },

@@ -29,6 +29,7 @@ import {
 import { TariffMomentFields, emptyMoment } from './TariffMomentFields'
 import { CopyTariffFields } from './CopyTariffFields'
 import { BaseCalculator } from './BaseCalculator'
+import { TariffMaintenanceEditor } from './TariffMaintenanceEditor'
 
 type Draft = {
   context: ArchiveContextDto
@@ -54,6 +55,14 @@ export function Tariffs({
     [detail, setDetail] = useState<TariffDto | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [preview, setPreview] = useState<TariffPreviewDto | null>(null)
+  const [maintenance, setMaintenance] = useState<{
+    tariff: TariffDto
+    mode: 'UPDATE' | 'DELETE'
+    context: ArchiveContextDto
+    opened: boolean
+    uncertain: boolean
+    trigger: HTMLElement | null
+  } | null>(null)
   const [calculatorPort, setCalculatorPort] = useState<string | null>(null)
   const [copyOpen, setCopyOpen] = useState(false)
   const [resolution, setResolution] = useState<MomentResolutionDto | null>(null)
@@ -84,10 +93,11 @@ export function Tariffs({
   const busy =
     archives.busy || archives.commandBusy || commandRequest.loading || copyRequest.loading
   const dialogOpen = !!draft || !!calculatorPort
+  const anyDialogOpen = dialogOpen || !!maintenance?.opened
   useEffect(() => {
-    onDialogChange(dialogOpen)
+    onDialogChange(anyDialogOpen)
     return () => onDialogChange(false)
-  }, [dialogOpen, onDialogChange])
+  }, [anyDialogOpen, onDialogChange])
   useEffect(() => {
     if (!portId) return
     void readList(() =>
@@ -255,6 +265,28 @@ export function Tariffs({
           {notice}
         </StateMessage>
       )}
+      {maintenance && !maintenance.opened && (
+        <StateMessage title="Bozza tariffa conservata" kind="warning">
+          {maintenance.uncertain
+            ? 'Verifica l’esito prima di ripetere una scrittura.'
+            : 'Riprendi la correzione o eliminazione della tariffa.'}
+          <Group>
+            <Button
+              disabled={busy || dialogOpen}
+              onClick={() => setMaintenance({ ...maintenance, opened: true })}
+            >
+              Riprendi bozza
+            </Button>
+            <Button
+              variant="default"
+              disabled={busy || maintenance.uncertain}
+              onClick={() => setMaintenance(null)}
+            >
+              Scarta bozza
+            </Button>
+          </Group>
+        </StateMessage>
+      )}
       <div className="ports-workspace">
         <section className="archive-panel port-list" aria-label="Elenco tariffe">
           <Group className="port-list-heading" justify="space-between">
@@ -262,7 +294,7 @@ export function Tariffs({
             <Button
               size="compact-sm"
               ref={newButton}
-              disabled={busy || !portId}
+              disabled={busy || !portId || !!maintenance}
               onClick={() => void create()}
             >
               Nuova tariffa
@@ -337,7 +369,7 @@ export function Tariffs({
             <h2>Tariffa e calcolo base</h2>
             <Button
               variant="light"
-              disabled={busy || !portId}
+              disabled={busy || !portId || !!maintenance}
               onClick={() => {
                 rememberTrigger()
                 setCalculatorPort(portId)
@@ -359,12 +391,34 @@ export function Tariffs({
                 Fine esclusa: {detail.effectiveTo ?? 'Senza limite finale'}
               </p>
               <Group>
-                <Button variant="default" disabled={busy} onClick={() => void create(true)}>
+                <Button
+                  variant="default"
+                  disabled={busy || !!maintenance}
+                  onClick={() => void create(true)}
+                >
                   Copia tariffa
                 </Button>
-                <Button disabled variant="subtle">
-                  Correzione ed eliminazione · in preparazione
-                </Button>
+                {(['UPDATE', 'DELETE'] as const).map((mode) => (
+                  <Button
+                    key={mode}
+                    variant="light"
+                    color={mode === 'DELETE' ? 'red' : undefined}
+                    disabled={busy || !!maintenance}
+                    onClick={() => {
+                      rememberTrigger()
+                      setMaintenance({
+                        tariff: detail,
+                        mode,
+                        context: { ...context },
+                        opened: true,
+                        uncertain: false,
+                        trigger: trigger.current,
+                      })
+                    }}
+                  >
+                    {mode === 'UPDATE' ? 'Correggi tariffa' : 'Elimina tariffa'}
+                  </Button>
+                ))}
               </Group>
               <ConfigurationDetails configurations={detail.configurations} />
             </>
@@ -376,6 +430,34 @@ export function Tariffs({
           )}
         </section>
       </div>
+      {maintenance && (
+        <TariffMaintenanceEditor
+          tariff={maintenance.tariff}
+          mode={maintenance.mode}
+          opened={maintenance.opened}
+          originalContext={maintenance.context}
+          archives={archives}
+          trigger={maintenance.trigger}
+          onClose={() => setMaintenance((old) => (old ? { ...old, opened: false } : null))}
+          onUncertainChange={(uncertain) =>
+            setMaintenance((old) =>
+              old && old.uncertain !== uncertain ? { ...old, uncertain } : old,
+            )
+          }
+          onApplied={(tariff) => {
+            detailRequest.invalidate()
+            setSelected(tariff?.id ?? null)
+            setDetail(tariff)
+            setMaintenance(null)
+            setNotice(
+              tariff
+                ? 'Tariffa corretta e calcoli aggiornati.'
+                : 'Tariffa eliminata e calcoli aggiornati.',
+            )
+            setReload((n) => n + 1)
+          }}
+        />
+      )}
       <Modal
         opened={dialogOpen}
         onClose={close}

@@ -1,11 +1,11 @@
 import type { BaseCalculationDto, TariffActivity } from '../../../shared/contracts/tariffs'
 import type { ResolvedMomentDto } from '../../../shared/contracts/values'
 import { calculateBracket } from '../../domain/tariffs/base-calculator'
-import { CatalogRepository } from '../../infrastructure/database/catalog-repository'
+import { WeightRepository } from '../../infrastructure/database/weight-repository'
+import type { WeightVersionDto } from '../../../shared/contracts/catalog'
 import { TariffRepository } from '../../infrastructure/database/tariff-repository'
 import { VesselRepository } from '../../infrastructure/database/vessel-repository'
 import type { DatabaseSession } from '../../infrastructure/database/database-session'
-import { ArchiveError } from '../../../shared/errors/archive-error'
 import type { VesselVersionDto } from '../../../shared/contracts/vessels'
 import type { TariffDto } from '../../../shared/contracts/tariffs'
 
@@ -15,7 +15,11 @@ import type { TariffDto } from '../../../shared/contracts/tariffs'
 export function calculateBase(
   database: DatabaseSession,
   input: { portId: string; vesselId: string; moment: ResolvedMomentDto; activity: TariffActivity },
-  simulated: { vesselVersion?: VesselVersionDto; tariff?: TariffDto } = {},
+  simulated: {
+    vesselVersion?: VesselVersionDto
+    tariff?: TariffDto
+    weight?: WeightVersionDto
+  } = {},
 ): BaseCalculationDto {
   const vessel =
     simulated.vesselVersion ??
@@ -26,14 +30,8 @@ export function calculateBase(
   const tariff =
     simulated.tariff ?? new TariffRepository(database).at(input.portId, input.moment.utc)
   const configuration = tariff.configurations.find((c) => c.vesselTypeId === vessel.vesselTypeId)!
-  const catalog = new CatalogRepository(database)
-  const activity = input.activity
   const weight =
-    activity.kind === 'OPERATION'
-      ? catalog.fixedWeights().find((w) => w.operation === activity.operation)!.initialWeight
-      : catalog.get(activity.serviceTypeId).initialWeight
-  // P19 replaces the initial-only weight resolver when dated weights are introduced.
-  if (!weight) throw new ArchiveError('INVALID_ARCHIVE', 'Manca il peso applicabile.')
+    simulated.weight ?? new WeightRepository(database).at(input.activity, input.moment.utc)
   const result = calculateBracket(configuration, vessel.size, weight.weight)
   const bracket = configuration.brackets[result.bracketIndex]
   return {

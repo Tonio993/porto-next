@@ -106,7 +106,9 @@ it('conserva decimali esatti fino a 256 cifre senza esponenti, arrotondamenti o 
     ).toThrow()
   expect(() =>
     sql()
-      .prepare('INSERT INTO weight_versions VALUES (?, ?, NULL, ?)')
+      .prepare(
+        'INSERT INTO weight_versions (id,sequence_id,effective_from,weight) VALUES (?, ?, NULL, ?)',
+      )
       .run('duplicate', a.initialWeight.sequenceId, '1'),
   ).toThrow()
   expect(() =>

@@ -121,7 +121,45 @@ export interface CompleteOperationDto {
 export interface OperationCompletionPreviewDto extends OperationPreviewDto {
   before: VesselOperationDto
 }
+export type CorrectOperationDto = CompleteOperationDto
+export type OperationCorrectionPreviewDto = OperationCompletionPreviewDto
+export interface OperationDeletionPreviewDto extends ChangePreviewDto {
+  before: VesselOperationDto
+}
 export interface OperationApi {
+  previewDelete(
+    request: CommandRequest<{ id: string }>,
+  ): Promise<ApplicationResult<OperationDeletionPreviewDto>>
+  deletionEffects(
+    request: QueryRequest<{ previewId: string; page: number; pageSize: number }>,
+  ): Promise<ApplicationResult<OperationDeletionPreviewDto>>
+  confirmDelete(
+    request: CommandRequest<{ previewId: string }>,
+  ): Promise<ApplicationResult<{ id: string }>>
+  updateNotes(
+    request: CommandRequest<{ id: string; notes: string | null }>,
+  ): Promise<ApplicationResult<VesselOperationDto>>
+  resolveCorrectionMoment(
+    request: QueryRequest<CorrectOperationDto>,
+  ): Promise<ApplicationResult<OperationMomentDto>>
+  previewCorrect(
+    request: CommandRequest<CorrectOperationDto>,
+  ): Promise<ApplicationResult<OperationCorrectionPreviewDto>>
+  correctionEffects(
+    request: QueryRequest<{ previewId: string; page: number; pageSize: number }>,
+  ): Promise<ApplicationResult<OperationCorrectionPreviewDto>>
+  confirmCorrect(
+    request: CommandRequest<{ previewId: string }>,
+  ): Promise<ApplicationResult<VesselOperationDto>>
+  previewInsert(
+    request: CommandRequest<CreateOperationDto>,
+  ): Promise<ApplicationResult<OperationPreviewDto>>
+  insertionEffects(
+    request: QueryRequest<{ previewId: string; page: number; pageSize: number }>,
+  ): Promise<ApplicationResult<OperationPreviewDto>>
+  confirmInsert(
+    request: CommandRequest<{ previewId: string }>,
+  ): Promise<ApplicationResult<VesselOperationDto>>
   resolveCompletionMoment(
     request: QueryRequest<CompleteOperationDto>,
   ): Promise<ApplicationResult<OperationMomentDto>>
@@ -158,6 +196,17 @@ export interface OperationApi {
   ): Promise<ApplicationResult<OperationPreviewDto>>
 }
 export const operationChannels = {
+  previewDelete: 'operations:preview-delete',
+  deletionEffects: 'operations:deletion-effects',
+  confirmDelete: 'operations:confirm-delete',
+  updateNotes: 'operations:update-notes',
+  resolveCorrectionMoment: 'operations:resolve-correction-moment',
+  previewCorrect: 'operations:preview-correct',
+  correctionEffects: 'operations:correction-effects',
+  confirmCorrect: 'operations:confirm-correct',
+  previewInsert: 'operations:preview-insert',
+  insertionEffects: 'operations:insertion-effects',
+  confirmInsert: 'operations:confirm-insert',
   resolveCompletionMoment: 'operations:resolve-completion-moment',
   previewComplete: 'operations:preview-complete',
   completionEffects: 'operations:completion-effects',

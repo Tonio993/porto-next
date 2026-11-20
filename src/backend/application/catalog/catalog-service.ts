@@ -1,3 +1,5 @@
+import { WeightService } from './weight-service'
+import { WeightRepository } from '../../infrastructure/database/weight-repository'
 import type { CatalogApi, CatalogChange } from '../../../shared/contracts/catalog'
 import type { ChangeEffectDto, ChangePreviewDto } from '../../../shared/contracts/master-data'
 import { ArchiveError } from '../../../shared/errors/archive-error'
@@ -10,7 +12,17 @@ import { entityId, pagination } from '../ports/port-input'
 
 const namespace = 'CATALOG_CHANGE'
 export class CatalogService implements CatalogApi {
-  constructor(private readonly coordinator: ArchiveCoordinator) {}
+  private readonly weights: WeightService
+  constructor(private readonly coordinator: ArchiveCoordinator) {
+    this.weights = new WeightService(coordinator)
+  }
+  weightHistory: CatalogApi['weightHistory'] = (request) => this.weights.weightHistory(request)
+  getWeight: CatalogApi['getWeight'] = (request) => this.weights.getWeight(request)
+  resolveWeightMoment: CatalogApi['resolveWeightMoment'] = (request) =>
+    this.weights.resolveWeightMoment(request)
+  previewWeight: CatalogApi['previewWeight'] = (request) => this.weights.previewWeight(request)
+  confirmWeight: CatalogApi['confirmWeight'] = (request) => this.weights.confirmWeight(request)
+  weightEffects: CatalogApi['weightEffects'] = (request) => this.weights.weightEffects(request)
   create: CatalogApi['create'] = (request) =>
     this.coordinator.command(request, (session, payload) => {
       const input = record(payload, ['description', 'initialWeight'])
@@ -130,12 +142,20 @@ export class CatalogService implements CatalogApi {
         action: 'DELETE',
         changes: [{ field: 'description', before: type.description, after: null }],
       })
-      effects.push({
-        versionId: type.initialWeight.id,
-        reference: { kind: 'WEIGHT_VERSION', id: type.initialWeight.id, label: 'Peso iniziale' },
-        action: 'DELETE',
-        changes: [{ field: 'weight', before: type.initialWeight.weight, after: null }],
-      })
+      effects.push(
+        ...new WeightRepository(session.database)
+          .versions(type.initialWeight.sequenceId)
+          .map((version): ChangeEffectDto => ({
+            versionId: version.id,
+            reference: {
+              kind: 'WEIGHT_VERSION',
+              id: version.id,
+              label: version.effectiveFrom ?? 'Peso iniziale',
+            },
+            action: 'DELETE',
+            changes: [{ field: 'weight', before: version.weight, after: null }],
+          })),
+      )
     } else {
       const field = change.operation === 'RENAME' ? 'description' : 'status'
       const before = type[field],

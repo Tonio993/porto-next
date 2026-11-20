@@ -9,6 +9,7 @@ import type {
 } from '../../../../shared/contracts/operations'
 import type { useArchives } from '../../api/use-archives'
 import { useApplicationRequest } from '../../api/use-application-request'
+import { operationCorrectionOutcome } from '../../api/operation-correction-outcome'
 import { moneyInput } from '../../api/numeric-input'
 import { StateMessage } from '../StateMessage'
 import { PortConfirmation } from '../ports/PortConfirmation'
@@ -16,8 +17,9 @@ import { PortPicker } from '../tariffs/PortPicker'
 import { TariffMomentFields } from '../tariffs/TariffMomentFields'
 import { BerthPicker } from './BerthPicker'
 import { OperationDetail } from './OperationDetail'
+import { VesselPicker } from './VesselPicker'
 
-function fromOperation(op: VesselOperationDto): CreateOperationDto {
+function fromOperation(op: VesselOperationDto, correction = false): CreateOperationDto {
   const moment = {
     localDateTime: op.endpoint.moment.localDateTime,
     selectedOffset: op.endpoint.moment.offset,
@@ -25,9 +27,10 @@ function fromOperation(op: VesselOperationDto): CreateOperationDto {
   const base = {
     vesselId: op.vesselId,
     moment,
-    executionStatus: 'PERFORMED' as const,
+    executionStatus: correction ? op.executionStatus : ('PERFORMED' as const),
     notes: op.notes,
-    manualOverrideAmount: op.charges[0].manualOverrideAmount,
+    manualOverrideAmount: op.charges.find((c) => c.economicEndpointRole !== 'ARRIVAL')!
+      .manualOverrideAmount,
   }
   if (op.operationType === 'ENTRY')
     return {
@@ -48,7 +51,8 @@ function fromOperation(op: VesselOperationDto): CreateOperationDto {
       localDateTime: op.arrival!.moment.localDateTime,
       selectedOffset: op.arrival!.moment.offset,
     },
-    arrivalManualOverrideAmount: op.charges[1]?.manualOverrideAmount ?? null,
+    arrivalManualOverrideAmount:
+      op.charges.find((c) => c.economicEndpointRole === 'ARRIVAL')?.manualOverrideAmount ?? null,
   }
 }
 export function OperationCompletionEditor({
@@ -59,6 +63,7 @@ export function OperationCompletionEditor({
   onClose,
   onApplied,
   trigger,
+  correction = false,
 }: {
   operation: VesselOperationDto
   opened: boolean
@@ -67,14 +72,31 @@ export function OperationCompletionEditor({
   onClose: () => void
   onApplied: (value: VesselOperationDto) => void
   trigger: HTMLElement | null
+  correction?: boolean
 }) {
+  const api = correction
+    ? {
+        resolve: window.operations.resolveCorrectionMoment,
+        preview: window.operations.previewCorrect,
+        effects: window.operations.correctionEffects,
+        confirm: window.operations.confirmCorrect,
+      }
+    : {
+        resolve: window.operations.resolveCompletionMoment,
+        preview: window.operations.previewComplete,
+        effects: window.operations.completionEffects,
+        confirm: window.operations.confirmComplete,
+      }
+  const expected = useRef<VesselOperationDto | null>(null)
   const context = archives.state.context!
   const [draftContext, setDraftContext] = useState(originalContext)
   const [original, setOriginal] = useState(operation)
-  const [values, setValues] = useState(() => fromOperation(operation))
-  const [amount, setAmount] = useState(operation.charges[0].manualOverrideAmount ?? '')
+  const [values, setValues] = useState(() => fromOperation(operation, correction))
+  const [amount, setAmount] = useState(
+    operation.charges.find((c) => c.economicEndpointRole !== 'ARRIVAL')!.manualOverrideAmount ?? '',
+  )
   const [arrivalAmount, setArrivalAmount] = useState(
-    operation.charges[1]?.manualOverrideAmount ?? '',
+    operation.charges.find((c) => c.economicEndpointRole === 'ARRIVAL')?.manualOverrideAmount ?? '',
   )
   const [preview, setPreview] = useState<OperationCompletionPreviewDto | null>(null)
   const [resolution, setResolution] = useState<OperationMomentDto | null>(null)
@@ -144,23 +166,65 @@ export function OperationCompletionEditor({
     if (result?.ok && active.current) {
       setUncertain(false)
       setReloadRequired(false)
-      if (result.value.executionStatus !== 'PLANNED') {
+      if (!correction && result.value.executionStatus !== 'PLANNED') {
         onApplied(result.value)
         setOpen(false)
       } else {
         setOriginal(result.value)
-        setValues(fromOperation(result.value))
-        setAmount(result.value.charges[0].manualOverrideAmount ?? '')
-        setArrivalAmount(result.value.charges[1]?.manualOverrideAmount ?? '')
+        setValues(fromOperation(result.value, correction))
+        setAmount(
+          result.value.charges.find((c) => c.economicEndpointRole !== 'ARRIVAL')!
+            .manualOverrideAmount ?? '',
+        )
+        setArrivalAmount(
+          result.value.charges.find((c) => c.economicEndpointRole === 'ARRIVAL')
+            ?.manualOverrideAmount ?? '',
+        )
         setDraftContext(result.context)
       }
     }
   }
-  const confirm = async () => {
-    if (!preview || uncertain) return
+  const verifyOutcome = async () => {
     const result = await editor.request(() =>
       checked(() =>
-        window.operations.confirmComplete({
+        window.operations.get({
+          context: { sessionId: draftContext.sessionId },
+          query: { id: original.id },
+        }),
+      ),
+    )
+    if (!result?.ok || !active.current) return
+    if (!expected.current) return
+    const outcome = operationCorrectionOutcome(
+      original,
+      expected.current,
+      result.value,
+      draftContext,
+      result.context,
+    )
+    if (outcome === 'APPLIED') {
+      onApplied(result.value)
+      setOpen(false)
+    } else if (outcome === 'UNCHANGED') {
+      setUncertain(false)
+      setPreview(null)
+      setError(
+        'La modifica non risulta applicata. Puoi generare una nuova anteprima della bozza conservata.',
+      )
+    } else {
+      setReloadRequired(true)
+      setUncertain(false)
+      setError(
+        'La cronologia è cambiata. Ricarica esplicitamente la bozza dai dati attuali prima di continuare.',
+      )
+    }
+  }
+  const confirm = async () => {
+    if (!preview || uncertain) return
+    expected.current = preview.operationValues
+    const result = await editor.request(() =>
+      checked(() =>
+        api.confirm({
           context: preview.context,
           payload: { previewId: preview.previewId },
         }),
@@ -175,8 +239,9 @@ export function OperationCompletionEditor({
       setPreview(null)
     }
   }
-  const missed = values.executionStatus === 'MISSED'
-  const disabled = busy || stale || uncertain || original.executionStatus !== 'PLANNED'
+  const missed = !correction && values.executionStatus === 'MISSED'
+  const disabled =
+    busy || stale || uncertain || (!correction && original.executionStatus !== 'PLANNED')
   const showPreview = () => {
     const base = amount.trim() ? moneyInput(amount) : null
     const arrival = arrivalAmount.trim() ? moneyInput(arrivalAmount) : null
@@ -192,15 +257,15 @@ export function OperationCompletionEditor({
         ...(values.operationType === 'MOVEMENT'
           ? {
               arrivalManualOverrideAmount:
-                values.destinationPortId !== original.endpoint.portId ? arrival : null,
+                correction || values.destinationPortId !== original.endpoint.portId
+                  ? arrival
+                  : null,
             }
           : {}),
       },
     }
     void editor
-      .request(() =>
-        checked(() => window.operations.previewComplete({ context: draftContext, payload })),
-      )
+      .request(() => checked(() => api.preview({ context: draftContext, payload })))
       .then((r) => {
         if (r?.ok) setPreview(r.value)
       })
@@ -214,7 +279,7 @@ export function OperationCompletionEditor({
           setOpen(false)
         }
       }}
-      title="Consuntiva operazione"
+      title={correction ? 'Correggi operazione' : 'Consuntiva operazione'}
       size="xl"
       closeOnClickOutside={false}
       closeOnEscape={!busy}
@@ -226,7 +291,7 @@ export function OperationCompletionEditor({
       }}
     >
       {error && (
-        <StateMessage kind="error" title="Consuntivazione non disponibile">
+        <StateMessage kind="error" title="Modifica non disponibile">
           {error}
         </StateMessage>
       )}
@@ -237,19 +302,23 @@ export function OperationCompletionEditor({
       )}
       {uncertain && (
         <StateMessage kind="warning" title="Esito non verificato">
-          Verifica l’esito con Ricarica bozza prima di ripetere la scrittura. I valori inseriti sono
-          conservati.
+          Verifica l’esito della scrittura prima di riprovare. I valori inseriti sono conservati.
         </StateMessage>
       )}
-      {(stale || uncertain) && (
+      {((stale && !uncertain) || (!correction && uncertain)) && (
         <Button disabled={busy} onClick={() => void reload()}>
           Ricarica bozza
+        </Button>
+      )}
+      {correction && uncertain && (
+        <Button disabled={busy} onClick={() => void verifyOutcome()}>
+          Verifica esito della scrittura
         </Button>
       )}
       {preview ? (
         <>
           {preview.blockers.length > 0 && (
-            <StateMessage kind="error" title="Consuntivazione bloccata">
+            <StateMessage kind="error" title="Modifica bloccata">
               {preview.blockers.map((blocker, index) => (
                 <p key={index}>
                   {blocker.reference.label}: {blocker.reason}
@@ -268,6 +337,7 @@ export function OperationCompletionEditor({
             </section>
           </div>
           <PortConfirmation
+            cancelDisabled={busy || uncertain}
             preview={preview}
             revision={context.revision}
             disabled={busy || uncertain || stale}
@@ -280,7 +350,7 @@ export function OperationCompletionEditor({
               void paging
                 .request(() =>
                   checked(() =>
-                    window.operations.completionEffects({
+                    api.effects({
                       context: { sessionId: preview.context.sessionId },
                       query: { previewId: preview.previewId, page, pageSize: 50 },
                     }),
@@ -294,21 +364,90 @@ export function OperationCompletionEditor({
         </>
       ) : (
         <Stack>
+          {correction && (
+            <>
+              <VesselPicker
+                context={draftContext}
+                value={values.vesselId}
+                disabled={disabled}
+                retainedId={original.vesselId}
+                onChange={(id) =>
+                  change({
+                    ...values,
+                    vesselId: id ?? '',
+                    moment: { ...values.moment, selectedOffset: null },
+                    ...(values.operationType !== 'ENTRY' ? { interpretationPortId: null } : {}),
+                  })
+                }
+              />
+              <Select
+                label="Tipologia"
+                value={values.operationType}
+                allowDeselect={false}
+                disabled={disabled}
+                data={[
+                  { value: 'ENTRY', label: 'Entrata' },
+                  { value: 'EXIT', label: 'Uscita' },
+                  { value: 'MOVEMENT', label: 'Spostamento' },
+                ]}
+                onChange={(type) => {
+                  if (!type || type === values.operationType) return
+                  const common = {
+                    vesselId: values.vesselId,
+                    executionStatus: values.executionStatus,
+                    notes: values.notes,
+                    manualOverrideAmount: null,
+                    moment: values.moment,
+                  }
+                  setArrivalAmount('')
+                  change(
+                    type === 'ENTRY'
+                      ? {
+                          ...common,
+                          operationType: 'ENTRY',
+                          portId: original.endpoint.portId,
+                          berthId: original.endpoint.berthId,
+                        }
+                      : type === 'EXIT'
+                        ? {
+                            ...common,
+                            operationType: 'EXIT',
+                            interpretationPortId: original.endpoint.portId,
+                          }
+                        : {
+                            ...common,
+                            operationType: 'MOVEMENT',
+                            interpretationPortId: original.endpoint.portId,
+                            destinationPortId: original.arrival?.portId ?? original.endpoint.portId,
+                            destinationBerthId: original.arrival?.berthId ?? null,
+                            arrivalMoment: original.arrival
+                              ? {
+                                  localDateTime: original.arrival.moment.localDateTime,
+                                  selectedOffset: original.arrival.moment.offset,
+                                }
+                              : { localDateTime: '', selectedOffset: null },
+                          },
+                  )
+                }}
+              />
+            </>
+          )}
           <Select
             data-autofocus
             label="Esito"
             allowDeselect={false}
             value={values.executionStatus}
-            disabled={busy || uncertain}
+            disabled={disabled}
             data={[
+              ...(correction ? [{ value: 'PLANNED', label: 'Prevista' }] : []),
               { value: 'PERFORMED', label: 'Effettuata' },
               { value: 'MISSED', label: 'Mancata' },
             ]}
             onChange={(status) =>
               change({
-                ...fromOperation(original),
+                ...(correction ? values : fromOperation(original, correction)),
                 notes: values.notes,
-                executionStatus: status as 'PERFORMED' | 'MISSED',
+                executionStatus: status as CreateOperationDto['executionStatus'],
               })
             }
           />
@@ -322,7 +461,8 @@ export function OperationCompletionEditor({
             <>
               <PortPicker
                 context={draftContext}
-                label="Porto effettivo"
+                label={correction ? 'Porto' : 'Porto effettivo'}
+                retainedId={original.endpoint.portId}
                 value={values.portId}
                 disabled={disabled || missed}
                 onChange={(id) =>
@@ -336,6 +476,17 @@ export function OperationCompletionEditor({
               />
               {values.portId && (
                 <BerthPicker
+                  historical={correction}
+                  retained={
+                    correction
+                      ? original.endpoint.portId === values.portId && original.endpoint.berthId
+                        ? {
+                            id: original.endpoint.berthId,
+                            label: original.endpoint.berthName ?? 'Banchina storica',
+                          }
+                        : null
+                      : undefined
+                  }
                   key={values.portId}
                   context={draftContext}
                   portId={values.portId}
@@ -352,6 +503,7 @@ export function OperationCompletionEditor({
               <PortPicker
                 context={draftContext}
                 label="Porto di interpretazione"
+                retainedId={original.endpoint.portId}
                 value={values.interpretationPortId}
                 disabled={disabled || missed}
                 onChange={(id) =>
@@ -368,8 +520,12 @@ export function OperationCompletionEditor({
             economic
             label={
               values.operationType === 'MOVEMENT'
-                ? 'Partenza effettiva locale'
-                : 'Momento effettivo locale'
+                ? correction
+                  ? 'Partenza locale'
+                  : 'Partenza effettiva locale'
+                : correction
+                  ? 'Momento locale'
+                  : 'Momento effettivo locale'
             }
             moment={values.moment}
             disabled={disabled || missed}
@@ -378,7 +534,7 @@ export function OperationCompletionEditor({
             onResolve={() => {
               void resolving
                 .request(() =>
-                  window.operations.resolveCompletionMoment({
+                  api.resolve({
                     context: { sessionId: draftContext.sessionId },
                     query: { id: original.id, values },
                   }),
@@ -392,7 +548,8 @@ export function OperationCompletionEditor({
             <>
               <PortPicker
                 context={draftContext}
-                label="Porto effettivo di destinazione"
+                label={correction ? 'Porto di destinazione' : 'Porto effettivo di destinazione'}
+                retainedId={original.arrival?.portId}
                 value={values.destinationPortId}
                 disabled={disabled || missed}
                 onChange={(id) =>
@@ -406,6 +563,18 @@ export function OperationCompletionEditor({
               />
               {values.destinationPortId && (
                 <BerthPicker
+                  historical={correction}
+                  retained={
+                    correction
+                      ? original.arrival?.portId === values.destinationPortId &&
+                        original.arrival.berthId
+                        ? {
+                            id: original.arrival.berthId,
+                            label: original.arrival.berthName ?? 'Banchina storica',
+                          }
+                        : null
+                      : undefined
+                  }
                   key={values.destinationPortId}
                   context={draftContext}
                   portId={values.destinationPortId}
@@ -416,7 +585,7 @@ export function OperationCompletionEditor({
               )}
               <TariffMomentFields
                 economic
-                label="Arrivo effettivo locale"
+                label={correction ? 'Arrivo locale' : 'Arrivo effettivo locale'}
                 moment={values.arrivalMoment}
                 disabled={disabled || missed}
                 resolution={resolution?.arrivalResolution ?? null}
@@ -424,7 +593,7 @@ export function OperationCompletionEditor({
                 onResolve={() => {
                   void resolving
                     .request(() =>
-                      window.operations.resolveCompletionMoment({
+                      api.resolve({
                         context: { sessionId: draftContext.sessionId },
                         query: { id: original.id, values },
                       }),
@@ -452,9 +621,10 @@ export function OperationCompletionEditor({
             }}
           />
           {values.operationType === 'MOVEMENT' &&
-            values.destinationPortId !== original.endpoint.portId && (
+            (correction || values.destinationPortId !== original.endpoint.portId) && (
               <TextInput
                 label="Sostituzione manuale all’arrivo (EUR)"
+                description="Applicabile soltanto agli spostamenti tra porti."
                 value={arrivalAmount}
                 error={
                   arrivalAmount.trim() && moneyInput(arrivalAmount) === null
@@ -469,7 +639,7 @@ export function OperationCompletionEditor({
               />
             )}
           <Textarea
-            label="Note effettive"
+            label={correction ? 'Note' : 'Note effettive'}
             value={values.notes ?? ''}
             maxLength={10000}
             disabled={disabled}

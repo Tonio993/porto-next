@@ -234,10 +234,8 @@ export class OperationRepository {
       )
       .get(id) as { closingOperationId: string | null; endedAt: string | null }
   }
-  insert(op: VesselOperationDto, openingIds: OpeningIds): void {
-    const sql = this.database.sqlite,
-      e = op.endpoint,
-      m = momentToColumns(e.moment)
+  insertRecords(op: VesselOperationDto): void {
+    const sql = this.database.sqlite
     sql
       .prepare(
         'INSERT INTO vessel_operations (id,vessel_id,vessel_version_id,operation_type,execution_status,notes,created_at) VALUES (?,?,?,?,?,?,?)',
@@ -274,6 +272,12 @@ export class OperationRepository {
         )
     }
     this.saveCharges(op)
+  }
+  insert(op: VesselOperationDto, openingIds: OpeningIds): void {
+    this.insertRecords(op)
+    const sql = this.database.sqlite,
+      e = op.endpoint,
+      m = momentToColumns(e.moment)
     if (op.executionStatus === 'MISSED') return
     if (op.operationType === 'ENTRY') {
       const { voyageId, portCallId: callId, berthStayId } = openingIds

@@ -1,0 +1,2705 @@
+{
+  "interruptedAttempts": [
+    {
+      "id": "2026-11-19T16-40-53.008Z-eqI8Wx",
+      "scope": "M4 verifica finale anteprime e regressioni collegate",
+      "completed": false,
+      "exitCode": null,
+      "expectedCases": 23,
+      "observedPassedLines": 21,
+      "nativeReportAvailable": false,
+      "usedForFinalCoverage": false,
+      "evidence": [
+        {
+          "path": "test-results/verification/2026-11-19T16-40-53.008Z-eqI8Wx/execution.json",
+          "sha256": "9fa3c5a0da671304392adb35044988e7702a172126e4ce066d9f5bcd4d708658"
+        },
+        {
+          "path": "test-results/verification/2026-11-19T16-40-53.008Z-eqI8Wx/stdout.log",
+          "sha256": "ee7758f0096bbdb6f89c9b455321c59cb8cc9149f401957a3e5adbd35f24baf4"
+        },
+        {
+          "path": "test-results/verification/2026-11-19T16-40-53.008Z-eqI8Wx/native/context.json",
+          "sha256": "9380f4b1ad3f5ead4047b8987afaee9a241cd0d30f5a5d95ac10a8db530eaa92"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "doc/m4/allegati/schermate/correzione-orfani-minimo.png",
+      "sha256": "97d72c74fc036e8e361b471afec4aa16e5169ac7d961652353bed08ada38a00a",
+      "width": 944,
+      "height": 661,
+      "window": [960, 700],
+      "inspection": "agente su acquisizione automatica"
+    },
+    {
+      "path": "doc/m4/allegati/schermate/inserimento-retroattivo-minimo.png",
+      "sha256": "f65b31fbe9cc1948d03010e936f453d85d5ea7fa68ca15df9c79c6645f9891f5",
+      "width": 944,
+      "height": 661,
+      "window": [960, 700],
+      "inspection": "agente su acquisizione automatica"
+    },
+    {
+      "path": "doc/m4/allegati/schermate/pesi-cronologia-desktop.png",
+      "sha256": "a9dc49a42abd2e53a500f68f8fc8362c05921585c7f6121044fc40b0b1206ec5",
+      "width": 1424,
+      "height": 921,
+      "window": [1440, 960],
+      "inspection": "agente su acquisizione automatica"
+    },
+    {
+      "path": "doc/m4/allegati/schermate/tariffa-ricalcoli-desktop.png",
+      "sha256": "b95109bf605597e5b486b7ac02b5d96415ae8a79e893d51ebe5e6807a72b7199",
+      "width": 1424,
+      "height": 921,
+      "window": [1440, 960],
+      "inspection": "agente su acquisizione automatica"
+    }
+  ],
+  "documentationAudit": {
+    "generatedAt": "2026-11-20T10:31:56.902Z",
+    "utf8Files": [
+      "README.md",
+      "doc/stato-implementazione-prestazioni.md",
+      "src/backend/application/catalog/catalog-service.ts",
+      "src/backend/application/operations/operation-completion.ts",
+      "src/backend/application/operations/operation-impacts.ts",
+      "src/backend/application/operations/operation-service.ts",
+      "src/backend/application/tariffs/calculate-base.ts",
+      "src/backend/application/tariffs/tariff-service.ts",
+      "src/backend/application/vessels/vessel-service.ts",
+      "src/backend/infrastructure/database/catalog-repository.ts",
+      "src/backend/infrastructure/database/migrations.ts",
+      "src/backend/infrastructure/database/operation-replay-repository.ts",
+      "src/backend/infrastructure/database/operation-repository.ts",
+      "src/backend/infrastructure/database/schema.ts",
+      "src/backend/infrastructure/database/tariff-repository.ts",
+      "src/preload/index.ts",
+      "src/renderer/src/app/Catalog.tsx",
+      "src/renderer/src/app/operations/BerthPicker.tsx",
+      "src/renderer/src/app/operations/OperationCompletionEditor.tsx",
+      "src/renderer/src/app/operations/Operations.tsx",
+      "src/renderer/src/app/operations/VesselPicker.tsx",
+      "src/renderer/src/app/ports/PortConfirmation.tsx",
+      "src/renderer/src/app/tariffs/PortPicker.tsx",
+      "src/renderer/src/app/tariffs/Tariffs.tsx",
+      "src/shared/contracts/catalog.ts",
+      "src/shared/contracts/operations.ts",
+      "src/shared/contracts/tariffs.ts",
+      "tests/e2e/assignments.spec.ts",
+      "tests/e2e/berths.spec.ts",
+      "tests/e2e/catalog.spec.ts",
+      "tests/e2e/inter-port-movements.spec.ts",
+      "tests/e2e/milestone-migrations.spec.ts",
+      "tests/e2e/movements.spec.ts",
+      "tests/e2e/operations-async.spec.ts",
+      "tests/e2e/operations.spec.ts",
+      "tests/e2e/services.spec.ts",
+      "tests/e2e/subjects.spec.ts",
+      "tests/e2e/tariffs.spec.ts",
+      "tests/e2e/vessels.spec.ts",
+      "tests/unit/archive-coordinator.test.ts",
+      "tests/unit/berth-service.test.ts",
+      "tests/unit/catalog-migration.test.ts",
+      "tests/unit/catalog-service.test.ts",
+      "tests/unit/effective-subjects-migration.test.ts",
+      "tests/unit/inter-port-migration.test.ts",
+      "tests/unit/movements-migration.test.ts",
+      "tests/unit/operations-migration.test.ts",
+      "tests/unit/port-lifecycle.test.ts",
+      "tests/unit/port-service.test.ts",
+      "tests/unit/services-migration.test.ts",
+      "tests/unit/subjects-migration.test.ts",
+      "tests/unit/tariffs-migration.test.ts",
+      "tests/unit/time-service.test.ts",
+      "tests/unit/vessels-migration.test.ts",
+      "tsconfig.node.json",
+      "doc/m4/allegati/build-dopo-correzioni-operazioni.json",
+      "doc/m4/allegati/build-prima-correzioni.json",
+      "doc/m4/allegati/build.json",
+      "doc/m4/allegati/esiti.json",
+      "doc/m4/allegati/package-after.json",
+      "doc/m4/allegati/package-before.json",
+      "doc/m4/chiusura.md",
+      "doc/p17b/inserimento-operazioni-retroattive.md",
+      "doc/p17c/correzione-operazioni.md",
+      "doc/p17d/eliminazione-operazioni.md",
+      "doc/p18/correzione-eliminazione-tariffe.md",
+      "doc/p19/versioni-dei-pesi.md",
+      "migrations/0017_weight_versions.sql",
+      "src/backend/application/catalog/weight-service.ts",
+      "src/backend/application/operations/operation-insertion.ts",
+      "src/backend/application/operations/operation-removal.ts",
+      "src/backend/application/operations/operation-replay.ts",
+      "src/backend/application/tariffs/tariff-maintenance.ts",
+      "src/backend/infrastructure/database/weight-repository.ts",
+      "src/renderer/src/api/operation-correction-outcome.ts",
+      "src/renderer/src/api/operation-deletion-outcome.ts",
+      "src/renderer/src/api/tariff-maintenance-outcome.ts",
+      "src/renderer/src/api/weight-change-outcome.ts",
+      "src/renderer/src/app/operations/OperationMaintenanceEditor.tsx",
+      "src/renderer/src/app/tariffs/TariffMaintenanceEditor.tsx",
+      "src/renderer/src/app/weights/WeightHistory.tsx",
+      "tests/e2e/m4-maintenance.spec.ts",
+      "tests/unit/operation-correction.test.ts",
+      "tests/unit/operation-deletion.test.ts",
+      "tests/unit/operation-insertion.test.ts",
+      "tests/unit/tariff-maintenance.test.ts",
+      "tests/unit/weight-service.test.ts"
+    ],
+    "untrackedDiffs": [
+      {
+        "path": "doc/m4/allegati/build-dopo-correzioni-operazioni.json",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/m4/allegati/build-prima-correzioni.json",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/m4/allegati/build.json",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/m4/allegati/esiti.json",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/m4/allegati/package-after.json",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/m4/allegati/package-before.json",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/m4/chiusura.md",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/p17b/inserimento-operazioni-retroattive.md",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/p17c/correzione-operazioni.md",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/p17d/eliminazione-operazioni.md",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/p18/correzione-eliminazione-tariffe.md",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "doc/p19/versioni-dei-pesi.md",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "migrations/0017_weight_versions.sql",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/backend/application/catalog/weight-service.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/backend/application/operations/operation-insertion.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/backend/application/operations/operation-removal.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/backend/application/operations/operation-replay.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/backend/application/tariffs/tariff-maintenance.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/backend/infrastructure/database/weight-repository.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/renderer/src/api/operation-correction-outcome.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/renderer/src/api/operation-deletion-outcome.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/renderer/src/api/tariff-maintenance-outcome.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/renderer/src/api/weight-change-outcome.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/renderer/src/app/operations/OperationMaintenanceEditor.tsx",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/renderer/src/app/tariffs/TariffMaintenanceEditor.tsx",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "src/renderer/src/app/weights/WeightHistory.tsx",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "tests/e2e/m4-maintenance.spec.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "tests/unit/operation-correction.test.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "tests/unit/operation-deletion.test.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "tests/unit/operation-insertion.test.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "tests/unit/tariff-maintenance.test.ts",
+        "exitCode": 1,
+        "stderr": ""
+      },
+      {
+        "path": "tests/unit/weight-service.test.ts",
+        "exitCode": 1,
+        "stderr": ""
+      }
+    ],
+    "untrackedExpectedExit": "0 identical or 1 differences; whitespace errors add bit2 and fail",
+    "trackedDiffExitCode": 0,
+    "markdown": [
+      "README.md",
+      "doc/m4/chiusura.md",
+      "doc/p17b/inserimento-operazioni-retroattive.md",
+      "doc/p17c/correzione-operazioni.md",
+      "doc/p17d/eliminazione-operazioni.md",
+      "doc/p18/correzione-eliminazione-tariffe.md",
+      "doc/p19/versioni-dei-pesi.md",
+      "doc/stato-implementazione-prestazioni.md"
+    ],
+    "command": {
+      "executable": "C:\\nvm4w\\nodejs\\node.exe",
+      "args": [
+        "scripts/verification/coordinator.mjs",
+        "documentazione",
+        "--document",
+        "README.md",
+        "--document",
+        "doc/m4/chiusura.md",
+        "--document",
+        "doc/p17b/inserimento-operazioni-retroattive.md",
+        "--document",
+        "doc/p17c/correzione-operazioni.md",
+        "--document",
+        "doc/p17d/eliminazione-operazioni.md",
+        "--document",
+        "doc/p18/correzione-eliminazione-tariffe.md",
+        "--document",
+        "doc/p19/versioni-dei-pesi.md",
+        "--document",
+        "doc/stato-implementazione-prestazioni.md"
+      ]
+    },
+    "coordinator": {
+      "exitCode": 0,
+      "directory": "test-results/verification/2026-11-20T10-31-30.528Z-coordinator-rVfNPw"
+    }
+  },
+  "runtimeQuery": {
+    "sql": "SELECT sqlite_version()",
+    "database": ":memory:",
+    "electron": "45.2.3",
+    "node": "24.22.2",
+    "sqlite": "3.53.4",
+    "driver": "13.0.3",
+    "arch": "x64"
+  },
+  "date": "2026-11-20",
+  "campaignStarted": "2026-11-19",
+  "base": "56ef58b729bab7626de2385e59a421ab841c96fd",
+  "schema": 17,
+  "branch": "main",
+  "localChanges": true,
+  "commitCreated": false,
+  "environment": {
+    "platform": "Windows x64",
+    "node": "24.21.0",
+    "npm": "12.2.1",
+    "electron": "45.2.3",
+    "sqlite": "3.53.4",
+    "builder": "26.18.0"
+  },
+  "reuse": {
+    "backendInputs": 98,
+    "unchangedBackendInputs": 98,
+    "mainUnchanged": true,
+    "preloadUnchanged": true,
+    "reason": "Dopo il backend completo cambiano soltanto i renderer delle operazioni e delle anteprime e i test desktop. Ripetuti tutti i percorsi coinvolti; i percorsi indipendenti mantengono validità e il pacchetto finale riesegue tutta la suite."
+  },
+  "staticChecks": {
+    "typescriptNode": "passed",
+    "typescriptWeb": "passed",
+    "eslint": "passed",
+    "prettier": "passed",
+    "fixtures": {
+      "passed": 20,
+      "total": 20
+    },
+    "documentation": "passed: coordinatore documentazione con tutti i Markdown modificati espliciti"
+  },
+  "logFiles": [
+    {
+      "path": ".local/m4-check-initial.log",
+      "sha256": "c8d03ed4449b4f6c0a78f0f37a303113a6bed7b62eceb18e27d421b784c559d8"
+    },
+    {
+      "path": ".local/m4-check-corrected.log",
+      "sha256": "cb6e607542378013b18c7883350f64c0ce538cc10b22a215414cd62d60e06800"
+    },
+    {
+      "path": ".local/m4-eslint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".local/m4-check-final.log",
+      "sha256": "e5e2970d6ba706d53dcb196c9ab6040fa0dd4ff4103b37deae5aea4519caf560"
+    },
+    {
+      "path": ".local/m4-typescript-node-test-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".local/m4-eslint-test-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".local/m4-fixtures.log",
+      "sha256": "e31d9ec18009d0256e5138e65cfff2ffafda61390831129158d9937113f40998"
+    },
+    {
+      "path": ".local/m4-build.log",
+      "sha256": "024a079cd2fe67eb42a4ccacd8ecc9c9e42cbd574afd4a7d327bcb00a978dfbc"
+    },
+    {
+      "path": ".local/m4-build-final.log",
+      "sha256": "ab5780cc67404786a2996085e719c05f2566828d13963103f78a11c67ea89810"
+    },
+    {
+      "path": ".local/m4-package.log",
+      "sha256": "e8b39798f524abcedc75c87661ff953a82ad19d6bbeb3fff463ad198bd6ba856"
+    },
+    {
+      "path": ".local/m4-check-cancel-final.log",
+      "sha256": "130cadcb4ca3039a2e71f65a4d820afeb2b03d444d818262681b1030ae39928f"
+    },
+    {
+      "path": ".local/m4-build-cancel-final.log",
+      "sha256": "b21f1389dc68be2d6d2cc1712e39470bceebf6007b03a1d3fa273d01f448dce2"
+    },
+    {
+      "path": ".local/m4-runtime.json",
+      "sha256": "0c2834c1dfb4e3d3d774541c0a5b52feab579ad154bcad14d840051d1a0b4deb"
+    },
+    {
+      "path": ".local/m4-text-audit.json",
+      "sha256": "9a25135054787eae36cbccaa0eb11590471db795d0d578eae248f447ac78a554"
+    },
+    {
+      "path": ".local/m4-documentation-final.log",
+      "sha256": "2291ca5d62cc3339e9451ebe5ac9e31a6c5afb7792b5017dcdc2c744f7a2b7d9"
+    },
+    {
+      "path": ".local/m4-resume-typescript.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".local/m4-resume-eslint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "buildCoverage": [
+    {
+      "file": "archives.spec.ts",
+      "title": "gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "assignments.spec.ts",
+      "title": "P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "assignments.spec.ts",
+      "title": "P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricamento e nuova sessione",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "berths.spec.ts",
+      "title": "amministra le banchine dal porto e conserva dati e contesto nel percorso Electron",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "catalog-async.spec.ts",
+      "title": "P08 catalogo: risposte tardive di dettaglio ed elenco, editor chiuso e cambio sessione",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "catalog.spec.ts",
+      "title": "P08 catalogo: v8 popolato, pesi esatti, ciclo di vita, conflitti, copie e riapertura offline",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "inter-port-movements.spec.ts",
+      "title": "P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità, ricalcoli e riapertura offline",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "inter-port-movements.spec.ts",
+      "title": "P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "m4-maintenance.spec.ts",
+      "title": "M4 operazioni: inserimento retroattivo, correzione, note e rimozione con servizi MISSED conservati",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "m4-maintenance.spec.ts",
+      "title": "M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tariffa protetta",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "m4-maintenance.spec.ts",
+      "title": "M4 pesi: iniziale protetta, versioni fisse e catalogo, confini, bozze, ricalcoli e risposta persa",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "m4-maintenance.spec.ts",
+      "title": "M4 operazioni: bozza note e correzione, risposta tardiva scartata e recupero dopo commit",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "m4-maintenance.spec.ts",
+      "title": "M4 operazioni: trasformazione interno/esterno, componenti ricreate e cambio nave",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "m4-maintenance.spec.ts",
+      "title": "M4 eliminazione: esito incerto verificato senza ripetere la scrittura",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "m4-maintenance.spec.ts",
+      "title": "M4 sessione: operation, Salva con nome scarta bozza e risposta precedente",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "m4-maintenance.spec.ts",
+      "title": "M4 sessione: tariff, Salva con nome scarta bozza e risposta precedente",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "m4-maintenance.spec.ts",
+      "title": "M4 sessione: weight, Salva con nome scarta bozza e risposta precedente",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "milestone-migrations.spec.ts",
+      "title": "M4: migrazioni cumulative v1–v16 e v17 corrente, dati, copie e trasferibilità",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "movements.spec.ts",
+      "title": "P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa alla partenza e persistenza offline",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "movements.spec.ts",
+      "title": "P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "operation-completion.spec.ts",
+      "title": "P17A: entrata effettuata, anteprima prima/dopo, errore per campo, focus e permanenze alla misura minima",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "operation-completion.spec.ts",
+      "title": "P17A: mancata bloccata da prestazione, poi spostamento mancato con riattribuzione FREE/CATALOG e conferma",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "operation-completion.spec.ts",
+      "title": "P17A: bozze obsolete, risposta ritardata e conferma persa con rilettura fallita/ritardata senza duplicazioni",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "operation-completion.spec.ts",
+      "title": "P17A: spostamento esterno effettuato, fusi distinti, due componenti e identità fra anteprima e conferma",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "operations-async.spec.ts",
+      "title": "P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "operations.spec.ts",
+      "title": "P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia, copie e riapertura offline",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "port-async.spec.ts",
+      "title": "scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza senza scrivere",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "port-lifecycle.spec.ts",
+      "title": "gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del porto offline",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "ports.spec.ts",
+      "title": "crea e consulta porti offline, li ritrova al riavvio e mantiene le copie indipendenti",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "services.spec.ts",
+      "title": "P14 funzionale: prestazioni libere, migrazione e contesto",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "services.spec.ts",
+      "title": "P14 asincrono: prestazioni libere, migrazione e contesto",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "services.spec.ts",
+      "title": "P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE conservata",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "services.spec.ts",
+      "title": "P15 asincrono: selettore catalogo ignora risposte precedenti e conserva la selezione fra ricerche",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "services.spec.ts",
+      "title": "P16 FREE: ciclo di vita, ricerca, conflitto e riapertura",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "services.spec.ts",
+      "title": "P16 CATALOG: ciclo di vita, ricerca, conflitto e riapertura",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "services.spec.ts",
+      "title": "P16 asincrono: filtri, anteprima obsoleta e note con esito incerto richiedono rilettura",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "services.spec.ts",
+      "title": "post-P16 FREE: creazione e consuntivazione con risposta persa richiedono rilettura",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "services.spec.ts",
+      "title": "post-P16 CATALOG: creazione e consuntivazione con risposta persa richiedono rilettura",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "services.spec.ts",
+      "title": "P16 ricerca: soggetti ereditati, porto e banchina, filtri vuoti e ispezione minima",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "subjects-async.spec.ts",
+      "title": "P06 Clienti: scarta risposte tardive di dettaglio, decorrenza e archivio precedente",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "subjects-async.spec.ts",
+      "title": "P06 Agenzie: scarta risposte tardive di dettaglio, decorrenza e archivio precedente",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "subjects.spec.ts",
+      "title": "P06 Clienti: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "subjects.spec.ts",
+      "title": "P06 Agenzie: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "tariffs-async.spec.ts",
+      "title": "P09 asincronia: selezioni, liste, risoluzione a editor chiuso, calcolo superato, futuro corrente e cambio sessione",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "tariffs.spec.ts",
+      "title": "P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo storico, conflitti e riapertura offline",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "time.spec.ts",
+      "title": "configura il fuso per archivio e risolve gap e occorrenze offline",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "ui01.spec.ts",
+      "title": "UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti reali",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "ui02.spec.ts",
+      "title": "UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notifiche ed effetti estesi",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "ui03-states.spec.ts",
+      "title": "UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento e nuova sessione",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "ui03.spec.ts",
+      "title": "UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle due dimensioni",
+      "buildEvidence": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "vessels-async.spec.ts",
+      "title": "P07 Navi: risposte tardive, cambio sessione e futuro → corrente senza scritture",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    },
+    {
+      "file": "vessels.spec.ts",
+      "title": "P07 Navi: migrazione, ciclo di vita, bozze, copie e riavvio offline",
+      "buildEvidence": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "packagedEvidence": "2026-11-20T09-25-53.213Z-MDuJka"
+    }
+  ],
+  "runs": [
+    {
+      "id": "2026-11-19T14-38-43.426Z-7xt4ME",
+      "path": "test-results/verification/2026-11-19T14-38-43.426Z-7xt4ME/results.json",
+      "runner": "vitest",
+      "phase": "backend",
+      "scope": "M4 integrazione finale completa",
+      "startedAt": "2026-11-19T14:38:43.426Z",
+      "endedAt": "2026-11-19T14:43:11.125Z",
+      "requestedArgs": ["tests/unit", "--maxWorkers=1"],
+      "command": {
+        "executable": "C:\\nvm4w\\nodejs\\node.exe",
+        "args": [
+          "C:\\Other\\porto-next\\scripts\\test.mjs",
+          "tests/unit",
+          "--maxWorkers=1",
+          "--includeTaskLocation",
+          "--reporter=default",
+          "--reporter=json",
+          "--reporter=C:\\Other\\porto-next\\scripts\\verification\\vitest-context.mjs",
+          "--outputFile=C:\\Other\\porto-next\\test-results\\verification\\2026-11-19T14-38-43.426Z-7xt4ME\\native\\report.json"
+        ]
+      },
+      "reproduction": "& 'C:\\nvm4w\\nodejs\\node.exe' 'C:\\Other\\porto-next\\scripts\\verification\\collect.mjs' 'vitest' '--phase' 'backend' '--scope' 'M4 integrazione finale completa' '--' 'tests/unit' '--maxWorkers=1'",
+      "counts": {
+        "passed": 491,
+        "failed": 0,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 491,
+        "attempts": 491,
+        "retried": 0
+      },
+      "outcome": "passed",
+      "exitCode": 0,
+      "processExitCode": 0,
+      "issues": [],
+      "errors": [],
+      "sha256": "6147c5a679904296e2b2a29954ce241b3a3b30e681c10335861c965f12eacfbb"
+    },
+    {
+      "id": "2026-11-19T14-47-30.964Z-TpXD1x",
+      "path": "test-results/verification/2026-11-19T14-47-30.964Z-TpXD1x/results.json",
+      "runner": "playwright",
+      "phase": "desktop",
+      "scope": "M4 build integrata suite desktop completa",
+      "startedAt": "2026-11-19T14:47:30.964Z",
+      "endedAt": "2026-11-19T15:37:03.113Z",
+      "requestedArgs": [],
+      "command": {
+        "executable": "C:\\nvm4w\\nodejs\\node.exe",
+        "args": [
+          "C:\\Other\\porto-next\\node_modules\\@playwright\\test\\cli.js",
+          "test",
+          "--reporter=list,json,C:\\Other\\porto-next\\scripts\\verification\\playwright-context.mjs",
+          "--output=C:\\Other\\porto-next\\test-results\\verification\\2026-11-19T14-47-30.964Z-TpXD1x\\artifacts"
+        ]
+      },
+      "reproduction": "& 'C:\\nvm4w\\nodejs\\node.exe' 'C:\\Other\\porto-next\\scripts\\verification\\collect.mjs' 'playwright' '--phase' 'desktop' '--scope' 'M4 build integrata suite desktop completa' '--'",
+      "counts": {
+        "passed": 40,
+        "failed": 12,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 52,
+        "attempts": 52,
+        "retried": 0
+      },
+      "outcome": "failed",
+      "exitCode": 1,
+      "processExitCode": 1,
+      "issues": [],
+      "errors": ["Il runner Playwright dichiara il fallimento della sessione"],
+      "sha256": "c17bd1640734028c43f3086803aa59d2cf15fa044cdcd08754296c6d01aec6f7",
+      "cases": [
+        {
+          "file": "archives.spec.ts",
+          "titlePath": [
+            "gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio"
+          ],
+          "status": "passed",
+          "durationMs": 38141,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "assignments.spec.ts",
+          "titlePath": [
+            "P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 121142,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "assignments.spec.ts",
+          "titlePath": [
+            "P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricamento e nuova sessione"
+          ],
+          "status": "passed",
+          "durationMs": 36458,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "berths.spec.ts",
+          "titlePath": [
+            "amministra le banchine dal porto e conserva dati e contesto nel percorso Electron"
+          ],
+          "status": "passed",
+          "durationMs": 133114,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "catalog-async.spec.ts",
+          "titlePath": [
+            "P08 catalogo: risposte tardive di dettaglio ed elenco, editor chiuso e cambio sessione"
+          ],
+          "status": "passed",
+          "durationMs": 36048,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "catalog.spec.ts",
+          "titlePath": [
+            "P08 catalogo: v8 popolato, pesi esatti, ciclo di vita, conflitti, copie e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 101705,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "inter-port-movements.spec.ts",
+          "titlePath": [
+            "P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità, ricalcoli e riapertura offline"
+          ],
+          "status": "failed",
+          "durationMs": 29143,
+          "attempts": 1,
+          "errors": [
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeFocused\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('button', { name: 'Nuovo spostamento', exact: true })\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeFocused\" getByRole('button', { name: 'Nuovo spostamento', exact: true }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Nuovo spostamento', exact: true })\u001b[22m\n\u001b[2m    14 × locator resolved to <button disabled type=\"button\" data-variant=\"light\" data-disabled=\"true\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root ",
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeFocused\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('button', { name: 'Nuovo spostamento', exact: true })\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeFocused\" getByRole('button', { name: 'Nuovo spostamento', exact: true }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Nuovo spostamento', exact: true })\u001b[22m\n\u001b[2m    14 × locator resolved to <button disabled type=\"button\" data-variant=\"light\" data-disabled=\"true\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root "
+          ]
+        },
+        {
+          "file": "inter-port-movements.spec.ts",
+          "titlePath": [
+            "P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome"
+          ],
+          "status": "failed",
+          "durationMs": 35263,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('combobox', { name: 'Porto di destinazione', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <input readonly disabled role=\"combobox\" autocomplete=\"off\" value=\"2 · Londra\" data-disabled=\"true\" aria-expanded=\"false\" data-variant=\"default\" id=\"mantine-jtwe22pd3\" aria-haspopup=\"listbox\" placeholder=\"Seleziona un porto\" class=\"m_8fb7ebe7 mantine-Input-input mantine-Select-input\"/>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and st",
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('combobox', { name: 'Porto di destinazione', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <input readonly disabled role=\"combobox\" autocomplete=\"off\" value=\"2 · Londra\" data-disabled=\"true\" aria-expanded=\"false\" data-variant=\"default\" id=\"mantine-jtwe22pd3\" aria-haspopup=\"listbox\" placeholder=\"Seleziona un porto\" class=\"m_8fb7ebe7 mantine-Input-input mantine-Select-input\"/>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and st"
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: inserimento retroattivo, correzione, note e rimozione con servizi MISSED conservati"
+          ],
+          "status": "failed",
+          "durationMs": 22988,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: '1 · Stella del mare', exact: true })\u001b[22m\n",
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: '1 · Stella del mare', exact: true })\u001b[22m\n\n\n  57 |   await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()\n  58 |   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()\n> 59 |   await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()\n     |                                                                                ^\n  60 | }\n  61 | async function selectEntry() {\n  62 |   await page.getByRole('button', { "
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tariffa protetta"
+          ],
+          "status": "passed",
+          "durationMs": 50985,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 pesi: iniziale protetta, versioni fisse e catalogo, confini, bozze, ricalcoli e risposta persa"
+          ],
+          "status": "failed",
+          "durationMs": 28565,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.fill: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Decorrenza locale')\u001b[22m\n",
+            "TimeoutError: locator.fill: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Decorrenza locale')\u001b[22m\n\n\n  301 |   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1440, 960))\n  302 |   const svc = await services()\n> 303 |   await catalog()\n      |                  ^\n  304 |   await page.getByRole('button', { name: 'Cronologia pesi entrata', exact: true }).click()\n  305 |   await expect(button('Elimina versione')).toBeDisabled()\n  306 |   await button('Nuova versione del peso').click()\n    at C:\\Other\\porto-next\\tests\\e2e\\"
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: bozza note e correzione, risposta tardiva scartata e recupero dopo commit"
+          ],
+          "status": "failed",
+          "durationMs": 21209,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: '1 · Stella del mare', exact: true })\u001b[22m\n",
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: '1 · Stella del mare', exact: true })\u001b[22m\n\n\n  57 |   await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()\n  58 |   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()\n> 59 |   await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()\n     |                                                                                ^\n  60 | }\n  61 | async function selectEntry() {\n  62 |   await page.getByRole('button', { "
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: trasformazione interno/esterno, componenti ricreate e cambio nave"
+          ],
+          "status": "failed",
+          "durationMs": 20451,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: '1 · Stella del mare', exact: true })\u001b[22m\n",
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: '1 · Stella del mare', exact: true })\u001b[22m\n\n\n  57 |   await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()\n  58 |   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()\n> 59 |   await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()\n     |                                                                                ^\n  60 | }\n  61 | async function selectEntry() {\n  62 |   await page.getByRole('button', { "
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 eliminazione: esito incerto verificato senza ripetere la scrittura"],
+          "status": "failed",
+          "durationMs": 20643,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: '1 · Stella del mare', exact: true })\u001b[22m\n",
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: '1 · Stella del mare', exact: true })\u001b[22m\n\n\n  57 |   await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()\n  58 |   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()\n> 59 |   await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()\n     |                                                                                ^\n  60 | }\n  61 | async function selectEntry() {\n  62 |   await page.getByRole('button', { "
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 sessione: operation, Salva con nome scarta bozza e risposta precedente"
+          ],
+          "status": "failed",
+          "durationMs": 20720,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: '1 · Stella del mare', exact: true })\u001b[22m\n",
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('option', { name: '1 · Stella del mare', exact: true })\u001b[22m\n\n\n  57 |   await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()\n  58 |   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()\n> 59 |   await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()\n     |                                                                                ^\n  60 | }\n  61 | async function selectEntry() {\n  62 |   await page.getByRole('button', { "
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 sessione: tariff, Salva con nome scarta bozza e risposta precedente"],
+          "status": "passed",
+          "durationMs": 19250,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 sessione: weight, Salva con nome scarta bozza e risposta precedente"],
+          "status": "passed",
+          "durationMs": 12965,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "milestone-migrations.spec.ts",
+          "titlePath": [
+            "M3: migrazioni cumulative v1–v15 e v16 corrente, dati, copie e trasferibilità"
+          ],
+          "status": "passed",
+          "durationMs": 27480,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "movements.spec.ts",
+          "titlePath": [
+            "P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa alla partenza e persistenza offline"
+          ],
+          "status": "failed",
+          "durationMs": 28839,
+          "attempts": 1,
+          "errors": [
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeFocused\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('button', { name: 'Nuovo spostamento', exact: true })\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeFocused\" getByRole('button', { name: 'Nuovo spostamento', exact: true }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Nuovo spostamento', exact: true })\u001b[22m\n\u001b[2m    14 × locator resolved to <button disabled type=\"button\" data-variant=\"light\" data-disabled=\"true\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root ",
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeFocused\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('button', { name: 'Nuovo spostamento', exact: true })\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeFocused\" getByRole('button', { name: 'Nuovo spostamento', exact: true }) with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Nuovo spostamento', exact: true })\u001b[22m\n\u001b[2m    14 × locator resolved to <button disabled type=\"button\" data-variant=\"light\" data-disabled=\"true\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root "
+          ]
+        },
+        {
+          "file": "movements.spec.ts",
+          "titlePath": [
+            "P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione"
+          ],
+          "status": "failed",
+          "durationMs": 34084,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Riprendi bozza', exact: true })\u001b[22m\n",
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Riprendi bozza', exact: true })\u001b[22m\n\n\n  289 |     await page.keyboard.press('Escape')\n  290 |     await releaseOperation(app)\n> 291 |     await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).click()\n      |                                                                             ^\n  292 |     modal = page.getByRole('dialog')\n  293 |     await expect(modal.getByText('Scegli l’occorrenza dell’orario.', { exact: true })).toHaveCount(\n  294 |       0,\n    at C:\\O"
+          ]
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: entrata effettuata, anteprima prima/dopo, errore per campo, focus e permanenze alla misura minima"
+          ],
+          "status": "passed",
+          "durationMs": 33998,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: mancata bloccata da prestazione, poi spostamento mancato con riattribuzione FREE/CATALOG e conferma"
+          ],
+          "status": "passed",
+          "durationMs": 43244,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: bozze obsolete, risposta ritardata e conferma persa con rilettura fallita/ritardata senza duplicazioni"
+          ],
+          "status": "passed",
+          "durationMs": 34568,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: spostamento esterno effettuato, fusi distinti, due componenti e identità fra anteprima e conferma"
+          ],
+          "status": "passed",
+          "durationMs": 24404,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operations-async.spec.ts",
+          "titlePath": [
+            "P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione"
+          ],
+          "status": "failed",
+          "durationMs": 46274,
+          "attempts": 1,
+          "errors": [
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('dialog')\nExpected: not visible\nReceived: visible\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toBeVisible\" getByRole('dialog') with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('dialog')\u001b[22m\n\u001b[2m    14 × locator resolved to <section role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" data-modal-content=\"true\" aria-describedby=\"mantine-4y5nzn69m-body\" aria-labelledby=\"mantine-4y5nzn69m-title\" class=\"m_fd1ab0aa m_54c44539 mantine-Modal-content m_1b7284a3 mantine-Paper-root\">…</s",
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).not.\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('dialog')\nExpected: not visible\nReceived: visible\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"not toBeVisible\" getByRole('dialog') with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('dialog')\u001b[22m\n\u001b[2m    14 × locator resolved to <section role=\"dialog\" tabindex=\"-1\" aria-modal=\"true\" data-modal-content=\"true\" aria-describedby=\"mantine-4y5nzn69m-body\" aria-labelledby=\"mantine-4y5nzn69m-title\" class=\"m_fd1ab0aa m_54c44539 mantine-Modal-content m_1b7284a3 mantine-Paper-root\">…</s"
+          ]
+        },
+        {
+          "file": "operations.spec.ts",
+          "titlePath": [
+            "P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia, copie e riapertura offline"
+          ],
+          "status": "failed",
+          "durationMs": 35736,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Nuova entrata', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" data-disabled=\"true\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visi",
+            "TimeoutError: locator.click: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Nuova entrata', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" data-disabled=\"true\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visi"
+          ]
+        },
+        {
+          "file": "port-async.spec.ts",
+          "titlePath": [
+            "scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza senza scrivere"
+          ],
+          "status": "passed",
+          "durationMs": 32448,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "port-lifecycle.spec.ts",
+          "titlePath": [
+            "gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del porto offline"
+          ],
+          "status": "passed",
+          "durationMs": 114197,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ports.spec.ts",
+          "titlePath": [
+            "crea e consulta porti offline, li ritrova al riavvio e mantiene le copie indipendenti"
+          ],
+          "status": "passed",
+          "durationMs": 54183,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": ["P14 funzionale: prestazioni libere, migrazione e contesto"],
+          "status": "passed",
+          "durationMs": 41220,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": ["P14 asincrono: prestazioni libere, migrazione e contesto"],
+          "status": "passed",
+          "durationMs": 38518,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE conservata"
+          ],
+          "status": "passed",
+          "durationMs": 41617,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "P15 asincrono: selettore catalogo ignora risposte precedenti e conserva la selezione fra ricerche"
+          ],
+          "status": "passed",
+          "durationMs": 30951,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": ["P16 FREE: ciclo di vita, ricerca, conflitto e riapertura"],
+          "status": "passed",
+          "durationMs": 105389,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": ["P16 CATALOG: ciclo di vita, ricerca, conflitto e riapertura"],
+          "status": "passed",
+          "durationMs": 146418,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "P16 asincrono: filtri, anteprima obsoleta e note con esito incerto richiedono rilettura"
+          ],
+          "status": "passed",
+          "durationMs": 54387,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "post-P16 FREE: creazione e consuntivazione con risposta persa richiedono rilettura"
+          ],
+          "status": "passed",
+          "durationMs": 64436,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "post-P16 CATALOG: creazione e consuntivazione con risposta persa richiedono rilettura"
+          ],
+          "status": "passed",
+          "durationMs": 68734,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "P16 ricerca: soggetti ereditati, porto e banchina, filtri vuoti e ispezione minima"
+          ],
+          "status": "passed",
+          "durationMs": 51805,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "subjects-async.spec.ts",
+          "titlePath": [
+            "P06 Clienti: scarta risposte tardive di dettaglio, decorrenza e archivio precedente"
+          ],
+          "status": "passed",
+          "durationMs": 39230,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "subjects-async.spec.ts",
+          "titlePath": [
+            "P06 Agenzie: scarta risposte tardive di dettaglio, decorrenza e archivio precedente"
+          ],
+          "status": "passed",
+          "durationMs": 39653,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "subjects.spec.ts",
+          "titlePath": ["P06 Clienti: migrazione, ciclo di vita, bozze, copie e riavvio offline"],
+          "status": "passed",
+          "durationMs": 147319,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "subjects.spec.ts",
+          "titlePath": ["P06 Agenzie: migrazione, ciclo di vita, bozze, copie e riavvio offline"],
+          "status": "passed",
+          "durationMs": 147158,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "tariffs-async.spec.ts",
+          "titlePath": [
+            "P09 asincronia: selezioni, liste, risoluzione a editor chiuso, calcolo superato, futuro corrente e cambio sessione"
+          ],
+          "status": "passed",
+          "durationMs": 64769,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "tariffs.spec.ts",
+          "titlePath": [
+            "P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo storico, conflitti e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 120450,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "time.spec.ts",
+          "titlePath": ["configura il fuso per archivio e risolve gap e occorrenze offline"],
+          "status": "passed",
+          "durationMs": 30261,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ui01.spec.ts",
+          "titlePath": [
+            "UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti reali"
+          ],
+          "status": "passed",
+          "durationMs": 62320,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ui02.spec.ts",
+          "titlePath": [
+            "UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notifiche ed effetti estesi"
+          ],
+          "status": "passed",
+          "durationMs": 69253,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ui03-states.spec.ts",
+          "titlePath": [
+            "UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento e nuova sessione"
+          ],
+          "status": "passed",
+          "durationMs": 54315,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ui03.spec.ts",
+          "titlePath": [
+            "UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle due dimensioni"
+          ],
+          "status": "passed",
+          "durationMs": 68476,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "vessels-async.spec.ts",
+          "titlePath": [
+            "P07 Navi: risposte tardive, cambio sessione e futuro → corrente senza scritture"
+          ],
+          "status": "passed",
+          "durationMs": 40991,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "vessels.spec.ts",
+          "titlePath": ["P07 Navi: migrazione, ciclo di vita, bozze, copie e riavvio offline"],
+          "status": "passed",
+          "durationMs": 157434,
+          "attempts": 1,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "2026-11-19T15-42-24.522Z-tmgSbu",
+      "path": "test-results/verification/2026-11-19T15-42-24.522Z-tmgSbu/results.json",
+      "runner": "playwright",
+      "phase": "desktop",
+      "scope": "M4 ripresa correzioni e regressioni renderer finale",
+      "startedAt": "2026-11-19T15:42:24.522Z",
+      "endedAt": "2026-11-19T16:21:40.317Z",
+      "requestedArgs": [
+        "tests/e2e/assignments.spec.ts",
+        "tests/e2e/inter-port-movements.spec.ts",
+        "tests/e2e/m4-maintenance.spec.ts",
+        "tests/e2e/milestone-migrations.spec.ts",
+        "tests/e2e/movements.spec.ts",
+        "tests/e2e/operation-completion.spec.ts",
+        "tests/e2e/operations-async.spec.ts",
+        "tests/e2e/operations.spec.ts",
+        "tests/e2e/ui03.spec.ts"
+      ],
+      "command": {
+        "executable": "C:\\nvm4w\\nodejs\\node.exe",
+        "args": [
+          "C:\\Other\\porto-next\\node_modules\\@playwright\\test\\cli.js",
+          "test",
+          "tests/e2e/assignments.spec.ts",
+          "tests/e2e/inter-port-movements.spec.ts",
+          "tests/e2e/m4-maintenance.spec.ts",
+          "tests/e2e/milestone-migrations.spec.ts",
+          "tests/e2e/movements.spec.ts",
+          "tests/e2e/operation-completion.spec.ts",
+          "tests/e2e/operations-async.spec.ts",
+          "tests/e2e/operations.spec.ts",
+          "tests/e2e/ui03.spec.ts",
+          "--reporter=list,json,C:\\Other\\porto-next\\scripts\\verification\\playwright-context.mjs",
+          "--output=C:\\Other\\porto-next\\test-results\\verification\\2026-11-19T15-42-24.522Z-tmgSbu\\artifacts"
+        ]
+      },
+      "reproduction": "& 'C:\\nvm4w\\nodejs\\node.exe' 'C:\\Other\\porto-next\\scripts\\verification\\collect.mjs' 'playwright' '--phase' 'desktop' '--scope' 'M4 ripresa correzioni e regressioni renderer finale' '--' 'tests/e2e/assignments.spec.ts' 'tests/e2e/inter-port-movements.spec.ts' 'tests/e2e/m4-maintenance.spec.ts' 'tests/e2e/milestone-migrations.spec.ts' 'tests/e2e/movements.spec.ts' 'tests/e2e/operation-completion.spec.ts' 'tests/e2e/operations-async.spec.ts' 'tests/e2e/operations.spec.ts' 'tests/e2e/ui03.spec.ts'",
+      "counts": {
+        "passed": 14,
+        "failed": 9,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 23,
+        "attempts": 23,
+        "retried": 0
+      },
+      "outcome": "failed",
+      "exitCode": 1,
+      "processExitCode": 1,
+      "issues": [],
+      "errors": [
+        "\u001b[31mWorker teardown timeout of 60000ms exceeded.\u001b[39m\n\n\u001b[31mFailed worker ran 1 test:\u001b[39m\ntests\\e2e\\m4-maintenance.spec.ts:240:1 › M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tariffa protetta",
+        "Il runner Playwright dichiara il fallimento della sessione"
+      ],
+      "sha256": "35c2b55f2733e74ad6af13fa7178f142a6abe6546c6aa0e5f938eecaaaeab4d4",
+      "cases": [
+        {
+          "file": "assignments.spec.ts",
+          "titlePath": [
+            "P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 130431,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "assignments.spec.ts",
+          "titlePath": [
+            "P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricamento e nuova sessione"
+          ],
+          "status": "passed",
+          "durationMs": 35396,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "inter-port-movements.spec.ts",
+          "titlePath": [
+            "P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità, ricalcoli e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 94602,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "inter-port-movements.spec.ts",
+          "titlePath": [
+            "P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome"
+          ],
+          "status": "failed",
+          "durationMs": 62155,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('button', { name: 'Verifica e mostra anteprima' })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" data-loading=\"true\" data-disabled=\"true\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b",
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('button', { name: 'Verifica e mostra anteprima' })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" data-loading=\"true\" data-disabled=\"true\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b"
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: inserimento retroattivo, correzione, note e rimozione con servizi MISSED conservati"
+          ],
+          "status": "failed",
+          "durationMs": 26518,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.fill: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Partenza locale', { exact: true })\u001b[22m\n",
+            "TimeoutError: locator.fill: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Partenza locale', { exact: true })\u001b[22m\n\n\n  190 |   await page.getByRole('button', { name: 'Inserisci operazione retroattiva', exact: true }).click()\n  191 |   await page.getByRole('menuitem', { name: 'Spostamento retroattivo', exact: true }).click()\n> 192 |   await modal().getByLabel('Partenza locale', { exact: true }).fill('2026-05-02T12:30')\n      |                                                                ^\n  193 |   await modal().getByLabel('Arrivo locale', { exact: tru"
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tariffa protetta"
+          ],
+          "status": "failed",
+          "durationMs": 1030343,
+          "attempts": 1,
+          "errors": [
+            "\u001b[31mTest timeout of 60000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+            "\u001b[31mTest timeout of 60000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n  23 | }\n  24 | let app: ElectronApplication, page: Page, folder: string\n> 25 | test.beforeEach(async ({ playwright }) => {\n     |      ^\n  26 |   folder = mkdtempSync(join(tmpdir(), 'porto-m4-ui-'))\n  27 |   const env = {\n  28 |     ...process.env,\n    at C:\\Other\\porto-next\\tests\\e2e\\m4-maintenance.spec.ts:25:6",
+            "Error: locator.click: Target page, context or browser has been closed\n\n  41 |   await page.context().setOffline(true)\n  42 |   await operationFixture(app, join(folder, 'm4.ormeggi'), 17, true)\n> 43 |   await page.getByRole('button', { name: 'Apri archivio', exact: true }).click()\n     |                                                                          ^\n  44 |   await expect(page.getByTestId('archive-path')).toHaveText(join(folder, 'm4.ormeggi'))\n  45 | })\n  46 | test.afterEach(async () => {\n    at C:\\Other\\porto-next\\tests\\e2e\\m4-maintenance.spec.ts:43:74",
+            "Error: EPERM, Permission denied: \\\\?\\C:\\Users\\ANTONI~1.IUE\\AppData\\Local\\Temp\\porto-m4-ui-Gs4nZT '\\\\?\\C:\\Users\\ANTONI~1.IUE\\AppData\\Local\\Temp\\porto-m4-ui-Gs4nZT'\n\n  46 | test.afterEach(async () => {\n  47 |   await app?.close()\n> 48 |   rmSync(folder, { recursive: true, force: true })\n     |   ^\n  49 | })\n  50 | const modal = () => page.getByRole('dialog')\n  51 | const button = (name: string) => modal().getByRole('button', { name, exact: true })\n    at C:\\Other\\porto-next\\tests\\e2e\\m4-maintenance.spec.ts:48:3"
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 pesi: iniziale protetta, versioni fisse e catalogo, confini, bozze, ricalcoli e risposta persa"
+          ],
+          "status": "failed",
+          "durationMs": 14933,
+          "attempts": 1,
+          "errors": [
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('dialog').getByRole('alert')\nExpected substring: \u001b[32m\"maggiore di zero\"\u001b[39m\nError: strict mode violation: getByRole('dialog').getByRole('alert') resolved to 2 elements:\n    1) <div role=\"alert\" id=\"mantine-r4sytvylq\" class=\"m_66836ed3 mantine-Alert-root\" aria-describedby=\"mantine-r4sytvylq-body\" aria-labelledby=\"mantine-r4sytvylq-title\">…</div> aka getByRole('alert', { name: 'Operazione non completata' })\n    2) <div role=\"alert\">…</div> aka getByRole('alert').fil",
+            "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('dialog').getByRole('alert')\nExpected substring: \u001b[32m\"maggiore di zero\"\u001b[39m\nError: strict mode violation: getByRole('dialog').getByRole('alert') resolved to 2 elements:\n    1) <div role=\"alert\" id=\"mantine-r4sytvylq\" class=\"m_66836ed3 mantine-Alert-root\" aria-describedby=\"mantine-r4sytvylq-body\" aria-labelledby=\"mantine-r4sytvylq-title\">…</div> aka getByRole('alert', { name: 'Operazione non completata' })\n    2) <div role=\"alert\">…</div> aka getByRole('alert').fil"
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: bozza note e correzione, risposta tardiva scartata e recupero dopo commit"
+          ],
+          "status": "failed",
+          "durationMs": 31670,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.fill: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Momento locale', { exact: true })\u001b[22m\n",
+            "TimeoutError: locator.fill: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Momento locale', { exact: true })\u001b[22m\n\n\n  371 |   const before = await saved()\n  372 |   await page.getByRole('button', { name: 'Correggi operazione', exact: true }).click()\n> 373 |   await modal().getByLabel('Momento locale').fill('2026-05-02T11:00')\n      |                                                               ^\n  374 |   await delayOperationResponse(app, 'operations:preview-correct')\n  375 |   await button('Verifica e mostra anteprima').click()\n  376 |   await expect."
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: trasformazione interno/esterno, componenti ricreate e cambio nave"
+          ],
+          "status": "failed",
+          "durationMs": 28203,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.fill: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Partenza locale', { exact: true })\u001b[22m\n",
+            "TimeoutError: locator.fill: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Partenza locale', { exact: true })\u001b[22m\n\n\n  411 |   await operations()\n  412 |   await page.getByRole('button', { name: 'Nuovo spostamento', exact: true }).click()\n> 413 |   await modal().getByLabel('Partenza locale').fill('2026-05-03T12:00')\n      |                                                                ^\n  414 |   await modal().getByLabel('Arrivo locale').fill('2026-05-03T13:00')\n  415 |   await modal().getByRole('combobox', { name: 'Porto di destinazione', exact: true "
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 eliminazione: esito incerto verificato senza ripetere la scrittura"],
+          "status": "passed",
+          "durationMs": 27943,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 sessione: operation, Salva con nome scarta bozza e risposta precedente"
+          ],
+          "status": "failed",
+          "durationMs": 29367,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.fill: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Momento locale', { exact: true })\u001b[22m\n",
+            "TimeoutError: locator.fill: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByLabel('Momento locale', { exact: true })\u001b[22m\n\n\n  498 |       await selectEntry()\n  499 |       await page.getByRole('button', { name: 'Correggi operazione', exact: true }).click()\n> 500 |       await modal().getByLabel('Momento locale').fill('2026-05-02T11:00')\n      |                                                                   ^\n  501 |     } else if (flow === 'tariff') {\n  502 |       await tariffs()\n  503 |       await page.getByRole('button', { name: 'Correggi tariffa', exact"
+          ]
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 sessione: tariff, Salva con nome scarta bozza e risposta precedente"],
+          "status": "passed",
+          "durationMs": 21164,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 sessione: weight, Salva con nome scarta bozza e risposta precedente"],
+          "status": "passed",
+          "durationMs": 15098,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "milestone-migrations.spec.ts",
+          "titlePath": [
+            "M4: migrazioni cumulative v1–v16 e v17 corrente, dati, copie e trasferibilità"
+          ],
+          "status": "passed",
+          "durationMs": 33774,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "movements.spec.ts",
+          "titlePath": [
+            "P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa alla partenza e persistenza offline"
+          ],
+          "status": "passed",
+          "durationMs": 151077,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "movements.spec.ts",
+          "titlePath": [
+            "P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione"
+          ],
+          "status": "failed",
+          "durationMs": 48779,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('combobox', { name: 'Nave', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <input readonly disabled role=\"combobox\" autocomplete=\"off\" data-disabled=\"true\" aria-expanded=\"false\" data-variant=\"default\" id=\"mantine-95eu0akzw\" aria-haspopup=\"listbox\" value=\"1 · Stella del mare\" placeholder=\"Seleziona una nave\" class=\"m_8fb7ebe7 mantine-Input-input mantine-Select-input\"/>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - elemen",
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('combobox', { name: 'Nave', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <input readonly disabled role=\"combobox\" autocomplete=\"off\" data-disabled=\"true\" aria-expanded=\"false\" data-variant=\"default\" id=\"mantine-95eu0akzw\" aria-haspopup=\"listbox\" value=\"1 · Stella del mare\" placeholder=\"Seleziona una nave\" class=\"m_8fb7ebe7 mantine-Input-input mantine-Select-input\"/>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - elemen"
+          ]
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: entrata effettuata, anteprima prima/dopo, errore per campo, focus e permanenze alla misura minima"
+          ],
+          "status": "passed",
+          "durationMs": 36398,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: mancata bloccata da prestazione, poi spostamento mancato con riattribuzione FREE/CATALOG e conferma"
+          ],
+          "status": "passed",
+          "durationMs": 47457,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: bozze obsolete, risposta ritardata e conferma persa con rilettura fallita/ritardata senza duplicazioni"
+          ],
+          "status": "passed",
+          "durationMs": 37750,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: spostamento esterno effettuato, fusi distinti, due componenti e identità fra anteprima e conferma"
+          ],
+          "status": "passed",
+          "durationMs": 27010,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operations-async.spec.ts",
+          "titlePath": [
+            "P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione"
+          ],
+          "status": "failed",
+          "durationMs": 63373,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('button', { name: 'Chiudi anteprima' })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" data-disabled=\"true\" data-variant=\"default\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2",
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('button', { name: 'Chiudi anteprima' })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" data-disabled=\"true\" data-variant=\"default\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2"
+          ]
+        },
+        {
+          "file": "operations.spec.ts",
+          "titlePath": [
+            "P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia, copie e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 197321,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ui03.spec.ts",
+          "titlePath": [
+            "UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle due dimensioni"
+          ],
+          "status": "passed",
+          "durationMs": 67081,
+          "attempts": 1,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "2026-11-19T16-24-09.478Z-kexDtb",
+      "path": "test-results/verification/2026-11-19T16-24-09.478Z-kexDtb/results.json",
+      "runner": "playwright",
+      "phase": "desktop",
+      "scope": "M4 ripresa fixture e asincronia finali",
+      "startedAt": "2026-11-19T16:24:09.478Z",
+      "endedAt": "2026-11-19T16:33:43.896Z",
+      "requestedArgs": [
+        "tests/e2e/inter-port-movements.spec.ts",
+        "tests/e2e/m4-maintenance.spec.ts",
+        "tests/e2e/movements.spec.ts",
+        "tests/e2e/operations-async.spec.ts",
+        "--grep",
+        "M4|P12 asincronia|P11 asincronia|P10 asincronia"
+      ],
+      "command": {
+        "executable": "C:\\nvm4w\\nodejs\\node.exe",
+        "args": [
+          "C:\\Other\\porto-next\\node_modules\\@playwright\\test\\cli.js",
+          "test",
+          "tests/e2e/inter-port-movements.spec.ts",
+          "tests/e2e/m4-maintenance.spec.ts",
+          "tests/e2e/movements.spec.ts",
+          "tests/e2e/operations-async.spec.ts",
+          "--grep",
+          "M4|P12 asincronia|P11 asincronia|P10 asincronia",
+          "--reporter=list,json,C:\\Other\\porto-next\\scripts\\verification\\playwright-context.mjs",
+          "--output=C:\\Other\\porto-next\\test-results\\verification\\2026-11-19T16-24-09.478Z-kexDtb\\artifacts"
+        ]
+      },
+      "reproduction": "& 'C:\\nvm4w\\nodejs\\node.exe' 'C:\\Other\\porto-next\\scripts\\verification\\collect.mjs' 'playwright' '--phase' 'desktop' '--scope' 'M4 ripresa fixture e asincronia finali' '--' 'tests/e2e/inter-port-movements.spec.ts' 'tests/e2e/m4-maintenance.spec.ts' 'tests/e2e/movements.spec.ts' 'tests/e2e/operations-async.spec.ts' '--grep' 'M4|P12 asincronia|P11 asincronia|P10 asincronia'",
+      "counts": {
+        "passed": 11,
+        "failed": 1,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 12,
+        "attempts": 12,
+        "retried": 0
+      },
+      "outcome": "failed",
+      "exitCode": 1,
+      "processExitCode": 1,
+      "issues": [],
+      "errors": ["Il runner Playwright dichiara il fallimento della sessione"],
+      "sha256": "beaea38dfcacad72cbb8dd9064c26dd3a1d3fc8698d12b378c84dff8265d2afd",
+      "cases": [
+        {
+          "file": "inter-port-movements.spec.ts",
+          "titlePath": [
+            "P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome"
+          ],
+          "status": "passed",
+          "durationMs": 57453,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: inserimento retroattivo, correzione, note e rimozione con servizi MISSED conservati"
+          ],
+          "status": "passed",
+          "durationMs": 61937,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tariffa protetta"
+          ],
+          "status": "passed",
+          "durationMs": 53981,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 pesi: iniziale protetta, versioni fisse e catalogo, confini, bozze, ricalcoli e risposta persa"
+          ],
+          "status": "passed",
+          "durationMs": 51159,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: bozza note e correzione, risposta tardiva scartata e recupero dopo commit"
+          ],
+          "status": "passed",
+          "durationMs": 42583,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: trasformazione interno/esterno, componenti ricreate e cambio nave"
+          ],
+          "status": "passed",
+          "durationMs": 73810,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 eliminazione: esito incerto verificato senza ripetere la scrittura"],
+          "status": "passed",
+          "durationMs": 31848,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 sessione: operation, Salva con nome scarta bozza e risposta precedente"
+          ],
+          "status": "passed",
+          "durationMs": 17045,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 sessione: tariff, Salva con nome scarta bozza e risposta precedente"],
+          "status": "passed",
+          "durationMs": 22375,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 sessione: weight, Salva con nome scarta bozza e risposta precedente"],
+          "status": "passed",
+          "durationMs": 19454,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "movements.spec.ts",
+          "titlePath": [
+            "P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione"
+          ],
+          "status": "passed",
+          "durationMs": 71826,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operations-async.spec.ts",
+          "titlePath": [
+            "P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione"
+          ],
+          "status": "failed",
+          "durationMs": 64660,
+          "attempts": 1,
+          "errors": [
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('button', { name: 'Chiudi anteprima' })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" data-disabled=\"true\" data-variant=\"default\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2",
+            "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('button', { name: 'Chiudi anteprima' })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" data-disabled=\"true\" data-variant=\"default\" class=\"mantine-focus-auto m_77c9d27d mantine-Button-root m_87cf2631 mantine-UnstyledButton-root\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2026-11-20T08-49-54.833Z-qSTb9E",
+      "path": "test-results/verification/2026-11-20T08-49-54.833Z-qSTb9E/results.json",
+      "runner": "playwright",
+      "phase": "desktop",
+      "scope": "M4 ripresa completa finale dopo interruzione",
+      "startedAt": "2026-11-20T08:49:54.833Z",
+      "endedAt": "2026-11-20T09:14:15.179Z",
+      "requestedArgs": [
+        "tests/e2e/assignments.spec.ts",
+        "tests/e2e/inter-port-movements.spec.ts",
+        "tests/e2e/m4-maintenance.spec.ts",
+        "tests/e2e/milestone-migrations.spec.ts",
+        "tests/e2e/movements.spec.ts",
+        "tests/e2e/operation-completion.spec.ts",
+        "tests/e2e/operations-async.spec.ts",
+        "tests/e2e/operations.spec.ts",
+        "tests/e2e/ui03.spec.ts"
+      ],
+      "command": {
+        "executable": "C:\\nvm4w\\nodejs\\node.exe",
+        "args": [
+          "C:\\Other\\porto-next\\node_modules\\@playwright\\test\\cli.js",
+          "test",
+          "tests/e2e/assignments.spec.ts",
+          "tests/e2e/inter-port-movements.spec.ts",
+          "tests/e2e/m4-maintenance.spec.ts",
+          "tests/e2e/milestone-migrations.spec.ts",
+          "tests/e2e/movements.spec.ts",
+          "tests/e2e/operation-completion.spec.ts",
+          "tests/e2e/operations-async.spec.ts",
+          "tests/e2e/operations.spec.ts",
+          "tests/e2e/ui03.spec.ts",
+          "--reporter=list,json,C:\\Other\\porto-next\\scripts\\verification\\playwright-context.mjs",
+          "--output=C:\\Other\\porto-next\\test-results\\verification\\2026-11-20T08-49-54.833Z-qSTb9E\\artifacts"
+        ]
+      },
+      "reproduction": "& 'C:\\nvm4w\\nodejs\\node.exe' 'C:\\Other\\porto-next\\scripts\\verification\\collect.mjs' 'playwright' '--phase' 'desktop' '--scope' 'M4 ripresa completa finale dopo interruzione' '--' 'tests/e2e/assignments.spec.ts' 'tests/e2e/inter-port-movements.spec.ts' 'tests/e2e/m4-maintenance.spec.ts' 'tests/e2e/milestone-migrations.spec.ts' 'tests/e2e/movements.spec.ts' 'tests/e2e/operation-completion.spec.ts' 'tests/e2e/operations-async.spec.ts' 'tests/e2e/operations.spec.ts' 'tests/e2e/ui03.spec.ts'",
+      "counts": {
+        "passed": 23,
+        "failed": 0,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 23,
+        "attempts": 23,
+        "retried": 0
+      },
+      "outcome": "passed",
+      "exitCode": 0,
+      "processExitCode": 0,
+      "issues": [],
+      "errors": [],
+      "sha256": "ae6b82293491a744f9648b23e0954c8c46516ed49fd2e3c87dae4498e4c1bba0",
+      "cases": [
+        {
+          "file": "assignments.spec.ts",
+          "titlePath": [
+            "P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 140141,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "assignments.spec.ts",
+          "titlePath": [
+            "P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricamento e nuova sessione"
+          ],
+          "status": "passed",
+          "durationMs": 37042,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "inter-port-movements.spec.ts",
+          "titlePath": [
+            "P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità, ricalcoli e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 95480,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "inter-port-movements.spec.ts",
+          "titlePath": [
+            "P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome"
+          ],
+          "status": "passed",
+          "durationMs": 61522,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: inserimento retroattivo, correzione, note e rimozione con servizi MISSED conservati"
+          ],
+          "status": "passed",
+          "durationMs": 60026,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tariffa protetta"
+          ],
+          "status": "passed",
+          "durationMs": 58150,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 pesi: iniziale protetta, versioni fisse e catalogo, confini, bozze, ricalcoli e risposta persa"
+          ],
+          "status": "passed",
+          "durationMs": 56404,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: bozza note e correzione, risposta tardiva scartata e recupero dopo commit"
+          ],
+          "status": "passed",
+          "durationMs": 50608,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: trasformazione interno/esterno, componenti ricreate e cambio nave"
+          ],
+          "status": "passed",
+          "durationMs": 74627,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 eliminazione: esito incerto verificato senza ripetere la scrittura"],
+          "status": "passed",
+          "durationMs": 25643,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 sessione: operation, Salva con nome scarta bozza e risposta precedente"
+          ],
+          "status": "passed",
+          "durationMs": 17672,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 sessione: tariff, Salva con nome scarta bozza e risposta precedente"],
+          "status": "passed",
+          "durationMs": 18915,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 sessione: weight, Salva con nome scarta bozza e risposta precedente"],
+          "status": "passed",
+          "durationMs": 13098,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "milestone-migrations.spec.ts",
+          "titlePath": [
+            "M4: migrazioni cumulative v1–v16 e v17 corrente, dati, copie e trasferibilità"
+          ],
+          "status": "passed",
+          "durationMs": 24255,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "movements.spec.ts",
+          "titlePath": [
+            "P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa alla partenza e persistenza offline"
+          ],
+          "status": "passed",
+          "durationMs": 154619,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "movements.spec.ts",
+          "titlePath": [
+            "P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione"
+          ],
+          "status": "passed",
+          "durationMs": 71999,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: entrata effettuata, anteprima prima/dopo, errore per campo, focus e permanenze alla misura minima"
+          ],
+          "status": "passed",
+          "durationMs": 34230,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: mancata bloccata da prestazione, poi spostamento mancato con riattribuzione FREE/CATALOG e conferma"
+          ],
+          "status": "passed",
+          "durationMs": 50062,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: bozze obsolete, risposta ritardata e conferma persa con rilettura fallita/ritardata senza duplicazioni"
+          ],
+          "status": "passed",
+          "durationMs": 36126,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: spostamento esterno effettuato, fusi distinti, due componenti e identità fra anteprima e conferma"
+          ],
+          "status": "passed",
+          "durationMs": 25772,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operations-async.spec.ts",
+          "titlePath": [
+            "P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione"
+          ],
+          "status": "passed",
+          "durationMs": 69624,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operations.spec.ts",
+          "titlePath": [
+            "P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia, copie e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 206082,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ui03.spec.ts",
+          "titlePath": [
+            "UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle due dimensioni"
+          ],
+          "status": "passed",
+          "durationMs": 69671,
+          "attempts": 1,
+          "errors": []
+        }
+      ]
+    },
+    {
+      "id": "2026-11-20T09-25-53.213Z-MDuJka",
+      "path": "test-results/verification/2026-11-20T09-25-53.213Z-MDuJka/results.json",
+      "runner": "playwright",
+      "phase": "packaged-desktop",
+      "scope": "M4 pacchetto Windows suite desktop completa",
+      "startedAt": "2026-11-20T09:25:53.213Z",
+      "endedAt": "2026-11-20T10:28:26.702Z",
+      "requestedArgs": [],
+      "command": {
+        "executable": "C:\\nvm4w\\nodejs\\node.exe",
+        "args": [
+          "C:\\Other\\porto-next\\node_modules\\@playwright\\test\\cli.js",
+          "test",
+          "--reporter=list,json,C:\\Other\\porto-next\\scripts\\verification\\playwright-context.mjs",
+          "--output=C:\\Other\\porto-next\\test-results\\verification\\2026-11-20T09-25-53.213Z-MDuJka\\artifacts"
+        ]
+      },
+      "reproduction": "& 'C:\\nvm4w\\nodejs\\node.exe' 'C:\\Other\\porto-next\\scripts\\verification\\collect.mjs' 'playwright' '--phase' 'packaged-desktop' '--scope' 'M4 pacchetto Windows suite desktop completa' '--'",
+      "counts": {
+        "passed": 52,
+        "failed": 0,
+        "skipped": 0,
+        "incomplete": 0,
+        "flaky": 0,
+        "expected-failure": 0,
+        "total": 52,
+        "attempts": 52,
+        "retried": 0
+      },
+      "outcome": "passed",
+      "exitCode": 0,
+      "processExitCode": 0,
+      "issues": [],
+      "errors": [],
+      "sha256": "1ca67f660e911c65538d1e102b3322dba68026bd2efc55f3ac63e1a2d398d1f1",
+      "cases": [
+        {
+          "file": "archives.spec.ts",
+          "titlePath": [
+            "gestisce archivi reali dalla finestra desktop e li ritrova dopo il riavvio"
+          ],
+          "status": "passed",
+          "durationMs": 46470,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "assignments.spec.ts",
+          "titlePath": [
+            "P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, copie e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 123065,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "assignments.spec.ts",
+          "titlePath": [
+            "P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricamento e nuova sessione"
+          ],
+          "status": "passed",
+          "durationMs": 37783,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "berths.spec.ts",
+          "titlePath": [
+            "amministra le banchine dal porto e conserva dati e contesto nel percorso Electron"
+          ],
+          "status": "passed",
+          "durationMs": 133352,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "catalog-async.spec.ts",
+          "titlePath": [
+            "P08 catalogo: risposte tardive di dettaglio ed elenco, editor chiuso e cambio sessione"
+          ],
+          "status": "passed",
+          "durationMs": 38033,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "catalog.spec.ts",
+          "titlePath": [
+            "P08 catalogo: v8 popolato, pesi esatti, ciclo di vita, conflitti, copie e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 103708,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "inter-port-movements.spec.ts",
+          "titlePath": [
+            "P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità, ricalcoli e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 105653,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "inter-port-movements.spec.ts",
+          "titlePath": [
+            "P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardiva, revisione e Salva con nome"
+          ],
+          "status": "passed",
+          "durationMs": 56878,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: inserimento retroattivo, correzione, note e rimozione con servizi MISSED conservati"
+          ],
+          "status": "passed",
+          "durationMs": 62467,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tariffa protetta"
+          ],
+          "status": "passed",
+          "durationMs": 62712,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 pesi: iniziale protetta, versioni fisse e catalogo, confini, bozze, ricalcoli e risposta persa"
+          ],
+          "status": "passed",
+          "durationMs": 61377,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: bozza note e correzione, risposta tardiva scartata e recupero dopo commit"
+          ],
+          "status": "passed",
+          "durationMs": 51271,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 operazioni: trasformazione interno/esterno, componenti ricreate e cambio nave"
+          ],
+          "status": "passed",
+          "durationMs": 73497,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 eliminazione: esito incerto verificato senza ripetere la scrittura"],
+          "status": "passed",
+          "durationMs": 25544,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": [
+            "M4 sessione: operation, Salva con nome scarta bozza e risposta precedente"
+          ],
+          "status": "passed",
+          "durationMs": 17255,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 sessione: tariff, Salva con nome scarta bozza e risposta precedente"],
+          "status": "passed",
+          "durationMs": 20289,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "m4-maintenance.spec.ts",
+          "titlePath": ["M4 sessione: weight, Salva con nome scarta bozza e risposta precedente"],
+          "status": "passed",
+          "durationMs": 13354,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "milestone-migrations.spec.ts",
+          "titlePath": [
+            "M4: migrazioni cumulative v1–v16 e v17 corrente, dati, copie e trasferibilità"
+          ],
+          "status": "passed",
+          "durationMs": 37641,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "movements.spec.ts",
+          "titlePath": [
+            "P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa alla partenza e persistenza offline"
+          ],
+          "status": "passed",
+          "durationMs": 162882,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "movements.spec.ts",
+          "titlePath": [
+            "P11 asincronia: risoluzione arrivo, query di contesto, selezione, revisione e nuova sessione"
+          ],
+          "status": "passed",
+          "durationMs": 71218,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: entrata effettuata, anteprima prima/dopo, errore per campo, focus e permanenze alla misura minima"
+          ],
+          "status": "passed",
+          "durationMs": 37864,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: mancata bloccata da prestazione, poi spostamento mancato con riattribuzione FREE/CATALOG e conferma"
+          ],
+          "status": "passed",
+          "durationMs": 48895,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: bozze obsolete, risposta ritardata e conferma persa con rilettura fallita/ritardata senza duplicazioni"
+          ],
+          "status": "passed",
+          "durationMs": 36394,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operation-completion.spec.ts",
+          "titlePath": [
+            "P17A: spostamento esterno effettuato, fusi distinti, due componenti e identità fra anteprima e conferma"
+          ],
+          "status": "passed",
+          "durationMs": 25072,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operations-async.spec.ts",
+          "titlePath": [
+            "P10 asincronia: dettaglio, elenco, permanenze, risoluzione chiusa, bozza obsoleta e cambio sessione"
+          ],
+          "status": "passed",
+          "durationMs": 69277,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "operations.spec.ts",
+          "titlePath": [
+            "P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia, copie e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 207064,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "port-async.spec.ts",
+          "titlePath": [
+            "scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza senza scrivere"
+          ],
+          "status": "passed",
+          "durationMs": 34435,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "port-lifecycle.spec.ts",
+          "titlePath": [
+            "gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del porto offline"
+          ],
+          "status": "passed",
+          "durationMs": 119042,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ports.spec.ts",
+          "titlePath": [
+            "crea e consulta porti offline, li ritrova al riavvio e mantiene le copie indipendenti"
+          ],
+          "status": "passed",
+          "durationMs": 59558,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": ["P14 funzionale: prestazioni libere, migrazione e contesto"],
+          "status": "passed",
+          "durationMs": 45738,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": ["P14 asincrono: prestazioni libere, migrazione e contesto"],
+          "status": "passed",
+          "durationMs": 39746,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE conservata"
+          ],
+          "status": "passed",
+          "durationMs": 53064,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "P15 asincrono: selettore catalogo ignora risposte precedenti e conserva la selezione fra ricerche"
+          ],
+          "status": "passed",
+          "durationMs": 29569,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": ["P16 FREE: ciclo di vita, ricerca, conflitto e riapertura"],
+          "status": "passed",
+          "durationMs": 109981,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": ["P16 CATALOG: ciclo di vita, ricerca, conflitto e riapertura"],
+          "status": "passed",
+          "durationMs": 142616,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "P16 asincrono: filtri, anteprima obsoleta e note con esito incerto richiedono rilettura"
+          ],
+          "status": "passed",
+          "durationMs": 52219,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "post-P16 FREE: creazione e consuntivazione con risposta persa richiedono rilettura"
+          ],
+          "status": "passed",
+          "durationMs": 69842,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "post-P16 CATALOG: creazione e consuntivazione con risposta persa richiedono rilettura"
+          ],
+          "status": "passed",
+          "durationMs": 71575,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "services.spec.ts",
+          "titlePath": [
+            "P16 ricerca: soggetti ereditati, porto e banchina, filtri vuoti e ispezione minima"
+          ],
+          "status": "passed",
+          "durationMs": 54566,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "subjects-async.spec.ts",
+          "titlePath": [
+            "P06 Clienti: scarta risposte tardive di dettaglio, decorrenza e archivio precedente"
+          ],
+          "status": "passed",
+          "durationMs": 39288,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "subjects-async.spec.ts",
+          "titlePath": [
+            "P06 Agenzie: scarta risposte tardive di dettaglio, decorrenza e archivio precedente"
+          ],
+          "status": "passed",
+          "durationMs": 41725,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "subjects.spec.ts",
+          "titlePath": ["P06 Clienti: migrazione, ciclo di vita, bozze, copie e riavvio offline"],
+          "status": "passed",
+          "durationMs": 152897,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "subjects.spec.ts",
+          "titlePath": ["P06 Agenzie: migrazione, ciclo di vita, bozze, copie e riavvio offline"],
+          "status": "passed",
+          "durationMs": 150929,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "tariffs-async.spec.ts",
+          "titlePath": [
+            "P09 asincronia: selezioni, liste, risoluzione a editor chiuso, calcolo superato, futuro corrente e cambio sessione"
+          ],
+          "status": "passed",
+          "durationMs": 65971,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "tariffs.spec.ts",
+          "titlePath": [
+            "P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo storico, conflitti e riapertura offline"
+          ],
+          "status": "passed",
+          "durationMs": 129625,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "time.spec.ts",
+          "titlePath": ["configura il fuso per archivio e risolve gap e occorrenze offline"],
+          "status": "passed",
+          "durationMs": 31831,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ui01.spec.ts",
+          "titlePath": [
+            "UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti reali"
+          ],
+          "status": "passed",
+          "durationMs": 82714,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ui02.spec.ts",
+          "titlePath": [
+            "UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notifiche ed effetti estesi"
+          ],
+          "status": "passed",
+          "durationMs": 101048,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ui03-states.spec.ts",
+          "titlePath": [
+            "UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento e nuova sessione"
+          ],
+          "status": "passed",
+          "durationMs": 56665,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "ui03.spec.ts",
+          "titlePath": [
+            "UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle due dimensioni"
+          ],
+          "status": "passed",
+          "durationMs": 73160,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "vessels-async.spec.ts",
+          "titlePath": [
+            "P07 Navi: risposte tardive, cambio sessione e futuro → corrente senza scritture"
+          ],
+          "status": "passed",
+          "durationMs": 41584,
+          "attempts": 1,
+          "errors": []
+        },
+        {
+          "file": "vessels.spec.ts",
+          "titlePath": ["P07 Navi: migrazione, ciclo di vita, bozze, copie e riavvio offline"],
+          "status": "passed",
+          "durationMs": 161347,
+          "attempts": 1,
+          "errors": []
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Prove automatizzate e ispezioni dell’agente; nessuna sessione manuale umana",
+    "Trasferimento tra processi e percorsi sul medesimo Windows, nessuna seconda macchina fisica",
+    "UI04, installer, installazione e M5 in P20"
+  ],
+  "retention": "Log completi e trace locali ignorati da Git, non garantiti dopo clone. Il riepilogo versionato conserva comandi, conteggi, codici, casi e impronte."
+}

@@ -1,12 +1,12 @@
 # Stato di implementazione delle prestazioni
 
-Aggiornamento del 18 novembre 2026. Questo file contiene lo stato corrente e la sola consegna attiva. Requisiti e frequenza dei controlli sono nel [piano](piano-implementazione-prestazioni.md), regole di lettura e aggiornamento nella [guida documentale](guida-documentazione.md).
+Aggiornamento del 20 novembre 2026. Questo file contiene lo stato corrente e la sola consegna attiva. Requisiti e frequenza dei controlli sono nel [piano](piano-implementazione-prestazioni.md), regole di lettura e aggiornamento nella [guida documentale](guida-documentazione.md).
 
 ## Stato corrente
 
 - P00–P16, P17A e UI01–UI03 completati. UI03 verificata sulla build Electron, schema v16 invariato, implementazione `2e24749`, base `c1ee663`. [Nota UI03](ui03/revisione-flussi-operativi.md). P16 e revisione tecnica post-P16 restano verificati; [nota e revisione](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 - M1 chiusa sul pacchetto Windows dello schema v9. **M2 chiusa** sull’integrazione P13, schema v14, secondo il piano §7.3. [Evidenze](p13/verifiche.md#verifiche-m2).
-- Revisioni tecniche dopo P12 e P16 completate. **M3 chiusa** sull’integrazione UI03, schema v16: backend completo, 39/39 percorsi desktop su build e 39/39 sul medesimo eseguibile Windows x64; migrazioni cumulative e trasferibilità verificate. [Nota M3](m3/chiusura.md). **P17A — Consuntivare operazioni con replay completato sulla build**, schema v16 invariato. Prossimo passo funzionale: **P17B — Inserire operazioni retroattive**; P17B–P20 restano da avviare.
+- Revisioni tecniche dopo P12 e P16 completate. **M3 chiusa** sull’integrazione UI03, schema v16; [storico M3](m3/chiusura.md) preservato. **M4 chiusa sull’integrazione P17A–P19, schema v17: P17B–P19 completati e verificati su backend, build e pacchetto Windows.** Implementazione e test nel commit `6282ccd`. [Consegna M4](m4/chiusura.md). Prossimo step: **P20 — Revisione e rilascio**.
 - **V01–V03 e rifinitura dell’output compatto completati e verificati**. Riscontro operativo P17A raccolto nel [manifest e nella nota](p17a/consuntivazione-operazioni.md#riscontro-operativo-del-coordinatore), distinguendo chiamate/output letti dai token. V04–V07 da rivalutare secondo la [consegna del piano di automazione](piano-automazione-verifiche.md#consegna-corrente).
 
 ## Avanzamento
@@ -31,11 +31,11 @@ Aggiornamento del 18 novembre 2026. Questo file contiene lo stato corrente e la 
 | P15  | Completato | `97e4b8e`                    | [Prima prestazione da catalogo](p15/prestazione-catalogo.md); build verificata, schema v16.                  |
 | P16  | Completato | `8c5f0e7`                    | [Ciclo di vita e revisione tecnica](p16/ciclo-vita-prestazioni.md); build verificata, schema v16.            |
 | P17A | Completato | `292f81a`                    | [Consuntivazione con replay](p17a/consuntivazione-operazioni.md)                                             |
-| P17B | Da avviare | —                            | Scheda nel piano                                                                                             |
-| P17C | Da avviare | —                            | Scheda nel piano                                                                                             |
-| P17D | Da avviare | —                            | Scheda nel piano                                                                                             |
-| P18  | Da avviare | —                            | Scheda nel piano                                                                                             |
-| P19  | Da avviare | —                            | Scheda nel piano                                                                                             |
+| P17B | Completato | `6282ccd`; verificato in M4  | [Inserimento retroattivo; verifica M4](p17b/inserimento-operazioni-retroattive.md)                           |
+| P17C | Completato | `6282ccd`; verificato in M4  | [Correzione operazioni; verifica M4](p17c/correzione-operazioni.md)                                          |
+| P17D | Completato | `6282ccd`; verificato in M4  | [Eliminazione operazioni e sole note; verifica M4](p17d/eliminazione-operazioni.md)                          |
+| P18  | Completato | `6282ccd`; verificato in M4  | [Correzione ed eliminazione tariffe; verifica M4](p18/correzione-eliminazione-tariffe.md)                    |
+| P19  | Completato | `6282ccd`; verificato in M4  | [Versioni dei pesi, schema v17; verifica M4](p19/versioni-dei-pesi.md)                                       |
 | P20  | Da avviare | —                            | Scheda nel piano                                                                                             |
 
 Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bloccato con causa concreta. I commit indicano implementazioni, mentre le note distinguono build e pacchetto. Il commit P00 si individua con `git log --diff-filter=A --oneline -- doc/p00/decisioni-iniziali.md`.
@@ -51,24 +51,22 @@ Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bl
 | M1       | Chiusa      | Schema v9, build e pacchetto verificati. [Evidenze](ui02/revisione-anagrafiche-e-catalogo.md#verifiche-ui02-e-m1).                                           |
 | M2       | Chiusa      | Schema v14: suite complete su build e medesimo eseguibile Windows, migrazioni cumulative e trasferibilità. [Evidenze](p13/verifiche.md#verifiche-m2).        |
 | M3       | Chiusa      | Schema v16, integrazione UI03: suite complete su build e medesimo pacchetto Windows x64, migrazioni v1–v15 e trasferibilità v16. [Evidenze](m3/chiusura.md). |
-| M4       | Pianificata | Dopo P19.                                                                                                                                                    |
+| M4       | Chiusa      | Schema v17, integrazione P17A–P19, backend/build/pacchetto, migrazioni e trasferibilità verificati. [Nota M4](m4/chiusura.md).                               |
 | M5       | Pianificata | P20, con UI04 e generazione installer.                                                                                                                       |
 
-Le verifiche complete seguono esclusivamente il [piano §7.3](piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). Le revisioni tecniche dopo P12 e P16 sono completate e documentate nelle rispettive note [P12](p12/spostamento-tra-porti.md#revisione-tecnica-dopo-p12) e [P16](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
+La matrice delle verifiche è nel [piano §7.3](piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). Il precedente limite dei soli unit test per P17B–P19 è superato dalla richiesta M4 del 19 novembre; le consegne originarie restano nelle rispettive note. Le revisioni tecniche dopo P12 e P16 sono completate e documentate nelle rispettive note [P12](p12/spostamento-tra-porti.md#revisione-tecnica-dopo-p12) e [P16](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 
-## Consegna corrente — P17A
+## Consegna corrente — M4
 
-**P17A completato e verificato sulla build Electron, schema v16 invariato.** Base `de23f71`, branch `main` inizialmente pulito; implementazione e test nel commit `292f81a`. Disponibile la consuntivazione delle operazioni previste come effettuate o mancate, con dati effettivi, replay completo, identità ancorate, assegnazioni, riattribuzione FREE/CATALOG e ricalcoli atomici. Anteprima prima/dopo e blocchi, protocollo P00 D04, bozze conservate, ricaricamento esplicito e recupero delle conferme incerte. Le correzioni generali e le eliminazioni restano P17B–D.
+**M4 chiusa, schema v17. P17B–P19 completati e verificati nell’integrazione P17A–P19.** Branch main, HEAD base `56ef58b729bab7626de2385e59a421ab841c96fd`, modifiche preesistenti preservate; implementazione e test consolidati nel commit `6282ccd` dopo la verifica, su richiesta dell’utente. Corretti i difetti statici e dei dialoghi operativi rilevati dalla campagna. Unica sintesi finale di copertura, esiti/riprese, riuso, build/pacchetto, immagini, impronte e limiti nella [nota M4](m4/chiusura.md); manifest e casi nell’[indice selezionato](m4/allegati/esiti.json). Le consegne originarie P17B–P19 restano nelle note storiche.
 
-**Verifiche concluse secondo §7.3:** check, backend completo con SQLite Electron e un worker esplicito, invarianti/rollback/riapertura P17A e percorsi desktop nuovi o direttamente interessati. La sola sintesi finale, i motivi di selezione/riuso e i limiti dei report sono nella [nota P17A](p17a/consuntivazione-operazioni.md#verifiche-finali), con [manifest](p17a/verifiche.json) ed evidenze selezionate. Il primo step resta incompleto per la fase desktop; gli esiti individuali riusciti sono distinti dai completamenti successivi. Nessuna promozione automatica del report a chiusura del task. Consegna precedente M3 conservata nella [nota e negli allegati M3](m3/chiusura.md).
-
-**Passaggio operativo a P17B — Inserire operazioni retroattive:** riusare replay, attribuzioni e piano di persistenza, separando l’inserimento dei record dell’operazione dalla vecchia applicazione incrementale delle permanenze. Usare namespace specifico e ID server stabili fra anteprima/applicazione; preservare componenti posseduti, riferimenti reali, rifiuto degli orfani e recupero degli esiti incerti. [Punti d’integrazione e limiti](p17a/consuntivazione-operazioni.md#limiti-e-passaggio-a-p17b). Prove estese desktop/pacchetto a **M4**, salvo trigger anticipati; nessuna sessione manuale umana o seconda macchina fisica.
+**Prossimo step: P20 — Revisione e rilascio.** M4 fornisce gli esiti riusabili e la base visiva per UI04/M5; revisione UI estesa, installer e installazione non sono anticipati. [Passaggio operativo](m4/chiusura.md#limiti-e-passaggio-a-p20).
 
 ## Limiti aperti
 
 I cinque avvisi Prettier legacy `00`–`04` sono risolti in [V03](v03/adozione-documentale.md); gli esiti storici, compresa la [nota M3](m3/chiusura.md), conservano le uscite effettivamente ottenute.
 
-- Prove desktop automatizzate e ispezioni dell'agente. M1–M3 provano trasferibilità fra processi e percorsi sullo stesso Windows, senza seconda macchina fisica. Accessibilità estesa, ulteriori DPI e installazione seguono i checkpoint previsti.
+- Prove desktop automatizzate e ispezioni dell'agente. M1–M4 provano trasferibilità fra processi e percorsi sullo stesso Windows, senza seconda macchina fisica. Accessibilità estesa, ulteriori DPI e installazione seguono i checkpoint previsti.
 - I dettagli di ambiente, prove e limiti specifici appartengono alle note collegate. I difetti ancora aperti vanno aggiunti qui con impatto concreto.
 
 ## Storico

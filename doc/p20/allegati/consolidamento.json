@@ -1,0 +1,34 @@
+{
+  "date": "2026-11-20T15:53:24.834Z",
+  "implementationCommit": "01db2d594e312813b23b8f59bd827351248c4a11",
+  "branch": "main",
+  "verificationBase": "b9686621540d7b6bd424d238955a2fda16d39875",
+  "sourceManifest": "doc/p20/allegati/build.json",
+  "sourceManifestSha256": "58cdf8727b43c349b4e62226a2a0247e0175691c6f1fd8c7b768794c6ff72c91",
+  "sourceFilesChecked": 254,
+  "byteExact": 253,
+  "lineEndingEquivalent": [
+    {
+      "path": "migrations/0010_tariffs.sql",
+      "verifiedWorktreeSha256": "c373252e5f424b1b6da096ec39e8c311052074089b142c0460d801de34437ca4",
+      "gitBlobSha256": "13cd8a139a2bfc1ecf7120707f0478b07f76f9cce778114840d32f429ac49896",
+      "gitBlobUnchangedFromBase": true,
+      "worktreeCrLfCount": 1,
+      "gitCrLfCount": 0,
+      "reason": "Un CRLF preesistente nel worktree normalizzato a LF da Git; contenuto SQL identico, nessuna modifica alla migrazione."
+    }
+  ],
+  "allSourceContentMatches": true,
+  "verifiedWorktreeBytesUnchanged": true,
+  "payloadFilesUnchanged": 5,
+  "historicalManifestsPreserved": true,
+  "verificationReuse": "Stesso worktree e stessa build della campagna P20. Il commit consolida codice, test e risorse; i manifest precedenti descrivono lo stato prima del commit. Differenza di fine riga SQL esplicitata separatamente.",
+  "documentationVerification": {
+    "report": "test-results/verification/2026-11-20T15-53-28.787Z-coordinator-VH9NMq/results.json",
+    "sha256": "fd6895aa1f135f63b0f218f786f1c12c2564a59d5a869629ffeaec264d366883",
+    "profile": "documentazione",
+    "outcome": "passed",
+    "completed": true,
+    "exitCode": 0
+  }
+}

@@ -21,7 +21,28 @@ npm run dev
 
 La prima installazione richiede Internet per scaricare i pacchetti e il runtime Electron. L’applicazione compilata funziona localmente senza server o connessioni esterne e include il runtime: l’utente finale non deve installare Node.js.
 
-better-sqlite3 13 include il binario N-API per Windows x64. La ricompilazione automatica di electron-builder è disattivata intenzionalmente: non serve installare Visual Studio per questo progetto. Se si aggiungono altri moduli nativi, occorre rivedere questa scelta. Gli script di distribuzione usano 7-Zip di sistema quando installato nella posizione standard; altrimenti electron-builder scarica il proprio strumento. ? possibile specificare un altro eseguibile con la variabile `ELECTRON_BUILDER_7ZIP_PATH`.
+better-sqlite3 13 include il binario N-API per Windows x64. La ricompilazione automatica di electron-builder è disattivata intenzionalmente: non serve installare Visual Studio per questo progetto. Se si aggiungono altri moduli nativi, occorre rivedere questa scelta. Gli script di distribuzione usano 7-Zip di sistema quando installato nella posizione standard; altrimenti electron-builder scarica il proprio strumento. È possibile specificare un altro eseguibile con la variabile `ELECTRON_BUILDER_7ZIP_PATH`.
+
+## Distribuzione Windows
+
+Versione **0.1.0**, formato archivio **v17**, Windows x64. La finestra minima è 960×700; la revisione UI comprende anche 1440×960 e ingrandimento del renderer al 125/150%. Per copertura effettiva e limiti dei DPI hardware consultare [UI04](doc/ui04/revisione-finale.md).
+
+Il pacchetto `dist/win-unpacked/` include Electron, risorse locali, migrazioni e driver SQLite: mantenere insieme tutti i suoi file. L'eseguibile è `Porto Next.exe`. L'installer `dist/Porto-Next-0.1.0-Setup.exe` è NSIS x64, per utente, con directory selezionabile. Generare l'installer e provarne l'installazione sono attività distinte; lo stato verificato e le impronte sono nella [consegna P20](doc/p20/revisione-e-rilascio.md).
+
+Gli artefatti di questa configurazione **non sono firmati**: Windows può mostrare l'avviso di editore sconosciuto. Non sono attestati per la distribuzione pubblica. La prova d'installazione sul sistema di destinazione resta da svolgere in un ambiente dedicato, prima di adottare il rilascio; non utilizzare archivi reali per il collaudo. L'archivio `.ormeggi` resta nel percorso scelto, distinto dall'installazione e dalle preferenze.
+
+Per produrre e verificare gli artefatti senza ricompilare la stessa build:
+
+```powershell
+npm.cmd run build
+node scripts/package.mjs --dir
+node scripts/test-packaged.mjs
+node scripts/package.mjs --win nsis --x64 --prepackaged dist/win-unpacked
+```
+
+Dopo il collaudo, archiviare fuori da `win-unpacked` l'eventuale `debug.log` prodotto da Chromium prima di generare NSIS. electron-builder aggiunge l'helper NSIS `resources/elevate.exe` anche alla cartella preconfezionata: nella consegna P20 l'helper è verificato nel payload dell'installer e archiviato separatamente dalla cartella collaudata. Confronti e impronte sono nella nota P20.
+
+`npm run pack`, `npm run dist:win` e `npm run test:packaged` restano gli alias comprensivi di build. Il marchio Windows usa risorse locali; per rigenerare l'icona usare `powershell -NoProfile -File scripts/generate-icon.ps1`. Le prove di rilascio devono riferirsi agli artefatti finali, secondo il [piano §7.3](doc/piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento).
 
 ## Gestione degli archivi
 
@@ -179,8 +200,8 @@ npm run dist:win
 - `test:packaged`: esegue l'intera suite desktop sul pacchetto Windows, con dati temporanei isolati.
 - `dist:win`: installer NSIS in `dist/`.
 
-Il test end-to-end sulla build non confezionata salva schermate in `test-results/`. La verifica del pacchetto esegue le stesse operazioni senza catturare schermate della finestra nascosta. I test usano cartelle temporanee e preferenze isolate; non toccano gli archivi dell’utente. Le variabili `PORTO_TEST_USER_DATA` e `PORTO_TEST_HIDDEN` sono riservate alle verifiche locali.
+I test end-to-end salvano le schermate in `test-results/`. UI04 e le manutenzioni M4 acquisiscono anche la finestra nascosta del pacchetto con l'API nativa Electron. I test usano cartelle temporanee e preferenze isolate; non toccano gli archivi dell’utente. Le variabili `PORTO_TEST_USER_DATA` e `PORTO_TEST_HIDDEN` sono riservate alle verifiche locali.
 
 L’installer di sviluppo non ha firma digitale. Per distribuire il prodotto al pubblico bisognerà configurare la firma e provare l’installazione sul sistema di destinazione.
 
-La verifica npm delle dipendenze distribuite non riporta vulnerabilit?. L?audit completo segnala avvisi moderati relativi a `minimatch` negli strumenti di sviluppo e confezionamento; restano da rivalutare con gli aggiornamenti dei rispettivi pacchetti.
+L'ultima verifica npm riportata nel progetto non indicava vulnerabilità nelle dipendenze distribuite; l'audit completo segnalava avvisi moderati relativi a `minimatch` negli strumenti di sviluppo e confezionamento. Rivalutare l'audit e gli aggiornamenti dei rispettivi pacchetti prima della distribuzione pubblica.

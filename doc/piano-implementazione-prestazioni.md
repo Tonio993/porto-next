@@ -232,6 +232,8 @@ Applicare il risultato alle schermate esistenti coinvolte e documentare poche co
 
 **UI04 — Controllo finale in P20.** Verificare l'interfaccia integrata dopo P17–P19: navigazione da tastiera, focus, etichette, contrasto, leggibilità degli stati senza affidarsi al solo colore e assenza di contenuti o comandi irraggiungibili alle dimensioni supportate. Correggere le regressioni visive e di usabilità residue prima del rilascio.
 
+Decisioni e limiti osservati nella [nota UI04](ui04/revisione-finale.md); stato effettivo nel registro.
+
 **Criteri comuni:** ispezionare schermate reali con dati temporanei, alla dimensione minima supportata e a una dimensione desktop più ampia; acquisire e ispezionare schermate rappresentative prima e dopo. Per UI01 verificare almeno elenco vuoto/popolato, dettaglio, cronologia storica/corrente/futura, creazione, modifica, anteprima pronta/bloccata/obsoleta, errore per campo e cambio sessione. Verificare tastiera e focus nei percorsi modificati. Eseguire i controlli implementativi e desktop pertinenti della sezione 7.3; aggiornare i test dei flussi modificati senza limitarsi ad asserzioni su classi CSS. Registrare decisioni visive, verifiche effettive, limiti e convenzioni per i task successivi in una nota dedicata (`doc/ui01/revisione-post-p04.md` per UI01) e nel registro. Distinguere ispezione automatizzata e sessione manuale umana. Nessuna revisione è completata sulla sola base della lettura del codice.
 
 ## 4. Task, dipendenze e chat
@@ -540,6 +542,8 @@ Sequenza, componenti e impatti nella [nota P10](p10/entrata-uscita-e-permanenze.
 - Registrare limitazioni residue, risultati dei controlli e passi successivi.
 
 **Accettazione:** tutti i criteri del perimetro sono soddisfatti oppure una funzione risulta esplicitamente rinviata con motivazione e impatto. Un difetto che compromette attribuzione, calcolo o integrità dell'archivio impedisce la chiusura. L'installer viene generato; l'installazione sul computer dell'utente rimane un'azione distinta.
+
+[Matrice di revisione P20](p20/copertura.md) e [consegna del rilascio](p20/revisione-e-rilascio.md), con build, pacchetto, installer e installazione distinti.
 
 ## 5. Copertura dei casi d'uso
 

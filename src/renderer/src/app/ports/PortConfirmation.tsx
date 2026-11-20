@@ -53,6 +53,22 @@ const labels: Record<string, string> = {
   vessel: 'Nave',
   selectable: 'Selezionabile',
 }
+function displayValue(field: string, value: string | null): string {
+  if (value === null) return '—'
+  const values: Record<string, Record<string, string>> = {
+    status: {
+      ACTIVE: 'Attivo',
+      INACTIVE: 'Disattivato',
+      PLANNED: 'Prevista',
+      PERFORMED: 'Effettuata',
+      MISSED: 'Mancata',
+    },
+    Tipologia: { ENTRY: 'Entrata', EXIT: 'Uscita', MOVEMENT: 'Spostamento' },
+    vesselTypeId: { STANDARD: 'Nave normale', PASSENGER: 'Nave passeggeri', ADM: 'Nave ADM' },
+    selectable: { true: 'Sì', false: 'No' },
+  }
+  return values[field]?.[value] ?? value
+}
 export function PortConfirmation({
   preview,
   disabled,
@@ -145,8 +161,8 @@ export function PortConfirmation({
                     )
                   </Table.Td>
                   <Table.Td>{labels[change.field] ?? change.field}</Table.Td>
-                  <Table.Td>{change.before ?? '—'}</Table.Td>
-                  <Table.Td>{change.after ?? '—'}</Table.Td>
+                  <Table.Td>{displayValue(change.field, change.before)}</Table.Td>
+                  <Table.Td>{displayValue(change.field, change.after)}</Table.Td>
                 </Table.Tr>
               )),
             )}

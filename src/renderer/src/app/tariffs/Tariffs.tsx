@@ -72,6 +72,7 @@ export function Tariffs({
   const [notice, setNotice] = useState<string | null>(null)
   const trigger = useRef<HTMLElement | null>(null),
     newButton = useRef<HTMLButtonElement>(null)
+  const resumeMaintenanceButton = useRef<HTMLButtonElement>(null)
   const portRequest = useApplicationRequest(context, setError)
   const { request: readPort } = portRequest
   const listRequest = useApplicationRequest(context, setError),
@@ -274,6 +275,7 @@ export function Tariffs({
             <Button
               disabled={busy || dialogOpen}
               onClick={() => setMaintenance({ ...maintenance, opened: true })}
+              ref={resumeMaintenanceButton}
             >
               Riprendi bozza
             </Button>
@@ -438,6 +440,7 @@ export function Tariffs({
           originalContext={maintenance.context}
           archives={archives}
           trigger={maintenance.trigger}
+          resumeTrigger={resumeMaintenanceButton}
           onClose={() => setMaintenance((old) => (old ? { ...old, opened: false } : null))}
           onUncertainChange={(uncertain) =>
             setMaintenance((old) =>

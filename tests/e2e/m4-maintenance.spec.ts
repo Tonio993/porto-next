@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
@@ -14,6 +14,8 @@ import {
   operationHeld,
   releaseOperation,
 } from './operations-support'
+
+declare function requestAnimationFrame(callback: () => void): number
 
 declare const window: {
   archives: ArchiveApi
@@ -155,8 +157,19 @@ async function lostReply(channel: string) {
 async function shot(name: string) {
   if (await button('Conferma modifica').count())
     await button('Conferma modifica').scrollIntoViewIfNeeded()
-  if (!process.env.PORTO_PACKAGED_EXE)
-    await page.screenshot({ path: test.info().outputPath(name), animations: 'disabled' })
+  await page.evaluate(
+    () =>
+      new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))),
+  )
+  const png = await app.evaluate(async ({ BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows()[0]
+    if (win.isVisible()) throw Error('La finestra di test deve restare nascosta.')
+    const captured = await win.capturePage()
+    if (captured.isEmpty()) throw Error('Acquisizione della finestra vuota.')
+    if (win.isVisible()) throw Error('La cattura ha mostrato la finestra di test.')
+    return captured.toPNG().toString('base64')
+  })
+  writeFileSync(test.info().outputPath(name), Buffer.from(png, 'base64'))
 }
 
 test('M4 operazioni: inserimento retroattivo, correzione, note e rimozione con servizi MISSED conservati', async () => {
@@ -323,9 +336,13 @@ test('M4 pesi: iniziale protetta, versioni fisse e catalogo, confini, bozze, ric
   await modal().getByLabel('Decorrenza locale').fill('2026-05-02T12:00')
   await modal().getByLabel('Peso', { exact: true }).fill('0')
   await button('Mostra anteprima').click()
-  await expect(modal().getByRole('alert').filter({ hasText: 'weight:' })).toContainText(
-    'maggiore di zero',
+  await expect(modal().getByRole('textbox', { name: 'Peso', exact: true })).toHaveAttribute(
+    'aria-invalid',
+    'true',
   )
+  await expect(
+    modal().getByRole('textbox', { name: 'Peso', exact: true }),
+  ).toHaveAccessibleDescription(/maggiore di zero/)
   await modal().getByLabel('Peso', { exact: true }).fill('2')
   await modal().press('Escape')
   await expect(modal()).toHaveCount(0)

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
 import type {
   ApplicationResult,
@@ -35,6 +35,7 @@ export function WeightHistory({
   opened,
   archives,
   trigger,
+  resumeTrigger,
   onClose,
   onUncertainChange,
   onApplied,
@@ -44,6 +45,7 @@ export function WeightHistory({
   opened: boolean
   archives: ReturnType<typeof useArchives>
   trigger: HTMLElement | null
+  resumeTrigger: RefObject<HTMLButtonElement | null>
   onClose: (keep: boolean) => void
   onUncertainChange: (value: boolean) => void
   onApplied: () => void
@@ -59,10 +61,15 @@ export function WeightHistory({
   const [resolution, setResolution] = useState<MomentResolutionDto | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [issues, setIssues] = useState<readonly FieldIssueDto[]>([])
+  const otherIssues = issues.filter((issue) => issue.path[0] !== 'weight')
   const [uncertain, setUncertain] = useState(false),
     [reloadRequired, setReloadRequired] = useState(false)
   const expected = useRef<{ versionId: string; version: WeightVersionDto | null } | null>(null)
   const active = useRef(true)
+  const weightInput = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (opened && editing && !preview) weightInput.current?.focus()
+  }, [opened, editing, preview])
   const reading = useApplicationRequest(context, setError),
     editor = useApplicationRequest(context, setError),
     paging = useApplicationRequest(context, setError),
@@ -295,7 +302,8 @@ export function WeightHistory({
       withCloseButton={!busy}
       returnFocus={false}
       onExitTransitionEnd={() => {
-        if (trigger?.isConnected) trigger.focus()
+        if (trigger?.isConnected && !trigger.matches(':disabled')) trigger.focus()
+        else if (resumeTrigger.current) resumeTrigger.current.focus()
         else document.querySelector<HTMLElement>('[aria-label="Dettaglio catalogo"]')?.focus()
       }}
     >
@@ -305,9 +313,9 @@ export function WeightHistory({
             {error}
           </StateMessage>
         )}
-        {issues.length > 0 && (
+        {otherIssues.length > 0 && (
           <div role="alert">
-            {issues.map((issue, i) => (
+            {otherIssues.map((issue, i) => (
               <p key={i}>
                 {issue.path.join(' · ')}: {issue.message}
               </p>
@@ -397,7 +405,9 @@ export function WeightHistory({
                     )}
                     <TextInput
                       label="Peso"
+                      ref={weightInput}
                       data-autofocus
+                      error={issues.find((issue) => issue.path[0] === 'weight')?.message}
                       inputMode="decimal"
                       description="Strettamente positivo; sono ammessi decimali esatti e la virgola."
                       value={draft.weight}

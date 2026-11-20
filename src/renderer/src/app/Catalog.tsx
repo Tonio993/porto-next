@@ -57,6 +57,7 @@ export function Catalog({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const newButton = useRef<HTMLButtonElement>(null)
+  const resumeWeightButton = useRef<HTMLButtonElement>(null)
   const dialogTrigger = useRef<HTMLElement | null>(null)
   const rememberTrigger = () => {
     dialogTrigger.current =
@@ -263,6 +264,7 @@ export function Catalog({
         <StateMessage title="Bozza peso conservata" kind="warning">
           <Group>
             <Button
+              ref={resumeWeightButton}
               disabled={busy || dialogOpen}
               onClick={() => setWeightWindow({ ...weightWindow, opened: true })}
             >
@@ -486,9 +488,11 @@ export function Catalog({
           opened={weightWindow.opened}
           archives={archives}
           trigger={weightWindow.trigger}
-          onClose={(keep) =>
+          resumeTrigger={resumeWeightButton}
+          onClose={(keep) => {
             setWeightWindow((old) => (keep && old ? { ...old, opened: false } : null))
-          }
+            if (!keep) requestAnimationFrame(() => weightWindow.trigger?.focus())
+          }}
           onUncertainChange={(uncertain) =>
             setWeightWindow((old) =>
               old && old.uncertain !== uncertain ? { ...old, uncertain } : old,

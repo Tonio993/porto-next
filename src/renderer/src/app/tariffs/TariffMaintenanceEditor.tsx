@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import { Button, Group, Modal, Stack } from '@mantine/core'
 import type {
   ApplicationResult,
@@ -27,6 +27,7 @@ export function TariffMaintenanceEditor({
   originalContext,
   archives,
   trigger,
+  resumeTrigger,
   onClose,
   onApplied,
   onUncertainChange,
@@ -37,6 +38,7 @@ export function TariffMaintenanceEditor({
   originalContext: ArchiveContextDto
   archives: ReturnType<typeof useArchives>
   trigger: HTMLElement | null
+  resumeTrigger: RefObject<HTMLButtonElement | null>
   onClose: () => void
   onApplied: (value: TariffDto | null) => void
   onUncertainChange: (value: boolean) => void
@@ -206,7 +208,8 @@ export function TariffMaintenanceEditor({
       withCloseButton={!busy}
       returnFocus={false}
       onExitTransitionEnd={() => {
-        if (trigger?.isConnected) trigger.focus()
+        if (trigger?.isConnected && !trigger.matches(':disabled')) trigger.focus()
+        else if (resumeTrigger.current) resumeTrigger.current.focus()
         else document.querySelector<HTMLElement>('[aria-label="Dettaglio tariffa"]')?.focus()
       }}
     >

@@ -1,9 +1,10 @@
 # Stato di implementazione delle prestazioni
 
-Aggiornamento del 20 novembre 2026. Questo file contiene lo stato corrente e la sola consegna attiva. Requisiti e frequenza dei controlli sono nel [piano](piano-implementazione-prestazioni.md), regole di lettura e aggiornamento nella [guida documentale](guida-documentazione.md).
+Aggiornamento del 23 novembre 2026. Questo file contiene lo stato corrente e la sola consegna attiva. Requisiti e frequenza dei controlli sono nel [piano](piano-implementazione-prestazioni.md), regole di lettura e aggiornamento nella [guida documentale](guida-documentazione.md).
 
 ## Stato corrente
 
+- **PR00 — Analisi post-rilascio completata**, implementazioni da avviare: [piano PR01–PR12](dev/piano-interventi-post-rilascio.md), copertura 21/21 e otto analoghi. Nuovo ciclo; chiusure P20/UI04/M5 preservate.
 - P00–P16, P17A e UI01–UI03 completati. UI03 verificata sulla build Electron, schema v16 invariato, implementazione `2e24749`, base `c1ee663`. [Nota UI03](ui03/revisione-flussi-operativi.md). P16 e revisione tecnica post-P16 restano verificati; [nota e revisione](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 - M1 chiusa sul pacchetto Windows dello schema v9. **M2 chiusa** sull’integrazione P13, schema v14, secondo il piano §7.3. [Evidenze](p13/verifiche.md#verifiche-m2).
 - Revisioni tecniche dopo P12 e P16 completate. **M3 chiusa** sull’integrazione UI03, schema v16; [storico M3](m3/chiusura.md) preservato. **M4 chiusa** sull’integrazione P17A–P19, schema v17, implementazione `6282ccd`; [consegna M4](m4/chiusura.md) preservata. **P20 e UI04 completati, M5 chiusa**, versione 0.1.0/schema v17, con pacchetto e installer Windows verificati. [Consegna P20](p20/revisione-e-rilascio.md). Restano firma e collaudo d’installazione nell’ambiente di destinazione.
@@ -56,11 +57,11 @@ Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bl
 
 La matrice delle verifiche è nel [piano §7.3](piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). Il precedente limite dei soli unit test per P17B–P19 è superato dalla richiesta M4 del 19 novembre; le consegne originarie restano nelle rispettive note. Le revisioni tecniche dopo P12 e P16 sono completate e documentate nelle rispettive note [P12](p12/spostamento-tra-porti.md#revisione-tecnica-dopo-p12) e [P16](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 
-## Consegna corrente — P20 / M5
+## Consegna corrente — PR00 / Analisi post-rilascio
 
-**P20/UI04 completati, M5 chiusa, versione 0.1.0/schema v17.** Branch `main`, base verificata `b968662`, stato iniziale pulito; implementazione e test consolidati nel commit `01db2d5` dopo le prove, su richiesta dell’utente. Corretti focus, errore Peso accessibile e valori tecnici delle anteprime; aggiunto il flusso continuo S1 e sostituita l’icona Electron. Backend completo 491/491; tutti i 57 percorsi desktop distinti coperti sulla build e sul medesimo pacchetto tramite campagne complete e riprese selettive documentate. Installer NSIS generato senza ricompilare, payload confrontato. Unica sintesi finale di prove, riuso, anomalie storiche, impronte e limiti nella [nota P20](p20/revisione-e-rilascio.md), casi e comandi nell’[indice selezionato](p20/allegati/esiti.json). M4 e le consegne precedenti restano preservate.
+**Analisi completata, implementazioni da avviare.** Base `main` / `a3ece62`, schema v17 invariato; fonte originale inizialmente non tracciata, preservata e poi versionata su richiesta esplicita (`d920854`). Il [piano post-rilascio](dev/piano-interventi-post-rilascio.md) censisce 21/21 punti, otto analoghi, accettazioni, dipendenze, verifiche di step e checkpoint. Riprodotti blocco bozza, perdita della selezione nella navigazione e falso errore dopo eliminazione sotto timing controllato; altri riscontri distinti dalle verifiche ancora necessarie. Offset numerico per `(Z)` confermato dall'utente. Due sole riproduzioni Electron mirate su build P20 invariata, offline e con archivi temporanei; nessuna campagna completa o modifica di prodotto. Esiti e limiti nella sola sintesi del piano.
 
-**Prossimo passo operativo:** collaudare l’installazione in un ambiente dedicato con dati temporanei e configurare la firma prima della distribuzione pubblica. Artefatti attuali non firmati; nessuna installazione o modifica ad archivi reali effettuata. [Limiti e passaggio operativo](p20/revisione-e-rilascio.md#limiti-e-prossimo-passo).
+**Prossimo passo:** PR01 (feedback dopo eliminazione e messaggi chiudibili), poi PR02 (bozze/esiti incerti); sequenza completa nel piano. P20/UI04 restano completati e M5 chiusa: [consegna ed evidenze del rilascio](p20/revisione-e-rilascio.md), con installazione nell'ambiente di destinazione e firma ancora separate da svolgere. Analisi PR00 conclusa senza commit; documentazione successivamente versionata su richiesta esplicita.
 
 ## Limiti aperti
 

@@ -4,7 +4,7 @@ Aggiornamento del 23 novembre 2026. Questo file contiene lo stato corrente e la 
 
 ## Stato corrente
 
-- **PR00 — Analisi post-rilascio completata**, implementazioni da avviare: [piano PR01–PR12](dev/piano-interventi-post-rilascio.md), copertura 21/21 e otto analoghi. Nuovo ciclo; chiusure P20/UI04/M5 preservate.
+- **PR01 implementato e verificato con test unitari; desktop/integrate differiti alla chiusura PR01–PR12**: [nota PR01](pr01/feedback-eliminazione.md), schema v17 invariato. Prossimo passo PR02. Analisi PR00 completata: [piano PR01–PR12](dev/piano-interventi-post-rilascio.md), copertura 21/21 e otto analoghi. Nuovo ciclo; chiusure P20/UI04/M5 preservate.
 - P00–P16, P17A e UI01–UI03 completati. UI03 verificata sulla build Electron, schema v16 invariato, implementazione `2e24749`, base `c1ee663`. [Nota UI03](ui03/revisione-flussi-operativi.md). P16 e revisione tecnica post-P16 restano verificati; [nota e revisione](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 - M1 chiusa sul pacchetto Windows dello schema v9. **M2 chiusa** sull’integrazione P13, schema v14, secondo il piano §7.3. [Evidenze](p13/verifiche.md#verifiche-m2).
 - Revisioni tecniche dopo P12 e P16 completate. **M3 chiusa** sull’integrazione UI03, schema v16; [storico M3](m3/chiusura.md) preservato. **M4 chiusa** sull’integrazione P17A–P19, schema v17, implementazione `6282ccd`; [consegna M4](m4/chiusura.md) preservata. **P20 e UI04 completati, M5 chiusa**, versione 0.1.0/schema v17, con pacchetto e installer Windows verificati. [Consegna P20](p20/revisione-e-rilascio.md). Restano firma e collaudo d’installazione nell’ambiente di destinazione.
@@ -12,32 +12,33 @@ Aggiornamento del 23 novembre 2026. Questo file contiene lo stato corrente e la 
 
 ## Avanzamento
 
-| Task | Stato      | Revisione di implementazione | Nota operativa                                                                                               |
-| ---- | ---------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| P00  | Completato | Commit di introduzione P00   | [Decisioni](p00/decisioni-iniziali.md)                                                                       |
-| P01  | Completato | `f9b3dbb`                    | [Contesto applicativo](p01/contesto-applicativo.md)                                                          |
-| P02  | Completato | `4235f71`                    | [Numeri e tempo](p02/numeri-e-tempo.md)                                                                      |
-| P03  | Completato | `5a6fa8c`                    | [Creazione e consultazione porti](p03/porti.md)                                                              |
-| P04  | Completato | `0be600d`                    | [Versioni e ciclo di vita porto](p04/versioni-e-ciclo-di-vita.md)                                            |
-| P05  | Completato | `f966ba8`                    | [Banchine](p05/banchine.md)                                                                                  |
-| P06  | Completato | `ef6e257`                    | [Clienti e agenzie](p06/clienti-e-agenzie.md)                                                                |
-| P07  | Completato | `856bcbc`                    | [Navi](p07/navi.md)                                                                                          |
-| P08  | Completato | `0e7fc36`                    | [Catalogo e pesi iniziali](p08/catalogo-e-pesi-iniziali.md)                                                  |
-| P09  | Completato | `1b2f4a5`                    | [Tariffe e calcolatore base](p09/tariffe-e-calcolatore-base.md)                                              |
-| P10  | Completato | `3a34501`                    | [Entrata, uscita e permanenze](p10/entrata-uscita-e-permanenze.md); verificato sulla build Electron.         |
-| P11  | Completato | `8450b39`                    | [Spostamento interno](p11/spostamento-interno.md); verificato sulla build Electron.                          |
-| P12  | Completato | `f07c859`                    | [Spostamento tra porti](p12/spostamento-tra-porti.md); verificato sulla build Electron.                      |
-| P13  | Completato | `c2b2ff9`                    | [Cliente e agenzia effettivi](p13/cliente-e-agenzia-effettivi.md); build e pacchetto verificati, schema v14. |
-| P14  | Completato | `a554e27`                    | [Prima prestazione libera](p14/prestazione-libera.md); build verificata, schema v15.                         |
-| P15  | Completato | `97e4b8e`                    | [Prima prestazione da catalogo](p15/prestazione-catalogo.md); build verificata, schema v16.                  |
-| P16  | Completato | `8c5f0e7`                    | [Ciclo di vita e revisione tecnica](p16/ciclo-vita-prestazioni.md); build verificata, schema v16.            |
-| P17A | Completato | `292f81a`                    | [Consuntivazione con replay](p17a/consuntivazione-operazioni.md)                                             |
-| P17B | Completato | `6282ccd`; verificato in M4  | [Inserimento retroattivo; verifica M4](p17b/inserimento-operazioni-retroattive.md)                           |
-| P17C | Completato | `6282ccd`; verificato in M4  | [Correzione operazioni; verifica M4](p17c/correzione-operazioni.md)                                          |
-| P17D | Completato | `6282ccd`; verificato in M4  | [Eliminazione operazioni e sole note; verifica M4](p17d/eliminazione-operazioni.md)                          |
-| P18  | Completato | `6282ccd`; verificato in M4  | [Correzione ed eliminazione tariffe; verifica M4](p18/correzione-eliminazione-tariffe.md)                    |
-| P19  | Completato | `6282ccd`; verificato in M4  | [Versioni dei pesi, schema v17; verifica M4](p19/versioni-dei-pesi.md)                                       |
-| P20  | Completato | `01db2d5`; verificato in M5  | [Revisione e rilascio](p20/revisione-e-rilascio.md)                                                          |
+| Task | Stato                                                       | Revisione di implementazione | Nota operativa                                                                                               |
+| ---- | ----------------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| P00  | Completato                                                  | Commit di introduzione P00   | [Decisioni](p00/decisioni-iniziali.md)                                                                       |
+| P01  | Completato                                                  | `f9b3dbb`                    | [Contesto applicativo](p01/contesto-applicativo.md)                                                          |
+| P02  | Completato                                                  | `4235f71`                    | [Numeri e tempo](p02/numeri-e-tempo.md)                                                                      |
+| P03  | Completato                                                  | `5a6fa8c`                    | [Creazione e consultazione porti](p03/porti.md)                                                              |
+| P04  | Completato                                                  | `0be600d`                    | [Versioni e ciclo di vita porto](p04/versioni-e-ciclo-di-vita.md)                                            |
+| P05  | Completato                                                  | `f966ba8`                    | [Banchine](p05/banchine.md)                                                                                  |
+| P06  | Completato                                                  | `ef6e257`                    | [Clienti e agenzie](p06/clienti-e-agenzie.md)                                                                |
+| P07  | Completato                                                  | `856bcbc`                    | [Navi](p07/navi.md)                                                                                          |
+| P08  | Completato                                                  | `0e7fc36`                    | [Catalogo e pesi iniziali](p08/catalogo-e-pesi-iniziali.md)                                                  |
+| P09  | Completato                                                  | `1b2f4a5`                    | [Tariffe e calcolatore base](p09/tariffe-e-calcolatore-base.md)                                              |
+| P10  | Completato                                                  | `3a34501`                    | [Entrata, uscita e permanenze](p10/entrata-uscita-e-permanenze.md); verificato sulla build Electron.         |
+| P11  | Completato                                                  | `8450b39`                    | [Spostamento interno](p11/spostamento-interno.md); verificato sulla build Electron.                          |
+| P12  | Completato                                                  | `f07c859`                    | [Spostamento tra porti](p12/spostamento-tra-porti.md); verificato sulla build Electron.                      |
+| P13  | Completato                                                  | `c2b2ff9`                    | [Cliente e agenzia effettivi](p13/cliente-e-agenzia-effettivi.md); build e pacchetto verificati, schema v14. |
+| P14  | Completato                                                  | `a554e27`                    | [Prima prestazione libera](p14/prestazione-libera.md); build verificata, schema v15.                         |
+| P15  | Completato                                                  | `97e4b8e`                    | [Prima prestazione da catalogo](p15/prestazione-catalogo.md); build verificata, schema v16.                  |
+| P16  | Completato                                                  | `8c5f0e7`                    | [Ciclo di vita e revisione tecnica](p16/ciclo-vita-prestazioni.md); build verificata, schema v16.            |
+| P17A | Completato                                                  | `292f81a`                    | [Consuntivazione con replay](p17a/consuntivazione-operazioni.md)                                             |
+| P17B | Completato                                                  | `6282ccd`; verificato in M4  | [Inserimento retroattivo; verifica M4](p17b/inserimento-operazioni-retroattive.md)                           |
+| P17C | Completato                                                  | `6282ccd`; verificato in M4  | [Correzione operazioni; verifica M4](p17c/correzione-operazioni.md)                                          |
+| P17D | Completato                                                  | `6282ccd`; verificato in M4  | [Eliminazione operazioni e sole note; verifica M4](p17d/eliminazione-operazioni.md)                          |
+| P18  | Completato                                                  | `6282ccd`; verificato in M4  | [Correzione ed eliminazione tariffe; verifica M4](p18/correzione-eliminazione-tariffe.md)                    |
+| P19  | Completato                                                  | `6282ccd`; verificato in M4  | [Versioni dei pesi, schema v17; verifica M4](p19/versioni-dei-pesi.md)                                       |
+| P20  | Completato                                                  | `01db2d5`; verificato in M5  | [Revisione e rilascio](p20/revisione-e-rilascio.md)                                                          |
+| PR01 | Implementato; unità verificate; desktop/integrate differiti | `3531d82`                    | [Feedback dopo eliminazione](pr01/feedback-eliminazione.md)                                                  |
 
 Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bloccato con causa concreta. I commit indicano implementazioni, mentre le note distinguono build e pacchetto. Il commit P00 si individua con `git log --diff-filter=A --oneline -- doc/p00/decisioni-iniziali.md`.
 
@@ -57,11 +58,13 @@ Stati ordinari: Da avviare, In corso, Implementato/da verificare, Completato, Bl
 
 La matrice delle verifiche è nel [piano §7.3](piano-implementazione-prestazioni.md#73-criteri-comuni-di-completamento). Il precedente limite dei soli unit test per P17B–P19 è superato dalla richiesta M4 del 19 novembre; le consegne originarie restano nelle rispettive note. Le revisioni tecniche dopo P12 e P16 sono completate e documentate nelle rispettive note [P12](p12/spostamento-tra-porti.md#revisione-tecnica-dopo-p12) e [P16](p16/ciclo-vita-prestazioni.md#revisione-tecnica-post-p16).
 
-## Consegna corrente — PR00 / Analisi post-rilascio
+## Consegna corrente — PR01 / Feedback dopo eliminazione
 
-**Analisi completata, implementazioni da avviare.** Base `main` / `a3ece62`, schema v17 invariato; fonte originale inizialmente non tracciata, preservata e poi versionata su richiesta esplicita (`d920854`). Il [piano post-rilascio](dev/piano-interventi-post-rilascio.md) censisce 21/21 punti, otto analoghi, accettazioni, dipendenze, verifiche di step e checkpoint. Riprodotti blocco bozza, perdita della selezione nella navigazione e falso errore dopo eliminazione sotto timing controllato; altri riscontri distinti dalle verifiche ancora necessarie. Offset numerico per `(Z)` confermato dall'utente. Due sole riproduzioni Electron mirate su build P20 invariata, offline e con archivi temporanei; nessuna campagna completa o modifica di prodotto. Esiti e limiti nella sola sintesi del piano.
+**Implementato; verificato con test unitari; desktop/integrate differiti.** Base reale `main / 21f0aee`, working tree iniziale pulito, schema v17 invariato; implementazione `3531d82`, versionata su successiva richiesta esplicita dell’utente. Barriera sul dettaglio durante eliminazione/applicazione dell’esito e recupero, analoghi A01 riscontrati nel codice e corretti, feedback transitori chiudibili con stato nel chiamante. [Nota operativa, copertura ed esiti finali](pr01/feedback-eliminazione.md). Fonte originale `doc/dev/punti-issue.md` preservata integralmente; analisi ed evidenze PR00 restano nel [piano post-rilascio](dev/piano-interventi-post-rilascio.md#verifiche-dellanalisi-ed-evidenze).
 
-**Prossimo passo:** PR01 (feedback dopo eliminazione e messaggi chiudibili), poi PR02 (bozze/esiti incerti); sequenza completa nel piano. P20/UI04 restano completati e M5 chiusa: [consegna ed evidenze del rilascio](p20/revisione-e-rilascio.md), con installazione nell'ambiente di destinazione e firma ancora separate da svolgere. Analisi PR00 conclusa senza commit; documentazione successivamente versionata su richiesta esplicita.
+**Deroga esplicita dell’utente del 23 novembre 2026 per PR01–PR12:** fra i task soltanto unit test TypeScript tramite npm test/Electron, con nuova copertura per ogni comportamento verificabile a quel livello, mantenendo controlli statici/documentali. Campagne complete, desktop, pacchetto e verifiche integrate differiti al checkpoint finale dopo tutte le modifiche della lista; K1–K3 diventano riesami della copertura. Al finale: check, backend/unitaria completa, SQLite/migrazioni pertinenti e desktop completo sulla build finale e sul medesimo pacchetto, includendo tutti i percorsi accumulati. [Frequenza e checkpoint aggiornati](dev/piano-interventi-post-rilascio.md#verifiche-degli-step-e-checkpoint); nessun esito storico modificato.
+
+**Prossimo passo: PR02**, bozze ed esiti incerti. Tastiera, focus, pulsante di chiusura e riproduzione reale del falso avviso hanno test desktop preparati ma non eseguiti. P20/UI04 restano completati e M5 chiusa: firma e installazione nell’ambiente di destinazione restano attività separate nella [consegna P20](p20/revisione-e-rilascio.md).
 
 ## Limiti aperti
 

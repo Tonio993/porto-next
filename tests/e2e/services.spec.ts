@@ -704,6 +704,21 @@ for (const category of ['FREE', 'CATALOG'] as const)
         await expect(
           page.getByText('Nessuna prestazione registrata.', { exact: true }),
         ).toBeVisible()
+        // PR01: deletion must not leave a false detail error; close only its notice.
+        await expect(page.getByText('Consultazione non disponibile', { exact: true })).toHaveCount(
+          0,
+        )
+        const feedback = page.getByRole('status').filter({ hasText: 'Prestazione aggiornata.' })
+        const closeFeedback = feedback.getByRole('button', {
+          name: 'Chiudi messaggio',
+          exact: true,
+        })
+        await closeFeedback.focus()
+        await closeFeedback.press('Enter')
+        await expect(feedback).toHaveCount(0)
+        await expect(
+          page.getByRole('button', { name: 'Ricarica consultazione', exact: true }),
+        ).toBeFocused()
         expect(errors).toEqual([])
       } finally {
         if (app) await app.close()

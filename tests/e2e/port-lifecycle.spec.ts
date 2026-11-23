@@ -153,6 +153,7 @@ test('gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del port
     await preview.getByRole('button', { name: 'Conferma modifica' }).click()
     await expect(detail).toHaveCount(0)
     await expect(page.getByText('Nessun porto trovato.')).toBeVisible()
+    await expect(page.getByRole('alert')).toHaveCount(0) // PR01 A01
     await page.getByRole('button', { name: 'Nuovo porto', exact: true }).click()
     await creation.getByRole('button', { name: 'Ricarica dati' }).click()
     await creation.getByLabel('Nome del porto').fill('Porto iniziale')

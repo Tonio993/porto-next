@@ -187,6 +187,7 @@ test('amministra le banchine dal porto e conserva dati e contesto nel percorso E
     await confirm.click()
     await expect(panel.getByText('Questo porto non ha banchine.')).toBeVisible()
     await expect(create).toBeFocused()
+    await expect(page.getByRole('alert')).toHaveCount(0) // PR01 A01
     await port.getByRole('button', { name: 'Elimina porto' }).click()
     await confirm.click()
     await expect(panel).toHaveCount(0)

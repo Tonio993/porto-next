@@ -5,10 +5,12 @@ export function StateMessage({
   kind = 'info',
   title,
   children,
+  onClose,
 }: {
   kind?: 'info' | 'success' | 'warning' | 'error'
   title: string
   children?: React.ReactNode
+  onClose?: () => void
 }) {
   const icons = {
     info: IconInfoCircle,
@@ -26,6 +28,9 @@ export function StateMessage({
       icon={<Icon size={18} />}
       title={title}
       role={kind === 'error' ? 'alert' : 'status'}
+      withCloseButton={!!onClose}
+      closeButtonLabel="Chiudi messaggio"
+      onClose={onClose}
       styles={{
         title: { color: textColor },
         message: { color: textColor },

@@ -2,6 +2,8 @@
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { runApplicationRequest } from '../../src/renderer/src/api/application-request'
+import { ResponseScope } from '../../src/renderer/src/api/response-scope'
 import { operationDeletionOutcome } from '../../src/renderer/src/api/operation-deletion-outcome'
 import * as replay from '../../src/backend/application/operations/operation-replay'
 import { ArchiveService } from '../../src/backend/application/archives/archive-service'
@@ -685,3 +687,54 @@ it('Salva con nome invalida la conferma anche quando conserva l’identificativo
   expect(await confirm(p)).toMatchObject(failure('ARCHIVE_SESSION_CHANGED'))
   expect(new OperationRepository(db()).get(op.id)).toEqual(op)
 })
+
+it.each(['prima', 'dopo'] as const)(
+  'risposta persa %s del commit: recupero di sola lettura, revisione coerente e nessuna ripetizione',
+  async (loss) => {
+    const op = await create(),
+      original = context(),
+      p = value(await deletion(op))
+    const detailScope = new ResponseScope(context),
+      commandScope = new ResponseScope(context)
+    detailScope.activate()
+    commandScope.activate()
+    const report = vi.fn(),
+      loading = vi.fn(),
+      write = vi.spyOn(operations, 'confirmDelete')
+    const invoke = <T>(call: () => Promise<ApplicationResult<T>>, expectedAbsence = false) =>
+      runApplicationRequest(commandScope, call, report, loading, { expectedAbsence })
+    let selected: string | null = op.id
+    const result = await detailScope.suspendWhile(async () =>
+      invoke(async () => {
+        if (loss === 'dopo') value(await confirm(p))
+        throw Error('Risposta persa')
+      }),
+    )
+    expect(result).toBeNull()
+    expect(selected).toBe(op.id)
+    expect(report).toHaveBeenCalledOnce()
+    report.mockClear()
+    const outcome = await detailScope.suspendWhile(async () => {
+      const read = await invoke(
+        () => operations.get({ context: { sessionId: original.sessionId }, query: { id: op.id } }),
+        true,
+      )
+      expect(read).not.toBeNull()
+      if (!read || (!read.ok && read.error.code !== 'NOT_FOUND') || !read.context)
+        throw Error('lettura non valida')
+      const outcome = operationDeletionOutcome(
+        op,
+        read.ok ? read.value : null,
+        original,
+        read.context,
+      )
+      if (outcome === 'APPLIED') selected = null
+      return outcome
+    })
+    expect(outcome).toBe(loss === 'dopo' ? 'APPLIED' : 'UNCHANGED')
+    expect(selected).toBe(loss === 'dopo' ? null : op.id)
+    expect(write).toHaveBeenCalledTimes(loss === 'dopo' ? 1 : 0)
+    expect(context().revision).toBe(String(BigInt(original.revision) + (loss === 'dopo' ? 1n : 0n)))
+    expect(report).not.toHaveBeenCalled()
+  },
+)

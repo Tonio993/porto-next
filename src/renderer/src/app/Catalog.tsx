@@ -73,7 +73,7 @@ export function Catalog({
   const commandRequest = useApplicationRequest(context, setDialogError)
   const effectsRequest = useApplicationRequest(context, setDialogError)
   const { request: readList } = listRequest,
-    { request: readDetail } = detailRequest,
+    { request: readDetail, invalidate: invalidateDetail } = detailRequest,
     { request: readFixed } = fixedRequest
   const busy = archives.busy || archives.commandBusy || commandRequest.loading
   const dialogOpen = !!draft || confirmOpen
@@ -107,7 +107,8 @@ export function Catalog({
         setSelected(null)
       }
     })
-  }, [readDetail, context.sessionId, context.revision, selected, reload])
+    return invalidateDetail
+  }, [invalidateDetail, readDetail, context.sessionId, context.revision, selected, reload])
   useEffect(() => {
     void readFixed(() =>
       window.catalog.fixedWeights({ context: { sessionId: context.sessionId }, query: null }),
@@ -186,29 +187,30 @@ export function Catalog({
       setNotice('Tipo di prestazione creato.')
     } else if (result && !result.ok) setIssues(result.error.fields)
   }
-  const confirm = async () => {
-    if (!preview) return
-    setDialogError(null)
-    const result = await commandRequest.request(() =>
-      archives.execute(() =>
-        window.catalog.confirm({
-          context: preview.context,
-          payload: { previewId: preview.previewId },
-        }),
-      ),
-    )
-    if (result?.ok) {
-      if (preview.operation === 'CATALOG_DELETE') {
-        detailRequest.invalidate()
-        setSelected(null)
-        setDetail(null)
+  const confirm = async () =>
+    detailRequest.suspendWhile(async () => {
+      if (!preview) return
+      setDialogError(null)
+      const result = await commandRequest.request(() =>
+        archives.execute(() =>
+          window.catalog.confirm({
+            context: preview.context,
+            payload: { previewId: preview.previewId },
+          }),
+        ),
+      )
+      if (result?.ok) {
+        if (preview.operation === 'CATALOG_DELETE') {
+          detailRequest.invalidate()
+          setSelected(null)
+          setDetail(null)
+        }
+        setPreview(null)
+        setConfirmOpen(false)
+        setDraft(null)
+        setNotice('Modifica completata.')
       }
-      setPreview(null)
-      setConfirmOpen(false)
-      setDraft(null)
-      setNotice('Modifica completata.')
-    }
-  }
+    }, preview?.operation === 'CATALOG_DELETE')
   const pageEffects = async (next: number) => {
     if (!preview) return
     const result = await effectsRequest.request(() =>
@@ -256,7 +258,14 @@ export function Catalog({
         </StateMessage>
       )}
       {notice && (
-        <StateMessage kind="success" title="Operazione completata">
+        <StateMessage
+          kind="success"
+          title="Operazione completata"
+          onClose={() => {
+            setNotice(null)
+            newButton.current?.focus()
+          }}
+        >
           {notice}
         </StateMessage>
       )}

@@ -30,6 +30,7 @@ export function TariffMaintenanceEditor({
   resumeTrigger,
   onClose,
   onApplied,
+  withDetailSuspended,
   onUncertainChange,
 }: {
   tariff: TariffDto
@@ -40,6 +41,7 @@ export function TariffMaintenanceEditor({
   trigger: HTMLElement | null
   resumeTrigger: RefObject<HTMLButtonElement | null>
   onClose: () => void
+  withDetailSuspended: ReturnType<typeof useApplicationRequest>['suspendWhile']
   onApplied: (value: TariffDto | null) => void
   onUncertainChange: (value: boolean) => void
 }) {
@@ -107,52 +109,56 @@ export function TariffMaintenanceEditor({
     }
     return r
   }
-  const readCurrent = () =>
-    editor.request(() =>
-      checked(() =>
-        window.tariffs.get({
-          context: { sessionId: draftContext.sessionId },
-          query: { id: original.id },
-        }),
-      ),
+  const readCurrent = (expectedAbsence = false) =>
+    editor.request(
+      () =>
+        checked(() =>
+          window.tariffs.get({
+            context: { sessionId: draftContext.sessionId },
+            query: { id: original.id },
+          }),
+        ),
+      { expectedAbsence },
     )
-  const reload = async () => {
-    if (busy || uncertain) return
-    invalidate()
-    const r = await readCurrent()
-    if (!active.current) return
-    if (r?.ok) {
-      setOriginal(r.value)
-      setDraftContext(r.context)
-      setReloadRequired(false)
-      setError(null)
-    } else if (r && !r.ok && r.error.code === 'NOT_FOUND' && r.context) onApplied(null)
-  }
-  const verifyOutcome = async () => {
-    if (busy || !uncertain) return
-    const r = await readCurrent()
-    if (!active.current || !r || !r.context || (!r.ok && r.error.code !== 'NOT_FOUND')) return
-    const actual = r.ok ? r.value : null
-    const outcome = tariffMaintenanceOutcome(
-      original,
-      expected.current,
-      actual,
-      draftContext,
-      r.context,
-    )
-    if (outcome === 'APPLIED') {
-      setUncertain(false)
-      onApplied(actual)
-    } else if (outcome === 'UNCHANGED') {
-      setUncertain(false)
-      setPreview(null)
-      setError('La modifica non risulta applicata. La bozza è conservata e puoi riprovare.')
-    } else {
-      setUncertain(false)
-      setReloadRequired(true)
-      setError('I dati sono cambiati. Ricarica esplicitamente il contesto prima di continuare.')
-    }
-  }
+  const reload = async () =>
+    withDetailSuspended(async () => {
+      if (busy || uncertain) return
+      invalidate()
+      const r = await readCurrent()
+      if (!active.current) return
+      if (r?.ok) {
+        setOriginal(r.value)
+        setDraftContext(r.context)
+        setReloadRequired(false)
+        setError(null)
+      } else if (r && !r.ok && r.error.code === 'NOT_FOUND' && r.context) onApplied(null)
+    }, mode === 'DELETE')
+  const verifyOutcome = async () =>
+    withDetailSuspended(async () => {
+      if (busy || !uncertain) return
+      const r = await readCurrent(mode === 'DELETE')
+      if (!active.current || !r || !r.context || (!r.ok && r.error.code !== 'NOT_FOUND')) return
+      const actual = r.ok ? r.value : null
+      const outcome = tariffMaintenanceOutcome(
+        original,
+        expected.current,
+        actual,
+        draftContext,
+        r.context,
+      )
+      if (outcome === 'APPLIED') {
+        setUncertain(false)
+        onApplied(actual)
+      } else if (outcome === 'UNCHANGED') {
+        setUncertain(false)
+        setPreview(null)
+        setError('La modifica non risulta applicata. La bozza è conservata e puoi riprovare.')
+      } else {
+        setUncertain(false)
+        setReloadRequired(true)
+        setError('I dati sono cambiati. Ricarica esplicitamente il contesto prima di continuare.')
+      }
+    }, mode === 'DELETE')
   const analyze = async () => {
     if (disabled) return
     setIssues([])
@@ -174,24 +180,25 @@ export function TariffMaintenanceEditor({
     if (r?.ok) setPreview(r.value)
     else if (r && !r.ok) setIssues(r.error.fields)
   }
-  const write = async () => {
-    if (disabled || !preview) return
-    expected.current = mode === 'UPDATE' ? preview.tariff : null
-    const request = { context: preview.context, payload: { previewId: preview.previewId } }
-    const r = await editor.request(() =>
-      checked<TariffDto | { id: string }>(() =>
-        mode === 'UPDATE'
-          ? window.tariffs.confirmUpdate(request)
-          : window.tariffs.confirmDelete(request),
-      ),
-    )
-    if (!active.current) return
-    if (r?.ok) onApplied(mode === 'UPDATE' ? (r.value as TariffDto) : null)
-    else if (!r || r.error.code === 'UNEXPECTED') {
-      setUncertain(true)
-      setPreview(null)
-    }
-  }
+  const write = async () =>
+    withDetailSuspended(async () => {
+      if (disabled || !preview) return
+      expected.current = mode === 'UPDATE' ? preview.tariff : null
+      const request = { context: preview.context, payload: { previewId: preview.previewId } }
+      const r = await editor.request(() =>
+        checked<TariffDto | { id: string }>(() =>
+          mode === 'UPDATE'
+            ? window.tariffs.confirmUpdate(request)
+            : window.tariffs.confirmDelete(request),
+        ),
+      )
+      if (!active.current) return
+      if (r?.ok) onApplied(mode === 'UPDATE' ? (r.value as TariffDto) : null)
+      else if (!r || r.error.code === 'UNEXPECTED') {
+        setUncertain(true)
+        setPreview(null)
+      }
+    }, mode === 'DELETE')
   return (
     <Modal
       opened={opened}

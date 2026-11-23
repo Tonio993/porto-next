@@ -42,6 +42,7 @@ export function useVessels(archives: ReturnType<typeof useArchives>) {
     request: historyRequest,
     invalidate: invalidateHistory,
     loading: loadingDetail,
+    suspendWhile: suspendDetail,
   } = useApplicationRequest(context, setDetailError)
   const action = useApplicationRequest(context, setError)
   const resolver = useApplicationRequest(context, setError)
@@ -104,7 +105,8 @@ export function useVessels(archives: ReturnType<typeof useArchives>) {
   }, [loadList, revision])
   useEffect(() => {
     void loadHistory()
-  }, [loadHistory, revision])
+    return invalidateHistory
+  }, [invalidateHistory, loadHistory, revision])
 
   const nextTransition = [history?.value.vessel, ...(page?.items ?? [])]
     .map((item) => item?.nextTransitionAt)
@@ -285,22 +287,24 @@ export function useVessels(archives: ReturnType<typeof useArchives>) {
   }
 
   async function confirm() {
-    if (!preview) return
-    clearErrors()
-    const result = await action.request(() =>
-      execute(() =>
-        window.vessels.confirm({
-          context: preview.context,
-          payload: { previewId: preview.previewId },
-        }),
-      ),
-    )
-    if (result?.ok) {
-      if (preview.operation === 'DELETE_VESSEL') select(null)
-      cancelPreview()
-      changeEditor(null)
-      setNotice('Modifica della nave salvata.')
-    }
+    return suspendDetail(async () => {
+      if (!preview) return
+      clearErrors()
+      const result = await action.request(() =>
+        execute(() =>
+          window.vessels.confirm({
+            context: preview.context,
+            payload: { previewId: preview.previewId },
+          }),
+        ),
+      )
+      if (result?.ok) {
+        if (preview.operation === 'DELETE_VESSEL') select(null)
+        cancelPreview()
+        changeEditor(null)
+        setNotice('Modifica della nave salvata.')
+      }
+    }, preview?.operation === 'DELETE_VESSEL')
   }
 
   async function reactivate() {

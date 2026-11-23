@@ -37,6 +37,7 @@ export function useCustomers(archives: ReturnType<typeof useArchives>) {
     request: historyRequest,
     invalidate: invalidateHistory,
     loading: loadingDetail,
+    suspendWhile: suspendDetail,
   } = useApplicationRequest(context, setDetailError)
   const action = useApplicationRequest(context, setError)
   const resolver = useApplicationRequest(context, setError)
@@ -99,7 +100,8 @@ export function useCustomers(archives: ReturnType<typeof useArchives>) {
   }, [loadList, revision])
   useEffect(() => {
     void loadHistory()
-  }, [loadHistory, revision])
+    return invalidateHistory
+  }, [invalidateHistory, loadHistory, revision])
 
   const nextTransition = [history?.value.customer, ...(page?.items ?? [])]
     .map((item) => item?.nextTransitionAt)
@@ -275,22 +277,24 @@ export function useCustomers(archives: ReturnType<typeof useArchives>) {
   }
 
   async function confirm() {
-    if (!preview) return
-    clearErrors()
-    const result = await action.request(() =>
-      execute(() =>
-        window.customers.confirm({
-          context: preview.context,
-          payload: { previewId: preview.previewId },
-        }),
-      ),
-    )
-    if (result?.ok) {
-      if (preview.operation === 'DELETE_CUSTOMER') select(null)
-      cancelPreview()
-      changeEditor(null)
-      setNotice('Modifica del cliente salvata.')
-    }
+    return suspendDetail(async () => {
+      if (!preview) return
+      clearErrors()
+      const result = await action.request(() =>
+        execute(() =>
+          window.customers.confirm({
+            context: preview.context,
+            payload: { previewId: preview.previewId },
+          }),
+        ),
+      )
+      if (result?.ok) {
+        if (preview.operation === 'DELETE_CUSTOMER') select(null)
+        cancelPreview()
+        changeEditor(null)
+        setNotice('Modifica del cliente salvata.')
+      }
+    }, preview?.operation === 'DELETE_CUSTOMER')
   }
 
   async function reactivate() {

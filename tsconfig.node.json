@@ -27,6 +27,7 @@
     "src/renderer/src/api/weight-change-outcome.ts",
     "doc/p00/contratti.ts",
     "doc/p00/scenari.mts",
-    "tests/**/*.ts"
+    "tests/**/*.ts",
+    "src/renderer/src/api/application-request.ts"
   ]
 }

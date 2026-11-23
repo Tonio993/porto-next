@@ -8,6 +8,7 @@ import type {
 export class ResponseScope {
   private generation = 0
   private active = false
+  private suspensions = 0
   constructor(private readonly context: () => ArchiveContextDto | null) {}
   activate() {
     this.active = true
@@ -20,11 +21,26 @@ export class ResponseScope {
     this.active = false
     this.invalidate()
   }
+  /** Keep a destructive command and its selection update in the same read barrier. */
+  async suspendWhile<T>(operation: () => Promise<T>, enabled = true): Promise<T> {
+    if (!enabled) return operation()
+    ++this.suspensions
+    this.invalidate()
+    try {
+      return await operation()
+    } finally {
+      --this.suspensions
+      this.invalidate()
+    }
+  }
   begin() {
     const generation = ++this.generation
     const session = this.context()?.sessionId
     const current = () =>
-      this.active && generation === this.generation && session === this.context()?.sessionId
+      this.active &&
+      this.suspensions === 0 &&
+      generation === this.generation &&
+      session === this.context()?.sessionId
     return {
       current,
       accepts: <T>(result: ApplicationResult<T>) =>

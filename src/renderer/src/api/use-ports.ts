@@ -56,7 +56,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
   const [createFields, setCreateFields] = useState<Record<string, string>>({})
   const busy = archives.busy || archives.commandBusy || action.loading
   const { request: listRequest } = list
-  const { request: detailRequest } = details
+  const { request: detailRequest, invalidate: invalidateDetail } = details
   const { request: companyRequest } = company
 
   const loadList = useCallback(async () => {
@@ -99,7 +99,8 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
   }, [loadList, context.revision])
   useEffect(() => {
     void loadDetail()
-  }, [loadDetail, context.revision])
+    return invalidateDetail
+  }, [invalidateDetail, loadDetail, context.revision])
   useEffect(() => {
     void companyRequest(() =>
       window.time.getCompanyZone({ context: { sessionId: context.sessionId }, query: null }),
@@ -293,32 +294,34 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
     )
   }
   async function confirm() {
-    if (!preview || !previewPort) return
-    const methods = {
-      INSERT_VERSION: window.ports.confirmInsertVersion,
-      UPDATE_VERSION: window.ports.confirmUpdateVersion,
-      DELETE_VERSION: window.ports.confirmDeleteVersion,
-      DEACTIVATE_PORT: window.ports.confirmDeactivate,
-      DELETE_PORT: window.ports.confirmDelete,
-    }
-    const result = await action.request(() =>
-      execute(() =>
-        methods[preview.operation]({
-          context: preview.context,
-          payload: { previewId: preview.previewId },
-        }),
-      ),
-    )
-    if (!result) return
-    if (!result.ok) return
-    const removed = preview.operation === 'DELETE_PORT'
-    setPreview(null)
-    setEditor(null)
-    setFields({})
-    setNotice('Modifica del porto salvata.')
-    if (removed) select(null)
-    else await loadDetail()
-    await loadList()
+    return details.suspendWhile(async () => {
+      if (!preview || !previewPort) return
+      const methods = {
+        INSERT_VERSION: window.ports.confirmInsertVersion,
+        UPDATE_VERSION: window.ports.confirmUpdateVersion,
+        DELETE_VERSION: window.ports.confirmDeleteVersion,
+        DEACTIVATE_PORT: window.ports.confirmDeactivate,
+        DELETE_PORT: window.ports.confirmDelete,
+      }
+      const result = await action.request(() =>
+        execute(() =>
+          methods[preview.operation]({
+            context: preview.context,
+            payload: { previewId: preview.previewId },
+          }),
+        ),
+      )
+      if (!result) return
+      if (!result.ok) return
+      const removed = preview.operation === 'DELETE_PORT'
+      setPreview(null)
+      setEditor(null)
+      setFields({})
+      setNotice('Modifica del porto salvata.')
+      if (removed) select(null)
+      else await loadDetail()
+      await loadList()
+    }, preview?.operation === 'DELETE_PORT')
   }
   async function reactivate() {
     if (!history) return

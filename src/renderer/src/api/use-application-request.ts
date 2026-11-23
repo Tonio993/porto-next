@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ApplicationResult, ArchiveContextDto } from '../../../shared/contracts/application'
 import { ResponseScope } from './response-scope'
+import { runApplicationRequest, type RequestOptions } from './application-request'
 
 export function useApplicationRequest(
   context: ArchiveContextDto | null,
@@ -19,22 +20,16 @@ export function useApplicationRequest(
     setLoading(false)
   }, [scope])
   const request = useCallback(
-    async <T>(operation: () => Promise<ApplicationResult<T>>) => {
-      const ticket = scope.begin()
-      setLoading(true)
-      try {
-        const result = await operation()
-        if (!ticket.accepts(result)) return null
-        if (!result.ok) report(result.error.message)
-        return result
-      } catch {
-        if (ticket.current()) report('La comunicazione con l’applicazione non è riuscita. Riprova.')
-        return null
-      } finally {
-        if (ticket.current()) setLoading(false)
-      }
-    },
+    <T>(operation: () => Promise<ApplicationResult<T>>, options?: RequestOptions) =>
+      runApplicationRequest(scope, operation, report, setLoading, options),
     [scope, report],
   )
-  return { loading, request, invalidate }
+  const suspendWhile = useCallback(
+    <T>(operation: () => Promise<T>, enabled = true) => {
+      if (enabled) setLoading(false)
+      return scope.suspendWhile(operation, enabled)
+    },
+    [scope],
+  )
+  return { loading, request, invalidate, suspendWhile }
 }

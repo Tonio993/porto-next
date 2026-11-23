@@ -301,6 +301,8 @@ for (const [kind, plural, singular, newLabel] of [
       await detail.getByRole('button', { name: `Elimina ${singular}`, exact: true }).click()
       await confirm.click()
       await expect(create).toBeFocused()
+      // PR01 A01: no transient detail error after a legitimate entity deletion.
+      await expect(page.getByRole('alert')).toHaveCount(0)
       expect(errors).toEqual([])
       await app.close()
       app = undefined

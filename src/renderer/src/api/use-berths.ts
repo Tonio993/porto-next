@@ -37,6 +37,7 @@ export function useBerths(archives: ReturnType<typeof useArchives>, portId: stri
     request: historyRequest,
     invalidate: invalidateHistory,
     loading: loadingDetail,
+    suspendWhile: suspendDetail,
   } = useApplicationRequest(context, setDetailError)
   const action = useApplicationRequest(context, setError)
   const resolver = useApplicationRequest(context, setError)
@@ -98,7 +99,8 @@ export function useBerths(archives: ReturnType<typeof useArchives>, portId: stri
   }, [loadList, revision])
   useEffect(() => {
     void loadHistory()
-  }, [loadHistory, revision])
+    return invalidateHistory
+  }, [invalidateHistory, loadHistory, revision])
 
   const nextTransition = [history?.value.berth, ...(page?.items ?? [])]
     .map((item) => item?.nextTransitionAt)
@@ -269,22 +271,24 @@ export function useBerths(archives: ReturnType<typeof useArchives>, portId: stri
   }
 
   async function confirm() {
-    if (!preview) return
-    clearErrors()
-    const result = await action.request(() =>
-      execute(() =>
-        window.berths.confirm({
-          context: preview.context,
-          payload: { previewId: preview.previewId },
-        }),
-      ),
-    )
-    if (result?.ok) {
-      if (preview.operation === 'DELETE_BERTH') select(null)
-      cancelPreview()
-      changeEditor(null)
-      setNotice('Modifica della banchina salvata.')
-    }
+    return suspendDetail(async () => {
+      if (!preview) return
+      clearErrors()
+      const result = await action.request(() =>
+        execute(() =>
+          window.berths.confirm({
+            context: preview.context,
+            payload: { previewId: preview.previewId },
+          }),
+        ),
+      )
+      if (result?.ok) {
+        if (preview.operation === 'DELETE_BERTH') select(null)
+        cancelPreview()
+        changeEditor(null)
+        setNotice('Modifica della banchina salvata.')
+      }
+    }, preview?.operation === 'DELETE_BERTH')
   }
 
   async function reactivate() {

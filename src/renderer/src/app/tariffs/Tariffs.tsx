@@ -90,7 +90,7 @@ export function Tariffs({
     })
   }, [readPort, portId, context.sessionId, context.revision])
   const { request: readList } = listRequest,
-    { request: readDetail } = detailRequest
+    { request: readDetail, invalidate: invalidateDetail } = detailRequest
   const busy =
     archives.busy || archives.commandBusy || commandRequest.loading || copyRequest.loading
   const dialogOpen = !!draft || !!calculatorPort
@@ -121,7 +121,8 @@ export function Tariffs({
     ).then((r) => {
       if (r?.ok) setDetail(r.value)
     })
-  }, [readDetail, selected, context.sessionId, context.revision, reload])
+    return invalidateDetail
+  }, [invalidateDetail, readDetail, selected, context.sessionId, context.revision, reload])
   useEffect(() => {
     const now = Date.now()
     const next = [...(list?.items ?? []), ...(detail ? [detail] : [])]
@@ -262,7 +263,14 @@ export function Tariffs({
         </StateMessage>
       )}
       {notice && (
-        <StateMessage title="Operazione completata" kind="success">
+        <StateMessage
+          title="Operazione completata"
+          kind="success"
+          onClose={() => {
+            setNotice(null)
+            newButton.current?.focus()
+          }}
+        >
           {notice}
         </StateMessage>
       )}
@@ -437,6 +445,7 @@ export function Tariffs({
           tariff={maintenance.tariff}
           mode={maintenance.mode}
           opened={maintenance.opened}
+          withDetailSuspended={detailRequest.suspendWhile}
           originalContext={maintenance.context}
           archives={archives}
           trigger={maintenance.trigger}

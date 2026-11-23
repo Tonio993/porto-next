@@ -22,6 +22,7 @@ export function OperationMaintenanceEditor({
   trigger,
   onClose,
   onApplied,
+  withDetailSuspended,
   onUncertainChange,
 }: {
   operation: VesselOperationDto
@@ -31,6 +32,7 @@ export function OperationMaintenanceEditor({
   archives: ReturnType<typeof useArchives>
   trigger: HTMLElement | null
   onClose: () => void
+  withDetailSuspended: ReturnType<typeof useApplicationRequest>['suspendWhile']
   onApplied: (value: VesselOperationDto | null) => void
   onUncertainChange: (value: boolean) => void
 }) {
@@ -90,87 +92,98 @@ export function OperationMaintenanceEditor({
     }
     return result
   }
-  const readCurrent = () =>
-    editor.request(() =>
-      checked(() =>
-        window.operations.get({
-          context: { sessionId: draftContext.sessionId },
-          query: { id: original.id },
-        }),
-      ),
+  const readCurrent = (expectedAbsence = false) =>
+    editor.request(
+      () =>
+        checked(() =>
+          window.operations.get({
+            context: { sessionId: draftContext.sessionId },
+            query: { id: original.id },
+          }),
+        ),
+      { expectedAbsence },
     )
-  const reload = async () => {
-    if (busy || uncertain) return
-    invalidate()
-    const r = await readCurrent()
-    if (!active.current) return
-    if (r?.ok) {
-      setOriginal(r.value)
-      setDraftContext(r.context)
-      setReloadRequired(false)
-      setError(null)
-    } else if (r && !r.ok && r.error.code === 'NOT_FOUND' && r.context) {
-      onApplied(null)
-    }
-  }
-  const verifyOutcome = async () => {
-    if (busy || !uncertain) return
-    const r = await readCurrent()
-    if (!active.current || !r || !r.context || (!r.ok && r.error.code !== 'NOT_FOUND')) return
-    const actual = r.ok ? r.value : null
-    const outcome =
-      mode === 'DELETE'
-        ? operationDeletionOutcome(original, actual, draftContext, r.context)
-        : actual && expected.current
-          ? operationCorrectionOutcome(original, expected.current, actual, draftContext, r.context)
-          : 'CONFLICT'
-    if (outcome === 'APPLIED') {
-      setUncertain(false)
-      onApplied(actual)
-    } else if (outcome === 'UNCHANGED') {
-      setUncertain(false)
-      setPreview(null)
-      setError('La modifica non risulta applicata. La bozza è conservata e puoi riprovare.')
-    } else {
-      setUncertain(false)
-      setReloadRequired(true)
-      setError('I dati sono cambiati. Ricarica esplicitamente il contesto prima di continuare.')
-    }
-  }
-  const write = async () => {
-    if (disabled || (mode === 'DELETE' && !preview)) return
-    const noteValue = notes === '' ? null : notes
-    expected.current = { ...original, notes: noteValue }
-    if (mode === 'DELETE') {
-      const p = preview!
-      const r = await editor.request(() =>
-        checked(() =>
-          window.operations.confirmDelete({
-            context: p.context,
-            payload: { previewId: p.previewId },
-          }),
-        ),
-      )
+  const reload = async () =>
+    withDetailSuspended(async () => {
+      if (busy || uncertain) return
+      invalidate()
+      const r = await readCurrent()
       if (!active.current) return
-      if (r?.ok) onApplied(null)
-      else if (!r || r.error.code === 'UNEXPECTED') {
-        setUncertain(true)
-        setPreview(null)
+      if (r?.ok) {
+        setOriginal(r.value)
+        setDraftContext(r.context)
+        setReloadRequired(false)
+        setError(null)
+      } else if (r && !r.ok && r.error.code === 'NOT_FOUND' && r.context) {
+        onApplied(null)
       }
-    } else {
-      const r = await editor.request(() =>
-        checked(() =>
-          window.operations.updateNotes({
-            context: draftContext,
-            payload: { id: original.id, notes: noteValue },
-          }),
-        ),
-      )
-      if (!active.current) return
-      if (r?.ok) onApplied(r.value)
-      else if (!r || r.error.code === 'UNEXPECTED') setUncertain(true)
-    }
-  }
+    }, mode === 'DELETE')
+  const verifyOutcome = async () =>
+    withDetailSuspended(async () => {
+      if (busy || !uncertain) return
+      const r = await readCurrent(mode === 'DELETE')
+      if (!active.current || !r || !r.context || (!r.ok && r.error.code !== 'NOT_FOUND')) return
+      const actual = r.ok ? r.value : null
+      const outcome =
+        mode === 'DELETE'
+          ? operationDeletionOutcome(original, actual, draftContext, r.context)
+          : actual && expected.current
+            ? operationCorrectionOutcome(
+                original,
+                expected.current,
+                actual,
+                draftContext,
+                r.context,
+              )
+            : 'CONFLICT'
+      if (outcome === 'APPLIED') {
+        setUncertain(false)
+        onApplied(actual)
+      } else if (outcome === 'UNCHANGED') {
+        setUncertain(false)
+        setPreview(null)
+        setError('La modifica non risulta applicata. La bozza è conservata e puoi riprovare.')
+      } else {
+        setUncertain(false)
+        setReloadRequired(true)
+        setError('I dati sono cambiati. Ricarica esplicitamente il contesto prima di continuare.')
+      }
+    }, mode === 'DELETE')
+  const write = async () =>
+    withDetailSuspended(async () => {
+      if (disabled || (mode === 'DELETE' && !preview)) return
+      const noteValue = notes === '' ? null : notes
+      expected.current = { ...original, notes: noteValue }
+      if (mode === 'DELETE') {
+        const p = preview!
+        const r = await editor.request(() =>
+          checked(() =>
+            window.operations.confirmDelete({
+              context: p.context,
+              payload: { previewId: p.previewId },
+            }),
+          ),
+        )
+        if (!active.current) return
+        if (r?.ok) onApplied(null)
+        else if (!r || r.error.code === 'UNEXPECTED') {
+          setUncertain(true)
+          setPreview(null)
+        }
+      } else {
+        const r = await editor.request(() =>
+          checked(() =>
+            window.operations.updateNotes({
+              context: draftContext,
+              payload: { id: original.id, notes: noteValue },
+            }),
+          ),
+        )
+        if (!active.current) return
+        if (r?.ok) onApplied(r.value)
+        else if (!r || r.error.code === 'UNEXPECTED') setUncertain(true)
+      }
+    }, mode === 'DELETE')
   return (
     <Modal
       opened={opened}

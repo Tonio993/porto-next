@@ -81,7 +81,7 @@ export function Services({
     resolving = useApplicationRequest(context, setDialogError),
     command = useApplicationRequest(context, setDialogError)
   const { request: readList } = listing,
-    { request: readDetail } = reading
+    { request: readDetail, invalidate: invalidateDetail } = reading
   const busy = archives.busy || archives.commandBusy || command.loading
   useEffect(() => {
     onDialogChange(open)
@@ -110,7 +110,8 @@ export function Services({
         setDetailRevision(r.context.revision)
       }
     })
-  }, [readDetail, context.sessionId, context.revision, selected, reload])
+    return invalidateDetail
+  }, [invalidateDetail, readDetail, context.sessionId, context.revision, selected, reload])
   // execute() refreshes archive state, but React may batch that update with this reply.
   // Check the persisted context before applying a preview/write DTO or allowing a retry.
   const executeServiceCommand = async <T,>(operation: () => Promise<ApplicationResult<T>>) => {
@@ -215,81 +216,84 @@ export function Services({
     setDraft(fromDetail(detail, mode, context))
     setOpen(true)
   }
-  const reloadDraft = async () => {
-    if (!draft) return
-    invalidateEditor()
-    if (draft.original) {
-      const r = await command.request(() =>
-        executeServiceCommand(() =>
-          window.services.get({
-            context: { sessionId: draft.context.sessionId },
-            query: { id: draft.original!.id },
+  const reloadDraft = async () =>
+    reading.suspendWhile(async () => {
+      if (!draft) return
+      invalidateEditor()
+      if (draft.original) {
+        const r = await command.request(
+          () =>
+            executeServiceCommand(() =>
+              window.services.get({
+                context: { sessionId: draft.context.sessionId },
+                query: { id: draft.original!.id },
+              }),
+            ),
+          { expectedAbsence: uncertain && draft.mode === 'DELETE' },
+        )
+        if (r?.ok) {
+          setDraft(fromDetail(r.value, draft.mode, r.context))
+          setUncertain(false)
+        } else if (r && !r.ok && r.error.code === 'NOT_FOUND') {
+          setDraft(null)
+          setOpen(false)
+          setDetail(null)
+          setSelected(null)
+          setNotice('La prestazione non esiste più.')
+          setUncertain(false)
+        }
+      } else if (uncertain) {
+        const r = await command.request(() =>
+          executeServiceCommand(async () => {
+            const resolved = await window.services.resolveMoment({
+              context: { sessionId: draft.context.sessionId },
+              query: {
+                vesselId: draft.values.vesselId,
+                interpretationPortId: draft.values.interpretationPortId,
+                moment: draft.values.moment,
+              },
+            })
+            if (!resolved.ok) return resolved
+            if (resolved.value.resolution.status !== 'RESOLVED')
+              throw new Error('Il momento della registrazione richiede una verifica.')
+            const utc = resolved.value.resolution.moment.utc
+            const result = await window.services.list({
+              context: { sessionId: draft.context.sessionId },
+              query: {
+                vesselId: draft.values.vesselId,
+                category: draft.category,
+                fromUtc: utc,
+                toUtc: utc,
+                page: 1,
+                pageSize: 25,
+              },
+            })
+            return result.ok ? { ...result, value: { list: result.value, utc } } : result
           }),
-        ),
-      )
-      if (r?.ok) {
-        setDraft(fromDetail(r.value, draft.mode, r.context))
-        setUncertain(false)
-      } else if (r && !r.ok && r.error.code === 'NOT_FOUND') {
-        setDraft(null)
-        setOpen(false)
-        setDetail(null)
+        )
+        if (!r?.ok) return
+        // Show all candidates at the submitted instant before allowing an explicit retry.
+        // Multiple ordinary services may legitimately have identical data.
+        listing.invalidate()
+        reading.invalidate()
+        setVesselId(draft.values.vesselId)
+        setFilters({ category: draft.category, fromUtc: r.value.utc, toUtc: r.value.utc })
+        setPage(1)
+        setList(r.value.list)
         setSelected(null)
-        setNotice('La prestazione non esiste più.')
+        setDetail(null)
+        setDraft({ ...draft, context: r.context })
+        setUncertain(false)
+        setOpen(false)
+        setNotice(
+          'Verifica nell’elenco le prestazioni già registrate al momento della bozza prima di riprenderla. I valori inseriti sono conservati.',
+        )
+      } else {
+        setDraft({ ...draft, context })
         setUncertain(false)
       }
-    } else if (uncertain) {
-      const r = await command.request(() =>
-        executeServiceCommand(async () => {
-          const resolved = await window.services.resolveMoment({
-            context: { sessionId: draft.context.sessionId },
-            query: {
-              vesselId: draft.values.vesselId,
-              interpretationPortId: draft.values.interpretationPortId,
-              moment: draft.values.moment,
-            },
-          })
-          if (!resolved.ok) return resolved
-          if (resolved.value.resolution.status !== 'RESOLVED')
-            throw new Error('Il momento della registrazione richiede una verifica.')
-          const utc = resolved.value.resolution.moment.utc
-          const result = await window.services.list({
-            context: { sessionId: draft.context.sessionId },
-            query: {
-              vesselId: draft.values.vesselId,
-              category: draft.category,
-              fromUtc: utc,
-              toUtc: utc,
-              page: 1,
-              pageSize: 25,
-            },
-          })
-          return result.ok ? { ...result, value: { list: result.value, utc } } : result
-        }),
-      )
-      if (!r?.ok) return
-      // Show all candidates at the submitted instant before allowing an explicit retry.
-      // Multiple ordinary services may legitimately have identical data.
-      listing.invalidate()
-      reading.invalidate()
-      setVesselId(draft.values.vesselId)
-      setFilters({ category: draft.category, fromUtc: r.value.utc, toUtc: r.value.utc })
-      setPage(1)
-      setList(r.value.list)
-      setSelected(null)
-      setDetail(null)
-      setDraft({ ...draft, context: r.context })
-      setUncertain(false)
-      setOpen(false)
-      setNotice(
-        'Verifica nell’elenco le prestazioni già registrate al momento della bozza prima di riprenderla. I valori inseriti sono conservati.',
-      )
-    } else {
-      setDraft({ ...draft, context })
-      setUncertain(false)
-    }
-    setReload((n) => n + 1)
-  }
+      setReload((n) => n + 1)
+    }, draft?.mode === 'DELETE')
   const finish = (service: ServiceActivityDto | null, revision: string) => {
     setOpen(false)
     setDraft(null)
@@ -300,24 +304,25 @@ export function Services({
     setReload((n) => n + 1)
     setNotice('Prestazione aggiornata.')
   }
-  const confirm = async () => {
-    if (!preview || !draft) return
-    const r = await command.request(() =>
-      executeServiceCommand(() =>
-        window.services.confirm({
-          context: preview.context,
-          payload: { previewId: preview.previewId },
-        }),
-      ),
-    )
-    if (r?.ok) finish(r.value.service, r.context.revision)
-    else if (!r) {
-      setUncertain(true)
-      setDialogError(
-        'Esito non verificato. Ricarica la bozza e controlla i dati prima di riprovare.',
+  const confirm = async () =>
+    reading.suspendWhile(async () => {
+      if (!preview || !draft) return
+      const r = await command.request(() =>
+        executeServiceCommand(() =>
+          window.services.confirm({
+            context: preview.context,
+            payload: { previewId: preview.previewId },
+          }),
+        ),
       )
-    }
-  }
+      if (r?.ok) finish(r.value.service, r.context.revision)
+      else if (!r) {
+        setUncertain(true)
+        setDialogError(
+          'Esito non verificato. Ricarica la bozza e controlla i dati prima di riprovare.',
+        )
+      }
+    }, draft?.mode === 'DELETE')
   const save = async () => {
     if (!draft) return
     if (draft.mode === 'NOTES' && draft.original) {
@@ -523,7 +528,16 @@ export function Services({
           {error}
         </StateMessage>
       )}
-      {notice && <StateMessage kind="success" title={notice} />}
+      {notice && (
+        <StateMessage
+          kind="success"
+          title={notice}
+          onClose={() => {
+            setNotice(null)
+            reloadFocus.current?.focus()
+          }}
+        />
+      )}
       <div className="services-workspace" data-detail={!!detail || reading.loading}>
         <section
           className="services-results"

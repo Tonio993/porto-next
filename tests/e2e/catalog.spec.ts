@@ -161,6 +161,14 @@ test('P08 catalogo: v8 popolato, pesi esatti, ciclo di vita, conflitti, copie e 
     await expect(dialog).toContainText('2 eliminazioni')
     await dialog.getByRole('button', { name: 'Conferma modifica', exact: true }).click()
     await expect(list.getByRole('button', { name: /rinforzo ormeggio/ })).toHaveCount(0)
+    // PR01: ordinary A01 deletion and owner-managed feedback, deferred to K4.
+    await expect(page.getByText('Catalogo non disponibile', { exact: true })).toHaveCount(0)
+    const feedback = page.getByRole('status').filter({ hasText: 'Operazione completata' })
+    const closeFeedback = feedback.getByRole('button', { name: 'Chiudi messaggio', exact: true })
+    await closeFeedback.focus()
+    await closeFeedback.press('Enter')
+    await expect(feedback).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Nuovo tipo', exact: true })).toBeFocused()
     const usedId = await page.evaluate(async () => {
       const state = await window.archives.getState()
       if (!state.ok || !state.value.context) throw new Error('context')

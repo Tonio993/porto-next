@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+﻿import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
@@ -313,6 +313,16 @@ test('M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tarif
   await confirm()
   await expect(modal()).toHaveCount(0)
   expect((await readService(svc.catalog.id)).base).toBe('215.00')
+  // PR01: tariff A01 and keyboard close use the same owner-managed feedback contract.
+  await expect(page.getByText('Tariffe non disponibili', { exact: true })).toHaveCount(0)
+  const feedback = page
+    .getByRole('status')
+    .filter({ hasText: 'Tariffa eliminata e calcoli aggiornati.' })
+  const closeFeedback = feedback.getByRole('button', { name: 'Chiudi messaggio', exact: true })
+  await closeFeedback.focus()
+  await closeFeedback.press('Enter')
+  await expect(feedback).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Nuova tariffa', exact: true })).toBeFocused()
   await page.locator('.port-list-item').first().click()
   await page.getByRole('button', { name: 'Elimina tariffa', exact: true }).click()
   await button('Analizza eliminazione').click()
@@ -524,6 +534,8 @@ test('M4 eliminazione: esito incerto verificato senza ripetere la scrittura', as
   await button('Verifica esito della scrittura').click()
   await expect(modal()).toHaveCount(0)
   await expect(page.getByText('Nessuna operazione registrata.')).toBeVisible()
+  await expect(page.getByText('Consultazione non disponibile', { exact: true })).toHaveCount(0)
+  await expect(page.getByText('Modifica non disponibile', { exact: true })).toHaveCount(0)
   expect(
     await app.evaluate(
       () =>
@@ -582,3 +594,141 @@ for (const flow of ['operation', 'tariff', 'weight'] as const) {
     ).toHaveCount(0)
   })
 }
+
+// PR01: archive:state is held after the first revision update and before onApplied.
+// Signals and renderer frames make the former race reproducible without timed sleeps.
+test('PR01 eliminazione: revisione pubblicata prima della selezione, dettaglio tardivo e chiusura da tastiera', async () => {
+  await operations()
+  await selectEntry()
+  await expect(page.getByRole('button', { name: 'Elimina operazione', exact: true })).toBeEnabled()
+  await delayOperationResponse(app, 'operations:get')
+  await page.getByRole('button', { name: 'Ricarica consultazione', exact: true }).click()
+  await expect.poll(() => operationHeld(app)).toBe(true)
+  await page.getByRole('button', { name: 'Elimina operazione', exact: true }).click()
+  await button('Analizza eliminazione').click()
+  await app.evaluate(({ ipcMain }) => {
+    type Handler = (e: Electron.IpcMainInvokeEvent, input: unknown) => Promise<unknown>
+    const handlers = (ipcMain as unknown as { _invokeHandlers: Map<string, Handler> })
+      ._invokeHandlers
+    const state = handlers.get('archive:state')!,
+      deletion = handlers.get('operations:confirm-delete')!
+    const get = handlers.get('operations:get')!
+    const gate = {
+      committed: false,
+      states: 0,
+      held: false,
+      reads: 0,
+      writes: 0,
+      release: () => {},
+    }
+    ;(globalThis as unknown as { pr01Gate: typeof gate }).pr01Gate = gate
+    ipcMain.removeHandler('operations:confirm-delete')
+    ipcMain.handle('operations:confirm-delete', async (e, input) => {
+      ++gate.writes
+      const result = await deletion(e, input)
+      gate.committed = true
+      return result
+    })
+    ipcMain.removeHandler('operations:get')
+    ipcMain.handle('operations:get', (e, input) => {
+      if (gate.committed) ++gate.reads
+      return get(e, input)
+    })
+    ipcMain.removeHandler('archive:state')
+    ipcMain.handle('archive:state', async (e, input) => {
+      const result = await state(e, input)
+      if (gate.committed && ++gate.states === 2) {
+        await new Promise<void>((resolve) => {
+          gate.release = resolve
+          gate.held = true
+        })
+      }
+      return result
+    })
+  })
+  await confirm()
+  await expect
+    .poll(() =>
+      app.evaluate(() => (globalThis as unknown as { pr01Gate: { held: boolean } }).pr01Gate.held),
+    )
+    .toBe(true)
+  await page.evaluate(
+    () =>
+      new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))),
+  )
+  expect(
+    await app.evaluate(
+      () => (globalThis as unknown as { pr01Gate: { reads: number } }).pr01Gate.reads,
+    ),
+  ).toBe(0)
+  await expect(page.getByText('Consultazione non disponibile', { exact: true })).toHaveCount(0)
+  await app.evaluate(() =>
+    (globalThis as unknown as { pr01Gate: { release: () => void } }).pr01Gate.release(),
+  )
+  await expect(modal()).toHaveCount(0)
+  await releaseOperation(app)
+  await page.evaluate(
+    () =>
+      new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))),
+  )
+  await expect(page.getByText('Nessuna operazione registrata.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Elimina operazione', exact: true })).toHaveCount(0)
+  await expect(page.getByText('Consultazione non disponibile', { exact: true })).toHaveCount(0)
+  const feedback = page
+    .getByRole('status')
+    .filter({ hasText: 'Operazione eliminata: assenza verificata.' })
+  const close = feedback.getByRole('button', { name: 'Chiudi messaggio', exact: true })
+  await close.focus()
+  await expect(close).toBeFocused()
+  await close.press('Enter')
+  await expect(feedback).toHaveCount(0)
+  await expect(
+    page.getByRole('button', { name: 'Ricarica consultazione', exact: true }),
+  ).toBeFocused()
+  expect(
+    await app.evaluate(
+      () => (globalThis as unknown as { pr01Gate: { writes: number } }).pr01Gate.writes,
+    ),
+  ).toBe(1)
+})
+
+test('PR01 chiudere il feedback conserva incertezza, blocco e recupero', async () => {
+  await operations()
+  await selectEntry()
+  await page.getByRole('button', { name: 'Modifica solo note', exact: true }).click()
+  await modal().getByRole('textbox', { name: 'Note', exact: true }).fill('Feedback precedente PR01')
+  await button('Salva note').click()
+  await expect(modal()).toHaveCount(0)
+  await expect(page.getByText('Note aggiornate: esito verificato.', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Elimina operazione', exact: true }).click()
+  await button('Analizza eliminazione').click()
+  await lostReply('operations:confirm-delete')
+  await confirm()
+  await expect(modal()).toContainText('Esito non verificato')
+  await modal().press('Escape')
+  await expect(modal()).toHaveCount(0)
+  const close = page
+    .getByRole('status')
+    .filter({ hasText: 'Note aggiornate: esito verificato.' })
+    .getByRole('button', { name: 'Chiudi messaggio', exact: true })
+  await close.focus()
+  await close.press('Space')
+  await expect(page.getByText('Note aggiornate: esito verificato.', { exact: true })).toHaveCount(0)
+  await expect(
+    page.getByRole('button', { name: 'Scarta bozza della modifica', exact: true }),
+  ).toBeDisabled()
+  await page.getByRole('button', { name: 'Riprendi eliminazione', exact: true }).click()
+  await expect(modal()).toContainText('Esito non verificato')
+  await expect(button('Analizza eliminazione')).toBeDisabled()
+  await expect(button('Verifica esito della scrittura')).toBeEnabled()
+  await button('Verifica esito della scrittura').click()
+  await expect(modal()).toHaveCount(0)
+  expect(
+    await app.evaluate(
+      () =>
+        (globalThis as unknown as { m4Calls: Record<string, number> }).m4Calls[
+          'operations:confirm-delete'
+        ],
+    ),
+  ).toBe(1)
+})

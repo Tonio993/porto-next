@@ -110,6 +110,7 @@ export function Operations({
   const [contextInstant, setContextInstant] = useState(''),
     [operationalContext, setOperationalContext] = useState<OperationalContextDto | null>(null)
   const trigger = useRef<HTMLElement | null>(null)
+  const consultationFocus = useRef<HTMLButtonElement | null>(null)
   const insertionTrigger = useRef<HTMLButtonElement | null>(null)
   const resumeDraft = useRef<HTMLButtonElement | null>(null)
   const listRequest = useApplicationRequest(context, setError),
@@ -121,7 +122,7 @@ export function Operations({
     contextRequest = useApplicationRequest(context, setError)
   const { request: readList } = listRequest,
     { request: readStays } = stayRequest,
-    { request: readDetail } = detailRequest
+    { request: readDetail, invalidate: invalidateDetail } = detailRequest
   const busy =
     archives.busy || archives.commandBusy || commandRequest.loading || effectsRequest.loading
   const stale =
@@ -237,7 +238,8 @@ export function Operations({
         setDetailRevision(r.context.revision)
       }
     })
-  }, [readDetail, context.sessionId, context.revision, selected, reload])
+    return invalidateDetail
+  }, [invalidateDetail, readDetail, context.sessionId, context.revision, selected, reload])
   useEffect(() => {
     contextRequest.invalidate()
     setOperationalContext(null)
@@ -470,7 +472,16 @@ export function Operations({
           {error}
         </StateMessage>
       )}
-      {notice && <StateMessage kind="success" title={notice} />}
+      {notice && (
+        <StateMessage
+          kind="success"
+          title={notice}
+          onClose={() => {
+            setNotice(null)
+            consultationFocus.current?.focus()
+          }}
+        />
+      )}
       <Group>
         <Button
           aria-pressed={view === 'operations'}
@@ -486,7 +497,12 @@ export function Operations({
         >
           Permanenze
         </Button>
-        <Button variant="subtle" disabled={busy} onClick={() => setReload((n) => n + 1)}>
+        <Button
+          ref={consultationFocus}
+          variant="subtle"
+          disabled={busy}
+          onClick={() => setReload((n) => n + 1)}
+        >
           Ricarica consultazione
         </Button>
       </Group>
@@ -847,12 +863,14 @@ export function Operations({
           operation={maintenance.operation}
           mode={maintenance.mode}
           opened={maintenanceOpen}
+          withDetailSuspended={detailRequest.suspendWhile}
           originalContext={maintenance.context}
           archives={archives}
           trigger={maintenance.trigger}
           onClose={() => setMaintenanceOpen(false)}
           onUncertainChange={setMaintenanceUncertain}
           onApplied={(value) => {
+            detailRequest.invalidate()
             setMaintenanceDone(true)
             setMaintenanceOpen(false)
             setMaintenanceUncertain(false)

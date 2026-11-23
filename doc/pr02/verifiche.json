@@ -1,0 +1,318 @@
+{
+  "task": "PR02",
+  "date": "2026-11-23",
+  "branch": "main",
+  "head": "7c664900d2f6a0d522826553fec336e380b4f01b",
+  "initialWorkingTree": "clean",
+  "implementation": "uncommitted working tree",
+  "schema": 17,
+  "environment": {
+    "platform": "win32",
+    "arch": "x64",
+    "hostNode": "v24.21.0",
+    "npm": "12.2.1",
+    "electron": "45.2.3",
+    "unitRuntime": "Electron via npm test",
+    "maxWorkers": 1,
+    "windowsHide": true,
+    "execution": "authorized external path per PR01; no ACL/Electron sandbox changes"
+  },
+  "runs": [
+    {
+      "label": "targeted",
+      "files": 7,
+      "total": 126,
+      "passed": 126,
+      "failed": 0,
+      "skipped": 0,
+      "startTimeUtc": "2026-11-23T14:49:57.368Z",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "signal": null,
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/draft-guard.test.ts",
+        "tests/unit/write-attempt.test.ts",
+        "tests/unit/operation-creation-outcome.test.ts",
+        "tests/unit/archive-controller.test.ts",
+        "tests/unit/service-service.test.ts",
+        "tests/unit/application-request.test.ts",
+        "tests/unit/response-scope.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr02-targeted.json"
+      ],
+      "nativeReport": "test-results/pr02-targeted.json",
+      "log": "test-results/pr02-targeted.log",
+      "npmProcess": "test-results/pr02-targeted-npm-process.json",
+      "electronProcess": "test-results/pr02-targeted-electron-process.json",
+      "failures": []
+    },
+    {
+      "label": "full",
+      "files": 40,
+      "total": 559,
+      "passed": 558,
+      "failed": 1,
+      "skipped": 0,
+      "startTimeUtc": "2026-11-23T15:05:39.104Z",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "signal": null,
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr02-full.json"
+      ],
+      "nativeReport": "test-results/pr02-full.json",
+      "log": "test-results/pr02-full.log",
+      "npmProcess": "test-results/pr02-full-npm-process.json",
+      "electronProcess": "test-results/pr02-full-electron-process.json",
+      "failures": [
+        {
+          "file": "tests/unit/inter-port-migration.test.ts",
+          "name": "P12: rollback dopo copia e sostituzione delle componenti ripristina interamente il v12 popolato",
+          "messages": ["Error: Test timed out in 5000ms."]
+        }
+      ]
+    },
+    {
+      "label": "recovery",
+      "files": 1,
+      "total": 3,
+      "passed": 1,
+      "failed": 2,
+      "skipped": 0,
+      "startTimeUtc": "2026-11-23T15:13:32.899Z",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "signal": null,
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/inter-port-migration.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr02-recovery.json"
+      ],
+      "nativeReport": "test-results/pr02-recovery.json",
+      "log": "test-results/pr02-recovery.log",
+      "npmProcess": "test-results/pr02-recovery-npm-process.json",
+      "electronProcess": "test-results/pr02-recovery-electron-process.json",
+      "failures": [
+        {
+          "file": "tests/unit/inter-port-migration.test.ts",
+          "name": "P12: migra v12 popolato preservando ogni riga, int64, tuple, identità, metadati e copia preventiva",
+          "messages": [
+            "Error: Test timed out in 5000ms.",
+            "ArchiveError: L’archivio aperto è cambiato. Ricarica la vista."
+          ]
+        },
+        {
+          "file": "tests/unit/inter-port-migration.test.ts",
+          "name": "P12: FK restrittiva interrompe la sostituzione dopo la copia e conserva v12 e sessione precedente",
+          "messages": ["Error: Test timed out in 5000ms."]
+        }
+      ]
+    },
+    {
+      "label": "lifecycle-final",
+      "files": 4,
+      "total": 52,
+      "passed": 52,
+      "failed": 0,
+      "skipped": 0,
+      "startTimeUtc": "2026-11-23T15:23:06.969Z",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "signal": null,
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/draft-guard.test.ts",
+        "tests/unit/write-attempt.test.ts",
+        "tests/unit/application-request.test.ts",
+        "tests/unit/response-scope.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr02-lifecycle-final.json"
+      ],
+      "nativeReport": "test-results/pr02-lifecycle-final.json",
+      "log": "test-results/pr02-lifecycle-final.log",
+      "npmProcess": "test-results/pr02-lifecycle-final-npm-process.json",
+      "electronProcess": "test-results/pr02-lifecycle-final-electron-process.json",
+      "failures": []
+    },
+    {
+      "label": "boundary-final",
+      "files": 5,
+      "total": 71,
+      "passed": 71,
+      "failed": 0,
+      "skipped": 0,
+      "startTimeUtc": "2026-11-23T15:32:37.070Z",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "signal": null,
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/archive-controller.test.ts",
+        "tests/unit/draft-guard.test.ts",
+        "tests/unit/write-attempt.test.ts",
+        "tests/unit/application-request.test.ts",
+        "tests/unit/response-scope.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr02-boundary-final.json"
+      ],
+      "nativeReport": "test-results/pr02-boundary-final.json",
+      "log": "test-results/pr02-boundary-final.log",
+      "npmProcess": "test-results/pr02-boundary-final-npm-process.json",
+      "electronProcess": "test-results/pr02-boundary-final-electron-process.json",
+      "failures": []
+    }
+  ],
+  "addedUnitTests": 50,
+  "addedUnitTestsPassed": true,
+  "globalUnitSuiteCompletelyPassed": false,
+  "reuse": "Final 71-case selection covers guard disposal, receipt/selection PR01 barrier and session validation before metadata access. Other 35 unit-file results retained; SQL and services unchanged. inter-port-migration remains unstable and is not reported green.",
+  "checks": {
+    "developmentCheck": {
+      "exitCode": 1,
+      "cause": "five ESLint errors fixed before full suite"
+    },
+    "previousCheck": {
+      "exitCode": 1,
+      "typecheck": "passed",
+      "eslint": "passed",
+      "formatting": "pre-existing doc/dev/punti-issue.md only",
+      "log": "test-results/pr02-check-final.log"
+    },
+    "deliveryCheck": {
+      "exitCode": 1,
+      "typecheck": "passed (node/web)",
+      "eslint": "passed",
+      "formatting": "pre-existing doc/dev/punti-issue.md only",
+      "log": "test-results/pr02-check-final-boundary.log",
+      "process": "test-results/pr02-check-final-boundary-process.json"
+    },
+    "documentationProfile": {
+      "exitCode": 1,
+      "documents": "passed",
+      "diff": "passed",
+      "formatting": "pre-existing doc/dev/punti-issue.md only",
+      "summary": "test-results/verification/2026-11-23T15-34-18.817Z-coordinator-eczVhT/summary.md",
+      "requestedDocuments": [
+        "doc/pr02/bozze-ed-esiti-incerti.md",
+        "doc/dev/piano-interventi-post-rilascio.md",
+        "doc/stato-implementazione-prestazioni.md"
+      ]
+    },
+    "previousDeliveryCheck": {
+      "exitCode": 1,
+      "log": "test-results/pr02-check-delivery.log",
+      "process": "test-results/pr02-check-delivery-process.json",
+      "cause": "pre-existing formatting only; before final IPC boundary refinement"
+    },
+    "finalPortAdapter": {
+      "typescriptWebExitCode": 0,
+      "eslintExitCode": 0,
+      "reason": "preserve editor and preview after consultation NOT_FOUND"
+    },
+    "firstDocumentationAttempt": {
+      "exitCode": 1,
+      "documents": "failed: JSON argument outside Markdown document scope",
+      "formatting": "pre-existing doc/dev/punti-issue.md only",
+      "summary": "test-results/verification/2026-11-23T15-28-45.001Z-coordinator-01ybsp/summary.md"
+    }
+  },
+  "originalIssueSource": {
+    "file": "doc/dev/punti-issue.md",
+    "sha256": "8e5b4e0c57c3fea049a8ad3fcf5104a82b42fe4ccd12a68c064595f6767fc185",
+    "preserved": true
+  },
+  "deferred": {
+    "checkpoint": "K4 after PR01-PR12",
+    "build": "not run",
+    "desktop": "prepared, not run",
+    "package": "not run",
+    "integratedChecks": "not run",
+    "ordinaryStepMilestoneProfiles": "not run"
+  },
+  "next": "PR11",
+  "sourceSha256": {
+    "src/main/archive-controller.ts": "6a7cd5a75dcf219bffd636d1a895ef3262d196f9e8e8594514db2ffbbec7cd67",
+    "src/main/index.ts": "d6dc53db2a69bbed5d90d5d24d0adea2cfebea103f8849af847ccef8c4c3922e",
+    "src/main/ipc/register.ts": "9a72b457f0729bf515821ec7cb6559b8afd601cfa76fe40ada31743a5f024345",
+    "src/main/ipc/write-outcome-store.ts": "c415c6881f7cf6348d41509a0704734f92d17d6ab888844a3d680331e28cde08",
+    "src/preload/index.ts": "9a6c142e747e4b73da73d1c91b30af7def66de7e4b02e44092878fa8cdabcea0",
+    "src/renderer/src/api/draft-guard.ts": "337fa12785ee2804f957c65b4693cf31dc66f17dd2ede2bedb581dc292e2c3af",
+    "src/renderer/src/api/operation-creation-outcome.ts": "3a25c8f1961604629101a14839d1ff6e04d9c3cd9f38d83db393e0ccb7f17617",
+    "src/renderer/src/api/single-flight.ts": "21d5d03156df0f7840aabf5cb3b4432d357bd9cd9b19fb201c04d8ad69b97a8b",
+    "src/renderer/src/api/use-agencies.ts": "78c8de9ab747596710b0e86eb00f6880617956a2ad234746d665d610e481fda8",
+    "src/renderer/src/api/use-application-request.ts": "bf1754b6df4f10d51e8bb346b4cd1cd8a07ae3e4920127b255daa3d39e861576",
+    "src/renderer/src/api/use-berths.ts": "456276950b677d70af4770cb21eb43766fefee58122719fbd9059f6150b7493a",
+    "src/renderer/src/api/use-customers.ts": "063f7f3edf6f7549762eba6381ab0cb0de93b093d9c8271df945c75ca1069c4a",
+    "src/renderer/src/api/use-ports.ts": "3d6bbaba2a3f540fdee50a54fc09a21019b25069c7c3bb0508b1a4ee22cc8e89",
+    "src/renderer/src/api/use-vessels.ts": "68bebac290f9b3a110cf94d61d867d3f3b624291c04bf365fb868888876cf70f",
+    "src/renderer/src/api/use-write-attempt.tsx": "75e71058e41ce3870aa18f1b5a13d4e0100df23f6ca32f3dc00d76b453fffb60",
+    "src/renderer/src/api/write-attempt.ts": "28e5856e1c4c32cbd3ab72d9f04a9a1d240beb7a9e79d20d5e7d6a70ff86351b",
+    "src/renderer/src/app/App.tsx": "ec9431457640dbd029f7e7cf9cb1f26de3e6b5f8790a6227c701c70f703c6ae8",
+    "src/renderer/src/app/Catalog.tsx": "8532809a51c1294b7d47f819b735db4975c26cbe8b81215f917e8534fa4a7720",
+    "src/renderer/src/app/CatalogPage.tsx": "05639d4d5eba372787e2eeac20cdd1d0a1e1ff3daaa2bfe8a9b3d7e3c5ac860d",
+    "src/renderer/src/app/DraftProtection.tsx": "eabc30778bfc129ce6668ea22049bd33570f579c2c3baa598728cd8918f73d97",
+    "src/renderer/src/app/MasterDataPage.tsx": "41f75a363ef2b764b0a4bf26d4b5e53eda438e4431ee4abe1aa954b9c86e6478",
+    "src/renderer/src/app/Ports.tsx": "087c408cedde8a02404f1502b8130dcb2315658fcbc91b90fac1cf05dd5ff8c7",
+    "src/renderer/src/app/TimeSettings.tsx": "aab02465ef851a8c3cbb9f0600db3deaff65f941d4e6de1a1aa5ac20436530f3",
+    "src/renderer/src/app/agencies/Agencies.tsx": "927c8db77b66e08e51019ce396a84c3ab9c91678380eeee3228a9870ad379dd1",
+    "src/renderer/src/app/berths/Berths.tsx": "6142ecc5a1ae0d137a3a3b8384ee7e1dfd9f8bb9d08eb68bccb9f85fe25c1bb0",
+    "src/renderer/src/app/customers/Customers.tsx": "2e50f5cc209d6fd6e5b78cbb5101d6f06dcdad114243dc78a74624c8510c5b66",
+    "src/renderer/src/app/operations/AssignmentEditor.tsx": "233985a503c59dae81da3a789a001e00571de31237d79e675c1ae1e224383a09",
+    "src/renderer/src/app/operations/OperationCompletionEditor.tsx": "6d0e8f8eefe36fb37341fa5f8629242b3955c11119c17ef3da0c5bfac49a7755",
+    "src/renderer/src/app/operations/OperationMaintenanceEditor.tsx": "2ea0326ec1f693d50f716d96185f1ed8f50886ee394d3be2e892bfadd01c657c",
+    "src/renderer/src/app/operations/Operations.tsx": "071f2ace2e317cc37ccfbc7b93074a5f8bee48ea394ebe43a954a50d670c2d45",
+    "src/renderer/src/app/services/Services.tsx": "b6bf7536736f7a1771035b829766524f8d1d54590048efcf8f7df4e06ac5f6b4",
+    "src/renderer/src/app/tariffs/TariffMaintenanceEditor.tsx": "7734ed2747bed4ec50815c2ff251e2d1359355336cb6a59e38dda98ab41d0b1a",
+    "src/renderer/src/app/tariffs/Tariffs.tsx": "59eee6054a2e624c87ee4549eb4c42803b7917166597059817fd98a66a918183",
+    "src/renderer/src/app/vessels/Vessels.tsx": "735c3216261840d3ea91eb9434ca36d42c9120794063c78eb243264ebe823bf7",
+    "src/renderer/src/app/weights/WeightHistory.tsx": "3c574ffb925debb301e40342d323b9a0c9ed46251d80494df35598accbf19476",
+    "src/renderer/src/env.d.ts": "6f2e72b47d32267692189e0492e8cabe2b231e3642cf5a1d9662a310a1837ba2",
+    "src/shared/contracts/archive.ts": "bacee7e050533e4ab629308e097c36070b63acf42e0ccf01f6dfad92db5c58e0",
+    "src/shared/contracts/write-outcomes.ts": "84abacb4cfe0a7b856ca57f22b286ba7f82136bccb64a1f3a09a45e40e062b6f",
+    "tests/e2e/operations.spec.ts": "ccc702d5e563cdaafc3bc2b5ebc77f5651dd06db49c2485d918608a1d84ab25d",
+    "tests/e2e/pr02-drafts.spec.ts": "55fa7b7f3f21fc733e8075e9b4cec98908096e1bc763991df35ffd7f55dd6535",
+    "tests/e2e/services.spec.ts": "5adf646174902437e74ed2b75cb877ad997f991347169c5a4391e1736ad67bec",
+    "tests/unit/archive-controller.test.ts": "e4f8d2a66711fa744ee5c84a689961a3302456fc13081f61530babe04afe82ba",
+    "tests/unit/assignment-service.test.ts": "741550f36cc53a3d1d0e42ae6f97f6eebbf348af4dc0b20e901f21781abd3baf",
+    "tests/unit/draft-guard.test.ts": "686750428b4a266a5c05e7070b034590487d162555026f4111e4412e7f7b3628",
+    "tests/unit/operation-creation-outcome.test.ts": "d89e2e99f98a18256773145546f09088951ef387c895239f5f5d53ca5c9d84ca",
+    "tests/unit/preload.test.ts": "d344bc34b8536c006f9d444c3ea3c9483753748d1cad7c9732d71d7148ce0d54",
+    "tests/unit/service-service.test.ts": "4abd9527d21c5b9470ac1851135e39d4501d859fe62eac7110ec63fab96ca77b",
+    "tests/unit/write-attempt.test.ts": "4f5ee5c16dcc8edcef450dce158f9bb26e44442eec7b5bb64fd77d433561a4cf",
+    "tsconfig.node.json": "7048b41a72048b406a89977103ebbaa81b1529e791008a0432284e1d2718584e"
+  },
+  "implementationCommit": "eba1313e7a2b16c69a029976fd0f62baa4be6b81",
+  "commitAuthorization": "User requested commits after the initial implementation delivery. Original head and uncommitted implementation fields describe the preserved verification inputs.",
+  "commitDocumentationCheck": {
+    "exitCode": 1,
+    "documents": "passed (UTF-8 and links)",
+    "diff": "passed",
+    "formatting": "pre-existing doc/dev/punti-issue.md only",
+    "summary": "test-results/verification/2026-11-23T15-55-50.036Z-coordinator-AF5H0D/summary.md",
+    "unitResults": "reused unchanged; all 49 code/test hashes match implementationCommit"
+  }
+}

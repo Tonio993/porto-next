@@ -1,3 +1,5 @@
+import { useWriteAttempt } from './use-write-attempt'
+import { trackedRequest } from '../../../shared/contracts/write-outcomes'
 import { useCallback, useEffect, useState } from 'react'
 import type { ArchiveContextDto } from '../../../shared/contracts/application'
 import type {
@@ -21,7 +23,11 @@ interface Editor {
   moment: MomentInputDto | null
 }
 
-export function useBerths(archives: ReturnType<typeof useArchives>, portId: string) {
+export function useBerths(
+  archives: ReturnType<typeof useArchives>,
+  portId: string,
+  onRecovered?: () => void,
+) {
   const { state, execute, setNotice, update } = archives
   const context = state.context!
   const { sessionId, revision } = context
@@ -56,7 +62,36 @@ export function useBerths(archives: ReturnType<typeof useArchives>, portId: stri
   const [resolution, setResolution] = useState<MomentResolutionDto | null>(null)
   const [preview, setPreview] = useState<BerthPreviewDto | null>(null)
   const [fields, setFields] = useState<Record<string, string>>({})
-  const busy = archives.busy || archives.commandBusy || action.loading
+  function discardDraft() {
+    setCreateContext(null)
+    setName('')
+    setEditor(null)
+    setPreview(null)
+    setResolution(null)
+    setFields({})
+    action.invalidate()
+    resolver.invalidate()
+    effects.invalidate()
+  }
+  const writes = useWriteAttempt(
+    archives,
+    () => {
+      discardDraft()
+      setSelection(null)
+      setHistory(null)
+      invalidateHistory()
+      setDetailError(null)
+      onRecovered?.()
+      void loadList()
+    },
+    suspendDetail,
+  )
+  const busy =
+    writes.attempt.busy ||
+    writes.attempt.uncertain ||
+    archives.busy ||
+    archives.commandBusy ||
+    action.loading
 
   const loadList = useCallback(async () => {
     setListError(null)
@@ -166,8 +201,14 @@ export function useBerths(archives: ReturnType<typeof useArchives>, portId: stri
   async function create() {
     if (!createContext) return false
     clearErrors()
-    const result = await action.request(() =>
-      execute(() => window.berths.create({ context: createContext, payload: { portId, name } })),
+    const result = await writes.attempt.run(createContext, crypto.randomUUID(), (attemptId) =>
+      action.request(() =>
+        execute(() =>
+          window.berths.create(
+            trackedRequest({ context: createContext, payload: { portId, name } }, attemptId),
+          ),
+        ),
+      ),
     )
     if (!result) return false
     if (!result.ok) {
@@ -274,12 +315,19 @@ export function useBerths(archives: ReturnType<typeof useArchives>, portId: stri
     return suspendDetail(async () => {
       if (!preview) return
       clearErrors()
-      const result = await action.request(() =>
-        execute(() =>
-          window.berths.confirm({
-            context: preview.context,
-            payload: { previewId: preview.previewId },
-          }),
+      const result = await writes.attempt.run(preview.context, crypto.randomUUID(), (attemptId) =>
+        action.request(() =>
+          execute(() =>
+            window.berths.confirm(
+              trackedRequest(
+                {
+                  context: preview.context,
+                  payload: { previewId: preview.previewId },
+                },
+                attemptId,
+              ),
+            ),
+          ),
         ),
       )
       if (result?.ok) {
@@ -294,12 +342,19 @@ export function useBerths(archives: ReturnType<typeof useArchives>, portId: stri
   async function reactivate() {
     if (!history) return
     clearErrors()
-    const result = await action.request(() =>
-      execute(() =>
-        window.berths.reactivate({
-          context: history.context,
-          payload: { berthId: history.value.berth.id },
-        }),
+    const result = await writes.attempt.run(history.context, crypto.randomUUID(), (attemptId) =>
+      action.request(() =>
+        execute(() =>
+          window.berths.reactivate(
+            trackedRequest(
+              {
+                context: history.context,
+                payload: { berthId: history.value.berth.id },
+              },
+              attemptId,
+            ),
+          ),
+        ),
       ),
     )
     if (result?.ok) setNotice('Banchina riattivata.')
@@ -318,6 +373,9 @@ export function useBerths(archives: ReturnType<typeof useArchives>, portId: stri
   }
 
   return {
+    discardDraft,
+    writeRecovery: writes.recovery,
+    writeRecoveryControl: writes.control,
     revision,
     busy,
     fields,

@@ -1,3 +1,4 @@
+import { useProtectedDraft } from '../DraftProtection'
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
 import type { PortDto } from '../../../../shared/contracts/ports'
@@ -19,22 +20,49 @@ export function Berths({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
-  const berths = useBerths(archives, port.id)
+  const berths = useBerths(archives, port.id, () => {
+    setCreating(false)
+    setEditorHidden(false)
+    setPreviewHidden(false)
+  })
   const [creating, setCreating] = useState(false)
+  const [editorHidden, setEditorHidden] = useState(false)
+  const [previewHidden, setPreviewHidden] = useState(false)
   const [restorePending, setRestorePending] = useState(false)
   const trigger = useRef<HTMLElement | null>(null)
   const section = useRef<HTMLElement>(null)
   const createButton = useRef<HTMLButtonElement>(null)
   const { busy, editor, preview, history, page } = berths
-  const opened = creating || !!editor || !!preview
+  const opened = creating || (!!editor && !editorHidden) || (!!preview && !previewHidden)
   useEffect(() => {
     onDialogChange(opened)
     return () => onDialogChange(false)
   }, [opened, onDialogChange])
 
+  const guard = useProtectedDraft({
+    state: berths.busy
+      ? 'BUSY'
+      : creating || !!berths.editor || !!berths.preview || !!berths.createContext
+        ? 'DRAFT'
+        : 'CLEAN',
+    discard: () => {
+      setCreating(false)
+      setEditorHidden(false)
+      setPreviewHidden(false)
+      berths.discardDraft()
+    },
+    recover: () => {},
+  })
   function openDialog(action: () => void) {
     trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    action()
+    guard.request({
+      label: 'avviare il nuovo comando',
+      run: () => {
+        setEditorHidden(false)
+        setPreviewHidden(false)
+        action()
+      },
+    })
   }
   useEffect(() => {
     if (!restorePending || opened || busy) return
@@ -110,7 +138,9 @@ export function Berths({
               status={berth.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
               selected={berths.selection === berth.id}
               disabled={busy}
-              onClick={() => berths.select(berth.id)}
+              onClick={() =>
+                guard.request({ label: 'cambiare selezione', run: () => berths.select(berth.id) })
+              }
             />
           ))}
           {page && (
@@ -214,6 +244,7 @@ export function Berths({
           }}
         >
           <Stack>
+            {berths.writeRecoveryControl}
             {message}
             <TextInput
               label="Nome banchina"
@@ -249,8 +280,8 @@ export function Berths({
 
       <Modal
         {...modalProps}
-        opened={!!editor && !preview}
-        onClose={() => !busy && berths.changeEditor(null)}
+        opened={!!editor && !preview && !editorHidden}
+        onClose={() => !berths.busy && setEditorHidden(true)}
         title={editor?.versionId ? 'Correggi versione banchina' : 'Nuova versione banchina'}
         size="lg"
       >
@@ -262,6 +293,7 @@ export function Berths({
             }}
           >
             <Stack>
+              {berths.writeRecoveryControl}
               {message}
               <TextInput
                 label="Nome banchina"
@@ -302,13 +334,14 @@ export function Berths({
 
       <Modal
         {...modalProps}
-        opened={!!preview}
-        onClose={() => !busy && berths.cancelPreview()}
+        opened={!!preview && !previewHidden}
+        onClose={() => !berths.busy && setPreviewHidden(true)}
         title="Anteprima banchina e conferma"
         size="xl"
       >
         {preview && (
           <>
+            {berths.writeRecoveryControl}
             {message}
             <PortConfirmation
               key={preview.previewId}

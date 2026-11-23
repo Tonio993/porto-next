@@ -1,3 +1,6 @@
+import { useProtectedDraft } from './DraftProtection'
+import { useWriteAttempt } from '../api/use-write-attempt'
+import { trackedRequest } from '../../../shared/contracts/write-outcomes'
 import { WeightHistory } from './weights/WeightHistory'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Pagination, Select, Stack, TextInput } from '@mantine/core'
@@ -52,7 +55,7 @@ export function Catalog({
   const [dialogError, setDialogError] = useState<string | null>(null)
   const [issues, setIssues] = useState<ApplicationErrorDto['fields']>([])
   const [draft, setDraft] = useState<Draft | null>(null)
-  const [createDraft, setCreateDraft] = useState<Draft | null>(null)
+  const [savedDraft, setSavedDraft] = useState<Draft | null>(null)
   const [preview, setPreview] = useState<ChangePreviewDto | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
@@ -75,7 +78,43 @@ export function Catalog({
   const { request: readList } = listRequest,
     { request: readDetail, invalidate: invalidateDetail } = detailRequest,
     { request: readFixed } = fixedRequest
-  const busy = archives.busy || archives.commandBusy || commandRequest.loading
+  const discardDraft = () => {
+    setDraft(null)
+    setSavedDraft(null)
+    setPreview(null)
+    setConfirmOpen(false)
+    commandRequest.invalidate()
+    effectsRequest.invalidate()
+    setIssues([])
+    setDialogError(null)
+  }
+  const writes = useWriteAttempt(
+    archives,
+    () => {
+      discardDraft()
+      setSelected(null)
+      setDetail(null)
+      setReload((n) => n + 1)
+    },
+    detailRequest.suspendWhile,
+  )
+  const guard = useProtectedDraft({
+    state: writes.attempt.uncertain
+      ? 'UNCERTAIN'
+      : archives.commandBusy || commandRequest.loading || writes.attempt.busy
+        ? 'BUSY'
+        : draft || preview || savedDraft
+          ? 'DRAFT'
+          : 'CLEAN',
+    discard: discardDraft,
+    recover: writes.openRecovery,
+  })
+  const busy =
+    writes.attempt.busy ||
+    writes.attempt.uncertain ||
+    archives.busy ||
+    archives.commandBusy ||
+    commandRequest.loading
   const dialogOpen = !!draft || confirmOpen
   const anyDialogOpen = dialogOpen || !!weightWindow?.opened
   useEffect(() => {
@@ -117,7 +156,7 @@ export function Catalog({
     })
   }, [readFixed, context.sessionId, context.revision, reload])
   const openWeights = (sequenceId: string, label: string) => {
-    if (weightWindow) return
+    if (weightWindow?.opened && weightWindow.sequenceId === sequenceId) return
     setWeightWindow({
       sequenceId,
       label,
@@ -131,9 +170,8 @@ export function Catalog({
     if (busy) return
     commandRequest.invalidate()
     effectsRequest.invalidate()
-    if (draft?.kind === 'CREATE') setCreateDraft(draft)
+    if (draft) setSavedDraft(draft)
     setDraft(null)
-    setPreview(null)
     setConfirmOpen(false)
     setDialogError(null)
     setIssues([])
@@ -171,18 +209,25 @@ export function Catalog({
       ])
       return
     }
-    const result = await commandRequest.request(() =>
-      archives.execute(() =>
-        window.catalog.create({
-          context: draft.context,
-          payload: { description: draft.description, initialWeight: weight },
-        }),
+    const result = await writes.attempt.run(draft.context, crypto.randomUUID(), (attemptId) =>
+      commandRequest.request(() =>
+        archives.execute(() =>
+          window.catalog.create(
+            trackedRequest(
+              {
+                context: draft.context,
+                payload: { description: draft.description, initialWeight: weight },
+              },
+              attemptId,
+            ),
+          ),
+        ),
       ),
     )
     if (result?.ok) {
       setSelected(result.value.id)
       setDetail(result.value)
-      setCreateDraft(null)
+      setSavedDraft(null)
       setDraft(null)
       setNotice('Tipo di prestazione creato.')
     } else if (result && !result.ok) setIssues(result.error.fields)
@@ -191,12 +236,19 @@ export function Catalog({
     detailRequest.suspendWhile(async () => {
       if (!preview) return
       setDialogError(null)
-      const result = await commandRequest.request(() =>
-        archives.execute(() =>
-          window.catalog.confirm({
-            context: preview.context,
-            payload: { previewId: preview.previewId },
-          }),
+      const result = await writes.attempt.run(preview.context, crypto.randomUUID(), (attemptId) =>
+        commandRequest.request(() =>
+          archives.execute(() =>
+            window.catalog.confirm(
+              trackedRequest(
+                {
+                  context: preview.context,
+                  payload: { previewId: preview.previewId },
+                },
+                attemptId,
+              ),
+            ),
+          ),
         ),
       )
       if (result?.ok) {
@@ -224,8 +276,14 @@ export function Catalog({
   const reactivate = async () => {
     if (!detail) return
     setDialogError(null)
-    const result = await commandRequest.request(() =>
-      archives.execute(() => window.catalog.reactivate({ context, payload: { id: detail.id } })),
+    const result = await writes.attempt.run(context, crypto.randomUUID(), (attemptId) =>
+      commandRequest.request(() =>
+        archives.execute(() =>
+          window.catalog.reactivate(
+            trackedRequest({ context, payload: { id: detail.id } }, attemptId),
+          ),
+        ),
+      ),
     )
     if (result?.ok) {
       setDetail(result.value)
@@ -242,6 +300,21 @@ export function Catalog({
   }, [draft, context])
   return (
     <>
+      {writes.recovery}
+      {(savedDraft || (preview && !confirmOpen)) && (
+        <Button
+          variant="default"
+          onClick={() => {
+            if (savedDraft) {
+              setDraft(savedDraft)
+              setSavedDraft(null)
+            }
+            if (preview) setConfirmOpen(true)
+          }}
+        >
+          Riprendi bozza
+        </Button>
+      )}
       {error && (
         <StateMessage kind="error" title="Catalogo non disponibile">
           {error}
@@ -282,7 +355,12 @@ export function Catalog({
             <Button
               variant="default"
               disabled={busy || weightWindow.uncertain}
-              onClick={() => setWeightWindow(null)}
+              onClick={() => {
+                guard.request({
+                  label: 'scartare la bozza del peso',
+                  run: () => setWeightWindow(null),
+                })
+              }}
             >
               Scarta bozza peso
             </Button>
@@ -298,17 +376,20 @@ export function Catalog({
               ref={newButton}
               disabled={busy}
               onClick={() => {
-                rememberTrigger()
-                setDialogError(null)
-                setIssues([])
-                setDraft(
-                  createDraft ?? {
-                    kind: 'CREATE',
-                    context: { ...context },
-                    description: '',
-                    weight: '1',
+                guard.request({
+                  label: 'iniziare il nuovo comando',
+                  run: () => {
+                    rememberTrigger()
+                    setDialogError(null)
+                    setIssues([])
+                    setDraft({
+                      kind: 'CREATE',
+                      context: { ...context },
+                      description: '',
+                      weight: '1',
+                    })
                   },
-                )
+                })
               }}
             >
               Nuovo tipo
@@ -411,8 +492,13 @@ export function Catalog({
               </p>
               <Button
                 variant="light"
-                disabled={busy || !!weightWindow}
-                onClick={() => openWeights(detail.initialWeight.sequenceId, detail.description)}
+                disabled={busy}
+                onClick={() => {
+                  guard.request({
+                    label: 'iniziare il nuovo comando',
+                    run: () => openWeights(detail.initialWeight.sequenceId, detail.description),
+                  })
+                }}
               >
                 Cronologia pesi
               </Button>
@@ -421,15 +507,20 @@ export function Catalog({
                   variant="default"
                   disabled={busy}
                   onClick={() => {
-                    rememberTrigger()
-                    setDialogError(null)
-                    setIssues([])
-                    setDraft({
-                      kind: 'RENAME',
-                      id: detail.id,
-                      description: detail.description,
-                      weight: detail.initialWeight.weight,
-                      context: { ...context },
+                    guard.request({
+                      label: 'iniziare il nuovo comando',
+                      run: () => {
+                        rememberTrigger()
+                        setDialogError(null)
+                        setIssues([])
+                        setDraft({
+                          kind: 'RENAME',
+                          id: detail.id,
+                          description: detail.description,
+                          weight: detail.initialWeight.weight,
+                          context: { ...context },
+                        })
+                      },
                     })
                   }}
                 >
@@ -439,7 +530,12 @@ export function Catalog({
                   <Button
                     variant="default"
                     disabled={busy}
-                    onClick={() => void showPreview({ operation: 'DEACTIVATE', id: detail.id })}
+                    onClick={() => {
+                      guard.request({
+                        label: 'iniziare il nuovo comando',
+                        run: () => void showPreview({ operation: 'DEACTIVATE', id: detail.id }),
+                      })
+                    }}
                   >
                     Disattiva
                   </Button>
@@ -452,7 +548,12 @@ export function Catalog({
                   color="red"
                   variant="light"
                   disabled={busy}
-                  onClick={() => void showPreview({ operation: 'DELETE', id: detail.id })}
+                  onClick={() => {
+                    guard.request({
+                      label: 'iniziare il nuovo comando',
+                      run: () => void showPreview({ operation: 'DELETE', id: detail.id }),
+                    })
+                  }}
                 >
                   Elimina tipo
                 </Button>
@@ -475,9 +576,13 @@ export function Catalog({
                 size="compact-sm"
                 variant="light"
                 disabled={busy || !!weightWindow}
-                onClick={() =>
-                  openWeights(item.initialWeight.sequenceId, operationLabels[item.operation])
-                }
+                onClick={() => {
+                  guard.request({
+                    label: 'iniziare il nuovo comando',
+                    run: () =>
+                      openWeights(item.initialWeight.sequenceId, operationLabels[item.operation]),
+                  })
+                }}
               >
                 Cronologia pesi {operationLabels[item.operation]}
               </Button>
@@ -502,6 +607,7 @@ export function Catalog({
             setWeightWindow((old) => (keep && old ? { ...old, opened: false } : null))
             if (!keep) requestAnimationFrame(() => weightWindow.trigger?.focus())
           }}
+          onResume={() => setWeightWindow({ ...weightWindow, opened: true })}
           onUncertainChange={(uncertain) =>
             setWeightWindow((old) =>
               old && old.uncertain !== uncertain ? { ...old, uncertain } : old,
@@ -532,6 +638,7 @@ export function Catalog({
         size="lg"
       >
         <Stack>
+          {writes.control}
           {dialogError && (
             <StateMessage kind="error" title="Operazione non completata">
               {dialogError}

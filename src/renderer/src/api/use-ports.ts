@@ -1,3 +1,5 @@
+import { useWriteAttempt } from './use-write-attempt'
+import { trackedRequest } from '../../../shared/contracts/write-outcomes'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ApplicationResult, ArchiveContextDto } from '../../../shared/contracts/application'
 import type {
@@ -27,7 +29,7 @@ export interface VersionDraft {
   context: ArchiveContextDto
 }
 
-export function usePorts(archives: ReturnType<typeof useArchives>) {
+export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?: () => void) {
   const { state, setError, setNotice, execute } = archives
   const context = state.context!
   const list = useApplicationRequest(context, setError)
@@ -47,6 +49,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
     context: ArchiveContextDto
   } | null>(null)
   const [draft, setDraft] = useState(empty)
+  const companyZone = useRef(empty.initialZoneId)
   const [draftContext, setDraftContext] = useState<ArchiveContextDto | null>(null)
   const [editor, setEditor] = useState<VersionDraft | null>(null)
   const [preview, setPreview] = useState<PortPreviewDto | null>(null)
@@ -54,7 +57,39 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
   const [resolution, setResolution] = useState<MomentResolutionDto | null>(null)
   const [fields, setFields] = useState<Record<string, string>>({})
   const [createFields, setCreateFields] = useState<Record<string, string>>({})
-  const busy = archives.busy || archives.commandBusy || action.loading
+  function discardDraft() {
+    setDraft({ ...empty, initialZoneId: companyZone.current })
+    setDraftContext(null)
+    setEditor(null)
+    setPreview(null)
+    setResolution(null)
+    setFields({})
+    setCreateFields({})
+    action.invalidate()
+    resolver.invalidate()
+    effects.invalidate()
+    company.invalidate()
+  }
+  const writes = useWriteAttempt(
+    archives,
+    () => {
+      discardDraft()
+      selected.current = null
+      setSelection(null)
+      setHistory(null)
+      details.invalidate()
+      setError(null)
+      onRecovered?.()
+      void loadList()
+    },
+    details.suspendWhile,
+  )
+  const busy =
+    writes.attempt.busy ||
+    writes.attempt.uncertain ||
+    archives.busy ||
+    archives.commandBusy ||
+    action.loading
   const { request: listRequest } = list
   const { request: detailRequest, invalidate: invalidateDetail } = details
   const { request: companyRequest } = company
@@ -89,8 +124,6 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
       selected.current = null
       setSelection(null)
       setHistory(null)
-      setEditor(null)
-      setPreview(null)
       setError(null)
     }
   }, [detailRequest, context.sessionId, selection, historyPage, setError])
@@ -106,6 +139,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
       window.time.getCompanyZone({ context: { sessionId: context.sessionId }, query: null }),
     ).then((result) => {
       if (result?.ok) {
+        companyZone.current = result.value.zoneId
         setDraft((value) => ({ ...value, initialZoneId: result.value.zoneId }))
         setDraftContext(result.context)
       }
@@ -199,12 +233,21 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
       await archives.update(() => window.archives.getState())
     }
   }
+  function openCreate() {
+    setDraftContext({ ...context })
+    setCreateFields({})
+    setError(null)
+  }
   async function create() {
     if (!draftContext) return
     setError(null)
     setCreateFields({})
-    const result = await action.request(() =>
-      execute(() => window.ports.create({ context: draftContext, payload: draft })),
+    const result = await writes.attempt.run(draftContext, crypto.randomUUID(), (attemptId) =>
+      action.request(() =>
+        execute(() =>
+          window.ports.create(trackedRequest({ context: draftContext, payload: draft }, attemptId)),
+        ),
+      ),
     )
     if (!result) return
     if (!result.ok) {
@@ -303,12 +346,19 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
         DEACTIVATE_PORT: window.ports.confirmDeactivate,
         DELETE_PORT: window.ports.confirmDelete,
       }
-      const result = await action.request(() =>
-        execute(() =>
-          methods[preview.operation]({
-            context: preview.context,
-            payload: { previewId: preview.previewId },
-          }),
+      const result = await writes.attempt.run(preview.context, crypto.randomUUID(), (attemptId) =>
+        action.request(() =>
+          execute(() =>
+            methods[preview.operation](
+              trackedRequest(
+                {
+                  context: preview.context,
+                  payload: { previewId: preview.previewId },
+                },
+                attemptId,
+              ),
+            ),
+          ),
         ),
       )
       if (!result) return
@@ -325,12 +375,19 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
   }
   async function reactivate() {
     if (!history) return
-    const result = await action.request(() =>
-      execute(() =>
-        window.ports.reactivate({
-          context: history.context,
-          payload: { portId: history.value.port.id },
-        }),
+    const result = await writes.attempt.run(history.context, crypto.randomUUID(), (attemptId) =>
+      action.request(() =>
+        execute(() =>
+          window.ports.reactivate(
+            trackedRequest(
+              {
+                context: history.context,
+                payload: { portId: history.value.port.id },
+              },
+              attemptId,
+            ),
+          ),
+        ),
       ),
     )
     if (result?.ok) {
@@ -350,6 +407,9 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
     if (result?.ok) setPreview({ ...preview, effects: result.value })
   }
   return {
+    discardDraft,
+    writeRecovery: writes.recovery,
+    writeRecoveryControl: writes.control,
     page,
     search,
     setSearch: (value: string) => {
@@ -375,6 +435,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>) {
     draftContext,
     createFields,
     create,
+    openCreate,
     reloadCreate,
     editor,
     changeEditor,

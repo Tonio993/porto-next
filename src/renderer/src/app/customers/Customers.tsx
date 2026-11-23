@@ -1,3 +1,4 @@
+import { useProtectedDraft } from '../DraftProtection'
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
 import { PageControls } from '../PageControls'
@@ -16,22 +17,49 @@ export function Customers({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
-  const customers = useCustomers(archives)
+  const customers = useCustomers(archives, () => {
+    setCreating(false)
+    setEditorHidden(false)
+    setPreviewHidden(false)
+  })
   const [creating, setCreating] = useState(false)
+  const [editorHidden, setEditorHidden] = useState(false)
+  const [previewHidden, setPreviewHidden] = useState(false)
   const [restorePending, setRestorePending] = useState(false)
   const trigger = useRef<HTMLElement | null>(null)
   const section = useRef<HTMLElement>(null)
   const createButton = useRef<HTMLButtonElement>(null)
   const { busy, editor, preview, history, page } = customers
-  const opened = creating || !!editor || !!preview
+  const opened = creating || (!!editor && !editorHidden) || (!!preview && !previewHidden)
   useEffect(() => {
     onDialogChange(opened)
     return () => onDialogChange(false)
   }, [opened, onDialogChange])
 
+  const guard = useProtectedDraft({
+    state: customers.busy
+      ? 'BUSY'
+      : creating || !!customers.editor || !!customers.preview || !!customers.createContext
+        ? 'DRAFT'
+        : 'CLEAN',
+    discard: () => {
+      setCreating(false)
+      setEditorHidden(false)
+      setPreviewHidden(false)
+      customers.discardDraft()
+    },
+    recover: () => {},
+  })
   function openDialog(action: () => void) {
     trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    action()
+    guard.request({
+      label: 'avviare il nuovo comando',
+      run: () => {
+        setEditorHidden(false)
+        setPreviewHidden(false)
+        action()
+      },
+    })
   }
   useEffect(() => {
     if (!restorePending || opened || busy) return
@@ -71,6 +99,19 @@ export function Customers({
       aria-labelledby="customers-heading"
       tabIndex={-1}
     >
+      {customers.writeRecovery}
+      {(editorHidden || previewHidden || (!creating && customers.createContext)) && (
+        <Button
+          variant="default"
+          onClick={() => {
+            if (customers.preview) setPreviewHidden(false)
+            else if (customers.editor) setEditorHidden(false)
+            else setCreating(true)
+          }}
+        >
+          Riprendi bozza
+        </Button>
+      )}
       <div className="ports-workspace">
         <section className="archive-panel port-list" role="group" aria-label="Elenco clienti">
           <Group justify="space-between">
@@ -114,7 +155,12 @@ export function Customers({
                 status={customer.status === 'ACTIVE' ? 'Attivo' : 'Disattivato'}
                 selected={customers.selection === customer.id}
                 disabled={busy}
-                onClick={() => customers.select(customer.id)}
+                onClick={() =>
+                  guard.request({
+                    label: 'cambiare selezione',
+                    run: () => customers.select(customer.id),
+                  })
+                }
               />
             ))}
           </Stack>
@@ -233,6 +279,7 @@ export function Customers({
           }}
         >
           <Stack>
+            {customers.writeRecoveryControl}
             {message}
             <TextInput
               label="Ragione sociale"
@@ -269,8 +316,8 @@ export function Customers({
 
       <Modal
         {...modalProps}
-        opened={!!editor && !preview}
-        onClose={() => !busy && customers.changeEditor(null)}
+        opened={!!editor && !preview && !editorHidden}
+        onClose={() => !customers.busy && setEditorHidden(true)}
         title={editor?.versionId ? 'Correggi versione cliente' : 'Nuova versione cliente'}
         size="lg"
       >
@@ -282,6 +329,7 @@ export function Customers({
             }}
           >
             <Stack>
+              {customers.writeRecoveryControl}
               {message}
               <TextInput
                 label="Ragione sociale"
@@ -332,13 +380,14 @@ export function Customers({
 
       <Modal
         {...modalProps}
-        opened={!!preview}
-        onClose={() => !busy && customers.cancelPreview()}
+        opened={!!preview && !previewHidden}
+        onClose={() => !customers.busy && setPreviewHidden(true)}
         title="Anteprima cliente e conferma"
         size="xl"
       >
         {preview && (
           <>
+            {customers.writeRecoveryControl}
             {message}
             <PortConfirmation
               key={preview.previewId}

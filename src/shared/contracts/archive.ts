@@ -31,6 +31,7 @@ export const archiveChannels = {
   close: 'archive:close',
   rename: 'archive:rename',
   changed: 'archive:changed',
+  actionRequested: 'archive:action-requested',
 } as const
 
 export type ErrorCode =
@@ -48,7 +49,9 @@ export type Result<T> =
   | { ok: true; value: T; context?: ArchiveContextDto | null }
   | { ok: false; error: ApplicationErrorDto; context?: ArchiveContextDto | null }
 
+export type ArchiveMenuAction = 'open' | 'saveAs' | 'backup' | 'close'
 export interface ArchiveApi {
+  onActionRequested(callback: (action: ArchiveMenuAction) => void): () => void
   getState(): Promise<Result<ArchiveState>>
   create(name: string): Promise<Result<ArchiveState>>
   open(): Promise<Result<ArchiveState>>

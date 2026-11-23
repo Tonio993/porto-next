@@ -58,6 +58,10 @@ test('P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia
       if (await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).isVisible()) {
         await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).click()
         await modal.getByRole('button', { name: 'Scarta bozza', exact: true }).click()
+        await page
+          .getByRole('dialog', { name: 'Scartare la bozza?', exact: true })
+          .getByRole('button', { name: 'Scarta', exact: true })
+          .click()
         await expect(modal).toHaveCount(0)
       }
       await page.getByRole('button', { name: `Nuova ${type}`, exact: true }).click()

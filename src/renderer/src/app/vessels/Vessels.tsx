@@ -1,3 +1,4 @@
+import { useProtectedDraft } from '../DraftProtection'
 import { VesselFields, vesselDetails, vesselSummary } from './VesselFields'
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
@@ -17,22 +18,49 @@ export function Vessels({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
-  const vessels = useVessels(archives)
+  const vessels = useVessels(archives, () => {
+    setCreating(false)
+    setEditorHidden(false)
+    setPreviewHidden(false)
+  })
   const [creating, setCreating] = useState(false)
+  const [editorHidden, setEditorHidden] = useState(false)
+  const [previewHidden, setPreviewHidden] = useState(false)
   const [restorePending, setRestorePending] = useState(false)
   const trigger = useRef<HTMLElement | null>(null)
   const section = useRef<HTMLElement>(null)
   const createButton = useRef<HTMLButtonElement>(null)
   const { busy, editor, preview, history, page } = vessels
-  const opened = creating || !!editor || !!preview
+  const opened = creating || (!!editor && !editorHidden) || (!!preview && !previewHidden)
   useEffect(() => {
     onDialogChange(opened)
     return () => onDialogChange(false)
   }, [opened, onDialogChange])
 
+  const guard = useProtectedDraft({
+    state: vessels.busy
+      ? 'BUSY'
+      : creating || !!vessels.editor || !!vessels.preview || !!vessels.createContext
+        ? 'DRAFT'
+        : 'CLEAN',
+    discard: () => {
+      setCreating(false)
+      setEditorHidden(false)
+      setPreviewHidden(false)
+      vessels.discardDraft()
+    },
+    recover: () => {},
+  })
   function openDialog(action: () => void) {
     trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    action()
+    guard.request({
+      label: 'avviare il nuovo comando',
+      run: () => {
+        setEditorHidden(false)
+        setPreviewHidden(false)
+        action()
+      },
+    })
   }
   useEffect(() => {
     if (!restorePending || opened || busy) return
@@ -72,6 +100,19 @@ export function Vessels({
       aria-labelledby="vessels-heading"
       tabIndex={-1}
     >
+      {vessels.writeRecovery}
+      {(editorHidden || previewHidden || (!creating && vessels.createContext)) && (
+        <Button
+          variant="default"
+          onClick={() => {
+            if (vessels.preview) setPreviewHidden(false)
+            else if (vessels.editor) setEditorHidden(false)
+            else setCreating(true)
+          }}
+        >
+          Riprendi bozza
+        </Button>
+      )}
       <div className="ports-workspace">
         <section className="archive-panel port-list" role="group" aria-label="Elenco navi">
           <Group justify="space-between">
@@ -115,7 +156,12 @@ export function Vessels({
                 status={vessel.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
                 selected={vessels.selection === vessel.id}
                 disabled={busy}
-                onClick={() => vessels.select(vessel.id)}
+                onClick={() =>
+                  guard.request({
+                    label: 'cambiare selezione',
+                    run: () => vessels.select(vessel.id),
+                  })
+                }
               />
             ))}
           </Stack>
@@ -235,6 +281,7 @@ export function Vessels({
           }}
         >
           <Stack>
+            {vessels.writeRecoveryControl}
             {message}
             <VesselFields
               value={vessels.description}
@@ -264,8 +311,8 @@ export function Vessels({
 
       <Modal
         {...modalProps}
-        opened={!!editor && !preview}
-        onClose={() => !busy && vessels.changeEditor(null)}
+        opened={!!editor && !preview && !editorHidden}
+        onClose={() => !vessels.busy && setEditorHidden(true)}
         title={editor?.versionId ? 'Correggi versione nave' : 'Nuova versione nave'}
         size="lg"
       >
@@ -277,6 +324,7 @@ export function Vessels({
             }}
           >
             <Stack>
+              {vessels.writeRecoveryControl}
               {message}
               <VesselFields
                 value={editor}
@@ -318,13 +366,14 @@ export function Vessels({
 
       <Modal
         {...modalProps}
-        opened={!!preview}
-        onClose={() => !busy && vessels.cancelPreview()}
+        opened={!!preview && !previewHidden}
+        onClose={() => !vessels.busy && setPreviewHidden(true)}
         title="Anteprima nave e conferma"
         size="xl"
       >
         {preview && (
           <>
+            {vessels.writeRecoveryControl}
             {message}
             <PortConfirmation
               key={preview.previewId}

@@ -1,3 +1,4 @@
+import { useProtectedDraft } from '../DraftProtection'
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
 import { PageControls } from '../PageControls'
@@ -16,22 +17,49 @@ export function Agencies({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
-  const agencies = useAgencies(archives)
+  const agencies = useAgencies(archives, () => {
+    setCreating(false)
+    setEditorHidden(false)
+    setPreviewHidden(false)
+  })
   const [creating, setCreating] = useState(false)
+  const [editorHidden, setEditorHidden] = useState(false)
+  const [previewHidden, setPreviewHidden] = useState(false)
   const [restorePending, setRestorePending] = useState(false)
   const trigger = useRef<HTMLElement | null>(null)
   const section = useRef<HTMLElement>(null)
   const createButton = useRef<HTMLButtonElement>(null)
   const { busy, editor, preview, history, page } = agencies
-  const opened = creating || !!editor || !!preview
+  const opened = creating || (!!editor && !editorHidden) || (!!preview && !previewHidden)
   useEffect(() => {
     onDialogChange(opened)
     return () => onDialogChange(false)
   }, [opened, onDialogChange])
 
+  const guard = useProtectedDraft({
+    state: agencies.busy
+      ? 'BUSY'
+      : creating || !!agencies.editor || !!agencies.preview || !!agencies.createContext
+        ? 'DRAFT'
+        : 'CLEAN',
+    discard: () => {
+      setCreating(false)
+      setEditorHidden(false)
+      setPreviewHidden(false)
+      agencies.discardDraft()
+    },
+    recover: () => {},
+  })
   function openDialog(action: () => void) {
     trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    action()
+    guard.request({
+      label: 'avviare il nuovo comando',
+      run: () => {
+        setEditorHidden(false)
+        setPreviewHidden(false)
+        action()
+      },
+    })
   }
   useEffect(() => {
     if (!restorePending || opened || busy) return
@@ -71,6 +99,19 @@ export function Agencies({
       aria-labelledby="agencies-heading"
       tabIndex={-1}
     >
+      {agencies.writeRecovery}
+      {(editorHidden || previewHidden || (!creating && agencies.createContext)) && (
+        <Button
+          variant="default"
+          onClick={() => {
+            if (agencies.preview) setPreviewHidden(false)
+            else if (agencies.editor) setEditorHidden(false)
+            else setCreating(true)
+          }}
+        >
+          Riprendi bozza
+        </Button>
+      )}
       <div className="ports-workspace">
         <section className="archive-panel port-list" role="group" aria-label="Elenco agenzie">
           <Group justify="space-between">
@@ -114,7 +155,12 @@ export function Agencies({
                 status={agency.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
                 selected={agencies.selection === agency.id}
                 disabled={busy}
-                onClick={() => agencies.select(agency.id)}
+                onClick={() =>
+                  guard.request({
+                    label: 'cambiare selezione',
+                    run: () => agencies.select(agency.id),
+                  })
+                }
               />
             ))}
           </Stack>
@@ -233,6 +279,7 @@ export function Agencies({
           }}
         >
           <Stack>
+            {agencies.writeRecoveryControl}
             {message}
             <TextInput
               label="Ragione sociale"
@@ -269,8 +316,8 @@ export function Agencies({
 
       <Modal
         {...modalProps}
-        opened={!!editor && !preview}
-        onClose={() => !busy && agencies.changeEditor(null)}
+        opened={!!editor && !preview && !editorHidden}
+        onClose={() => !agencies.busy && setEditorHidden(true)}
         title={editor?.versionId ? 'Correggi versione agenzia' : 'Nuova versione agenzia'}
         size="lg"
       >
@@ -282,6 +329,7 @@ export function Agencies({
             }}
           >
             <Stack>
+              {agencies.writeRecoveryControl}
               {message}
               <TextInput
                 label="Ragione sociale"
@@ -332,13 +380,14 @@ export function Agencies({
 
       <Modal
         {...modalProps}
-        opened={!!preview}
-        onClose={() => !busy && agencies.cancelPreview()}
+        opened={!!preview && !previewHidden}
+        onClose={() => !agencies.busy && setPreviewHidden(true)}
         title="Anteprima agenzia e conferma"
         size="xl"
       >
         {preview && (
           <>
+            {agencies.writeRecoveryControl}
             {message}
             <PortConfirmation
               key={preview.previewId}

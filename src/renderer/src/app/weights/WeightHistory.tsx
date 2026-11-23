@@ -1,3 +1,5 @@
+import { useProtectedDraft } from '../DraftProtection'
+import { SingleFlight } from '../../api/single-flight'
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
 import type {
@@ -37,6 +39,7 @@ export function WeightHistory({
   trigger,
   resumeTrigger,
   onClose,
+  onResume,
   onUncertainChange,
   onApplied,
 }: {
@@ -47,6 +50,7 @@ export function WeightHistory({
   trigger: HTMLElement | null
   resumeTrigger: RefObject<HTMLButtonElement | null>
   onClose: (keep: boolean) => void
+  onResume: () => void
   onUncertainChange: (value: boolean) => void
   onApplied: () => void
 }) {
@@ -83,6 +87,30 @@ export function WeightHistory({
       draft.context.archiveId !== context.archiveId ||
       draft.context.sessionId !== context.sessionId ||
       draft.context.revision !== context.revision)
+  const [flight] = useState(() => new SingleFlight())
+  const guard = useProtectedDraft({
+    get state() {
+      return flight.busy
+        ? 'BUSY'
+        : uncertain
+          ? 'UNCERTAIN'
+          : busy
+            ? 'BUSY'
+            : draft
+              ? 'DRAFT'
+              : 'CLEAN'
+    },
+    discard: () => {
+      invalidate()
+      setDraft(null)
+      setEditing(false)
+      onClose(false)
+    },
+    recover: () => {
+      onResume()
+      setEditing(true)
+    },
+  })
   const disabled = busy || stale || uncertain
   useEffect(() => {
     active.current = true
@@ -151,24 +179,30 @@ export function WeightHistory({
     return r
   }
   const start = (operation: Draft['operation'], before: WeightVersionDto | null) => {
-    if (busy || reading.loading || draft || historyContext.revision !== context.revision) return
-    invalidate()
-    setReloadRequired(false)
-    setDraft({
-      operation,
-      before,
-      context: { ...historyContext },
-      weight: before?.weight.replace('.', ',') ?? '1',
-      moment: before
-        ? before.effectiveMoment
-          ? {
-              localDateTime: before.effectiveMoment.localDateTime,
-              selectedOffset: before.effectiveMoment.offset,
-            }
-          : null
-        : emptyMoment(),
+    guard.request({
+      label: 'modificare il peso',
+      run: () => {
+        if (busy || reading.loading || historyContext.revision !== context.revision) return
+        invalidate()
+        setReloadRequired(false)
+        setDraft({
+          operation,
+          before,
+          context: { ...historyContext },
+          weight: before?.weight.replace('.', ',') ?? '1',
+          moment: before
+            ? before.effectiveMoment
+              ? {
+                  localDateTime: before.effectiveMoment.localDateTime,
+                  selectedOffset: before.effectiveMoment.offset,
+                }
+              : null
+            : emptyMoment(),
+        })
+        setEditing(true)
+        onResume()
+      },
     })
-    setEditing(true)
   }
   const reloadDraft = async () => {
     if (!draft || busy || uncertain) return
@@ -239,24 +273,25 @@ export function WeightHistory({
     setReload((n) => n + 1)
     onApplied()
   }
-  const write = async () => {
-    if (!draft || !preview || disabled) return
-    expected.current = { versionId: preview.versionId, version: preview.version }
-    const r = await editor.request(() =>
-      checked(() =>
-        window.catalog.confirmWeight({
-          context: preview.context,
-          payload: { previewId: preview.previewId },
-        }),
-      ),
-    )
-    if (!active.current) return
-    if (r?.ok) applied()
-    else if (!r || r.error.code === 'UNEXPECTED') {
-      setUncertain(true)
-      setPreview(null)
-    }
-  }
+  const write = async () =>
+    flight.run(async () => {
+      if (!draft || !preview || disabled) return
+      expected.current = { versionId: preview.versionId, version: preview.version }
+      const r = await editor.request(() =>
+        checked(() =>
+          window.catalog.confirmWeight({
+            context: preview.context,
+            payload: { previewId: preview.previewId },
+          }),
+        ),
+      )
+      if (!active.current) return
+      if (r?.ok) applied()
+      else if (!r || r.error.code === 'UNEXPECTED') {
+        setUncertain(true)
+        setPreview(null)
+      }
+    })
   const verify = async () => {
     if (!draft || !uncertain || busy || !expected.current) return
     const r = await editor.request(() =>
@@ -452,7 +487,7 @@ export function WeightHistory({
               confine incluso e terminano al confine escluso.
             </p>
             {reading.loading && <p role="status">Caricamento cronologia…</p>}
-            {draft ? (
+            {draft && (
               <Group>
                 <Button disabled={busy} onClick={() => setEditing(true)}>
                   Riprendi bozza
@@ -461,21 +496,25 @@ export function WeightHistory({
                   disabled={busy || uncertain}
                   variant="default"
                   onClick={() => {
-                    invalidate()
-                    setDraft(null)
+                    guard.request({
+                      label: 'scartare la bozza del peso',
+                      run: () => {
+                        invalidate()
+                        setDraft(null)
+                      },
+                    })
                   }}
                 >
                   Scarta bozza
                 </Button>
               </Group>
-            ) : (
-              <Button
-                disabled={busy || reading.loading || !history}
-                onClick={() => start('INSERT', null)}
-              >
-                Nuova versione del peso
-              </Button>
             )}
+            <Button
+              disabled={busy || reading.loading || !history}
+              onClick={() => start('INSERT', null)}
+            >
+              Nuova versione del peso
+            </Button>
             {history?.versions.items.map((v) => (
               <section key={v.id} className="archive-panel">
                 <Group justify="space-between">
@@ -498,7 +537,7 @@ export function WeightHistory({
                 <Group>
                   <Button
                     variant="default"
-                    disabled={busy || reading.loading || !!draft}
+                    disabled={busy || reading.loading}
                     onClick={() => start('UPDATE', v)}
                   >
                     Correggi peso
@@ -506,7 +545,7 @@ export function WeightHistory({
                   <Button
                     variant="light"
                     color="red"
-                    disabled={busy || reading.loading || !!draft || v.effectiveFrom === null}
+                    disabled={busy || reading.loading || v.effectiveFrom === null}
                     onClick={() => start('DELETE', v)}
                   >
                     Elimina versione

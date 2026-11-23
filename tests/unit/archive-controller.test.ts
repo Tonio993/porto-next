@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+import { trackedRequest, writeOutcomeChannel } from '../../src/shared/contracts/write-outcomes'
 import { ServiceService } from '../../src/backend/application/services/service-service'
 import { serviceChannels } from '../../src/shared/contracts/services'
 import { registerServiceIpc } from '../../src/main/ipc/register'
@@ -620,4 +622,49 @@ describe('confine IPC', () => {
     )
     expect(execute).toHaveBeenCalledOnce()
   })
+})
+it('PR02: ricevute IPC protette da mittente/frame/sessione; nessuna seconda invocazione della scrittura', async () => {
+  await create('ricevute')
+  const context = state.context!,
+    attemptId = randomUUID()
+  const service = new AgencyService(new ArchiveCoordinator())
+  const execute = vi
+    .spyOn(service, 'reactivate')
+    .mockResolvedValue({ ok: true, value: { agencyId: 'agenzia' }, context })
+  registerArchiveIpc(controller, () => owner)
+  registerAgencyIpc(service, () => owner)
+  const handler = (name: string) =>
+    vi.mocked(ipcMain.handle).mock.calls.find(([channel]) => channel === name)![1]
+  const event = {
+    sender: owner.webContents,
+    senderFrame: owner.webContents.mainFrame,
+  } as Electron.IpcMainInvokeEvent
+  const request = trackedRequest({ context, payload: { agencyId: 'agenzia' } }, attemptId)
+  await handler(agencyChannels.reactivate)(event, request)
+  expect(execute).toHaveBeenCalledWith({ context, payload: { agencyId: 'agenzia' } })
+  const read = { context: { sessionId: context.sessionId }, query: { attemptId } }
+  for (const wrong of [
+    { sender: {}, senderFrame: owner.webContents.mainFrame },
+    { sender: owner.webContents, senderFrame: {} },
+  ])
+    expect(
+      await handler(writeOutcomeChannel)(wrong as Electron.IpcMainInvokeEvent, read),
+    ).toMatchObject({ ok: false, context: null, error: { code: 'INVALID_INPUT' } })
+  expect(await handler(writeOutcomeChannel)(event, read)).toMatchObject({
+    ok: true,
+    value: { outcome: 'APPLIED', context },
+  })
+  expect(await handler(agencyChannels.reactivate)(event, request)).toMatchObject({
+    ok: false,
+    error: { code: 'VALIDATION_ERROR' },
+  })
+  expect(execute).toHaveBeenCalledTimes(1)
+  await create('seconda sessione ricevute')
+  const metadata = vi.spyOn(DatabaseSession.prototype, 'metadata')
+  expect(await handler(writeOutcomeChannel)(event, read)).toMatchObject({
+    ok: false,
+    context: null,
+    error: { code: 'ARCHIVE_SESSION_CHANGED' },
+  })
+  expect(metadata).not.toHaveBeenCalled()
 })

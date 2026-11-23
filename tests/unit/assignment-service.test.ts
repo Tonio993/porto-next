@@ -1,4 +1,9 @@
 import { mkdtempSync, rmSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
+import { WriteAttempt } from '../../src/renderer/src/api/write-attempt'
+import { DraftGuard } from '../../src/renderer/src/api/draft-guard'
+import { WriteOutcomeStore } from '../../src/main/ipc/write-outcome-store'
+import { trackedRequest } from '../../src/shared/contracts/write-outcomes'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -681,3 +686,56 @@ it('anteprima assegnazione paginata: conferma tutti gli effetti oltre la prima p
       .every((s) => s.subjects.customer?.id === c),
   ).toBe(true)
 }, 20000)
+it('PR02 assegnazioni: risposta persa, navigazione e nuovo bersaglio bloccati fino al recupero del tentativo originale', async () => {
+  const operation = await create(input('ENTRY', '2026-06-01T12:00', 'PERFORMED'))
+  const customerId = await customer(),
+    api = service(),
+    originalTarget = target('VESSEL_OPERATION', operation.id)
+  const p = value(
+    await api.preview({
+      context: context(),
+      payload: { target: originalTarget, specified: { customerId, agencyId: null } },
+    }),
+  )
+  const before = context(),
+    store = new WriteOutcomeStore(),
+    attempt = new WriteAttempt(),
+    guard = new DraftGuard()
+  const write = vi.fn((request: unknown) =>
+    api.confirm(request as Parameters<typeof api.confirm>[0]),
+  )
+  const navigate = vi.fn()
+  guard.register({}, () => ({
+    state: attempt.busy ? 'BUSY' : attempt.uncertain ? 'UNCERTAIN' : 'DRAFT',
+    discard: vi.fn(),
+    recover: vi.fn(),
+  }))
+  await attempt.run(before, randomUUID(), async (attemptId) => {
+    await store.execute(
+      trackedRequest({ context: p.context, payload: { previewId: p.previewId } }, attemptId),
+      write,
+    )
+    return null
+  })
+  for (const label of ['nuova assegnazione', 'altra nave', 'sottosezione']) {
+    expect(guard.request({ label, run: navigate })).toBe(false)
+    guard.cancel()
+  }
+  expect(navigate).not.toHaveBeenCalled()
+  expect(
+    await attempt.recover(async (attemptId, snapshot) => ({
+      ok: true,
+      context: context(),
+      value: store.get(
+        { context: { sessionId: snapshot.sessionId }, query: { attemptId } },
+        context(),
+      ),
+    })),
+  ).toBe('APPLIED')
+  const actual = value(
+    await api.get({ context: { sessionId: context().sessionId }, query: originalTarget }),
+  )
+  expect(actual.specified).toEqual({ customerId, agencyId: null })
+  expect(context().revision).toBe((BigInt(before.revision) + 1n).toString())
+  expect(write).toHaveBeenCalledTimes(1)
+})

@@ -1,3 +1,5 @@
+import { useProtectedDraft } from '../DraftProtection'
+import { SingleFlight } from '../../api/single-flight'
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { Button, Group, Modal, Stack } from '@mantine/core'
 import type {
@@ -29,6 +31,7 @@ export function TariffMaintenanceEditor({
   trigger,
   resumeTrigger,
   onClose,
+  onResume,
   onApplied,
   withDetailSuspended,
   onUncertainChange,
@@ -41,6 +44,7 @@ export function TariffMaintenanceEditor({
   trigger: HTMLElement | null
   resumeTrigger: RefObject<HTMLButtonElement | null>
   onClose: () => void
+  onResume: () => void
   withDetailSuspended: ReturnType<typeof useApplicationRequest>['suspendWhile']
   onApplied: (value: TariffDto | null) => void
   onUncertainChange: (value: boolean) => void
@@ -71,6 +75,19 @@ export function TariffMaintenanceEditor({
     draftContext.revision !== context.revision ||
     draftContext.sessionId !== context.sessionId ||
     draftContext.archiveId !== context.archiveId
+  const [flight] = useState(() => new SingleFlight())
+  useProtectedDraft({
+    get state() {
+      return flight.busy ? 'BUSY' : uncertain ? 'UNCERTAIN' : busy ? 'BUSY' : 'DRAFT'
+    },
+    discard: () => {
+      invalidate()
+      onClose()
+    },
+    recover: () => {
+      onResume()
+    },
+  })
   const disabled = busy || stale || uncertain
   useEffect(() => {
     active.current = true
@@ -181,24 +198,26 @@ export function TariffMaintenanceEditor({
     else if (r && !r.ok) setIssues(r.error.fields)
   }
   const write = async () =>
-    withDetailSuspended(async () => {
-      if (disabled || !preview) return
-      expected.current = mode === 'UPDATE' ? preview.tariff : null
-      const request = { context: preview.context, payload: { previewId: preview.previewId } }
-      const r = await editor.request(() =>
-        checked<TariffDto | { id: string }>(() =>
-          mode === 'UPDATE'
-            ? window.tariffs.confirmUpdate(request)
-            : window.tariffs.confirmDelete(request),
-        ),
-      )
-      if (!active.current) return
-      if (r?.ok) onApplied(mode === 'UPDATE' ? (r.value as TariffDto) : null)
-      else if (!r || r.error.code === 'UNEXPECTED') {
-        setUncertain(true)
-        setPreview(null)
-      }
-    }, mode === 'DELETE')
+    flight.run(async () =>
+      withDetailSuspended(async () => {
+        if (disabled || !preview) return
+        expected.current = mode === 'UPDATE' ? preview.tariff : null
+        const request = { context: preview.context, payload: { previewId: preview.previewId } }
+        const r = await editor.request(() =>
+          checked<TariffDto | { id: string }>(() =>
+            mode === 'UPDATE'
+              ? window.tariffs.confirmUpdate(request)
+              : window.tariffs.confirmDelete(request),
+          ),
+        )
+        if (!active.current) return
+        if (r?.ok) onApplied(mode === 'UPDATE' ? (r.value as TariffDto) : null)
+        else if (!r || r.error.code === 'UNEXPECTED') {
+          setUncertain(true)
+          setPreview(null)
+        }
+      }, mode === 'DELETE'),
+    )
   return (
     <Modal
       opened={opened}

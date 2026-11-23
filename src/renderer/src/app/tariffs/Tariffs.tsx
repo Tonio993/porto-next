@@ -1,3 +1,6 @@
+import { useProtectedDraft } from '../DraftProtection'
+import { useWriteAttempt } from '../../api/use-write-attempt'
+import { trackedRequest } from '../../../../shared/contracts/write-outcomes'
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, Group, Modal, Stack } from '@mantine/core'
 import type {
@@ -54,6 +57,8 @@ export function Tariffs({
   const [selected, setSelected] = useState<string | null>(null),
     [detail, setDetail] = useState<TariffDto | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [draftVisible, setDraftVisible] = useState(true)
+  const [maintenanceGeneration, setMaintenanceGeneration] = useState(0)
   const [preview, setPreview] = useState<TariffPreviewDto | null>(null)
   const [maintenance, setMaintenance] = useState<{
     tariff: TariffDto
@@ -91,9 +96,49 @@ export function Tariffs({
   }, [readPort, portId, context.sessionId, context.revision])
   const { request: readList } = listRequest,
     { request: readDetail, invalidate: invalidateDetail } = detailRequest
+  const discardDraft = () => {
+    setMaintenanceGeneration((n) => n + 1)
+    setMaintenance(null)
+    setDraft(null)
+    setPreview(null)
+    setResolution(null)
+    setDialogError(null)
+    setIssues([])
+    setCopyOpen(false)
+    commandRequest.invalidate()
+    effectsRequest.invalidate()
+    momentRequest.invalidate()
+    copyRequest.invalidate()
+  }
+  const writes = useWriteAttempt(
+    archives,
+    () => {
+      discardDraft()
+      setSelected(null)
+      setDetail(null)
+      setReload((n) => n + 1)
+    },
+    detailRequest.suspendWhile,
+  )
+  const guard = useProtectedDraft({
+    state: writes.attempt.uncertain
+      ? 'UNCERTAIN'
+      : archives.commandBusy || commandRequest.loading || writes.attempt.busy
+        ? 'BUSY'
+        : draft || preview || maintenance
+          ? 'DRAFT'
+          : 'CLEAN',
+    discard: discardDraft,
+    recover: writes.openRecovery,
+  })
   const busy =
-    archives.busy || archives.commandBusy || commandRequest.loading || copyRequest.loading
-  const dialogOpen = !!draft || !!calculatorPort
+    writes.attempt.busy ||
+    writes.attempt.uncertain ||
+    archives.busy ||
+    archives.commandBusy ||
+    commandRequest.loading ||
+    copyRequest.loading
+  const dialogOpen = (!!draft && draftVisible) || !!calculatorPort
   const anyDialogOpen = dialogOpen || !!maintenance?.opened
   useEffect(() => {
     onDialogChange(anyDialogOpen)
@@ -144,42 +189,42 @@ export function Tariffs({
   }
   const close = () => {
     if (busy) return
-    commandRequest.invalidate()
-    effectsRequest.invalidate()
     momentRequest.invalidate()
     copyRequest.invalidate()
-    setDraft(null)
-    setPreview(null)
+    effectsRequest.invalidate()
+    setDraftVisible(false)
     setCalculatorPort(null)
-    setResolution(null)
-    setDialogError(null)
-    setIssues([])
-    setCopyOpen(false)
   }
-  const create = async (copy = false) => {
-    if (!portId) return
-    rememberTrigger()
-    setDialogError(null)
-    setIssues([])
-    setResolution(null)
-    setPreview(null)
-    setCopyOpen(false)
-    const next = {
-      context: { ...context },
-      portId,
-      moment: emptyMoment(),
-      configurations: emptyConfigurations(),
-    }
-    setDraft(next)
-    if (copy && detail) {
-      const r = await copyRequest.request(() =>
-        window.tariffs.copyConfigurations({
-          context: { sessionId: context.sessionId },
-          query: { id: detail.id },
-        }),
-      )
-      if (r?.ok) setDraft({ ...next, configurations: copyDraft(r.value) })
-    }
+  const create = (copy = false) => {
+    guard.request({
+      label: 'creare una tariffa',
+      run: async () => {
+        if (!portId) return
+        rememberTrigger()
+        setDraftVisible(true)
+        setDialogError(null)
+        setIssues([])
+        setResolution(null)
+        setPreview(null)
+        setCopyOpen(false)
+        const next = {
+          context: { ...context },
+          portId,
+          moment: emptyMoment(),
+          configurations: emptyConfigurations(),
+        }
+        setDraft(next)
+        if (copy && detail) {
+          const r = await copyRequest.request(() =>
+            window.tariffs.copyConfigurations({
+              context: { sessionId: context.sessionId },
+              query: { id: detail.id },
+            }),
+          )
+          if (r?.ok) setDraft({ ...next, configurations: copyDraft(r.value) })
+        }
+      },
+    })
   }
   const submit = async () => {
     if (!draft) return
@@ -206,12 +251,19 @@ export function Tariffs({
   const confirm = async () => {
     if (!preview) return
     setDialogError(null)
-    const r = await commandRequest.request(() =>
-      archives.execute(() =>
-        window.tariffs.confirmCreate({
-          context: preview.context,
-          payload: { previewId: preview.previewId },
-        }),
+    const r = await writes.attempt.run(preview.context, crypto.randomUUID(), (attemptId) =>
+      commandRequest.request(() =>
+        archives.execute(() =>
+          window.tariffs.confirmCreate(
+            trackedRequest(
+              {
+                context: preview.context,
+                payload: { previewId: preview.previewId },
+              },
+              attemptId,
+            ),
+          ),
+        ),
       ),
     )
     if (r?.ok) {
@@ -248,6 +300,12 @@ export function Tariffs({
   }
   return (
     <>
+      {writes.recovery}
+      {draft && !draftVisible && (
+        <Button variant="default" onClick={() => setDraftVisible(true)}>
+          Riprendi bozza tariffa
+        </Button>
+      )}
       {error && (
         <StateMessage title="Tariffe non disponibili" kind="error">
           {error}
@@ -290,7 +348,12 @@ export function Tariffs({
             <Button
               variant="default"
               disabled={busy || maintenance.uncertain}
-              onClick={() => setMaintenance(null)}
+              onClick={() => {
+                guard.request({
+                  label: 'scartare la bozza della tariffa',
+                  run: () => setMaintenance(null),
+                })
+              }}
             >
               Scarta bozza
             </Button>
@@ -304,7 +367,7 @@ export function Tariffs({
             <Button
               size="compact-sm"
               ref={newButton}
-              disabled={busy || !portId || !!maintenance}
+              disabled={busy || !portId}
               onClick={() => void create()}
             >
               Nuova tariffa
@@ -315,17 +378,22 @@ export function Tariffs({
             value={portId}
             disabled={busy}
             onChange={(id) => {
-              listRequest.invalidate()
-              detailRequest.invalidate()
-              portRequest.invalidate()
-              setPort(null)
-              setPortId(id)
-              setPage(1)
-              setList(null)
-              setSelected(null)
-              setDetail(null)
-              setError(null)
-              setNotice(null)
+              guard.request({
+                label: 'cambiare porto',
+                run: () => {
+                  listRequest.invalidate()
+                  detailRequest.invalidate()
+                  portRequest.invalidate()
+                  setPort(null)
+                  setPortId(id)
+                  setPage(1)
+                  setList(null)
+                  setSelected(null)
+                  setDetail(null)
+                  setError(null)
+                  setNotice(null)
+                },
+              })
             }}
           />
           {listRequest.loading && <p role="status">Caricamento tariffe…</p>}
@@ -379,7 +447,7 @@ export function Tariffs({
             <h2>Tariffa e calcolo base</h2>
             <Button
               variant="light"
-              disabled={busy || !portId || !!maintenance}
+              disabled={busy || !portId}
               onClick={() => {
                 rememberTrigger()
                 setCalculatorPort(portId)
@@ -401,11 +469,7 @@ export function Tariffs({
                 Fine esclusa: {detail.effectiveTo ?? 'Senza limite finale'}
               </p>
               <Group>
-                <Button
-                  variant="default"
-                  disabled={busy || !!maintenance}
-                  onClick={() => void create(true)}
-                >
+                <Button variant="default" disabled={busy} onClick={() => void create(true)}>
                   Copia tariffa
                 </Button>
                 {(['UPDATE', 'DELETE'] as const).map((mode) => (
@@ -413,16 +477,21 @@ export function Tariffs({
                     key={mode}
                     variant="light"
                     color={mode === 'DELETE' ? 'red' : undefined}
-                    disabled={busy || !!maintenance}
+                    disabled={busy}
                     onClick={() => {
-                      rememberTrigger()
-                      setMaintenance({
-                        tariff: detail,
-                        mode,
-                        context: { ...context },
-                        opened: true,
-                        uncertain: false,
-                        trigger: trigger.current,
+                      guard.request({
+                        label: 'modificare la tariffa',
+                        run: () => {
+                          rememberTrigger()
+                          setMaintenance({
+                            tariff: detail,
+                            mode,
+                            context: { ...context },
+                            opened: true,
+                            uncertain: false,
+                            trigger: trigger.current,
+                          })
+                        },
                       })
                     }}
                   >
@@ -442,6 +511,7 @@ export function Tariffs({
       </div>
       {maintenance && (
         <TariffMaintenanceEditor
+          key={maintenanceGeneration}
           tariff={maintenance.tariff}
           mode={maintenance.mode}
           opened={maintenance.opened}
@@ -451,6 +521,7 @@ export function Tariffs({
           trigger={maintenance.trigger}
           resumeTrigger={resumeMaintenanceButton}
           onClose={() => setMaintenance((old) => (old ? { ...old, opened: false } : null))}
+          onResume={() => setMaintenance((old) => old && { ...old, opened: true })}
           onUncertainChange={(uncertain) =>
             setMaintenance((old) =>
               old && old.uncertain !== uncertain ? { ...old, uncertain } : old,
@@ -496,6 +567,7 @@ export function Tariffs({
         ) : (
           draft && (
             <Stack>
+              {writes.control}
               {dialogError && (
                 <StateMessage title="Operazione non completata" kind="error">
                   {dialogError}

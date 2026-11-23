@@ -1,3 +1,5 @@
+import { useProtectedDraft } from '../DraftProtection'
+import { SingleFlight } from '../../api/single-flight'
 import { useEffect, useRef, useState } from 'react'
 import { Button, Group, Modal, Select, Stack, Textarea, TextInput } from '@mantine/core'
 import type { ApplicationResult, ArchiveContextDto } from '../../../../shared/contracts/application'
@@ -61,6 +63,7 @@ export function OperationCompletionEditor({
   originalContext,
   archives,
   onClose,
+  onResume,
   onApplied,
   trigger,
   correction = false,
@@ -70,6 +73,7 @@ export function OperationCompletionEditor({
   originalContext: ArchiveContextDto
   archives: ReturnType<typeof useArchives>
   onClose: () => void
+  onResume: () => void
   onApplied: (value: VesselOperationDto) => void
   trigger: HTMLElement | null
   correction?: boolean
@@ -154,6 +158,7 @@ export function OperationCompletionEditor({
     return result
   }
   const reload = async () => {
+    if (uncertain || busy) return
     invalidate()
     const result = await editor.request(() =>
       checked(() =>
@@ -219,27 +224,41 @@ export function OperationCompletionEditor({
       )
     }
   }
-  const confirm = async () => {
-    if (!preview || uncertain) return
-    expected.current = preview.operationValues
-    const result = await editor.request(() =>
-      checked(() =>
-        api.confirm({
-          context: preview.context,
-          payload: { previewId: preview.previewId },
-        }),
-      ),
-    )
-    if (!active.current) return
-    if (result?.ok) {
-      onApplied(result.value)
-      setOpen(false)
-    } else if (!result || (!result.ok && result.error.code === 'UNEXPECTED')) {
-      setUncertain(true)
-      setPreview(null)
-    }
-  }
+  const confirm = async () =>
+    flight.run(async () => {
+      if (!preview || uncertain) return
+      expected.current = preview.operationValues
+      const result = await editor.request(() =>
+        checked(() =>
+          api.confirm({
+            context: preview.context,
+            payload: { previewId: preview.previewId },
+          }),
+        ),
+      )
+      if (!active.current) return
+      if (result?.ok) {
+        onApplied(result.value)
+        setOpen(false)
+      } else if (!result || (!result.ok && result.error.code === 'UNEXPECTED')) {
+        setUncertain(true)
+        setPreview(null)
+      }
+    })
   const missed = !correction && values.executionStatus === 'MISSED'
+  const [flight] = useState(() => new SingleFlight())
+  useProtectedDraft({
+    get state() {
+      return flight.busy ? 'BUSY' : uncertain ? 'UNCERTAIN' : busy ? 'BUSY' : 'DRAFT'
+    },
+    discard: () => {
+      invalidate()
+      onClose()
+    },
+    recover: () => {
+      onResume()
+    },
+  })
   const disabled =
     busy || stale || uncertain || (!correction && original.executionStatus !== 'PLANNED')
   const showPreview = () => {
@@ -306,7 +325,7 @@ export function OperationCompletionEditor({
         </StateMessage>
       )}
       {((stale && !uncertain) || (!correction && uncertain)) && (
-        <Button disabled={busy} onClick={() => void reload()}>
+        <Button disabled={busy} onClick={() => void (uncertain ? verifyOutcome() : reload())}>
           Ricarica bozza
         </Button>
       )}

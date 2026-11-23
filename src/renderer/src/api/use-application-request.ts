@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import type { ApplicationResult, ArchiveContextDto } from '../../../shared/contracts/application'
 import { ResponseScope } from './response-scope'
 import { runApplicationRequest, type RequestOptions } from './application-request'
@@ -11,7 +11,7 @@ export function useApplicationRequest(
   latest.current = context
   const [scope] = useState(() => new ResponseScope(() => latest.current))
   const [loading, setLoading] = useState(false)
-  useEffect(() => {
+  useLayoutEffect(() => {
     scope.activate()
     return () => scope.dispose()
   }, [scope])

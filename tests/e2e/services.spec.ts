@@ -79,6 +79,9 @@ for (const scenario of ['funzionale', 'asincrono'] as const)
       const open = async () => {
         await page.getByRole('button', { name: 'Nuova prestazione libera', exact: true }).click()
         await expect(modal).toBeVisible()
+        const discard = page.getByRole('dialog', { name: 'Scartare la bozza?', exact: true })
+        if (await discard.count())
+          await discard.getByRole('button', { name: 'Scarta', exact: true }).click()
       }
       if (scenario === 'funzionale') {
         await app.evaluate(({ BrowserWindow }) =>
@@ -835,6 +838,18 @@ test('P16 asincrono: filtri, anteprima obsoleta e note con esito incerto richied
 
 async function loseServiceReply(app: ElectronApplication, channel: string) {
   await app.evaluate(({ ipcMain }, channel) => {
+    const state = globalThis as unknown as {
+      pr02ServiceLoss?: Record<string, { lose: boolean }>
+      pr02ServiceWrites?: Record<string, number>
+    }
+    state.pr02ServiceLoss ??= {}
+    state.pr02ServiceWrites ??= {}
+    if (state.pr02ServiceLoss[channel]) {
+      state.pr02ServiceLoss[channel].lose = true
+      return
+    }
+    const holder = { lose: true }
+    state.pr02ServiceLoss[channel] = holder
     const handlers = (
       ipcMain as unknown as {
         _invokeHandlers: Map<
@@ -844,24 +859,24 @@ async function loseServiceReply(app: ElectronApplication, channel: string) {
       }
     )._invokeHandlers
     const original = handlers.get(channel)!
-    let lost = false
     ipcMain.removeHandler(channel)
     ipcMain.handle(channel, async (event, input) => {
+      state.pr02ServiceWrites![channel] = (state.pr02ServiceWrites![channel] ?? 0) + 1
       const result = await original(event, input)
-      if (!lost) {
-        lost = true
-        throw Error('Risposta persa dopo l’esecuzione')
+      if (holder.lose) {
+        holder.lose = false
+        throw Error('Risposta persa dopo esecuzione PR02')
       }
       return result
     })
   }, channel)
 }
+
 for (const category of ['FREE', 'CATALOG'] as const)
-  test(`post-P16 ${category}: creazione e consuntivazione con risposta persa richiedono rilettura`, async ({
+  test(`PR02 ${category}: ricevuta di creazione/consuntivazione/eliminazione persa, recupero senza riscrittura`, async ({
     playwright,
-  }, testInfo) => {
-    test.setTimeout(180000)
-    const folder = mkdtempSync(join(tmpdir(), 'porto-post-p16-')),
+  }) => {
+    const folder = mkdtempSync(join(tmpdir(), 'porto-pr02-services-')),
       path = join(folder, 'review.ormeggi')
     const env = {
       ...process.env,
@@ -872,131 +887,99 @@ for (const category of ['FREE', 'CATALOG'] as const)
     let app: ElectronApplication | undefined
     try {
       app = await playwright._electron.launch({ ...options(), env })
-      const page = await setup(app, path),
-        modal = page.getByRole('dialog')
+      const page = await setup(app, path)
+      const editor = () =>
+        page.getByRole('dialog').filter({ has: page.getByLabel('Momento prestazione locale') })
+      const recovery = () =>
+        page.getByRole('dialog', { name: 'Verifica esito della scrittura', exact: true })
+      const verify = async () => {
+        await expect(recovery()).toBeVisible()
+        await recovery().getByRole('button', { name: 'Verifica esito', exact: true }).click()
+        await expect(page.getByRole('dialog')).toHaveCount(0)
+      }
       await page
         .getByRole('button', {
           name: category === 'FREE' ? 'Nuova prestazione libera' : 'Nuova prestazione da catalogo',
           exact: true,
         })
         .click()
-      await modal.getByLabel('Momento prestazione locale').fill('2026-05-02T13:00')
+      await editor().getByLabel('Momento prestazione locale').fill('2026-05-02T13:00')
       if (category === 'FREE') {
-        await modal
-          .getByRole('textbox', { name: 'Descrizione', exact: true })
-          .fill('Recupero creazione incerta')
-        await modal.getByLabel('Importo base EUR').fill('17.25')
+        await editor().getByLabel('Descrizione', { exact: true }).fill('Recupero creazione incerta')
+        await editor().getByLabel('Importo base EUR').fill('17.25')
       } else {
-        await modal.getByRole('combobox', { name: 'Tipo di prestazione', exact: true }).click()
+        await editor().getByRole('combobox', { name: 'Tipo di prestazione', exact: true }).click()
         await page.getByRole('option', { name: 'rinforzo ormeggio', exact: true }).click()
       }
       await loseServiceReply(
         app,
         category === 'FREE' ? 'services:create-free' : 'services:create-catalog',
       )
-      await modal.getByRole('button', { name: 'Registra prestazione' }).click()
+      await editor().getByRole('button', { name: 'Registra prestazione', exact: true }).click()
+      await expect(recovery()).toBeVisible()
+      await loseServiceReply(app, 'write-outcomes:get')
+      await recovery().getByRole('button', { name: 'Verifica esito', exact: true }).click()
+      await expect(recovery()).toContainText('Esito ancora ignoto')
+      await recovery().press('Escape')
       await expect(
-        modal.getByRole('alert').filter({ hasText: 'Esito non verificato' }),
-      ).toBeVisible()
-      await expect(modal.getByRole('button', { name: 'Registra prestazione' })).toBeDisabled()
-      // A failed verification cannot unlock the write; a delayed one must be awaited.
-      await loseServiceReply(app, 'services:list')
-      await modal.getByRole('button', { name: /Verifica registrazione|Ricarica bozza/ }).click()
-      await expect(modal.getByRole('button', { name: 'Registra prestazione' })).toBeDisabled()
-      await expect(modal.getByRole('alert')).toContainText('La comunicazione')
-      await delayOperationResponse(app, 'services:list')
-      await modal.getByRole('button', { name: 'Verifica registrazione', exact: true }).click()
+        editor().getByRole('button', { name: 'Registra prestazione', exact: true }),
+      ).toBeDisabled()
+      await editor()
+        .getByRole('button', { name: 'Verifica esito della scrittura', exact: true })
+        .click()
+      await delayOperationResponse(app, 'write-outcomes:get')
+      await recovery().getByRole('button', { name: 'Verifica esito', exact: true }).click()
       await expect.poll(() => operationHeld(app!)).toBe(true)
-      await expect(modal.getByRole('button', { name: 'Registra prestazione' })).toBeDisabled()
+      await expect(
+        recovery().getByRole('button', { name: 'Verifica esito', exact: true }),
+      ).toBeDisabled()
       await releaseOperation(app)
-      await expect(modal).toHaveCount(0)
+      await expect(page.getByRole('dialog')).toHaveCount(0)
+      await expect(page.getByRole('button', { name: 'Riprendi bozza', exact: true })).toHaveCount(0)
       await expect(page.getByRole('button', { name: 'Apri prestazione', exact: true })).toHaveCount(
         1,
       )
-      await expect(
-        page.getByText('Verifica nell’elenco le prestazioni già registrate', { exact: false }),
-      ).toBeVisible()
-      if (category === 'FREE') {
-        await app.evaluate(({ BrowserWindow }) =>
-          BrowserWindow.getAllWindows()[0].setSize(960, 700),
-        )
-        if (!process.env.PORTO_PACKAGED_EXE)
-          await page.screenshot({
-            path: testInfo.outputPath('recupero-incerto-minimo.png'),
-            animations: 'disabled',
-          })
-      }
-      await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).click()
-      await expect(modal.getByLabel('Momento prestazione locale')).toHaveValue('2026-05-02T13:00')
-      if (category === 'FREE')
-        await expect(modal.getByRole('textbox', { name: 'Descrizione', exact: true })).toHaveValue(
-          'Recupero creazione incerta',
-        )
-      await expect(modal.getByRole('button', { name: 'Registra prestazione' })).toBeEnabled()
-      await modal.getByRole('button', { name: 'Chiudi', exact: true }).click()
       await page.getByRole('button', { name: 'Apri prestazione', exact: true }).click()
-      const detail = page.getByRole('region', { name: 'Dettaglio prestazione' })
-      await detail.getByRole('button', { name: 'Consuntiva prestazione' }).click()
+      let detail = page.getByRole('region', { name: 'Dettaglio prestazione' })
+      await detail.getByRole('button', { name: 'Consuntiva prestazione', exact: true }).click()
       if (category === 'CATALOG') {
-        await modal.getByRole('combobox', { name: 'Stato', exact: true }).click()
+        await editor().getByRole('combobox', { name: 'Stato', exact: true }).click()
         await page.getByRole('option', { name: 'Mancata', exact: true }).click()
       }
-      await modal.getByRole('button', { name: 'Mostra anteprima' }).click()
+      await editor().getByRole('button', { name: 'Mostra anteprima', exact: true }).click()
       await loseServiceReply(app, 'services:confirm')
-      await modal.getByRole('button', { name: 'Conferma variazione' }).click()
-      await expect(
-        modal.getByRole('alert').filter({ hasText: 'Esito non verificato' }),
-      ).toBeVisible()
-      await modal.getByRole('button', { name: 'Ricarica bozza', exact: true }).click()
-      await expect(
-        modal.getByRole('heading', { name: 'Modifica prestazione', exact: true }),
-      ).toBeVisible()
-      await expect(modal.getByRole('combobox', { name: 'Stato', exact: true })).toHaveValue(
-        category === 'FREE' ? 'Effettuata' : 'Mancata',
-      )
-      if (category === 'CATALOG') {
-        await app.evaluate(({ BrowserWindow }) =>
-          BrowserWindow.getAllWindows()[0].setSize(1440, 960),
-        )
-        if (!process.env.PORTO_PACKAGED_EXE)
-          await page.screenshot({
-            path: testInfo.outputPath('consuntivazione-riletta-desktop.png'),
-            animations: 'disabled',
-          })
-      }
-      await modal.getByRole('button', { name: 'Mostra anteprima' }).click()
-      await expect(modal.getByRole('region', { name: 'Anteprima prestazione' })).toBeVisible()
-      await modal.getByRole('button', { name: 'Conferma variazione' }).click()
-      await expect(modal).toHaveCount(0)
-      const persisted = await page.evaluate(async (vesselId) => {
-        const s = await window.archives.getState()
-        if (!s.ok || !s.value.context) throw Error('context')
-        const r = await window.services.list({
-          context: { sessionId: s.value.context.sessionId },
-          query: { vesselId, page: 1, pageSize: 25 },
-        })
-        if (!r.ok) throw Error(r.error.message)
-        return r.value
-      }, ids.vesselId)
-      expect(persisted.total).toBe(1)
-      expect(persisted.items[0].executionStatus).toBe(category === 'FREE' ? 'PERFORMED' : 'MISSED')
+      await page
+        .getByRole('dialog')
+        .getByRole('button', { name: 'Conferma variazione', exact: true })
+        .click()
+      await verify()
+      await page.getByRole('button', { name: 'Apri prestazione', exact: true }).click()
+      detail = page.getByRole('region', { name: 'Dettaglio prestazione' })
+      await expect(detail).toContainText(category === 'FREE' ? 'Effettuata' : 'Mancata')
       await detail.getByRole('button', { name: 'Elimina prestazione', exact: true }).click()
-      await modal.getByRole('button', { name: 'Mostra anteprima' }).click()
-      // The confirm wrapper loses only its first reply; install another one for deletion.
+      await page
+        .getByRole('dialog')
+        .getByRole('button', { name: 'Mostra anteprima', exact: true })
+        .click()
       await loseServiceReply(app, 'services:confirm')
-      await modal.getByRole('button', { name: 'Conferma variazione' }).click()
-      await expect(
-        modal.getByRole('alert').filter({ hasText: 'Esito non verificato' }),
-      ).toBeVisible()
-      await modal.getByRole('button', { name: 'Ricarica bozza', exact: true }).click()
-      await expect(modal).toHaveCount(0)
-      await expect(page.getByText('La prestazione non esiste più.', { exact: true })).toBeVisible()
+      await page
+        .getByRole('dialog')
+        .getByRole('button', { name: 'Conferma variazione', exact: true })
+        .click()
+      await verify()
       await expect(page.getByRole('button', { name: 'Apri prestazione', exact: true })).toHaveCount(
         0,
       )
-      await page.getByRole('button', { name: 'Nuova prestazione libera', exact: true }).click()
-      await expect(modal.getByRole('button', { name: 'Registra prestazione' })).toBeEnabled()
-      await expect(modal.getByRole('alert')).toHaveCount(0)
+      expect(
+        await app.evaluate(
+          () =>
+            (globalThis as unknown as { pr02ServiceWrites: Record<string, number> })
+              .pr02ServiceWrites,
+        ),
+      ).toMatchObject({
+        [category === 'FREE' ? 'services:create-free' : 'services:create-catalog']: 1,
+        'services:confirm': 2,
+      })
     } finally {
       if (app) await app.close()
       rmSync(folder, { recursive: true, force: true })

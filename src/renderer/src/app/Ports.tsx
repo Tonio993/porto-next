@@ -1,3 +1,4 @@
+import { useProtectedDraft } from './DraftProtection'
 import { useEffect, useRef, useState } from 'react'
 import { Button, Group, Modal, Stack, TextInput } from '@mantine/core'
 import type { useArchives } from '../api/use-archives'
@@ -18,14 +19,48 @@ export function Ports({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (opened: boolean) => void
 }) {
-  const ports = usePorts(archives)
+  const ports = usePorts(archives, () => {
+    setCreating(false)
+    setCreateStarted(false)
+    setEditorHidden(false)
+    setPreviewHidden(false)
+  })
   const [creating, setCreating] = useState(false)
+  const [createStarted, setCreateStarted] = useState(false)
+  const [editorHidden, setEditorHidden] = useState(false)
+  const [previewHidden, setPreviewHidden] = useState(false)
   const [berthDialogOpened, setBerthDialogOpened] = useState(false)
   const dialogTrigger = useRef<HTMLElement | null>(null)
+  const guard = useProtectedDraft({
+    state: ports.busy
+      ? 'BUSY'
+      : createStarted ||
+          !!ports.editor ||
+          !!ports.preview ||
+          !!ports.draft.name ||
+          !!ports.draft.locality
+        ? 'DRAFT'
+        : 'CLEAN',
+    discard: () => {
+      setCreating(false)
+      setCreateStarted(false)
+      setEditorHidden(false)
+      setPreviewHidden(false)
+      ports.discardDraft()
+    },
+    recover: () => {},
+  })
   function openDialog(action: () => void) {
     dialogTrigger.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null
-    action()
+    guard.request({
+      label: 'avviare il nuovo comando',
+      run: () => {
+        setEditorHidden(false)
+        setPreviewHidden(false)
+        action()
+      },
+    })
   }
   function restoreFocus() {
     if (creating || ports.editor || ports.preview) return
@@ -34,7 +69,11 @@ export function Ports({
       : document.querySelector<HTMLButtonElement>('.port-list-heading button')
     target?.focus()
   }
-  const dialogOpened = creating || !!ports.editor || !!ports.preview || berthDialogOpened
+  const dialogOpened =
+    creating ||
+    (!!ports.editor && !editorHidden) ||
+    (!!ports.preview && !previewHidden) ||
+    berthDialogOpened
   useEffect(() => {
     onDialogChange(dialogOpened)
     return () => onDialogChange(false)
@@ -46,17 +85,38 @@ export function Ports({
   )
   return (
     <>
+      {ports.writeRecovery}
+      {(editorHidden || previewHidden || (!creating && createStarted)) && (
+        <Button
+          variant="default"
+          onClick={() => {
+            if (ports.preview) setPreviewHidden(false)
+            else if (ports.editor) setEditorHidden(false)
+            else setCreating(true)
+          }}
+        >
+          Riprendi bozza
+        </Button>
+      )}
       <div className="ports-workspace">
         <PortList
           page={ports.page}
           search={ports.search}
           onSearch={ports.setSearch}
-          onSelect={ports.select}
+          onSelect={(id) => {
+            guard.request({ label: 'cambiare porto', run: () => ports.select(id) })
+          }}
           onPage={ports.setPageNumber}
           loading={ports.loadingList}
           disabled={archives.busy}
           selected={ports.selection}
-          onCreate={() => openDialog(() => setCreating(true))}
+          onCreate={() =>
+            openDialog(() => {
+              ports.openCreate()
+              setCreateStarted(true)
+              setCreating(true)
+            })
+          }
         />
         <div
           className="port-inspector"
@@ -119,11 +179,15 @@ export function Ports({
             onSubmit={(event) => {
               event.preventDefault()
               void ports.create().then((created) => {
-                if (created) setCreating(false)
+                if (created) {
+                  setCreateStarted(false)
+                  setCreating(false)
+                }
               })
             }}
           >
             <Stack>
+              {ports.writeRecoveryControl}
               {modalError}
               <p className="panel-description">
                 Il porto nasce attivo, con una versione iniziale senza decorrenza.
@@ -170,8 +234,8 @@ export function Ports({
         </section>
       </Modal>
       <Modal
-        opened={!!ports.editor && !ports.preview}
-        onClose={() => !ports.busy && ports.changeEditor(null)}
+        opened={!!ports.editor && !ports.preview && !editorHidden}
+        onClose={() => !ports.busy && setEditorHidden(true)}
         title={ports.editor?.versionId ? 'Correggi versione' : 'Nuova versione'}
         centered
         size="lg"
@@ -183,6 +247,7 @@ export function Ports({
       >
         {ports.editor && (
           <>
+            {ports.writeRecoveryControl}
             {modalError}
             <PortVersionForm
               draft={ports.editor}
@@ -199,8 +264,8 @@ export function Ports({
         )}
       </Modal>
       <Modal
-        opened={!!ports.preview}
-        onClose={() => !ports.busy && ports.cancelPreview()}
+        opened={!!ports.preview && !previewHidden}
+        onClose={() => !ports.busy && setPreviewHidden(true)}
         title="Anteprima e conferma"
         centered
         size="xl"
@@ -212,6 +277,7 @@ export function Ports({
       >
         {ports.preview && (
           <>
+            {ports.writeRecoveryControl}
             {modalError}
             <PortConfirmation
               key={ports.preview.previewId}

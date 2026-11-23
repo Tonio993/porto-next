@@ -1,3 +1,5 @@
+import { useWriteAttempt } from './use-write-attempt'
+import { trackedRequest } from '../../../shared/contracts/write-outcomes'
 import { useCallback, useEffect, useState } from 'react'
 import type { ArchiveContextDto } from '../../../shared/contracts/application'
 import type {
@@ -26,7 +28,7 @@ interface Editor extends VesselFormValue {
   moment: MomentInputDto | null
 }
 
-export function useVessels(archives: ReturnType<typeof useArchives>) {
+export function useVessels(archives: ReturnType<typeof useArchives>, onRecovered?: () => void) {
   const { state, execute, setNotice, update } = archives
   const context = state.context!
   const { sessionId, revision } = context
@@ -62,7 +64,36 @@ export function useVessels(archives: ReturnType<typeof useArchives>) {
   const [resolution, setResolution] = useState<MomentResolutionDto | null>(null)
   const [preview, setPreview] = useState<VesselPreviewDto | null>(null)
   const [fields, setFields] = useState<Record<string, string>>({})
-  const busy = archives.busy || archives.commandBusy || action.loading
+  function discardDraft() {
+    setCreateContext(null)
+    setDescription(emptyVesselForm)
+    setEditor(null)
+    setPreview(null)
+    setResolution(null)
+    setFields({})
+    action.invalidate()
+    resolver.invalidate()
+    effects.invalidate()
+  }
+  const writes = useWriteAttempt(
+    archives,
+    () => {
+      discardDraft()
+      setSelection(null)
+      setHistory(null)
+      invalidateHistory()
+      setDetailError(null)
+      onRecovered?.()
+      void loadList()
+    },
+    suspendDetail,
+  )
+  const busy =
+    writes.attempt.busy ||
+    writes.attempt.uncertain ||
+    archives.busy ||
+    archives.commandBusy ||
+    action.loading
 
   const loadList = useCallback(async () => {
     setListError(null)
@@ -174,8 +205,12 @@ export function useVessels(archives: ReturnType<typeof useArchives>) {
     clearErrors()
     const payload = parseDescription(description)
     if (!payload) return false
-    const result = await action.request(() =>
-      execute(() => window.vessels.create({ context: createContext, payload })),
+    const result = await writes.attempt.run(createContext, crypto.randomUUID(), (attemptId) =>
+      action.request(() =>
+        execute(() =>
+          window.vessels.create(trackedRequest({ context: createContext, payload }, attemptId)),
+        ),
+      ),
     )
     if (!result) return false
     if (!result.ok) {
@@ -290,12 +325,19 @@ export function useVessels(archives: ReturnType<typeof useArchives>) {
     return suspendDetail(async () => {
       if (!preview) return
       clearErrors()
-      const result = await action.request(() =>
-        execute(() =>
-          window.vessels.confirm({
-            context: preview.context,
-            payload: { previewId: preview.previewId },
-          }),
+      const result = await writes.attempt.run(preview.context, crypto.randomUUID(), (attemptId) =>
+        action.request(() =>
+          execute(() =>
+            window.vessels.confirm(
+              trackedRequest(
+                {
+                  context: preview.context,
+                  payload: { previewId: preview.previewId },
+                },
+                attemptId,
+              ),
+            ),
+          ),
         ),
       )
       if (result?.ok) {
@@ -310,12 +352,19 @@ export function useVessels(archives: ReturnType<typeof useArchives>) {
   async function reactivate() {
     if (!history) return
     clearErrors()
-    const result = await action.request(() =>
-      execute(() =>
-        window.vessels.reactivate({
-          context: history.context,
-          payload: { vesselId: history.value.vessel.id },
-        }),
+    const result = await writes.attempt.run(history.context, crypto.randomUUID(), (attemptId) =>
+      action.request(() =>
+        execute(() =>
+          window.vessels.reactivate(
+            trackedRequest(
+              {
+                context: history.context,
+                payload: { vesselId: history.value.vessel.id },
+              },
+              attemptId,
+            ),
+          ),
+        ),
       ),
     )
     if (result?.ok) setNotice('Nave riattivata.')
@@ -346,6 +395,9 @@ export function useVessels(archives: ReturnType<typeof useArchives>) {
   }
 
   return {
+    discardDraft,
+    writeRecovery: writes.recovery,
+    writeRecoveryControl: writes.control,
     search,
     setSearch: (value: string) => {
       invalidateList()

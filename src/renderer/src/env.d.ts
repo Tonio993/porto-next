@@ -1,3 +1,4 @@
+import type { WriteOutcomeApi } from '../../shared/contracts/write-outcomes'
 import type { ServiceApi } from '../../shared/contracts/services'
 import type { AssignmentApi } from '../../shared/contracts/assignments'
 import type { OperationApi } from '../../shared/contracts/operations'
@@ -13,6 +14,7 @@ import type { PortApi } from '../../shared/contracts/ports'
 
 declare global {
   interface Window {
+    writeOutcomes: WriteOutcomeApi
     services: ServiceApi
     assignments: AssignmentApi
     operations: OperationApi

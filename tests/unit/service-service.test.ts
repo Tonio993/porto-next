@@ -1,6 +1,10 @@
 import * as serviceCalculation from '../../src/backend/application/services/service-calculation'
 import * as subjectResolution from '../../src/backend/application/operations/subject-resolution'
 import { CatalogService } from '../../src/backend/application/catalog/catalog-service'
+import { WriteOutcomeStore } from '../../src/main/ipc/write-outcome-store'
+import { WriteAttempt } from '../../src/renderer/src/api/write-attempt'
+import { trackedRequest } from '../../src/shared/contracts/write-outcomes'
+import { randomUUID } from 'node:crypto'
 import { CatalogRepository } from '../../src/backend/infrastructure/database/catalog-repository'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -1664,4 +1668,86 @@ it('P16: cambio nave e istante ridetermina versioni, tariffa zero, soggetti indi
     vesselVersionId: updated.vesselVersionId,
   })
   integrity()
+})
+it('PR02: risposta persa dopo commit identifica il tentativo fra prestazioni identiche senza deduplicare né riscrivere', async () => {
+  const first = value(await create())
+  const original = context(),
+    store = new WriteOutcomeStore(),
+    attempt = new WriteAttempt(),
+    id = randomUUID()
+  const write = vi.fn((request: unknown) =>
+    services.createFree(request as Parameters<typeof services.createFree>[0]),
+  )
+  const count = all().length
+  await attempt.run(original, id, async (attemptId) => {
+    await store.execute(trackedRequest({ context: original, payload: input() }, attemptId), write)
+    throw Error('risposta persa dopo commit')
+  })
+  expect(attempt.uncertain).toBe(true)
+  expect(all()).toHaveLength(count + 1)
+  expect(all().filter((item) => item.id !== first.id)).toHaveLength(1)
+  expect(context().revision).toBe((BigInt(original.revision) + 1n).toString())
+  const outcome = await attempt.recover(async (attemptId, snapshot) => ({
+    ok: true,
+    context: context(),
+    value: store.get(
+      { context: { sessionId: snapshot.sessionId }, query: { attemptId } },
+      context(),
+    ),
+  }))
+  expect(outcome).toBe('APPLIED')
+  expect(attempt.uncertain).toBe(false)
+  expect(write).toHaveBeenCalledTimes(1)
+  expect(all()).toHaveLength(count + 1)
+})
+it('PR02: conflitto noto con risposta persa conserva la bozza senza attribuire la scrittura al candidato esistente', async () => {
+  const original = context(),
+    store = new WriteOutcomeStore(),
+    attempt = new WriteAttempt(),
+    id = randomUUID()
+  await create()
+  const before = context()
+  const write = vi.fn((request: unknown) =>
+    services.createFree(request as Parameters<typeof services.createFree>[0]),
+  )
+  await attempt.run(original, id, async (attemptId) => {
+    await store.execute(trackedRequest({ context: original, payload: input() }, attemptId), write)
+    return null
+  })
+  expect(
+    await attempt.recover(async (attemptId, snapshot) => ({
+      ok: true,
+      context: context(),
+      value: store.get(
+        { context: { sessionId: snapshot.sessionId }, query: { attemptId } },
+        context(),
+      ),
+    })),
+  ).toBe('REJECTED')
+  expect(all()).toHaveLength(1)
+  expect(context()).toEqual(before)
+  expect(write).toHaveBeenCalledTimes(1)
+})
+it('PR02: assenza di ricevuta prima dell’invio non autorizza una ripetizione, anche con archivio invariato', async () => {
+  const original = context(),
+    store = new WriteOutcomeStore(),
+    attempt = new WriteAttempt(),
+    id = randomUUID()
+  const write = vi.fn(async () => null)
+  await attempt.run(original, id, write)
+  expect(
+    await attempt.recover(async (attemptId, snapshot) => ({
+      ok: true,
+      context: context(),
+      value: store.get(
+        { context: { sessionId: snapshot.sessionId }, query: { attemptId } },
+        context(),
+      ),
+    })),
+  ).toBe('UNKNOWN')
+  await attempt.run(original, randomUUID(), write)
+  expect(attempt.uncertain).toBe(true)
+  expect(write).toHaveBeenCalledTimes(1)
+  expect(all()).toHaveLength(0)
+  expect(context()).toEqual(original)
 })

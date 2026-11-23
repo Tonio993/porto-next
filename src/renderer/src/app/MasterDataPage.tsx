@@ -1,3 +1,4 @@
+import { useDraftProtection } from './DraftProtection'
 import { Vessels } from './vessels/Vessels'
 import { Button, Group, Stack } from '@mantine/core'
 import type { useArchives } from '../api/use-archives'
@@ -13,11 +14,10 @@ export function MasterDataPage({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (opened: boolean) => void
 }) {
+  const guard = useDraftProtection()
   const [section, setSection] = useState('Porti')
-  const [dialogOpened, setDialogOpened] = useState(false)
   const dialogChange = useCallback(
     (opened: boolean) => {
-      setDialogOpened(opened)
       onDialogChange(opened)
     },
     [onDialogChange],
@@ -30,8 +30,10 @@ export function MasterDataPage({
             key={name}
             variant={section === name ? 'light' : 'default'}
             aria-pressed={section === name}
-            disabled={dialogOpened}
-            onClick={() => setSection(name)}
+            onClick={() => {
+              if (section !== name)
+                guard.request({ label: 'cambiare sottosezione', run: () => setSection(name) })
+            }}
           >
             {name}
           </Button>

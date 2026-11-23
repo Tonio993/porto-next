@@ -1,4 +1,6 @@
-﻿import { useEffect, useRef, useState } from 'react'
+import { useProtectedDraft } from '../DraftProtection'
+import { SingleFlight } from '../../api/single-flight'
+import { useEffect, useRef, useState } from 'react'
 import { Button, Group, Modal, Stack, Textarea } from '@mantine/core'
 import type { ApplicationResult, ArchiveContextDto } from '../../../../shared/contracts/application'
 import type {
@@ -21,6 +23,7 @@ export function OperationMaintenanceEditor({
   archives,
   trigger,
   onClose,
+  onResume,
   onApplied,
   withDetailSuspended,
   onUncertainChange,
@@ -32,6 +35,7 @@ export function OperationMaintenanceEditor({
   archives: ReturnType<typeof useArchives>
   trigger: HTMLElement | null
   onClose: () => void
+  onResume: () => void
   withDetailSuspended: ReturnType<typeof useApplicationRequest>['suspendWhile']
   onApplied: (value: VesselOperationDto | null) => void
   onUncertainChange: (value: boolean) => void
@@ -54,6 +58,19 @@ export function OperationMaintenanceEditor({
     draftContext.revision !== context.revision ||
     draftContext.sessionId !== context.sessionId ||
     draftContext.archiveId !== context.archiveId
+  const [flight] = useState(() => new SingleFlight())
+  useProtectedDraft({
+    get state() {
+      return flight.busy ? 'BUSY' : uncertain ? 'UNCERTAIN' : busy ? 'BUSY' : 'DRAFT'
+    },
+    discard: () => {
+      invalidate()
+      onClose()
+    },
+    recover: () => {
+      onResume()
+    },
+  })
   const disabled = busy || stale || uncertain
   useEffect(() => {
     active.current = true
@@ -150,40 +167,42 @@ export function OperationMaintenanceEditor({
       }
     }, mode === 'DELETE')
   const write = async () =>
-    withDetailSuspended(async () => {
-      if (disabled || (mode === 'DELETE' && !preview)) return
-      const noteValue = notes === '' ? null : notes
-      expected.current = { ...original, notes: noteValue }
-      if (mode === 'DELETE') {
-        const p = preview!
-        const r = await editor.request(() =>
-          checked(() =>
-            window.operations.confirmDelete({
-              context: p.context,
-              payload: { previewId: p.previewId },
-            }),
-          ),
-        )
-        if (!active.current) return
-        if (r?.ok) onApplied(null)
-        else if (!r || r.error.code === 'UNEXPECTED') {
-          setUncertain(true)
-          setPreview(null)
+    flight.run(async () =>
+      withDetailSuspended(async () => {
+        if (disabled || (mode === 'DELETE' && !preview)) return
+        const noteValue = notes === '' ? null : notes
+        expected.current = { ...original, notes: noteValue }
+        if (mode === 'DELETE') {
+          const p = preview!
+          const r = await editor.request(() =>
+            checked(() =>
+              window.operations.confirmDelete({
+                context: p.context,
+                payload: { previewId: p.previewId },
+              }),
+            ),
+          )
+          if (!active.current) return
+          if (r?.ok) onApplied(null)
+          else if (!r || r.error.code === 'UNEXPECTED') {
+            setUncertain(true)
+            setPreview(null)
+          }
+        } else {
+          const r = await editor.request(() =>
+            checked(() =>
+              window.operations.updateNotes({
+                context: draftContext,
+                payload: { id: original.id, notes: noteValue },
+              }),
+            ),
+          )
+          if (!active.current) return
+          if (r?.ok) onApplied(r.value)
+          else if (!r || r.error.code === 'UNEXPECTED') setUncertain(true)
         }
-      } else {
-        const r = await editor.request(() =>
-          checked(() =>
-            window.operations.updateNotes({
-              context: draftContext,
-              payload: { id: original.id, notes: noteValue },
-            }),
-          ),
-        )
-        if (!active.current) return
-        if (r?.ok) onApplied(r.value)
-        else if (!r || r.error.code === 'UNEXPECTED') setUncertain(true)
-      }
-    }, mode === 'DELETE')
+      }, mode === 'DELETE'),
+    )
   return (
     <Modal
       opened={opened}

@@ -1,6 +1,7 @@
 import { basename, join } from 'node:path'
 import { BrowserWindow, dialog } from 'electron'
 import type { ArchiveContextDto } from '../shared/contracts/application'
+import type { WriteOutcomeApi, WriteOutcomeDto } from '../shared/contracts/write-outcomes'
 import type { ArchiveFileOperations } from '../backend/application/archives/archive-files'
 import {
   record,
@@ -83,6 +84,12 @@ export class ArchiveController {
 
   async shutdown(): Promise<void> {
     await this.archives.shutdown()
+  }
+  readWriteOutcome(
+    request: Parameters<WriteOutcomeApi['get']>[0],
+    read: (context: ArchiveContextDto) => WriteOutcomeDto,
+  ) {
+    return this.archives.coordinator.query(request, (session) => read(session.context()))
   }
   private state(): ArchiveState {
     return {

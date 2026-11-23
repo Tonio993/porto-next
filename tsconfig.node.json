@@ -28,6 +28,10 @@
     "doc/p00/contratti.ts",
     "doc/p00/scenari.mts",
     "tests/**/*.ts",
-    "src/renderer/src/api/application-request.ts"
+    "src/renderer/src/api/application-request.ts",
+    "src/renderer/src/api/draft-guard.ts",
+    "src/renderer/src/api/write-attempt.ts",
+    "src/renderer/src/api/operation-creation-outcome.ts",
+    "src/renderer/src/api/single-flight.ts"
   ]
 }

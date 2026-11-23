@@ -1,3 +1,4 @@
+import { writeOutcomeChannel, type WriteOutcomeApi } from '../shared/contracts/write-outcomes'
 import { serviceChannels, type ServiceApi } from '../shared/contracts/services'
 import { assignmentChannels, type AssignmentApi } from '../shared/contracts/assignments'
 import { operationChannels, type OperationApi } from '../shared/contracts/operations'
@@ -14,6 +15,14 @@ import { berthChannels, type BerthApi } from '../shared/contracts/berths'
 import { portChannels, type PortApi } from '../shared/contracts/ports'
 
 const api: ArchiveApi = {
+  onActionRequested: (callback) => {
+    const listener = (
+      _event: Electron.IpcRendererEvent,
+      action: import('../shared/contracts/archive').ArchiveMenuAction,
+    ) => callback(action)
+    ipcRenderer.on(archiveChannels.actionRequested, listener)
+    return () => ipcRenderer.removeListener(archiveChannels.actionRequested, listener)
+  },
   getState: () => ipcRenderer.invoke(archiveChannels.state),
   create: (name) => ipcRenderer.invoke(archiveChannels.create, name),
   open: () => ipcRenderer.invoke(archiveChannels.open),
@@ -201,3 +210,8 @@ const services: ServiceApi = {
   get: (request) => ipcRenderer.invoke(serviceChannels.get, request),
 }
 contextBridge.exposeInMainWorld('services', services)
+
+const writeOutcomes: WriteOutcomeApi = {
+  get: (request) => ipcRenderer.invoke(writeOutcomeChannel, request),
+}
+contextBridge.exposeInMainWorld('writeOutcomes', writeOutcomes)

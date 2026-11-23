@@ -1,3 +1,5 @@
+import { useWriteAttempt } from './use-write-attempt'
+import { trackedRequest } from '../../../shared/contracts/write-outcomes'
 import { useCallback, useEffect, useState } from 'react'
 import type { ArchiveContextDto } from '../../../shared/contracts/application'
 import type {
@@ -21,7 +23,7 @@ interface Editor {
   moment: MomentInputDto | null
 }
 
-export function useCustomers(archives: ReturnType<typeof useArchives>) {
+export function useCustomers(archives: ReturnType<typeof useArchives>, onRecovered?: () => void) {
   const { state, execute, setNotice, update } = archives
   const context = state.context!
   const { sessionId, revision } = context
@@ -57,7 +59,36 @@ export function useCustomers(archives: ReturnType<typeof useArchives>) {
   const [resolution, setResolution] = useState<MomentResolutionDto | null>(null)
   const [preview, setPreview] = useState<CustomerPreviewDto | null>(null)
   const [fields, setFields] = useState<Record<string, string>>({})
-  const busy = archives.busy || archives.commandBusy || action.loading
+  function discardDraft() {
+    setCreateContext(null)
+    setBusinessName('')
+    setEditor(null)
+    setPreview(null)
+    setResolution(null)
+    setFields({})
+    action.invalidate()
+    resolver.invalidate()
+    effects.invalidate()
+  }
+  const writes = useWriteAttempt(
+    archives,
+    () => {
+      discardDraft()
+      setSelection(null)
+      setHistory(null)
+      invalidateHistory()
+      setDetailError(null)
+      onRecovered?.()
+      void loadList()
+    },
+    suspendDetail,
+  )
+  const busy =
+    writes.attempt.busy ||
+    writes.attempt.uncertain ||
+    archives.busy ||
+    archives.commandBusy ||
+    action.loading
 
   const loadList = useCallback(async () => {
     setListError(null)
@@ -167,8 +198,14 @@ export function useCustomers(archives: ReturnType<typeof useArchives>) {
   async function create() {
     if (!createContext) return false
     clearErrors()
-    const result = await action.request(() =>
-      execute(() => window.customers.create({ context: createContext, payload: { businessName } })),
+    const result = await writes.attempt.run(createContext, crypto.randomUUID(), (attemptId) =>
+      action.request(() =>
+        execute(() =>
+          window.customers.create(
+            trackedRequest({ context: createContext, payload: { businessName } }, attemptId),
+          ),
+        ),
+      ),
     )
     if (!result) return false
     if (!result.ok) {
@@ -280,12 +317,19 @@ export function useCustomers(archives: ReturnType<typeof useArchives>) {
     return suspendDetail(async () => {
       if (!preview) return
       clearErrors()
-      const result = await action.request(() =>
-        execute(() =>
-          window.customers.confirm({
-            context: preview.context,
-            payload: { previewId: preview.previewId },
-          }),
+      const result = await writes.attempt.run(preview.context, crypto.randomUUID(), (attemptId) =>
+        action.request(() =>
+          execute(() =>
+            window.customers.confirm(
+              trackedRequest(
+                {
+                  context: preview.context,
+                  payload: { previewId: preview.previewId },
+                },
+                attemptId,
+              ),
+            ),
+          ),
         ),
       )
       if (result?.ok) {
@@ -300,12 +344,19 @@ export function useCustomers(archives: ReturnType<typeof useArchives>) {
   async function reactivate() {
     if (!history) return
     clearErrors()
-    const result = await action.request(() =>
-      execute(() =>
-        window.customers.reactivate({
-          context: history.context,
-          payload: { customerId: history.value.customer.id },
-        }),
+    const result = await writes.attempt.run(history.context, crypto.randomUUID(), (attemptId) =>
+      action.request(() =>
+        execute(() =>
+          window.customers.reactivate(
+            trackedRequest(
+              {
+                context: history.context,
+                payload: { customerId: history.value.customer.id },
+              },
+              attemptId,
+            ),
+          ),
+        ),
       ),
     )
     if (result?.ok) setNotice('Cliente riattivato.')
@@ -324,6 +375,9 @@ export function useCustomers(archives: ReturnType<typeof useArchives>) {
   }
 
   return {
+    discardDraft,
+    writeRecovery: writes.recovery,
+    writeRecoveryControl: writes.control,
     search,
     setSearch: (value: string) => {
       invalidateList()

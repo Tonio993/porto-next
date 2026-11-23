@@ -1,3 +1,7 @@
+import { WriteOutcomeStore } from './write-outcome-store'
+import { writeOutcomeChannel, type WriteOutcomeApi } from '../../shared/contracts/write-outcomes'
+import type { ApplicationResult } from '../../shared/contracts/application'
+import { asArchiveError } from '../../shared/errors/archive-error'
 import { ServiceService } from '../../backend/application/services/service-service'
 import { serviceChannels, type ServiceApi } from '../../shared/contracts/services'
 import { AssignmentService } from '../../backend/application/operations/assignment-service'
@@ -25,10 +29,17 @@ import { berthChannels, type BerthApi } from '../../shared/contracts/berths'
 import type { BerthService } from '../../backend/application/berths/berth-service'
 import type { PortService } from '../../backend/application/ports/port-service'
 
+const writeOutcomes = new WriteOutcomeStore()
+
 export function registerArchiveIpc(
   controller: ArchiveController,
   window: () => BrowserWindow | null,
 ): void {
+  registerGuardedIpc(writeOutcomeChannel, window, (input) =>
+    controller.readWriteOutcome(input as Parameters<WriteOutcomeApi['get']>[0], (context) =>
+      writeOutcomes.get(input, context),
+    ),
+  )
   const actions: ArchiveAction[] = [
     'state',
     'create',
@@ -68,6 +79,30 @@ function registerGuardedIpc(
         },
         context: null,
       }
+    if (
+      input &&
+      typeof input === 'object' &&
+      'attemptId' in input &&
+      /:(create|create-free|create-catalog|confirm(?:-[a-z]+)?|reactivate|update-notes|configure-company-zone)$/.test(
+        channel,
+      )
+    ) {
+      return writeOutcomes
+        .execute(input, (value) => Promise.resolve(execute(value) as ApplicationResult<unknown>))
+        .catch((error) => {
+          const known = asArchiveError(error)
+          return {
+            ok: false,
+            error: {
+              code: known.code,
+              message: known.message,
+              fields: known.fields,
+              conflicts: known.conflicts,
+            },
+            context: null,
+          }
+        })
+    }
     return execute(input)
   })
 }

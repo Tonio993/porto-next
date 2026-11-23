@@ -1,3 +1,4 @@
+import { useDraftProtection } from './DraftProtection'
 import { useState } from 'react'
 import { Button, Group } from '@mantine/core'
 import type { useArchives } from '../api/use-archives'
@@ -7,6 +8,7 @@ export function CatalogPage(props: {
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
+  const guard = useDraftProtection()
   const [section, setSection] = useState('CATALOG')
   return (
     <>
@@ -14,14 +16,20 @@ export function CatalogPage(props: {
         <Button
           variant={section === 'CATALOG' ? 'light' : 'subtle'}
           aria-pressed={section === 'CATALOG'}
-          onClick={() => setSection('CATALOG')}
+          onClick={() => {
+            if (section !== 'CATALOG')
+              guard.request({ label: 'cambiare sottosezione', run: () => setSection('CATALOG') })
+          }}
         >
           Tipi di prestazione e pesi
         </Button>
         <Button
           variant={section === 'TARIFFS' ? 'light' : 'subtle'}
           aria-pressed={section === 'TARIFFS'}
-          onClick={() => setSection('TARIFFS')}
+          onClick={() => {
+            if (section !== 'TARIFFS')
+              guard.request({ label: 'cambiare sottosezione', run: () => setSection('TARIFFS') })
+          }}
         >
           Tariffe
         </Button>

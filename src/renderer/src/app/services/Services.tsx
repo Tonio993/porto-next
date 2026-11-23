@@ -1,3 +1,6 @@
+import { useProtectedDraft } from '../DraftProtection'
+import { useWriteAttempt } from '../../api/use-write-attempt'
+import { trackedRequest } from '../../../../shared/contracts/write-outcomes'
 import { ServiceFilters, type ServiceFiltersValue } from './ServiceFilters'
 import { ServicePreview } from './ServicePreview'
 import { CatalogPicker } from './CatalogPicker'
@@ -60,7 +63,6 @@ export function Services({
   const [error, setError] = useState<string | null>(null),
     [dialogError, setDialogError] = useState<string | null>(null),
     [notice, setNotice] = useState<string | null>(null)
-  const [uncertain, setUncertain] = useState(false)
   const [issues, setIssues] = useState<readonly FieldIssueDto[]>([])
   const [previewExpired, setPreviewExpired] = useState(false)
   useEffect(() => {
@@ -82,7 +84,43 @@ export function Services({
     command = useApplicationRequest(context, setDialogError)
   const { request: readList } = listing,
     { request: readDetail, invalidate: invalidateDetail } = reading
-  const busy = archives.busy || archives.commandBusy || command.loading
+  const writes = useWriteAttempt(
+    archives,
+    () => {
+      invalidateEditor()
+      setDraft(null)
+      setOpen(false)
+
+      setSelected(null)
+      setDetail(null)
+      setReload((n) => n + 1)
+    },
+    reading.suspendWhile,
+  )
+  const uncertain = writes.attempt.uncertain
+  const guard = useProtectedDraft({
+    state: writes.attempt.busy
+      ? 'BUSY'
+      : uncertain
+        ? 'UNCERTAIN'
+        : archives.commandBusy || command.loading
+          ? 'BUSY'
+          : draft
+            ? 'DRAFT'
+            : 'CLEAN',
+    discard: () => {
+      invalidateEditor()
+      setDraft(null)
+      setOpen(false)
+    },
+    recover: () => (writes.attempt.uncertain ? writes.openRecovery() : setOpen(true)),
+  })
+  const busy =
+    writes.attempt.busy ||
+    writes.attempt.uncertain ||
+    archives.busy ||
+    archives.commandBusy ||
+    command.loading
   useEffect(() => {
     onDialogChange(open)
     return () => onDialogChange(false)
@@ -144,27 +182,32 @@ export function Services({
     if (draft) setDraft({ ...draft, values })
   }
   const start = (category: 'FREE' | 'CATALOG') => {
-    if (!vesselId) return
-    trigger.current = document.activeElement as HTMLElement
-    invalidateEditor()
-    setUncertain(false)
-    setDraft({
-      context,
-      amount: '',
-      category,
-      serviceTypeId: null,
-      values: {
-        vesselId,
-        interpretationPortId: null,
-        moment: emptyMoment(),
-        executionStatus: 'PLANNED',
-        description: '',
-        base: '0.00',
-        notes: null,
-        specified: { customerId: null, agencyId: null },
+    guard.request({
+      label: 'iniziare una prestazione',
+      run: () => {
+        if (!vesselId) return
+        trigger.current = document.activeElement as HTMLElement
+        invalidateEditor()
+
+        setDraft({
+          context,
+          amount: '',
+          category,
+          serviceTypeId: null,
+          values: {
+            vesselId,
+            interpretationPortId: null,
+            moment: emptyMoment(),
+            executionStatus: 'PLANNED',
+            description: '',
+            base: '0.00',
+            notes: null,
+            specified: { customerId: null, agencyId: null },
+          },
+        })
+        setOpen(true)
       },
     })
-    setOpen(true)
   }
   const resolve = async () => {
     if (!draft) return
@@ -209,88 +252,42 @@ export function Services({
     },
   })
   const edit = (mode: Draft['mode']) => {
-    if (!detail || detailRevision !== context.revision) return
-    trigger.current = document.activeElement as HTMLElement
-    invalidateEditor()
-    setUncertain(false)
-    setDraft(fromDetail(detail, mode, context))
-    setOpen(true)
+    guard.request({
+      label: 'modificare la prestazione',
+      run: () => {
+        if (!detail || detailRevision !== context.revision) return
+        trigger.current = document.activeElement as HTMLElement
+        invalidateEditor()
+
+        setDraft(fromDetail(detail, mode, context))
+        setOpen(true)
+      },
+    })
   }
   const reloadDraft = async () =>
     reading.suspendWhile(async () => {
-      if (!draft) return
+      if (!draft || writes.attempt.uncertain) return
       invalidateEditor()
       if (draft.original) {
-        const r = await command.request(
-          () =>
-            executeServiceCommand(() =>
-              window.services.get({
-                context: { sessionId: draft.context.sessionId },
-                query: { id: draft.original!.id },
-              }),
-            ),
-          { expectedAbsence: uncertain && draft.mode === 'DELETE' },
+        const r = await command.request(() =>
+          executeServiceCommand(() =>
+            window.services.get({
+              context: { sessionId: draft.context.sessionId },
+              query: { id: draft.original!.id },
+            }),
+          ),
         )
         if (r?.ok) {
           setDraft(fromDetail(r.value, draft.mode, r.context))
-          setUncertain(false)
         } else if (r && !r.ok && r.error.code === 'NOT_FOUND') {
           setDraft(null)
           setOpen(false)
           setDetail(null)
           setSelected(null)
           setNotice('La prestazione non esiste più.')
-          setUncertain(false)
         }
-      } else if (uncertain) {
-        const r = await command.request(() =>
-          executeServiceCommand(async () => {
-            const resolved = await window.services.resolveMoment({
-              context: { sessionId: draft.context.sessionId },
-              query: {
-                vesselId: draft.values.vesselId,
-                interpretationPortId: draft.values.interpretationPortId,
-                moment: draft.values.moment,
-              },
-            })
-            if (!resolved.ok) return resolved
-            if (resolved.value.resolution.status !== 'RESOLVED')
-              throw new Error('Il momento della registrazione richiede una verifica.')
-            const utc = resolved.value.resolution.moment.utc
-            const result = await window.services.list({
-              context: { sessionId: draft.context.sessionId },
-              query: {
-                vesselId: draft.values.vesselId,
-                category: draft.category,
-                fromUtc: utc,
-                toUtc: utc,
-                page: 1,
-                pageSize: 25,
-              },
-            })
-            return result.ok ? { ...result, value: { list: result.value, utc } } : result
-          }),
-        )
-        if (!r?.ok) return
-        // Show all candidates at the submitted instant before allowing an explicit retry.
-        // Multiple ordinary services may legitimately have identical data.
-        listing.invalidate()
-        reading.invalidate()
-        setVesselId(draft.values.vesselId)
-        setFilters({ category: draft.category, fromUtc: r.value.utc, toUtc: r.value.utc })
-        setPage(1)
-        setList(r.value.list)
-        setSelected(null)
-        setDetail(null)
-        setDraft({ ...draft, context: r.context })
-        setUncertain(false)
-        setOpen(false)
-        setNotice(
-          'Verifica nell’elenco le prestazioni già registrate al momento della bozza prima di riprenderla. I valori inseriti sono conservati.',
-        )
       } else {
         setDraft({ ...draft, context })
-        setUncertain(false)
       }
       setReload((n) => n + 1)
     }, draft?.mode === 'DELETE')
@@ -307,17 +304,24 @@ export function Services({
   const confirm = async () =>
     reading.suspendWhile(async () => {
       if (!preview || !draft) return
-      const r = await command.request(() =>
-        executeServiceCommand(() =>
-          window.services.confirm({
-            context: preview.context,
-            payload: { previewId: preview.previewId },
-          }),
+      const r = await writes.attempt.run(preview.context, crypto.randomUUID(), (attemptId) =>
+        command.request(() =>
+          executeServiceCommand(() =>
+            window.services.confirm(
+              trackedRequest(
+                {
+                  context: preview.context,
+                  payload: { previewId: preview.previewId },
+                },
+                attemptId,
+              ),
+            ),
+          ),
         ),
       )
       if (r?.ok) finish(r.value.service, r.context.revision)
       else if (!r) {
-        setUncertain(true)
+        writes.openRecovery()
         setDialogError(
           'Esito non verificato. Ricarica la bozza e controlla i dati prima di riprovare.',
         )
@@ -326,17 +330,24 @@ export function Services({
   const save = async () => {
     if (!draft) return
     if (draft.mode === 'NOTES' && draft.original) {
-      const r = await command.request(() =>
-        executeServiceCommand(() =>
-          window.services.updateNotes({
-            context: draft.context,
-            payload: { id: draft.original!.id, notes: draft.values.notes },
-          }),
+      const r = await writes.attempt.run(draft.context, crypto.randomUUID(), (attemptId) =>
+        command.request(() =>
+          executeServiceCommand(() =>
+            window.services.updateNotes(
+              trackedRequest(
+                {
+                  context: draft.context,
+                  payload: { id: draft.original!.id, notes: draft.values.notes },
+                },
+                attemptId,
+              ),
+            ),
+          ),
         ),
       )
       if (r?.ok) finish(r.value, r.context.revision)
       else if (!r) {
-        setUncertain(true)
+        writes.openRecovery()
         setDialogError(
           'Esito non verificato. Ricarica la bozza e controlla le note prima di riprovare.',
         )
@@ -390,25 +401,37 @@ export function Services({
       else if (r) setIssues(r.error.fields)
       return
     }
-    const r = await command.request(() =>
-      executeServiceCommand(() =>
-        draft.category === 'FREE'
-          ? window.services.createFree({
-              context: draft.context,
-              payload: { ...draft.values, base: base! },
-            })
-          : window.services.createCatalog({
-              context: draft.context,
-              payload: {
-                vesselId: draft.values.vesselId,
-                interpretationPortId: draft.values.interpretationPortId,
-                moment: draft.values.moment,
-                executionStatus: draft.values.executionStatus,
-                notes: draft.values.notes,
-                specified: draft.values.specified,
-                serviceTypeId: draft.serviceTypeId!,
-              },
-            }),
+    const r = await writes.attempt.run(draft.context, crypto.randomUUID(), (attemptId) =>
+      command.request(() =>
+        executeServiceCommand(() =>
+          draft.category === 'FREE'
+            ? window.services.createFree(
+                trackedRequest(
+                  {
+                    context: draft.context,
+                    payload: { ...draft.values, base: base! },
+                  },
+                  attemptId,
+                ),
+              )
+            : window.services.createCatalog(
+                trackedRequest(
+                  {
+                    context: draft.context,
+                    payload: {
+                      vesselId: draft.values.vesselId,
+                      interpretationPortId: draft.values.interpretationPortId,
+                      moment: draft.values.moment,
+                      executionStatus: draft.values.executionStatus,
+                      notes: draft.values.notes,
+                      specified: draft.values.specified,
+                      serviceTypeId: draft.serviceTypeId!,
+                    },
+                  },
+                  attemptId,
+                ),
+              ),
+        ),
       ),
     )
     if (r?.ok) {
@@ -425,7 +448,7 @@ export function Services({
       setReload((n) => n + 1)
     } else if (r) setIssues(r.error.fields)
     else if (!r) {
-      setUncertain(true)
+      writes.openRecovery()
       setDialogError(
         'Esito non verificato. Ricarica la consultazione e controlla la registrazione prima di riprovare.',
       )
@@ -436,6 +459,7 @@ export function Services({
     (draft.context.sessionId !== context.sessionId || draft.context.revision !== context.revision)
   return (
     <section className="master-data-page services-page" aria-label="Prestazioni">
+      {writes.recovery}
       <Group justify="space-between" className="operational-heading">
         <h2>Prestazioni nave</h2>
         <Group>
@@ -463,18 +487,23 @@ export function Services({
         value={vesselId}
         disabled={busy}
         onChange={(id) => {
-          listing.invalidate()
-          reading.invalidate()
-          invalidateEditor()
-          setFilters({})
-          setVesselId(id)
-          setPage(1)
-          setList(null)
-          setSelected(null)
-          setDetail(null)
-          setDraft(null)
-          setUncertain(false)
-          setNotice(null)
+          guard.request({
+            label: 'cambiare nave',
+            run: () => {
+              listing.invalidate()
+              reading.invalidate()
+              invalidateEditor()
+              setFilters({})
+              setVesselId(id)
+              setPage(1)
+              setList(null)
+              setSelected(null)
+              setDetail(null)
+              setDraft(null)
+
+              setNotice(null)
+            },
+          })
         }}
       />
       <ServiceFilters
@@ -776,6 +805,7 @@ export function Services({
       >
         {draft && (
           <Stack>
+            {writes.control}
             {dialogError && (
               <StateMessage kind="error" title="Registrazione non disponibile">
                 {dialogError}

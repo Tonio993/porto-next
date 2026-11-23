@@ -1,7 +1,8 @@
+import { DraftProtection, useDraftProtection } from './DraftProtection'
 import { Services } from './services/Services'
 import { Operations } from './operations/Operations'
 import { CatalogPage } from './CatalogPage'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ActionIcon, Button, Modal, Tooltip } from '@mantine/core'
 import {
   IconAnchor,
@@ -22,16 +23,38 @@ export function App() {
   const archives = useArchives()
   // Remount forms, selections and future previews at every actual activation.
   return (
-    <ArchiveWorkspace key={archives.state.context?.sessionId ?? 'closed'} archives={archives} />
+    <DraftProtection key={archives.state.context?.sessionId ?? 'closed'}>
+      <ArchiveWorkspace archives={archives} />
+    </DraftProtection>
   )
 }
 
 function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchives> }) {
+  const guard = useDraftProtection()
+  const navigate = (target: string) => {
+    if (target !== section)
+      guard.request({ label: `aprire ${target}`, run: () => setSection(target) })
+  }
   const { state, busy, error, notice, setError, setNotice } = archives
   const [section, setSection] = useState('Archivi')
   const [aboutOpened, setAboutOpened] = useState(false)
   const [feedbackInDialog, setFeedbackInDialog] = useState(false)
   const active = state.active
+  useEffect(
+    () =>
+      window.archives?.onActionRequested((action) => {
+        const context = state.context
+        const request = context ? { context, payload: null } : undefined
+        const run = async () => {
+          if (action === 'backup') await archives.run(() => window.archives.backup(request))
+          else if (action === 'open') await archives.update(() => window.archives.open())
+          else await archives.update(() => window.archives[action](request))
+        }
+        if (action === 'backup') void run()
+        else guard.request({ label: 'cambiare archivio', run })
+      }),
+    [archives, state.context, guard],
+  )
 
   return (
     <div className="desktop-shell" aria-busy={busy}>
@@ -50,7 +73,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
           <button
             className="nav-item"
             aria-current={section === 'Archivi' ? 'page' : undefined}
-            onClick={() => setSection('Archivi')}
+            onClick={() => navigate('Archivi')}
           >
             <IconDatabase size={19} />
             Archivi
@@ -68,7 +91,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
               className="nav-item"
               disabled={!active || busy}
               aria-current={section === label ? 'page' : undefined}
-              onClick={() => setSection(label)}
+              onClick={() => navigate(label)}
             >
               {label}
             </button>
@@ -183,7 +206,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
             <section className="archive-panel">
               <h2>Sezione in preparazione</h2>
               <p>Le funzioni di {section.toLowerCase()} non sono ancora disponibili.</p>
-              <Button variant="light" onClick={() => setSection('Archivi')}>
+              <Button variant="light" onClick={() => navigate('Archivi')}>
                 Torna all’archivio
               </Button>
             </section>

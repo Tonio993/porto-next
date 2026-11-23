@@ -1,3 +1,6 @@
+import { useProtectedDraft } from './DraftProtection'
+import { useWriteAttempt } from '../api/use-write-attempt'
+import { trackedRequest } from '../../../shared/contracts/write-outcomes'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Button, Stack, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../shared/contracts/application'
@@ -20,7 +23,32 @@ export function TimeSettings({ archives }: { archives: ReturnType<typeof useArch
   } = useApplicationRequest(state.context, setError)
   const resolver = useApplicationRequest(state.context, setError)
   const command = useApplicationRequest(state.context, setError)
-  const busy = archives.busy || archives.commandBusy || command.loading
+  const writes = useWriteAttempt(archives, () => {
+    void load()
+  })
+  useProtectedDraft({
+    state: writes.attempt.uncertain
+      ? 'UNCERTAIN'
+      : archives.commandBusy || command.loading || writes.attempt.busy
+        ? 'BUSY'
+        : company && !company.confirmed && zoneId !== company.zoneId
+          ? 'DRAFT'
+          : 'CLEAN',
+    discard: () => {
+      resolver.invalidate()
+      command.invalidate()
+      invalidateLoad()
+      setResolution(null)
+      setZoneId(company?.zoneId ?? 'Europe/Rome')
+    },
+    recover: writes.openRecovery,
+  })
+  const busy =
+    writes.attempt.busy ||
+    writes.attempt.uncertain ||
+    archives.busy ||
+    archives.commandBusy ||
+    command.loading
   const sessionId = state.context!.sessionId
   const load = useCallback(async () => {
     setError(null)
@@ -40,9 +68,13 @@ export function TimeSettings({ archives }: { archives: ReturnType<typeof useArch
     event.preventDefault()
     if (!draftContext) return
     invalidateLoad()
-    const result = await command.request(() =>
-      execute(() =>
-        window.time.configureCompanyZone({ context: draftContext, payload: { zoneId } }),
+    const result = await writes.attempt.run(draftContext, crypto.randomUUID(), (attemptId) =>
+      command.request(() =>
+        execute(() =>
+          window.time.configureCompanyZone(
+            trackedRequest({ context: draftContext, payload: { zoneId } }, attemptId),
+          ),
+        ),
       ),
     )
     if (result?.ok) {
@@ -62,6 +94,7 @@ export function TimeSettings({ archives }: { archives: ReturnType<typeof useArch
   }
   return (
     <section className="archive-panel" aria-busy={loading || resolver.loading}>
+      {writes.recovery}
       <Stack gap="lg">
         {loading && <p role="status">Caricamento configurazione…</p>}
         {resolver.loading && <p role="status">Verifica orario in corso…</p>}

@@ -16,10 +16,10 @@ import { CustomerService } from '../backend/application/customers/customer-servi
 import { registerCustomerIpc } from './ipc/register'
 import { appendFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { app, BrowserWindow, dialog, Menu } from 'electron'
+import { app, BrowserWindow, Menu } from 'electron'
 import type { ArchiveState } from '../shared/contracts/archive'
 import { archiveChannels } from '../shared/contracts/archive'
-import { ArchiveController, type ArchiveAction } from './archive-controller'
+import { ArchiveController } from './archive-controller'
 import {
   registerArchiveIpc,
   registerTimeIpc,
@@ -97,14 +97,8 @@ function createWindow(): void {
   else void window.loadFile(join(__dirname, '../renderer/index.html'))
 }
 
-async function menuAction(action: ArchiveAction): Promise<void> {
-  const result = await controller?.execute(action)
-  if (result && !result.ok && window)
-    await dialog.showMessageBox(window, {
-      type: 'error',
-      title: 'Archivio',
-      message: result.error.message,
-    })
+function menuAction(action: import('../shared/contracts/archive').ArchiveMenuAction): void {
+  window?.webContents.send(archiveChannels.actionRequested, action)
 }
 
 if (ownsInstance) {

@@ -1,0 +1,468 @@
+{
+  "formatVersion": 1,
+  "task": "PR03",
+  "date": "2026-11-24",
+  "branch": "main",
+  "base": "e627b41ec815d52991992afadbe0a9d8631f33f0",
+  "initialWorkingTree": "clean",
+  "commitCreated": true,
+  "schemaVersion": 17,
+  "environment": {
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.21.0",
+    "npm": "12.2.1",
+    "electron": "45.2.3",
+    "launch": "npm test / ELECTRON_RUN_AS_NODE=1; windowsHide; ordinary allowed path; no startup block; ACL and Electron sandbox unchanged"
+  },
+  "finalUnitRun": "full",
+  "newTests": 46,
+  "unitRuns": [
+    {
+      "label": "development",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/consultation-state.test.tsx",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr03-development.json"
+      ],
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "report": "test-results/pr03-development.json",
+      "log": "test-results/pr03-development.log",
+      "total": 27,
+      "passed": 24,
+      "failed": 3,
+      "pending": 0,
+      "files": 1,
+      "failures": [
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 adattatore agencies: ricerca, pagina, selezione e cronologia ripristinate; GET indipendente dal filtro, revisione e NOT_FOUND",
+          "messages": ["Error: Segnale atteso non ricevuto"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 adattatore customers: ricerca, pagina, selezione e cronologia ripristinate; GET indipendente dal filtro, revisione e NOT_FOUND",
+          "messages": ["Error: Segnale atteso non ricevuto"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 adattatore vessels: ricerca, pagina, selezione e cronologia ripristinate; GET indipendente dal filtro, revisione e NOT_FOUND",
+          "messages": ["Error: Segnale atteso non ricevuto"]
+        }
+      ]
+    },
+    {
+      "label": "adapters",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/consultation-state.test.tsx",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr03-adapters.json"
+      ],
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "report": "test-results/pr03-adapters.json",
+      "log": "test-results/pr03-adapters.log",
+      "total": 34,
+      "passed": 27,
+      "failed": 7,
+      "pending": 0,
+      "files": 1,
+      "failures": [
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 porti: ripristina cronologia per porto e corregge anche una pagina con totale zero",
+          "messages": ["Error: Render non converge"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 banchine: ritorno al porto e alla banchina con pagine isolate, cleanup e risposta tardiva",
+          "messages": ["AssertionError: expected 3 to be 2 // Object.is equality"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 operazioni: nave, vista, selezione fuori pagina, pagine e ordine permanenze passano dai chiamanti reali",
+          "messages": ["AssertionError: expected false to be true // Object.is equality"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 prestazioni: filtri per nave e Tutte le navi protetto dalla bozza; pagina e selezione riesaminate",
+          "messages": ["AssertionError: expected null not to be null"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 tariffe: pagina e selezione per porto, ritorno e rimozione della tariffa dopo revisione",
+          "messages": ["TypeError: Cannot read properties of undefined (reading 'localDateTime')"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 catalogo: ricerca e stato non cancellano un tipo esistente fuori filtro, eliminazione e pagina vuota",
+          "messages": ["TypeError: Cannot read properties of undefined (reading 'weight')"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 riferimenti filtri prestazioni: risolve viaggio fuori pagina e rimuove soltanto riferimenti inesistenti",
+          "messages": ["Error: Segnale atteso non ricevuto"]
+        }
+      ]
+    },
+    {
+      "label": "adapters2",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/consultation-state.test.tsx",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr03-adapters2.json"
+      ],
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "report": "test-results/pr03-adapters2.json",
+      "log": "test-results/pr03-adapters2.log",
+      "total": 34,
+      "passed": 32,
+      "failed": 2,
+      "pending": 0,
+      "files": 1,
+      "failures": [
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 porti: ripristina cronologia per porto e corregge anche una pagina con totale zero",
+          "messages": ["Error: Segnale atteso non ricevuto"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 banchine: ritorno al porto e alla banchina con pagine isolate, cleanup e risposta tardiva",
+          "messages": ["AssertionError: expected 4 to be 3 // Object.is equality"]
+        }
+      ]
+    },
+    {
+      "label": "adapters3",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/consultation-state.test.tsx",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr03-adapters3.json"
+      ],
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "report": "test-results/pr03-adapters3.json",
+      "log": "test-results/pr03-adapters3.log",
+      "total": 39,
+      "passed": 39,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "failures": []
+    },
+    {
+      "label": "current",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/consultation-state.test.tsx",
+        "tests/unit/application-request.test.ts",
+        "tests/unit/response-scope.test.ts",
+        "tests/unit/draft-guard.test.ts",
+        "tests/unit/write-attempt.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr03-current.json"
+      ],
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "report": "test-results/pr03-current.json",
+      "log": "test-results/pr03-current.log",
+      "total": 92,
+      "passed": 92,
+      "failed": 0,
+      "pending": 0,
+      "files": 5,
+      "failures": []
+    },
+    {
+      "label": "coverage",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/consultation-state.test.tsx",
+        "tests/unit/application-request.test.ts",
+        "tests/unit/response-scope.test.ts",
+        "tests/unit/draft-guard.test.ts",
+        "tests/unit/write-attempt.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr03-coverage.json"
+      ],
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "report": "test-results/pr03-coverage.json",
+      "log": "test-results/pr03-coverage.log",
+      "total": 98,
+      "passed": 95,
+      "failed": 3,
+      "pending": 0,
+      "files": 5,
+      "failures": [
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 filtro serviceCustomers: ricerca e pagina per nave ripristinate, ID letto fuori lista",
+          "messages": ["Error: Elemento atteso assente"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 filtro serviceAgencies: ricerca e pagina per nave ripristinate, ID letto fuori lista",
+          "messages": ["Error: Elemento atteso assente"]
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 filtro serviceTypes: ricerca e pagina per nave ripristinate, ID letto fuori lista",
+          "messages": ["Error: Elemento atteso assente"]
+        }
+      ]
+    },
+    {
+      "label": "targeted-final",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/consultation-state.test.tsx",
+        "tests/unit/application-request.test.ts",
+        "tests/unit/response-scope.test.ts",
+        "tests/unit/draft-guard.test.ts",
+        "tests/unit/write-attempt.test.ts",
+        "tests/unit/operation-service.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr03-targeted-final.json"
+      ],
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "report": "test-results/pr03-targeted-final.json",
+      "log": "test-results/pr03-targeted-final.log",
+      "total": 144,
+      "passed": 143,
+      "failed": 1,
+      "pending": 0,
+      "files": 6,
+      "failures": [
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 filtro banchina: ripristino per nave/porto e dettaglio storico fuori pagina",
+          "messages": ["Error: Elemento atteso assente"]
+        }
+      ]
+    },
+    {
+      "label": "new-final",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/consultation-state.test.tsx",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr03-new-final.json"
+      ],
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "report": "test-results/pr03-new-final.json",
+      "log": "test-results/pr03-new-final.log",
+      "total": 46,
+      "passed": 45,
+      "failed": 1,
+      "pending": 0,
+      "files": 1,
+      "failures": [
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "title": "PR03 filtro banchina: ripristino per nave/porto e dettaglio storico fuori pagina",
+          "messages": ["Error: Elemento atteso assente"]
+        }
+      ]
+    },
+    {
+      "label": "new-passed",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "tests/unit/consultation-state.test.tsx",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr03-new-passed.json"
+      ],
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "report": "test-results/pr03-new-passed.json",
+      "log": "test-results/pr03-new-passed.log",
+      "total": 46,
+      "passed": 46,
+      "failed": 0,
+      "pending": 0,
+      "files": 1,
+      "failures": []
+    },
+    {
+      "label": "full",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr03-full.json"
+      ],
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "report": "test-results/pr03-full.json",
+      "log": "test-results/pr03-full.log",
+      "total": 610,
+      "passed": 609,
+      "failed": 1,
+      "pending": 0,
+      "files": 41,
+      "failures": [
+        {
+          "file": "tests/unit/inter-port-migration.test.ts",
+          "title": "P12: rollback dopo copia e sostituzione delle componenti ripristina interamente il v12 popolato",
+          "messages": ["Error: Test timed out in 5000ms."]
+        }
+      ]
+    }
+  ],
+  "staticCheck": {
+    "command": "npm.cmd run check",
+    "exitCode": 1,
+    "typecheck": "passed",
+    "eslint": "passed",
+    "formattingFailureOnly": "doc/dev/punti-issue.md",
+    "log": "test-results/pr03-check-final.log"
+  },
+  "documentation": {
+    "profile": "documentazione",
+    "documents": [
+      "doc/pr03/stato-consultazione.md",
+      "doc/stato-implementazione-prestazioni.md",
+      "doc/dev/piano-interventi-post-rilascio.md",
+      "doc/piano-implementazione-prestazioni.md"
+    ],
+    "runs": [
+      {
+        "summary": "test-results/verification/2026-11-24T10-08-50.636Z-coordinator-hzVIbg/summary.md",
+        "exitCode": 1,
+        "documents": "passed",
+        "diff": "passed",
+        "formattingFailureOnly": "doc/dev/punti-issue.md"
+      },
+      {
+        "summary": "test-results/verification/2026-11-24T10-11-45.676Z-coordinator-3esRY9/summary.md",
+        "exitCode": 1,
+        "documents": "passed",
+        "diff": "passed",
+        "formattingFailures": ["doc/dev/punti-issue.md", "doc/pr03/verifiche.json"],
+        "resolution": "new manifest compacted after formatting; reformatted before the final documentation run; original source preserved"
+      },
+      {
+        "summary": "test-results/verification/2026-11-24T10-13-30.878Z-coordinator-1yI6jZ/summary.md",
+        "exitCode": 1,
+        "documents": "passed",
+        "diff": "passed",
+        "formattingFailureOnly": "doc/dev/punti-issue.md"
+      },
+      {
+        "summary": "test-results/verification/2026-11-24T10-17-31.405Z-coordinator-LslNBx/summary.md",
+        "exitCode": 1,
+        "documents": "passed",
+        "diff": "passed",
+        "formattingFailureOnly": "doc/dev/punti-issue.md",
+        "reason": "Versionamento autorizzato: riferimenti al commit di implementazione e riuso delle unità sulle 27 impronte invariate"
+      }
+    ],
+    "finalRun": "test-results/verification/2026-11-24T10-17-31.405Z-coordinator-LslNBx/summary.md",
+    "followup": "Only result references updated afterwards; selective Prettier, documents validator and git diff --check repeated."
+  },
+  "inheritedLimits": {
+    "interPortMigration": "PR02/PR11 limit reproduced by PR03 at original 5000ms; no retry",
+    "weights": "PR11 full timeout and successful 28/28 repetition preserved; PR03 full 28/28 passed",
+    "originalSourceFormatting": "preserved; no exclusions"
+  },
+  "deferredToK4": {
+    "executed": false,
+    "desktop": [
+      "tests/e2e/pr03-navigation.spec.ts",
+      "tests/e2e/pr02-drafts.spec.ts",
+      "tests/e2e/pr11-stays.spec.ts"
+    ],
+    "otherScenarios": "C1/C2/C8, async families, UI02/UI03/UI04, release-flow, milestone-migrations; full build and same packaged executable; see PR03 K1 matrix",
+    "k1": "coverage review only"
+  },
+  "sourceSha256": {
+    "src/renderer/src/api/application-request.ts": "21523e1e41c39c052e0fcc3f57acd678fc1ea8ece861bae9052285325c6685d4",
+    "src/renderer/src/api/use-agencies.ts": "c46bd8439bae94e4af08846636183bd57f219e91638c0e658d600379f94d55ae",
+    "src/renderer/src/api/use-berths.ts": "19cdde22720b7bb280948cc3f201ce0aa72301b73796e1119fa9cd0a2fa58d3c",
+    "src/renderer/src/api/use-customers.ts": "df307152b4b83cf3cbec837a1203a8893be1a52b32e175332fa762e52c20579e",
+    "src/renderer/src/api/use-ports.ts": "56cec09da1de2f20139b81460c1a85a780a309ad32c52f01d4a93fdb9a81f768",
+    "src/renderer/src/api/use-vessels.ts": "681731788bbed0d46e48262c2d96c57f873a60a1c5a88539ccf98fa33b9ac454",
+    "src/renderer/src/app/App.tsx": "badcb35d56ecba066b282f5f1cdf3139473a16d5133bf08f6834ef0e6f9930f8",
+    "src/renderer/src/app/Catalog.tsx": "98198551d37987626cae364d19e23b3524abbdc3421a5b4827e960e27a7a5dfa",
+    "src/renderer/src/app/CatalogPage.tsx": "3f18154e8f05697e3ec6578964a0aa3052c2b1250fe506578f0d0892e6eba505",
+    "src/renderer/src/app/MasterDataPage.tsx": "c8d1b30946872ff390ccf265a293e00c307ba3e5379d70a1bfcc7c2573476a32",
+    "src/renderer/src/app/operations/BerthPicker.tsx": "30998d7a5906967f428e1acf2d94832182e262cb2f8464e7f7b639f7bac4a338",
+    "src/renderer/src/app/operations/Operations.tsx": "fea73619fc61a8a33d48af99a85038e2b3eb8b4d7856123123511f3bff3e5be2",
+    "src/renderer/src/app/operations/SubjectPicker.tsx": "71c442379d7ce2826203f7aa2961ce45e9604370daffd5a69b4f3c7ddef4ad7c",
+    "src/renderer/src/app/operations/VesselPicker.tsx": "157de89f56623ac28469c206112e61974eceb5b866123af839633fa807cacc35",
+    "src/renderer/src/app/services/CatalogPicker.tsx": "dd92b3d56d2bbb8f63cad3c432b31436641d11d28c92b51534cb7fb1f6b63032",
+    "src/renderer/src/app/services/ServiceFilters.tsx": "b1f76d0615112cef88eacd714bda4cca65f3b77fdb15a63fb223bc142e73b1ad",
+    "src/renderer/src/app/services/Services.tsx": "2f4dd3f1ec5f175c12968aa4e96bb13437dddce81460d45b59bd28c0c2eb9bb4",
+    "src/renderer/src/app/tariffs/PortPicker.tsx": "8b1b2fa82c0f7557ae86f363c6d67d5cb07375a79901e3016cb8f3de07c7ac1e",
+    "src/renderer/src/app/tariffs/Tariffs.tsx": "118d66386529ace542f559539617acc88721d0a6b0ba2b22ec08974ad85024a2",
+    "src/renderer/src/app/weights/WeightHistory.tsx": "28c0932fd2fdc9d147af82b9a52dd513627fb16785a8f624f2bc4d1619ec085b",
+    "tsconfig.web.json": "522606e63a649cefaf8209e9e4cb4e519aa7d5fc9085ad4f34978027d9e69f38",
+    "src/renderer/src/api/consultation-state.ts": "434ae661356c11b409328de696e1d8bede7f8b9119fe4ba31059aea05ef541d5",
+    "src/renderer/src/api/use-consultation-state.tsx": "b21758f3713868628c674716bf0bcb4791358f8724a105dc8c817dc5c2cd0bca",
+    "src/renderer/src/api/use-service-filter-references.ts": "12173a88405fe5b4ee4b5c55ad311bde3bc0277a529f5755ae86a43147b9155e",
+    "tests/e2e/pr03-navigation.spec.ts": "660a3693d4898ce9e809577574342dec50d6784ca9832cc75bc81653e8ccd281",
+    "tests/unit/consultation-state.test.tsx": "954647596c693e568ea7a03de4a8f531fb72f58b4428e6c32aad796494b3d6c7",
+    "tests/unit/support/hook-runner.tsx": "7f8c6c388996b935932a6e23f909ff6893d3d0eece5ee8f05044fa1a556b5572"
+  },
+  "preservedSource": {
+    "path": "doc/dev/punti-issue.md",
+    "sha256": "8e5b4e0c57c3fea049a8ad3fcf5104a82b42fe4ccd12a68c064595f6767fc185"
+  },
+  "sourceEvidenceReview": {
+    "sourceCount": 27,
+    "sourceHashMismatches": [],
+    "sourceWritesAfterFullStarted": [],
+    "preservedIssueSource": true
+  },
+  "implementationRevision": "f6db0d95f1e5136cb95013d7444e239718be3b31",
+  "commitAuthorization": "Successiva richiesta esplicita dell’utente: effettua le commit"
+}

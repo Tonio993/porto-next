@@ -173,6 +173,8 @@ Da P01 `ArchiveCoordinator` possiede la sessione SQLite attiva e la coda condivi
 
 L'ID contenuto nel file non basta: «Salva con nome» conserva l'ID dell'archivio e delle righe, ma apre una copia indipendente. Serve un nuovo token di sessione anche in questo caso. Nessun dato funzionale viene conservato nelle preferenze globali dell'utente.
 
+La consultazione conserva ricerca, filtri, pagine e identificativi nel workspace della sessione, separati per sezione e proprietario. Al ritorno le viste ricaricano i dati e riesaminano riferimenti e pagine; un selezionato fuori pagina/filtro resta distinto da uno inesistente. Bozze, anteprime e ricevute mantengono i recuperi e la guardia PR02. [Censimento e integrazione PR03](pr03/stato-consultazione.md#censimento-e-decisioni); [deroga PR01–PR12 e checkpoint](dev/piano-interventi-post-rilascio.md#verifiche-degli-step-e-checkpoint).
+
 ### 3.2 Contratti e responsabilità
 
 - Dominio puro in `src/backend/domain/`, casi d'uso e transazioni in `application/`, SQL/Drizzle in `infrastructure/`.

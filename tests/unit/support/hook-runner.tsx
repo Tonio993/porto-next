@@ -123,7 +123,9 @@ export function useLayoutEffect(run: Effect['run'], deps?: readonly unknown[]) {
   effect(run, deps, true)
 }
 export function useContext<T>(context: Context<T>): T {
-  return contexts.get(context) as T
+  if (contexts.has(context)) return contexts.get(context) as T
+  // Match React's declared default when the unit mounts a consumer without a provider.
+  return (context as Context<T> & { _currentValue: T })._currentValue
 }
 export function useSyncExternalStore<T>(
   subscribe: (fn: () => void) => () => void,

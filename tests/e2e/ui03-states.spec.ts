@@ -55,7 +55,7 @@ test('UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento 
     await modal.getByRole('button', { name: 'Registra prestazione' }).click()
     await expect(modal).toHaveCount(0)
     const detail = page.getByRole('region', { name: 'Dettaglio prestazione' })
-    await expect(detail).toContainText('Base EUR 12.34')
+    await expect(detail).toContainText('Base EUR 12,34')
     // An actual external FK blocks deletion; no simulated application response.
     await app.evaluate(({ app }, path) => {
       const module = process.getBuiltinModule('module') as typeof import('node:module')
@@ -126,7 +126,7 @@ test('UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento 
     ).toBeVisible()
     await expect(page.getByText('Seleziona una prestazione', { exact: true })).toHaveCount(0)
     await releaseOperation(app)
-    await expect(detail).toContainText('Base EUR 12.34')
+    await expect(detail).toContainText('Base EUR 12,34')
     await detail.getByRole('button', { name: 'Modifica sole note' }).click()
     await modal.getByLabel('Note', { exact: true }).fill('Bozza della sessione precedente')
     await app.evaluate(

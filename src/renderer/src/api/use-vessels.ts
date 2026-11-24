@@ -1,3 +1,5 @@
+import { useNumericFormat } from './use-numeric-preference'
+import { integerInput } from './numeric-input'
 import { useConsultationState } from './use-consultation-state'
 import { useWriteAttempt } from './use-write-attempt'
 import { trackedRequest } from '../../../shared/contracts/write-outcomes'
@@ -30,6 +32,7 @@ interface Editor extends VesselFormValue {
 }
 
 export function useVessels(archives: ReturnType<typeof useArchives>, onRecovered?: () => void) {
+  const numericFormat = useNumericFormat()
   const { state, execute, setNotice, update } = archives
   const context = state.context!
   const { sessionId, revision } = context
@@ -190,6 +193,8 @@ export function useVessels(archives: ReturnType<typeof useArchives>, onRecovered
 
   function openCreate() {
     clearErrors()
+    if (!createContext)
+      setDescription((value) => ({ ...value, numericFormat: { ...numericFormat } }))
     setCreateContext((saved) => saved ?? context)
   }
 
@@ -244,7 +249,7 @@ export function useVessels(archives: ReturnType<typeof useArchives>, onRecovered
       context: history.context,
       vesselId: vessel.id,
       versionId: version?.id ?? null,
-      ...vesselForm(version ?? vessel.version),
+      ...vesselForm(version ?? vessel.version, numericFormat),
       moment: version
         ? version.effectiveMoment && {
             localDateTime: version.effectiveMoment.localDateTime,
@@ -393,7 +398,7 @@ export function useVessels(archives: ReturnType<typeof useArchives>, onRecovered
     if (!result)
       setFields({
         ...(!value.vesselTypeId ? { vesselTypeId: 'Scegli una tipologia.' } : {}),
-        ...(!/^[0-9]+$/.test(value.size.trim()) || !Number.isSafeInteger(Number(value.size))
+        ...(integerInput(value.size) === null
           ? { size: 'Inserisci un intero da 0 a 9007199254740991.' }
           : {}),
       })

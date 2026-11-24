@@ -1,3 +1,6 @@
+import { NumericPreferenceService } from '../backend/application/preferences/numeric-preference'
+import { NumericPreferenceStore } from '../backend/infrastructure/preferences/numeric-preference-store'
+import { registerNumericPreferenceIpc } from './ipc/register'
 import { ServiceService } from '../backend/application/services/service-service'
 import { registerServiceIpc } from './ipc/register'
 import { AssignmentService } from '../backend/application/operations/assignment-service'
@@ -119,6 +122,13 @@ if (ownsInstance) {
         archives,
       )
       registerArchiveIpc(controller, () => window)
+      registerNumericPreferenceIpc(
+        new NumericPreferenceService(
+          new NumericPreferenceStore(join(app.getPath('userData'), 'numeric-preference.json')),
+          log,
+        ),
+        () => window,
+      )
       registerTimeIpc(new TimeService(archives.coordinator), () => window)
       registerPortIpc(new PortService(archives.coordinator), () => window)
       registerBerthIpc(new BerthService(archives.coordinator), () => window)

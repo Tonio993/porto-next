@@ -145,7 +145,7 @@ test('P17A: entrata effettuata, anteprima prima/dopo, errore per campo, focus e 
   await page.keyboard.press('Shift+Tab')
   await expect(modal.getByRole('combobox', { name: 'Esito', exact: true })).toBeFocused()
   await modal.getByLabel('Momento effettivo locale').fill('2026-06-01T13:00')
-  await modal.getByLabel('Sostituzione manuale della base (EUR)', { exact: true }).fill('-1')
+  await modal.getByLabel('Sostituzione manuale della base (EUR)', { exact: true }).fill('0,001')
   await modal.getByRole('button', { name: 'Verifica e mostra anteprima' }).click()
   await expect(modal.getByRole('alert')).toContainText('importo non negativo')
   await modal.getByLabel('Sostituzione manuale della base (EUR)', { exact: true }).fill('0')

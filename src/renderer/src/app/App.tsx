@@ -1,3 +1,4 @@
+import { NumericSettings } from './NumericSettings'
 import { ConsultationWorkspace } from '../api/use-consultation-state'
 import { DraftProtection, useDraftProtection } from './DraftProtection'
 import { Services } from './services/Services'
@@ -117,6 +118,7 @@ function ArchiveWorkspace({ archives }: { archives: ReturnType<typeof useArchive
 
       <div className="workspace">
         <header className="topbar">
+          <NumericSettings />
           <div>
             Spazio di lavoro<span className="breadcrumb-separator">/</span>
             <strong>{section}</strong>

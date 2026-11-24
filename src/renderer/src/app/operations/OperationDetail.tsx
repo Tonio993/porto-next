@@ -1,9 +1,13 @@
+import { CalculationNumbers } from '../CalculationNumbers'
+import { formatNumeric } from '../../api/numeric-input'
+import { useNumericFormat } from '../../api/use-numeric-preference'
 import { SubjectValues } from './SubjectValues'
 import type { VesselOperationDto } from '../../../../shared/contracts/operations'
 import { formatMoney } from '../../api/numeric-input'
 export const operationLabels = { ENTRY: 'Entrata', EXIT: 'Uscita', MOVEMENT: 'Spostamento' }
 export const executionLabels = { PLANNED: 'Prevista', PERFORMED: 'Effettuata', MISSED: 'Mancata' }
 export function OperationDetail({ operation: o }: { operation: VesselOperationDto }) {
+  const numericFormat = useNumericFormat()
   const e = o.endpoint
   return (
     <section aria-label="Dettaglio operazione" className="tariff-long-value">
@@ -73,22 +77,21 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
               {e.portName} · {r.moment.localDateTime} · {r.moment.zoneId} · {r.vesselName}
             </p>
             <p>
-              Valore tariffario: {formatMoney(r.tariffValue)} · Peso: {r.weight}
+              Valore tariffario: {formatMoney(r.tariffValue, numericFormat)} · Peso:{' '}
+              {formatNumeric(r.weight, numericFormat)}
             </p>
             <p>
-              Base calcolata: {formatMoney(r.base)}
+              Base calcolata: {formatMoney(r.base, numericFormat)}
               <br />
               Sostituzione manuale:{' '}
-              {c.manualOverrideAmount === null ? 'Assente' : formatMoney(c.manualOverrideAmount)}
+              {c.manualOverrideAmount === null
+                ? 'Assente'
+                : formatMoney(c.manualOverrideAmount, numericFormat)}
               <br />
-              <strong>Base effettiva: {formatMoney(c.effectiveBase)}</strong>
+              <strong>Base effettiva: {formatMoney(c.effectiveBase, numericFormat)}</strong>
             </p>
             <SubjectValues subjects={c.subjects} ownLevel="VESSEL_OPERATION" />
-            <ol>
-              {r.steps.map((step, i) => (
-                <li key={i}>{step}</li>
-              ))}
-            </ol>
+            <CalculationNumbers value={r} />
             <details>
               <summary>Riferimenti applicati e operandi</summary>
               <p>
@@ -111,8 +114,12 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
                 Peso: {r.weightVersionId}
               </p>
               <p>
-                Tipologia {r.vesselTypeId}, dimensione {r.size}, limite {r.upperLimit}, valore{' '}
-                {r.ordinaryValue}, extra {r.extraCount} × {r.extraValue}, ampiezza {r.extraWidth}.
+                Tipologia {r.vesselTypeId}, dimensione {formatNumeric(r.size, numericFormat)},
+                limite {formatNumeric(r.upperLimit, numericFormat)}, valore{' '}
+                {formatNumeric(r.ordinaryValue, numericFormat)}, extra{' '}
+                {formatNumeric(r.extraCount, numericFormat)} ×{' '}
+                {formatNumeric(r.extraValue, numericFormat)}, ampiezza{' '}
+                {formatNumeric(r.extraWidth, numericFormat)}.
               </p>
             </details>
           </section>
@@ -120,7 +127,7 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
       })}
       {o.charges.length > 1 && (
         <p>
-          <strong>Totale basi effettive: {formatMoney(o.totalBase)}</strong>
+          <strong>Totale basi effettive: {formatMoney(o.totalBase, numericFormat)}</strong>
         </p>
       )}
       <p>Note: {o.notes ?? '—'}</p>

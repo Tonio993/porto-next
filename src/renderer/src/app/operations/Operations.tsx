@@ -1,3 +1,6 @@
+import { ExactNumericInput } from '../ExactNumericInput'
+import { useNumericFormat } from '../../api/use-numeric-preference'
+import type { NumericFormat } from '../../../../shared/contracts/numeric-preference'
 import { useConsultationState, useConsultationPicker } from '../../api/use-consultation-state'
 import { operationCreationOutcome } from '../../api/operation-creation-outcome'
 import { SingleFlight } from '../../api/single-flight'
@@ -43,6 +46,7 @@ import { BerthPicker } from './BerthPicker'
 import { OperationDetail, executionLabels, operationLabels } from './OperationDetail'
 
 type Draft = {
+  numericFormat: NumericFormat
   retrospective: boolean
   context: ArchiveContextDto
   values: CreateOperationDto
@@ -56,6 +60,7 @@ export function Operations({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
+  const numericFormat = useNumericFormat()
   const [assignmentTarget, setAssignmentTarget] = useState<AssignmentTarget | null>(null),
     [assignmentOpen, setAssignmentOpen] = useState(false)
   const assignmentTrigger = useRef<HTMLElement | null>(null)
@@ -377,6 +382,7 @@ export function Operations({
         invalidateEditor()
         setReloadRequired(false)
         setDraft({
+          numericFormat: { ...numericFormat },
           retrospective,
           context,
           override: '',
@@ -1248,7 +1254,9 @@ export function Operations({
                   disabled={disabled}
                 />
               )}
-              <TextInput
+              <ExactNumericInput
+                format={draft.numericFormat}
+                unit="EUR"
                 label="Sostituzione manuale della base (EUR, facoltativa)"
                 description="Anche zero. Il calcolo tariffario resta conservato."
                 value={draft.override}
@@ -1259,7 +1267,9 @@ export function Operations({
                 }}
               />
               {draft.values.operationType === 'MOVEMENT' && (
-                <TextInput
+                <ExactNumericInput
+                  format={draft.numericFormat}
+                  unit="EUR"
                   label="Sostituzione manuale all’arrivo (EUR, facoltativa)"
                   description="Solo tra porti: ENTRY all’arrivo. Il campo precedente sostituisce EXIT alla partenza; nello stesso porto sostituisce MOVEMENT."
                   value={draft.arrivalOverride}

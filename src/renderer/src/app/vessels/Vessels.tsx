@@ -1,3 +1,4 @@
+import { useNumericFormat } from '../../api/use-numeric-preference'
 import { useProtectedDraft } from '../DraftProtection'
 import { VesselFields, vesselDetails, vesselSummary } from './VesselFields'
 import { useEffect, useRef, useState } from 'react'
@@ -18,6 +19,7 @@ export function Vessels({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
+  const numericFormat = useNumericFormat()
   const vessels = useVessels(archives, () => {
     setCreating(false)
     setEditorHidden(false)
@@ -193,7 +195,7 @@ export function Vessels({
               <h3>
                 Nave {history.vessel.code} · {history.vessel.version.registeredName}
               </h3>
-              <p>{vesselDetails(history.vessel.version)}</p>
+              <p>{vesselDetails(history.vessel.version, numericFormat)}</p>
               <Group gap="xs">
                 <Badge
                   variant="outline"
@@ -246,7 +248,7 @@ export function Vessels({
                   <VersionCard
                     key={version.id}
                     version={version}
-                    description={vesselSummary(version)}
+                    description={vesselSummary(version, numericFormat)}
                     disabled={busy}
                     onEdit={() => openDialog(() => vessels.edit(version))}
                     onDelete={() =>

@@ -184,10 +184,10 @@ for (const [kind, plural, singular, newLabel] of [
       const future = history.getByRole('article').filter({ hasText: 'Futura' })
       await expect(future).toContainText('2090-01-01T09:00:00.000Z')
       await expect(future).toContainText('IMO: 001-B')
-      await expect(future).toContainText('Dimensione: 2200')
+      await expect(future).toContainText('Dimensione: 2.200')
       await expect(
         history.getByRole('article').filter({ hasText: 'Versione iniziale' }),
-      ).toContainText('Dimensione: 2100')
+      ).toContainText('Dimensione: 2.100')
       await future.scrollIntoViewIfNeeded()
       if (!packaged) await shot('cronologia-futura.png')
       await future.getByRole('button', { name: 'Correggi versione' }).click()

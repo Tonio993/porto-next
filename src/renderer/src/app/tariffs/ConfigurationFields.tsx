@@ -1,46 +1,56 @@
-import { Button, Group, Stack, Tabs, TextInput } from '@mantine/core'
+import { ExactNumericInput } from '../ExactNumericInput'
+import { useNumericFormat } from '../../api/use-numeric-preference'
+import type { NumericFormat } from '../../../../shared/contracts/numeric-preference'
+import { Button, Group, Stack, Tabs } from '@mantine/core'
 import type {
   TariffConfigurationDto,
   TariffConfigurationInput,
 } from '../../../../shared/contracts/tariffs'
 import { vesselTypes, type VesselTypeId } from '../../../../shared/contracts/vessels'
-import { decimalInput } from '../../api/numeric-input'
+import { decimalInput, integerInput, formatNumeric } from '../../api/numeric-input'
 
 export type ConfigurationDraft = {
+  numericFormat: NumericFormat
   vesselTypeId: VesselTypeId
   brackets: { upperLimit: string; value: string }[]
   extraWidth: string
   extraValue: string
 }
-export const emptyConfigurations = (): ConfigurationDraft[] =>
+export const emptyConfigurations = (numericFormat: NumericFormat): ConfigurationDraft[] =>
   vesselTypes.map((t) => ({
+    numericFormat: { ...numericFormat },
     vesselTypeId: t.id,
     brackets: [{ upperLimit: '', value: '' }],
     extraWidth: '',
     extraValue: '',
   }))
-export const copyDraft = (configs: readonly TariffConfigurationInput[]): ConfigurationDraft[] =>
+export const copyDraft = (
+  configs: readonly TariffConfigurationInput[],
+  numericFormat: NumericFormat,
+): ConfigurationDraft[] =>
   vesselTypes.map((t) => {
     const c = configs.find((c) => c.vesselTypeId === t.id)!
     return {
       ...c,
+      numericFormat: { ...numericFormat },
       brackets: c.brackets.map((b) => ({
         upperLimit: String(b.upperLimit),
-        value: b.value.replace('.', ','),
+        value: b.value,
       })),
       extraWidth: String(c.extraWidth),
-      extraValue: c.extraValue.replace('.', ','),
+      extraValue: c.extraValue,
     }
   })
 export function readConfigurations(configs: ConfigurationDraft[]): TariffConfigurationInput[] {
   const integer = (raw: string) => {
-    if (!/^[0-9]+$/.test(raw.trim()) || !Number.isSafeInteger(Number(raw)))
+    const value = integerInput(raw)
+    if (value === null)
       throw new Error('Inserisci limiti e ampiezze interi entro 9007199254740991.')
-    return Number(raw)
+    return value
   }
   const decimal = (raw: string) => {
     const value = decimalInput(raw)
-    if (value === null || raw.trim().replace(',', '.').replace('.', '').length > 256)
+    if (value === null)
       throw new Error('Inserisci valori decimali non negativi, con al massimo 256 cifre.')
     return value
   }
@@ -83,9 +93,10 @@ export function ConfigurationFields({
             </p>
             {c.brackets.map((b, i) => (
               <div className="tariff-bracket-fields" key={i}>
-                <TextInput
+                <ExactNumericInput
+                  format={c.numericFormat}
                   label={`Limite incluso ${i + 1}`}
-                  inputMode="numeric"
+                  integer
                   value={b.upperLimit}
                   disabled={disabled}
                   onChange={(e) =>
@@ -97,9 +108,10 @@ export function ConfigurationFields({
                     })
                   }
                 />
-                <TextInput
+                <ExactNumericInput
+                  format={c.numericFormat}
                   label={`Valore EUR ${i + 1}`}
-                  inputMode="decimal"
+                  unit="EUR"
                   value={b.value}
                   disabled={disabled}
                   onChange={(e) =>
@@ -135,16 +147,18 @@ export function ConfigurationFields({
               </Button>
             </Group>
             <div className="tariff-extra-fields">
-              <TextInput
+              <ExactNumericInput
+                format={c.numericFormat}
                 label="Ampiezza extra"
-                inputMode="numeric"
+                integer
                 value={c.extraWidth}
                 disabled={disabled}
                 onChange={(e) => change(index, { ...c, extraWidth: e.currentTarget.value })}
               />
-              <TextInput
+              <ExactNumericInput
+                format={c.numericFormat}
                 label="Valore extra EUR"
-                inputMode="decimal"
+                unit="EUR"
                 value={c.extraValue}
                 disabled={disabled}
                 onChange={(e) => change(index, { ...c, extraValue: e.currentTarget.value })}
@@ -161,6 +175,7 @@ export function ConfigurationDetails({
 }: {
   configurations: readonly TariffConfigurationDto[]
 }) {
+  const numericFormat = useNumericFormat()
   return (
     <>
       {vesselTypes.map((t) => {
@@ -184,15 +199,17 @@ export function ConfigurationDetails({
               <tbody>
                 {c.brackets.map((b) => (
                   <tr key={b.id}>
-                    <td>{b.upperLimit}</td>
-                    <td>{b.value.replace('.', ',')}</td>
+                    <td>{formatNumeric(b.upperLimit, numericFormat)}</td>
+                    <td>{formatNumeric(b.value, numericFormat)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <p>
-              Ampiezza extra: {c.extraWidth} · Valore extra:{' '}
-              <span className="tariff-long-value">{c.extraValue.replace('.', ',')} EUR</span>
+              Ampiezza extra: {formatNumeric(c.extraWidth, numericFormat)} · Valore extra:{' '}
+              <span className="tariff-long-value">
+                {formatNumeric(c.extraValue, numericFormat)} EUR
+              </span>
             </p>
           </section>
         )

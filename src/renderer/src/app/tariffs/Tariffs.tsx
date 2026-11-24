@@ -1,3 +1,4 @@
+import { useNumericFormat } from '../../api/use-numeric-preference'
 import { useConsultationState, useConsultationPicker } from '../../api/use-consultation-state'
 import { useProtectedDraft } from '../DraftProtection'
 import { useWriteAttempt } from '../../api/use-write-attempt'
@@ -49,6 +50,7 @@ export function Tariffs({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
+  const numericFormat = useNumericFormat()
   const consultationPicker = useConsultationPicker('tariffPorts')
   const context = archives.state.context!
   const [portId, setPortId] = useConsultationState('tariffOwner', 'portId')
@@ -236,7 +238,7 @@ export function Tariffs({
           context: { ...context },
           portId,
           moment: emptyMoment(),
-          configurations: emptyConfigurations(),
+          configurations: emptyConfigurations(numericFormat),
         }
         setDraft(next)
         if (copy && detail) {
@@ -246,7 +248,11 @@ export function Tariffs({
               query: { id: detail.id },
             }),
           )
-          if (r?.ok) setDraft({ ...next, configurations: copyDraft(r.value) })
+          if (r?.ok)
+            setDraft({
+              ...next,
+              configurations: copyDraft(r.value, next.configurations[0].numericFormat!),
+            })
         }
       },
     })
@@ -653,7 +659,10 @@ export function Tariffs({
                       disabled={busy}
                       report={setDialogError}
                       onCopy={(c) => {
-                        setDraft({ ...draft, configurations: copyDraft(c) })
+                        setDraft({
+                          ...draft,
+                          configurations: copyDraft(c, draft.configurations[0].numericFormat!),
+                        })
                         setCopyOpen(false)
                       }}
                     />

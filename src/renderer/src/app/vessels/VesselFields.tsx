@@ -1,3 +1,9 @@
+import { ExactNumericInput } from '../ExactNumericInput'
+import { integerInput, formatNumeric } from '../../api/numeric-input'
+import {
+  italianNumericFormat,
+  type NumericFormat,
+} from '../../../../shared/contracts/numeric-preference'
 import { Select, Stack, TextInput } from '@mantine/core'
 import {
   vesselTypes,
@@ -9,18 +15,24 @@ export interface VesselFormValue {
   registeredName: string
   imoNumber: string
   vesselTypeId: VesselTypeId | null
+  numericFormat: NumericFormat
   size: string
 }
 
 export const emptyVesselForm: VesselFormValue = {
+  numericFormat: { ...italianNumericFormat },
   registeredName: '',
   imoNumber: '',
   vesselTypeId: null,
   size: '',
 }
 
-export function vesselForm(description: VesselDescriptionDto): VesselFormValue {
+export function vesselForm(
+  description: VesselDescriptionDto,
+  numericFormat: NumericFormat,
+): VesselFormValue {
   return {
+    numericFormat: { ...numericFormat },
     registeredName: description.registeredName,
     imoNumber: description.imoNumber ?? '',
     vesselTypeId: description.vesselTypeId,
@@ -29,23 +41,22 @@ export function vesselForm(description: VesselDescriptionDto): VesselFormValue {
 }
 
 export function vesselFormInput(value: VesselFormValue): VesselDescriptionDto | null {
-  const size = value.size.trim()
-  if (!value.vesselTypeId || !/^[0-9]+$/.test(size) || !Number.isSafeInteger(Number(size)))
-    return null
+  const size = integerInput(value.size)
+  if (!value.vesselTypeId || size === null) return null
   return {
     registeredName: value.registeredName,
     imoNumber: value.imoNumber.trim() || null,
     vesselTypeId: value.vesselTypeId,
-    size: Number(size),
+    size,
   }
 }
 
-export function vesselSummary(value: VesselDescriptionDto): string {
-  return `${value.registeredName} · ${vesselDetails(value)}`
+export function vesselSummary(value: VesselDescriptionDto, format: NumericFormat): string {
+  return `${value.registeredName} · ${vesselDetails(value, format)}`
 }
 
-export function vesselDetails(value: VesselDescriptionDto): string {
-  return `IMO: ${value.imoNumber ?? 'assente'} · ${vesselTypes.find(({ id }) => id === value.vesselTypeId)!.label} · Dimensione: ${value.size}`
+export function vesselDetails(value: VesselDescriptionDto, format: NumericFormat): string {
+  return `IMO: ${value.imoNumber ?? 'assente'} · ${vesselTypes.find(({ id }) => id === value.vesselTypeId)!.label} · Dimensione: ${formatNumeric(value.size, format)}`
 }
 
 export function VesselFields({
@@ -87,7 +98,9 @@ export function VesselFields({
         error={fields.vesselTypeId}
         onChange={(type) => onChange({ ...value, vesselTypeId: type as VesselTypeId | null })}
       />
-      <TextInput
+      <ExactNumericInput
+        integer
+        format={value.numericFormat}
         label="Dimensione"
         description="Intero non negativo, senza unità di misura."
         required

@@ -1,4 +1,8 @@
 import { randomUUID } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { NumericPreferenceService } from '../../src/backend/application/preferences/numeric-preference'
+import { NumericPreferenceStore } from '../../src/backend/infrastructure/preferences/numeric-preference-store'
+import { englishNumericFormat } from '../../src/shared/contracts/numeric-preference'
 import { trackedRequest, writeOutcomeChannel } from '../../src/shared/contracts/write-outcomes'
 import { ServiceService } from '../../src/backend/application/services/service-service'
 import { serviceChannels } from '../../src/shared/contracts/services'
@@ -84,6 +88,22 @@ afterEach(async () => {
 })
 
 describe('controller archivi e menu', () => {
+  it('PR04 la preferenza utente conserva byte, sessione, revisione, timestamp e recenti dell’archivio', async () => {
+    await create('Preferenze')
+    const before = structuredClone(state)
+    const bytes = readFileSync(state.active!.path)
+    const recent = readFileSync(join(folder, 'recent-archives.json'))
+    const service = new NumericPreferenceService(
+      new NumericPreferenceStore(join(folder, 'numeric-preference.json')),
+    )
+    expect(service.set(englishNumericFormat)).toMatchObject({ ok: true })
+    expect(service.get()).toMatchObject({ ok: true, value: englishNumericFormat })
+    expect(state).toEqual(before)
+    expect(readFileSync(state.active!.path)).toEqual(bytes)
+    expect(readFileSync(join(folder, 'recent-archives.json'))).toEqual(recent)
+    expect((await controller.execute('state')).ok).toBe(true)
+    expect(state).toEqual(before)
+  })
   it('non legge B per completare una richiesta contestuale di A', async () => {
     await create('A')
     const old = state.context

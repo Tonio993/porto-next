@@ -1,3 +1,5 @@
+import type { NumericPreferenceService } from '../../backend/application/preferences/numeric-preference'
+import { numericPreferenceChannels } from '../../shared/contracts/numeric-preference'
 import { WriteOutcomeStore } from './write-outcome-store'
 import { writeOutcomeChannel, type WriteOutcomeApi } from '../../shared/contracts/write-outcomes'
 import type { ApplicationResult } from '../../shared/contracts/application'
@@ -197,4 +199,12 @@ export function registerServiceIpc(
 ): void {
   for (const action of Object.keys(serviceChannels) as (keyof ServiceApi)[])
     registerGuardedIpc(serviceChannels[action], window, (input) => service[action](input as never))
+}
+
+export function registerNumericPreferenceIpc(
+  service: NumericPreferenceService,
+  window: () => BrowserWindow | null,
+): void {
+  registerGuardedIpc(numericPreferenceChannels.get, window, (input) => service.get(input))
+  registerGuardedIpc(numericPreferenceChannels.set, window, (input) => service.set(input))
 }

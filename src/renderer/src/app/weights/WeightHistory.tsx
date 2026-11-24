@@ -1,8 +1,12 @@
+import { formatNumeric } from '../../api/numeric-input'
+import { ExactNumericInput } from '../ExactNumericInput'
+import { useNumericFormat } from '../../api/use-numeric-preference'
+import type { NumericFormat } from '../../../../shared/contracts/numeric-preference'
 import { useConsultationState } from '../../api/use-consultation-state'
 import { useProtectedDraft } from '../DraftProtection'
 import { SingleFlight } from '../../api/single-flight'
 import { useEffect, useRef, useState, type RefObject } from 'react'
-import { Badge, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
+import { Badge, Button, Group, Modal, Stack } from '@mantine/core'
 import type {
   ApplicationResult,
   ArchiveContextDto,
@@ -25,6 +29,7 @@ import { PortConfirmation } from '../ports/PortConfirmation'
 import { TariffMomentFields, emptyMoment } from '../tariffs/TariffMomentFields'
 
 type Draft = {
+  numericFormat: NumericFormat
   context: ArchiveContextDto
   operation: WeightChangeDto['operation']
   before: WeightVersionDto | null
@@ -55,6 +60,7 @@ export function WeightHistory({
   onUncertainChange: (value: boolean) => void
   onApplied: () => void
 }) {
+  const numericFormat = useNumericFormat()
   const context = archives.state.context!
   const [page, setPage, pageCurrent] = useConsultationState('weights', 'page', sequenceId),
     [reload, setReload] = useState(0)
@@ -187,10 +193,11 @@ export function WeightHistory({
         invalidate()
         setReloadRequired(false)
         setDraft({
+          numericFormat: { ...numericFormat },
           operation,
           before,
           context: { ...historyContext },
-          weight: before?.weight.replace('.', ',') ?? '1',
+          weight: before?.weight ?? '1',
           moment: before
             ? before.effectiveMoment
               ? {
@@ -240,10 +247,7 @@ export function WeightHistory({
     if (!draft || disabled) return
     invalidate()
     const weight = decimalInput(draft.weight)
-    if (
-      draft.operation !== 'DELETE' &&
-      (weight === null || draft.weight.trim().replace(',', '.').replace('.', '').length > 256)
-    ) {
+    if (draft.operation !== 'DELETE' && weight === null) {
       setError('Inserisci un peso positivo, senza esponenti, con al massimo 256 cifre.')
       return
     }
@@ -439,7 +443,8 @@ export function WeightHistory({
                     ) : (
                       <p>Peso iniziale senza decorrenza.</p>
                     )}
-                    <TextInput
+                    <ExactNumericInput
+                      format={draft.numericFormat}
                       label="Peso"
                       ref={weightInput}
                       data-autofocus
@@ -457,8 +462,8 @@ export function WeightHistory({
                 ) : (
                   <p>
                     Decorrenza: {draft.before?.effectiveMoment?.localDateTime} · peso{' '}
-                    {draft.before?.weight}. Le attività saranno ricalcolate con la sequenza
-                    restante.
+                    {formatNumeric(draft.before?.weight ?? '—', numericFormat)}. Le attività saranno
+                    ricalcolate con la sequenza restante.
                   </p>
                 )}
                 <Button
@@ -519,7 +524,7 @@ export function WeightHistory({
             {history?.versions.items.map((v) => (
               <section key={v.id} className="archive-panel">
                 <Group justify="space-between">
-                  <strong>Peso {v.weight.replace('.', ',')}</strong>
+                  <strong>Peso {formatNumeric(v.weight, numericFormat)}</strong>
                   <Badge>{phaseLabels[v.phase]}</Badge>
                 </Group>
                 <p>

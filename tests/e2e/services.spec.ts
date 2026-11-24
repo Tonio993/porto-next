@@ -113,7 +113,7 @@ for (const scenario of ['funzionale', 'asincrono'] as const)
         await modal.getByRole('button', { name: 'Registra prestazione' }).click()
         await expect(modal).toHaveCount(0)
         const detail = page.getByRole('region', { name: 'Dettaglio prestazione' })
-        await expect(detail).toContainText('Base EUR 123.45')
+        await expect(detail).toContainText('Base EUR 123,45')
         await expect(detail).toContainText('Mancata')
         await expect(detail).toContainText('Banchina non specificata')
         await expect(detail).toContainText('Assente')
@@ -307,7 +307,7 @@ test('P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE c
     await modal.getByRole('button', { name: 'Registra prestazione', exact: true }).click()
     await expect(modal).toHaveCount(0)
     const detail = page.getByRole('region', { name: 'Dettaglio prestazione' })
-    await expect(detail).toContainText('Catalogo · Mancata · Base EUR 115.00')
+    await expect(detail).toContainText('Catalogo · Mancata · Base EUR 115,00')
     await expect(detail).toContainText('Extra: 3 × 5 EUR')
     await expect(detail).toContainText('Peso: 1')
     await expect(detail).toContainText('Base: 115.00 × 1 = 115.00 EUR')
@@ -598,7 +598,7 @@ for (const category of ['FREE', 'CATALOG'] as const)
         await expect(modal).toHaveCount(0)
         await expect(detail).toContainText('Mancata')
         await expect(detail).toContainText(
-          category === 'FREE' ? 'Base EUR 20.25' : 'Base EUR 115.00',
+          category === 'FREE' ? 'Base EUR 20,25' : 'Base EUR 115,00',
         )
         // Combined visible filters, historical type, interval and the actual stay hierarchy.
         await page.getByText('Filtri prestazioni', { exact: true }).click()
@@ -681,7 +681,7 @@ for (const category of ['FREE', 'CATALOG'] as const)
           await page.getByRole('option', { name: 'Sostituzione P16', exact: true }).click()
           await modal.getByRole('button', { name: 'Mostra anteprima' }).click()
           await expect(modal.getByRole('region', { name: 'Anteprima prestazione' })).toContainText(
-            'Base EUR 230.00',
+            'Base EUR 230,00',
           )
           await modal.getByRole('button', { name: 'Conferma variazione' }).click()
           await expect(modal).toHaveCount(0)
@@ -906,7 +906,7 @@ for (const category of ['FREE', 'CATALOG'] as const)
       await editor().getByLabel('Momento prestazione locale').fill('2026-05-02T13:00')
       if (category === 'FREE') {
         await editor().getByLabel('Descrizione', { exact: true }).fill('Recupero creazione incerta')
-        await editor().getByLabel('Importo base EUR').fill('17.25')
+        await editor().getByLabel('Importo base EUR').fill('17,25')
       } else {
         await editor().getByRole('combobox', { name: 'Tipo di prestazione', exact: true }).click()
         await page.getByRole('option', { name: 'rinforzo ormeggio', exact: true }).click()

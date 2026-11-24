@@ -1,3 +1,4 @@
+import { useNumericFormat } from '../../api/use-numeric-preference'
 import { useProtectedDraft } from '../DraftProtection'
 import { SingleFlight } from '../../api/single-flight'
 import { useEffect, useRef, useState, type RefObject } from 'react'
@@ -49,10 +50,13 @@ export function TariffMaintenanceEditor({
   onApplied: (value: TariffDto | null) => void
   onUncertainChange: (value: boolean) => void
 }) {
+  const numericFormat = useNumericFormat()
   const context = archives.state.context!
   const [draftContext, setDraftContext] = useState(originalContext)
   const [original, setOriginal] = useState(tariff)
-  const [configurations, setConfigurations] = useState(() => copyDraft(tariff.configurations))
+  const [configurations, setConfigurations] = useState(() =>
+    copyDraft(tariff.configurations, numericFormat),
+  )
   const [moment, setMoment] = useState<MomentInputDto>(() => ({
     localDateTime: tariff.effectiveMoment.localDateTime,
     selectedOffset: tariff.effectiveMoment.offset,

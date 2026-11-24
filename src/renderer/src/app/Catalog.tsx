@@ -1,3 +1,7 @@
+import { formatNumeric } from '../api/numeric-input'
+import { ExactNumericInput } from './ExactNumericInput'
+import { useNumericFormat } from '../api/use-numeric-preference'
+import type { NumericFormat } from '../../../shared/contracts/numeric-preference'
 import { useConsultationState } from '../api/use-consultation-state'
 import { useProtectedDraft } from './DraftProtection'
 import { useWriteAttempt } from '../api/use-write-attempt'
@@ -21,6 +25,7 @@ import { StateMessage } from './StateMessage'
 import { PortConfirmation } from './ports/PortConfirmation'
 
 type Draft = {
+  numericFormat: NumericFormat
   kind: 'CREATE' | 'RENAME'
   context: ArchiveContextDto
   description: string
@@ -34,6 +39,7 @@ export function Catalog({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
+  const numericFormat = useNumericFormat()
   const context = archives.state.context!
   const [weightWindow, setWeightWindow] = useState<{
     sequenceId: string
@@ -211,7 +217,7 @@ export function Catalog({
     setDialogError(null)
     setIssues([])
     const weight = decimalInput(draft.weight)
-    if (weight === null || draft.weight.trim().replace(',', '.').replace('.', '').length > 256) {
+    if (weight === null) {
       setIssues([
         {
           path: ['initialWeight'],
@@ -395,6 +401,7 @@ export function Catalog({
                     setDialogError(null)
                     setIssues([])
                     setDraft({
+                      numericFormat: { ...numericFormat },
                       kind: 'CREATE',
                       context: { ...context },
                       description: '',
@@ -493,7 +500,7 @@ export function Catalog({
               <p>
                 Peso iniziale:{' '}
                 <strong data-testid="catalog-weight">
-                  {detail.initialWeight.weight.replace('.', ',')}
+                  {formatNumeric(detail.initialWeight.weight, numericFormat)}
                 </strong>{' '}
                 · senza decorrenza
               </p>
@@ -526,6 +533,7 @@ export function Catalog({
                         setDialogError(null)
                         setIssues([])
                         setDraft({
+                          numericFormat: { ...numericFormat },
                           kind: 'RENAME',
                           id: detail.id,
                           description: detail.description,
@@ -582,7 +590,8 @@ export function Catalog({
           {fixed.map((item) => (
             <p key={item.operation}>
               <strong>{operationLabels[item.operation]}</strong>:{' '}
-              {item.initialWeight.weight.replace('.', ',')} · peso iniziale senza decorrenza
+              {formatNumeric(item.initialWeight.weight, numericFormat)} · peso iniziale senza
+              decorrenza
               <Button
                 ml="sm"
                 size="compact-sm"
@@ -697,9 +706,10 @@ export function Catalog({
                   disabled={busy}
                 />
                 {draft.kind === 'CREATE' && (
-                  <TextInput
+                  <ExactNumericInput
+                    format={draft.numericFormat}
                     label="Peso iniziale"
-                    description="Maggiore di zero. Puoi usare la virgola decimale."
+                    description="Maggiore di zero, al massimo 256 cifre."
                     inputMode="decimal"
                     value={draft.weight}
                     onChange={(event) => setDraft({ ...draft, weight: event.currentTarget.value })}

@@ -1,3 +1,4 @@
+import type { NumericPreferenceApi } from '../../shared/contracts/numeric-preference'
 import type { WriteOutcomeApi } from '../../shared/contracts/write-outcomes'
 import type { ServiceApi } from '../../shared/contracts/services'
 import type { AssignmentApi } from '../../shared/contracts/assignments'
@@ -14,6 +15,7 @@ import type { PortApi } from '../../shared/contracts/ports'
 
 declare global {
   interface Window {
+    numericPreference: NumericPreferenceApi
     writeOutcomes: WriteOutcomeApi
     services: ServiceApi
     assignments: AssignmentApi

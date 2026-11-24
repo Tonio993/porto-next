@@ -1,7 +1,9 @@
+import { ExactNumericInput } from '../ExactNumericInput'
+import { useNumericFormat } from '../../api/use-numeric-preference'
 import { useProtectedDraft } from '../DraftProtection'
 import { SingleFlight } from '../../api/single-flight'
 import { useEffect, useRef, useState } from 'react'
-import { Button, Group, Modal, Select, Stack, Textarea, TextInput } from '@mantine/core'
+import { Button, Group, Modal, Select, Stack, Textarea } from '@mantine/core'
 import type { ApplicationResult, ArchiveContextDto } from '../../../../shared/contracts/application'
 import type {
   CreateOperationDto,
@@ -93,6 +95,8 @@ export function OperationCompletionEditor({
       }
   const expected = useRef<VesselOperationDto | null>(null)
   const context = archives.state.context!
+  const preference = useNumericFormat()
+  const [numericFormat] = useState(() => ({ ...preference }))
   const [draftContext, setDraftContext] = useState(originalContext)
   const [original, setOriginal] = useState(operation)
   const [values, setValues] = useState(() => fromOperation(operation, correction))
@@ -624,7 +628,9 @@ export function OperationCompletionEditor({
               />
             </>
           )}
-          <TextInput
+          <ExactNumericInput
+            format={numericFormat}
+            unit="EUR"
             label="Sostituzione manuale della base (EUR)"
             description="Facoltativa, anche zero; il calcolo tariffario resta conservato."
             value={amount}
@@ -641,7 +647,9 @@ export function OperationCompletionEditor({
           />
           {values.operationType === 'MOVEMENT' &&
             (correction || values.destinationPortId !== original.endpoint.portId) && (
-              <TextInput
+              <ExactNumericInput
+                format={numericFormat}
+                unit="EUR"
                 label="Sostituzione manuale all’arrivo (EUR)"
                 description="Applicabile soltanto agli spostamenti tra porti."
                 value={arrivalAmount}

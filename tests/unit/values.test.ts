@@ -1,3 +1,4 @@
+import { italianNumericFormat } from '../../src/shared/contracts/numeric-preference'
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 import Database from 'better-sqlite3'
@@ -28,13 +29,15 @@ describe('numeri esatti e adattatori EUR', () => {
     })
   }
 
-  it('distingue importi manuali, fattori e normalizzazione italiana', () => {
-    expect(moneyInput(' 000172,5 ')).toBe('172.50')
+  it('distingue importi manuali, fattori e normalizzazione canonica', () => {
+    expect(moneyInput(' 000172.5 ')).toBe('172.50')
     expect(moneyInput('2,675')).toBeNull()
     expect(moneyInput('1.234,50')).toBeNull()
-    expect(decimalInput('0001,12345678901234567890100')).toBe('1.123456789012345678901')
+    expect(decimalInput('0001.12345678901234567890100')).toBe('1.123456789012345678901')
     expect(decimalText('0001.2300')).toBe('1.23')
-    expect(formatMoney('92233720368547758.07')).toBe('92.233.720.368.547.758,07 €')
+    expect(formatMoney('92233720368547758.07', italianNumericFormat)).toBe(
+      '92.233.720.368.547.758,07 €',
+    )
     for (const input of [0.01, '2.675', '01.00', '1,00', '-1.00', '1e2', ' 1.00 ', '1.00\n'])
       expect(() => Money.parse(input)).toThrowError(
         expect.objectContaining({ code: 'VALIDATION_ERROR' }),

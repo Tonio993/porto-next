@@ -1,3 +1,6 @@
+import { CalculationNumbers } from '../CalculationNumbers'
+import { formatNumeric } from '../../api/numeric-input'
+import { useNumericFormat } from '../../api/use-numeric-preference'
 import type {
   ServiceActivityDto,
   ServiceChangePreviewDto,
@@ -24,10 +27,12 @@ const labels: Record<string, string> = {
   calculation: 'Calcolo',
 }
 function Values({ value }: { value: ServiceActivityDto }) {
+  const numericFormat = useNumericFormat()
   return (
     <div className="tariff-long-value">
       <p>
-        {value.description} · {executionLabels[value.executionStatus]} · Base EUR {value.base}
+        {value.description} · {executionLabels[value.executionStatus]} · Base EUR{' '}
+        {formatNumeric(value.base, numericFormat)}
       </p>
       <p>
         {value.vesselName} · {value.portName} · {value.berthName ?? 'Banchina non specificata'}
@@ -45,13 +50,7 @@ function Values({ value }: { value: ServiceActivityDto }) {
       </p>
       <SubjectValues subjects={value.subjects} ownLevel="SERVICE_ACTIVITY" />
       <p>Note: {value.notes ?? 'Nessuna'}</p>
-      {value.calculation && (
-        <ol>
-          {value.calculation.steps.map((step, i) => (
-            <li key={i}>{step}</li>
-          ))}
-        </ol>
-      )}
+      {value.calculation && <CalculationNumbers value={value.calculation} />}
     </div>
   )
 }

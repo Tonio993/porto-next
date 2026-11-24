@@ -1,3 +1,7 @@
+import {
+  numericPreferenceChannels,
+  type NumericPreferenceApi,
+} from '../shared/contracts/numeric-preference'
 import { writeOutcomeChannel, type WriteOutcomeApi } from '../shared/contracts/write-outcomes'
 import { serviceChannels, type ServiceApi } from '../shared/contracts/services'
 import { assignmentChannels, type AssignmentApi } from '../shared/contracts/assignments'
@@ -215,3 +219,9 @@ const writeOutcomes: WriteOutcomeApi = {
   get: (request) => ipcRenderer.invoke(writeOutcomeChannel, request),
 }
 contextBridge.exposeInMainWorld('writeOutcomes', writeOutcomes)
+
+const numericPreference: NumericPreferenceApi = {
+  get: () => ipcRenderer.invoke(numericPreferenceChannels.get),
+  set: (value) => ipcRenderer.invoke(numericPreferenceChannels.set, value),
+}
+contextBridge.exposeInMainWorld('numericPreference', numericPreference)

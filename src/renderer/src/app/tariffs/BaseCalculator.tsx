@@ -1,3 +1,6 @@
+import { CalculationNumbers } from '../CalculationNumbers'
+import { formatNumeric } from '../../api/numeric-input'
+import { useNumericFormat } from '../../api/use-numeric-preference'
 import { useEffect, useState } from 'react'
 import { Button, Group, Select, Stack, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
@@ -20,6 +23,7 @@ export function BaseCalculator({
   context: ArchiveContextDto
   portId: string
 }) {
+  const numericFormat = useNumericFormat()
   const [vesselSearch, setVesselSearch] = useState(''),
     [vesselPage, setVesselPage] = useState(1)
   const [vessels, setVessels] = useState<PageDto<VesselDto> | null>(null)
@@ -233,20 +237,18 @@ export function BaseCalculator({
             </StateMessage>
           )}
           <h3>
-            Base simulata: <span data-testid="calculated-base">{formatMoney(trace.base)}</span>
+            Base simulata:{' '}
+            <span data-testid="calculated-base">{formatMoney(trace.base, numericFormat)}</span>
           </h3>
           <p>
-            Nave {trace.vesselName} · {trace.vesselTypeId} · dimensione storica {trace.size}
+            Nave {trace.vesselName} · {trace.vesselTypeId} · dimensione storica{' '}
+            {formatNumeric(trace.size, numericFormat)}
           </p>
           <p>
             {trace.moment.localDateTime.replace('T', ' ')} · {trace.moment.zoneId} ·{' '}
             {trace.moment.offset} · UTC {trace.moment.utc}
           </p>
-          <ol>
-            {trace.steps.map((step, i) => (
-              <li key={i}>{step}</li>
-            ))}
-          </ol>
+          <CalculationNumbers value={trace} />
           <details>
             <summary>Riferimenti applicati</summary>
             <dl>

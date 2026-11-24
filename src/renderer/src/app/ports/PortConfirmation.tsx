@@ -1,3 +1,6 @@
+import { useNumericFormat } from '../../api/use-numeric-preference'
+import { formatNumeric } from '../../api/numeric-input'
+import type { NumericFormat } from '../../../../shared/contracts/numeric-preference'
 import { useEffect, useState } from 'react'
 import { Button, Group, Table } from '@mantine/core'
 import type { ChangePreviewDto } from '../../../../shared/contracts/master-data'
@@ -53,8 +56,28 @@ const labels: Record<string, string> = {
   vessel: 'Nave',
   selectable: 'Selezionabile',
 }
-function displayValue(field: string, value: string | null): string {
+export function displayPreviewValue(
+  field: string,
+  value: string | null,
+  format: NumericFormat,
+): string {
   if (value === null) return '—'
+  const numericFields = [
+    'size',
+    'weight',
+    'upperLimit',
+    'ordinaryValue',
+    'extraWidth',
+    'extraValue',
+    'extraCount',
+    'tariffValue',
+    'base',
+    'calculatedBase',
+    'manualOverride',
+    'effectiveBase',
+  ]
+  if (numericFields.includes(field) && /^[0-9]+(?:\.[0-9]+)?$/.test(value))
+    return formatNumeric(value, format)
   const values: Record<string, Record<string, string>> = {
     status: {
       ACTIVE: 'Attivo',
@@ -86,6 +109,7 @@ export function PortConfirmation({
   onCancel: () => void
   onPage: (page: number) => void
 }) {
+  const numericFormat = useNumericFormat()
   const [expired, setExpired] = useState(Date.now() >= Date.parse(preview.expiresAtUtc))
   useEffect(() => {
     const delay = Date.parse(preview.expiresAtUtc) - Date.now()
@@ -161,8 +185,12 @@ export function PortConfirmation({
                     )
                   </Table.Td>
                   <Table.Td>{labels[change.field] ?? change.field}</Table.Td>
-                  <Table.Td>{displayValue(change.field, change.before)}</Table.Td>
-                  <Table.Td>{displayValue(change.field, change.after)}</Table.Td>
+                  <Table.Td>
+                    {displayPreviewValue(change.field, change.before, numericFormat)}
+                  </Table.Td>
+                  <Table.Td>
+                    {displayPreviewValue(change.field, change.after, numericFormat)}
+                  </Table.Td>
                 </Table.Tr>
               )),
             )}

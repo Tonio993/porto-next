@@ -4,6 +4,7 @@ import { createTheme, MantineProvider } from '@mantine/core'
 import '@mantine/core/styles.css'
 import './styles.css'
 import { App } from './app/App'
+import { NumericPreferenceProvider } from './api/use-numeric-preference'
 
 const theme = createTheme({
   primaryColor: 'teal',
@@ -30,7 +31,9 @@ const theme = createTheme({
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="light">
-      <App />
+      <NumericPreferenceProvider>
+        <App />
+      </NumericPreferenceProvider>
     </MantineProvider>
   </React.StrictMode>,
 )

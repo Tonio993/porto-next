@@ -1,3 +1,8 @@
+import { CalculationNumbers } from '../CalculationNumbers'
+import { formatNumeric } from '../../api/numeric-input'
+import { ExactNumericInput } from '../ExactNumericInput'
+import { useNumericFormat } from '../../api/use-numeric-preference'
+import type { NumericFormat } from '../../../../shared/contracts/numeric-preference'
 import { useServiceFilterReferences } from '../../api/use-service-filter-references'
 import { useConsultationState, useConsultationPicker } from '../../api/use-consultation-state'
 import { useProtectedDraft } from '../DraftProtection'
@@ -33,6 +38,7 @@ import { PageControls } from '../PageControls'
 import { StateMessage } from '../StateMessage'
 
 type Draft = {
+  numericFormat: NumericFormat
   mode?: 'UPDATE' | 'COMPLETE' | 'NOTES' | 'DELETE'
   original?: ServiceActivityDto
   context: ArchiveContextDto
@@ -48,6 +54,7 @@ export function Services({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
+  const numericFormat = useNumericFormat()
   const consultationPicker = useConsultationPicker('serviceVessels')
   const context = archives.state.context!
   const [vesselId, setVesselId] = useConsultationState('serviceOwner', 'vesselId'),
@@ -230,6 +237,7 @@ export function Services({
         invalidateEditor()
 
         setDraft({
+          numericFormat: { ...numericFormat },
           context,
           amount: '',
           category,
@@ -271,6 +279,7 @@ export function Services({
     mode: Draft['mode'],
     snapshot: ArchiveContextDto,
   ): Draft => ({
+    numericFormat: { ...numericFormat },
     mode: mode === 'COMPLETE' && value.executionStatus !== 'PLANNED' ? 'UPDATE' : mode,
     original: value,
     context: snapshot,
@@ -318,7 +327,10 @@ export function Services({
           ),
         )
         if (r?.ok) {
-          setDraft(fromDetail(r.value, draft.mode, r.context))
+          setDraft({
+            ...fromDetail(r.value, draft.mode, r.context),
+            numericFormat: draft.numericFormat,
+          })
         } else if (r && !r.ok && r.error.code === 'NOT_FOUND') {
           setDraft(null)
           setOpen(false)
@@ -656,7 +668,7 @@ export function Services({
                             </span>
                           </td>
                           <td>{executionLabels[s.executionStatus]}</td>
-                          <td>{s.base}</td>
+                          <td>{formatNumeric(s.base, numericFormat)}</td>
                           <td>
                             <Button
                               variant="subtle"
@@ -703,7 +715,8 @@ export function Services({
             )}
             <p>
               {detail.category === 'FREE' ? 'Libera' : 'Catalogo'} ·{' '}
-              {executionLabels[detail.executionStatus]} · Base EUR {detail.base}
+              {executionLabels[detail.executionStatus]} · Base EUR{' '}
+              {formatNumeric(detail.base, numericFormat)}
             </p>
             <p>
               {detail.vesselName} · {detail.portName} ·{' '}
@@ -727,18 +740,15 @@ export function Services({
               <section aria-label="Calcolo della prestazione" className="tariff-long-value">
                 <h4>Spiegazione del calcolo</h4>
                 <p>
-                  Tipologia {detail.calculation.vesselTypeId} · dimensione {detail.calculation.size}{' '}
-                  · Peso: {detail.calculation.weight}
+                  Tipologia {detail.calculation.vesselTypeId} · dimensione{' '}
+                  {formatNumeric(detail.calculation.size, numericFormat)} · Peso:{' '}
+                  {formatNumeric(detail.calculation.weight, numericFormat)}
                 </p>
                 <p>
                   Tariffa dal {detail.calculation.tariffEffectiveFrom} · Scaglione fino a{' '}
-                  {detail.calculation.upperLimit}
+                  {formatNumeric(detail.calculation.upperLimit, numericFormat)}
                 </p>
-                <ol>
-                  {detail.calculation.steps.map((step, i) => (
-                    <li key={i}>{step}</li>
-                  ))}
-                </ol>
+                <CalculationNumbers value={detail.calculation} />
                 <details>
                   <summary>Riferimenti del calcolo</summary>
                   <p>
@@ -993,7 +1003,9 @@ export function Services({
                           change({ ...draft.values, description: e.currentTarget.value })
                         }
                       />
-                      <TextInput
+                      <ExactNumericInput
+                        format={draft.numericFormat}
+                        unit="EUR"
                         label="Importo base EUR"
                         error={
                           issues.find((issue) => issue.path.at(-1) === 'base')?.message ??

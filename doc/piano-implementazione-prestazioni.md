@@ -96,6 +96,8 @@ Fonti: dominio §1.5; requisiti §2.8; modello §§3.9–3.10.
 
 Le operazioni `ENTRY`, `MOVEMENT`, `EXIT` generano `Voyage → PortCall → BerthStay`. Viaggi, visite e ormeggi sono persistiti e hanno identità stabili, ma struttura e date non vengono amministrate come CRUD indipendenti. Su questi elementi si possono gestire le assegnazioni di cliente e agenzia.
 
+La consultazione Permanenze mostra viaggi, visite e ormeggi per apertura UTC decrescente, con ID decrescente come spareggio tecnico; l'ordine globale dei viaggi precede la paginazione. Replay e risoluzione del contesto conservano la propria sequenza cronologica. [Implementazione e copertura PR11](pr11/permanenze-recenti.md).
+
 `PLANNED` e `PERFORMED` producono la struttura; `MISSED` non la produce, ma richiede il contesto previsto per la propria operazione e partecipa ai vincoli di unicità temporale. Il trascorrere del tempo non cambia lo stato.
 
 | Evento                | Effetto                                                                                           |

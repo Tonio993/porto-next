@@ -1,0 +1,311 @@
+{
+  "task": "PR11",
+  "date": "2026-11-23",
+  "branch": "main",
+  "head": "1d2c58afcb480a4d071a0d9ee7dca9513ca4275b",
+  "initialWorkingTree": "clean",
+  "implementation": "uncommitted working tree",
+  "schema": 17,
+  "environment": {
+    "platform": "win32",
+    "arch": "x64",
+    "hostNode": "v24.21.0",
+    "npm": "12.2.1",
+    "electron": "45.2.3",
+    "unitRuntime": "Electron via npm test",
+    "maxWorkers": 1,
+    "windowsHide": true,
+    "changesToAclSandboxTimeoutRetryExclusions": false
+  },
+  "runs": [
+    {
+      "label": "regression",
+      "execution": "default sandbox path; no launch failure",
+      "files": 7,
+      "total": 246,
+      "passed": 244,
+      "failed": 2,
+      "pending": 0,
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "args": [
+        "test",
+        "--",
+        "tests/unit/operation-service.test.ts",
+        "tests/unit/operation-completion.test.ts",
+        "tests/unit/operation-correction.test.ts",
+        "tests/unit/operation-deletion.test.ts",
+        "tests/unit/operation-insertion.test.ts",
+        "tests/unit/assignment-service.test.ts",
+        "tests/unit/service-service.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr11-regression.json"
+      ],
+      "failures": [
+        {
+          "file": "tests/unit/operation-completion.test.ts",
+          "name": "rollback dopo ricostruzione e riattribuzione ripristina dati, metadati e anteprima",
+          "duration": 293.1244999999999,
+          "messages": [
+            "AssertionError: expected 'cb021b72-2d6d-4c0a-9782-d5a8c9818e00' to be 'fb33e854-d279-47d6-9d2e-7c9aee7c79b0' // Object.is equality"
+          ]
+        },
+        {
+          "file": "tests/unit/operation-deletion.test.ts",
+          "name": "rollback dopo rimozione dei componenti e riattribuzione conserva metadati e anteprima riutilizzabile",
+          "duration": 213.6263999999992,
+          "messages": [
+            "AssertionError: expected '579cb4dc-432a-4499-9fe4-5d71b4fbf7b0' not to be '579cb4dc-432a-4499-9fe4-5d71b4fbf7b0' // Object.is equality"
+          ]
+        }
+      ],
+      "reports": {
+        "json": "test-results/pr11-regression.json",
+        "log": "test-results/pr11-regression.log",
+        "npm": "test-results/pr11-regression-npm-process.json",
+        "electron": "test-results/pr11-regression-electron-process.json"
+      }
+    },
+    {
+      "label": "targeted",
+      "execution": "authorized external path per PR01/PR02",
+      "files": 3,
+      "total": 104,
+      "passed": 104,
+      "failed": 0,
+      "pending": 0,
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "args": [
+        "test",
+        "--",
+        "tests/unit/operation-service.test.ts",
+        "tests/unit/operation-completion.test.ts",
+        "tests/unit/operation-deletion.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr11-targeted.json"
+      ],
+      "failures": [],
+      "reports": {
+        "json": "test-results/pr11-targeted.json",
+        "log": "test-results/pr11-targeted.log",
+        "npm": "test-results/pr11-targeted-npm-process.json",
+        "electron": "test-results/pr11-targeted-electron-process.json"
+      }
+    },
+    {
+      "label": "new-final",
+      "execution": "authorized external path per PR01/PR02",
+      "files": 1,
+      "total": 46,
+      "passed": 5,
+      "failed": 0,
+      "pending": 41,
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "args": [
+        "test",
+        "--",
+        "tests/unit/operation-service.test.ts",
+        "--testNamePattern=PR11",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr11-new-final.json"
+      ],
+      "failures": [],
+      "reports": {
+        "json": "test-results/pr11-new-final.json",
+        "log": "test-results/pr11-new-final.log",
+        "npm": "test-results/pr11-new-final-npm-process.json",
+        "electron": "test-results/pr11-new-final-electron-process.json"
+      }
+    },
+    {
+      "label": "full",
+      "execution": "authorized external path per PR01/PR02",
+      "files": 40,
+      "total": 564,
+      "passed": 562,
+      "failed": 2,
+      "pending": 0,
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "args": [
+        "test",
+        "--",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr11-full.json"
+      ],
+      "failures": [
+        {
+          "file": "tests/unit/inter-port-migration.test.ts",
+          "name": "P12: rollback dopo copia e sostituzione delle componenti ripristina interamente il v12 popolato",
+          "duration": 7124.4063,
+          "messages": ["Error: Test timed out in 5000ms."]
+        },
+        {
+          "file": "tests/unit/weight-service.test.ts",
+          "name": "migrazione v16 popolato conserva riferimenti e dipendenti CASCADE, tuple, metadati e copia preventiva",
+          "duration": 9289.5487,
+          "messages": [
+            "Error: Test timed out in 5000ms.",
+            "ArchiveError: L’archivio aperto è cambiato. Ricarica la vista."
+          ]
+        }
+      ],
+      "reports": {
+        "json": "test-results/pr11-full.json",
+        "log": "test-results/pr11-full.log",
+        "npm": "test-results/pr11-full-npm-process.json",
+        "electron": "test-results/pr11-full-electron-process.json"
+      }
+    },
+    {
+      "label": "weight-recovery",
+      "execution": "authorized external path per PR01/PR02",
+      "files": 1,
+      "total": 28,
+      "passed": 28,
+      "failed": 0,
+      "pending": 0,
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "args": [
+        "test",
+        "--",
+        "tests/unit/weight-service.test.ts",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=test-results/pr11-weight-recovery.json"
+      ],
+      "failures": [],
+      "reports": {
+        "json": "test-results/pr11-weight-recovery.json",
+        "log": "test-results/pr11-weight-recovery.log",
+        "npm": "test-results/pr11-weight-recovery-npm-process.json",
+        "electron": "test-results/pr11-weight-recovery-electron-process.json"
+      }
+    }
+  ],
+  "static": {
+    "process": {
+      "exitCode": 1,
+      "signal": null
+    },
+    "log": "test-results/pr11-check-final.log",
+    "typecheckNode": "passed",
+    "typecheckWeb": "passed",
+    "eslint": "passed",
+    "prettier": "failed: only pre-existing doc/dev/punti-issue.md",
+    "earlierCheck": {
+      "process": "test-results/pr11-check-process.json",
+      "log": "test-results/pr11-check.log",
+      "note": "Prettier flagged original issue source and new test formatting; new test formatting corrected before final check."
+    }
+  },
+  "preservedIssueSource": {
+    "path": "doc/dev/punti-issue.md",
+    "sha256": "8e5b4e0c57c3fea049a8ad3fcf5104a82b42fe4ccd12a68c064595f6767fc185"
+  },
+  "verifiedSource": [
+    {
+      "path": "src/backend/infrastructure/database/operation-repository.ts",
+      "sha256": "9efb4db2c0edb035165e1f145fd05f65dcb6337e3d7f25e8a0f1046c7adb5508"
+    },
+    {
+      "path": "tests/unit/operation-service.test.ts",
+      "sha256": "2e332119b9e7d99d8be216d5349a23d19bc30a0b8070fac9b83ff05e6965f69e"
+    },
+    {
+      "path": "tests/unit/operation-completion.test.ts",
+      "sha256": "d0f1c463c604d924faca26294453cf1f97e46b7dc239fac0f8ce7bb7e4920b8c"
+    },
+    {
+      "path": "tests/unit/operation-correction.test.ts",
+      "sha256": "719265fb6b4717d5105d3e374fe0fb2094d51d92e896e4b2fa23a68a0d7d9015"
+    },
+    {
+      "path": "tests/unit/operation-deletion.test.ts",
+      "sha256": "68bc68853111f79d8075355c73c8e2c18665750bd9fce8e0ba4022c4712bcc56"
+    },
+    {
+      "path": "tests/unit/operation-insertion.test.ts",
+      "sha256": "f29f4b9c1e88793318434b93d9022837495f5c8762a78f3f30d5eff788b08b2f"
+    },
+    {
+      "path": "tests/unit/assignment-service.test.ts",
+      "sha256": "b0572548cc9530fc25093d9ef329b38de0f02bc3dd6a2026c80a3e27a1e74c9e"
+    },
+    {
+      "path": "tests/unit/service-service.test.ts",
+      "sha256": "7bfda64830263e457c4ce618e83cd69727c24634fe5a6191ffed80ab70362cfb"
+    },
+    {
+      "path": "tests/e2e/pr11-stays.spec.ts",
+      "sha256": "11aadc76dc7e39b529d206f722c88adb0bbc8ea2259c72437d820aa0e47c8cf9"
+    },
+    {
+      "path": "tests/e2e/inter-port-movements.spec.ts",
+      "sha256": "e2098f9661307cde9e0c67cc02505648ab80d2059a8eaf2f564ce213bd088ce1"
+    },
+    {
+      "path": "tests/e2e/movements.spec.ts",
+      "sha256": "3ae86bd4f7ae4af7652711bb6d0c468c09275eb658fc9a6dec0e2a664587854f"
+    },
+    {
+      "path": "tests/e2e/operation-completion.spec.ts",
+      "sha256": "00e5f234d671869aa782888057b4c75bf9107029e56c6dba3b397abcc3449e68"
+    }
+  ],
+  "deferredToK4": {
+    "new": ["tests/e2e/pr11-stays.spec.ts"],
+    "updated": [
+      "tests/e2e/inter-port-movements.spec.ts",
+      "tests/e2e/movements.spec.ts",
+      "tests/e2e/operation-completion.spec.ts"
+    ],
+    "regression": [
+      "tests/e2e/operations.spec.ts",
+      "tests/e2e/assignments.spec.ts",
+      "tests/e2e/release-flow.spec.ts",
+      "tests/e2e/milestone-migrations.spec.ts"
+    ],
+    "execution": "not run; no new build, package, step/milestone profile, integrated or human desktop session"
+  },
+  "documentation": {
+    "profile": "documentazione",
+    "documents": [
+      "doc/pr11/permanenze-recenti.md",
+      "doc/stato-implementazione-prestazioni.md",
+      "doc/dev/piano-interventi-post-rilascio.md",
+      "doc/piano-implementazione-prestazioni.md"
+    ],
+    "exitCode": 1,
+    "utf8LinksAndAnchors": "passed",
+    "gitDiff": "passed",
+    "formatting": "failed: only pre-existing doc/dev/punti-issue.md",
+    "summary": "test-results/verification/2026-11-23T17-31-46.570Z-coordinator-OQFr2A/summary.md",
+    "process": "test-results/pr11-documents-process.json",
+    "log": "test-results/pr11-documents.log"
+  },
+  "implementationCommit": "6d4572b806cc3178e95eec49034847e9bb4bc6d9",
+  "commitAuthorization": "User requested commits on 2026-11-24 after the initial delivery. Original head and uncommitted implementation fields describe the preserved verification inputs. Verified source hashes match the implementation commit; unit results are reused without behavioral changes.",
+  "versioningDocumentationCheck": {
+    "date": "2026-11-24",
+    "profile": "documentazione",
+    "exitCode": 1,
+    "summary": "test-results/verification/2026-11-24T09-24-59.211Z-coordinator-zPnJvZ/summary.md",
+    "utf8LinksAndAnchors": "passed",
+    "gitDiff": "passed",
+    "formatting": "failed: only pre-existing doc/dev/punti-issue.md",
+    "reusedUnitResults": "Source hashes unchanged; no behavioral changes after the verified delivery."
+  }
+}

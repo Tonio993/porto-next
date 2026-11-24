@@ -4,7 +4,7 @@
   "branch": "main",
   "head": "40ef3b4df6d8421c41cb5addd9be5a1cab13eeaa",
   "initialWorkingTree": "clean",
-  "delivery": "uncommitted working tree; no commit authorized",
+  "delivery": "committed on subsequent explicit user request; original delivery was uncommitted",
   "schemaVersion": 17,
   "policy": "PR01–PR12 unit/static/doc checks only; K2 coverage review performed; desktop/build/package/integrated and packaged resource probe deferred to K4",
   "newTests": {
@@ -773,5 +773,27 @@
     "electronExitCode": 1,
     "newTestsAllPassed": true,
     "limitation": "ENOTEMPTY in service-service afterEach rmSync; directory still existed but exposed no entries on read-only inspection; root cause unproven. Diagnostic selected case passed 1/1 with 56 not selected. Full result remains 854/855; no retry/timeout/exclusion changes and no full rerun."
+  },
+  "implementationCommit": "3cc509a5c8ea2b60b966b0188fea7038f70a2c02",
+  "versioning": {
+    "authorization": "explicit subsequent user request to create the commits",
+    "implementationCommit": "3cc509a5c8ea2b60b966b0188fea7038f70a2c02",
+    "reusedUnitResult": "855/855 final-full; all 64 verified source/test/data hashes unchanged",
+    "documentationSummary": "test-results/verification/2026-11-24T16-13-57.310Z-coordinator-f4GZat/summary.md",
+    "documentationExitCode": 1,
+    "documentationPhases": {
+      "documents": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "diff": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "formatting": {
+        "status": "failed",
+        "exitCode": 1
+      }
+    }
   }
 }

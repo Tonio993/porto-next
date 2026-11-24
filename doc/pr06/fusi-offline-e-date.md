@@ -2,7 +2,7 @@
 
 ## Sintesi operativa
 
-24 novembre 2026. Base reale **main / 40ef3b4df6d8421c41cb5addd9be5a1cab13eeaa**, working tree iniziale pulito. Implementazione nel working tree, **nessun commit**. Schema v17 e dipendenze invariati. [Requisiti #1/#17, A05, C5/C8](../dev/piano-interventi-post-rilascio.md#fusi-offline-e-date), [P02](../p02/numeri-e-tempo.md), [D03/D04](../p00/decisioni-iniziali.md#d03--momenti-e-fusi).
+24 novembre 2026. Base reale **main / 40ef3b4df6d8421c41cb5addd9be5a1cab13eeaa**, working tree iniziale pulito. Implementazione `3cc509a`, versionata su successiva richiesta esplicita dell’utente; la consegna iniziale era senza commit. Schema v17 e dipendenze invariati. [Requisiti #1/#17, A05, C5/C8](../dev/piano-interventi-post-rilascio.md#fusi-offline-e-date), [P02](../p02/numeri-e-tempo.md), [D03/D04](../p00/decisioni-iniziali.md#d03--momenti-e-fusi).
 
 Selettori offline nei riferimenti temporali e nella creazione del porto; restrizione paese/fuso anche nel servizio autorevole. Presentazione storica `dd/mm/yyyy HH:mm (offset numerico)`, distinta da UTC tecnico, input locale e data civile. Le permanenze ricevono dal backend le tuple delle operazioni di apertura/chiusura. Nessuna migrazione o variazione dei fusi confermati, nessuna preferenza di lingua/valuta/data nuova. Preservati sessioni/revisioni, bozze PR02/PR04, stato PR03, barriere PR01, picker PR05 e ordinamento UTC PR11.
 
@@ -69,6 +69,8 @@ Selezioni di sviluppo conservate nel manifest: primitive **30/30**; servizi/SQLi
 **Ambiente:** Windows x64, Node host 24.21.0/npm 12.2.1, Electron 45.2.3 del lockfile, ICU 78.2 e tzdata runtime 2026e; tutti i 593 identificativi del dataset geografico 2026f sono supportati. La mappa non aggiorna le regole del resolver; wrapper di processo nascosto esistente, avvisi Crashpad/Vite conservati. Le suite si sono avviate nel percorso ordinario consentito: nessun blocco d'avvio ha richiesto il percorso esterno autorizzato. Il solo download delle fonti IANA ha richiesto rete esterna alla sandbox, completato senza cambiare ACL, sandbox Electron, isolamento o navigazione. Nessuna build, esecuzione desktop, confezionamento o campagna integrata.
 
 **Documentazione:** profilo `documentazione` sui sei Markdown modificati: UTF-8, collegamenti/ancore e differenze passati; uscita **1** per la sola formattazione preesistente di punti-issue.md. Riepilogo finale `test-results/verification/2026-11-24T16-06-19.452Z-coordinator-nlz1OF/summary.md`; primo report e dettagli nel manifest. Dopo il solo aggiornamento di questi riferimenti e del manifest ripetuti controlli documenti, Prettier selettivo e diff. Nessun profilo ordinario step/milestone o esecuzione integrata.
+
+Per il versionamento autorizzato riusati gli esiti unitari: le impronte dei 64 file di codice/test/dati coincidono con la completa definitiva verificata. Ripetuto il profilo documentale sui tre Markdown aggiornati per il commit: UTF-8, collegamenti/ancore e diff passati; uscita **1** per la sola formattazione preesistente di punti-issue.md. Riepilogo `test-results/verification/2026-11-24T16-13-57.310Z-coordinator-f4GZat/summary.md`. Dopo il solo aggiornamento dei riferimenti e del manifest ripetuti documenti, Prettier selettivo e diff; nessuna nuova esecuzione unitaria, desktop, build o pacchetto.
 
 ## Riesame K2 e scenari K4
 

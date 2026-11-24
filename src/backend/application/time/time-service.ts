@@ -1,3 +1,4 @@
+import { selectableZone } from './selectable-zone'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
 import type { MomentInputDto } from '../../../shared/contracts/values'
 import { ArchiveError } from '../../../shared/errors/archive-error'
@@ -19,7 +20,9 @@ export class TimeService {
   configureCompanyZone(request: CommandRequest<{ zoneId: string }>) {
     return this.coordinator.command(request, ({ database }, payload) => {
       const input = record(payload, ['zoneId'])
-      return new TimeZoneRepository(database).configureCompany(input.zoneId)
+      const repository = new TimeZoneRepository(database)
+      if (!repository.company().confirmed) selectableZone(input.zoneId)
+      return repository.configureCompany(input.zoneId)
     })
   }
 

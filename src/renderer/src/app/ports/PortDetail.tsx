@@ -1,3 +1,4 @@
+import { formatUtcInstant } from '../../api/date-display'
 import { Badge, Button, Group } from '@mantine/core'
 import type { PortDto } from '../../../../shared/contracts/ports'
 import { countryName } from './PortDescriptionFields'
@@ -32,7 +33,7 @@ export function PortDetail({
       <p className="panel-description">
         Versione applicabile:{' '}
         {port.version.effectiveFrom
-          ? `dal ${port.version.effectiveFrom} (UTC)`
+          ? `dal ${formatUtcInstant(port.version.effectiveFrom)}`
           : 'iniziale, senza limite temporale inferiore'}
         .
       </p>

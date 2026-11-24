@@ -536,7 +536,7 @@ it.each(['PLANNED', 'PERFORMED', 'MISSED'] as const)(
         payload: {
           name: 'Altro',
           locality: 'Altro',
-          countryCode: 'IT',
+          countryCode: 'US',
           initialZoneId: 'America/New_York',
         },
       }),

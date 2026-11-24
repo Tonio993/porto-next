@@ -42,7 +42,7 @@ describe('creazione e consultazione porti', () => {
   it('salva tutte le parti, incrementa una sola revisione e rilegge identità e fuso al riavvio', async () => {
     const result = await create({
       name: ' Porto A ',
-      countryCode: ' it ',
+      countryCode: ' np ',
       initialZoneId: 'Asia/Kathmandu',
     })
     expect(result).toMatchObject({
@@ -52,7 +52,7 @@ describe('creazione e consultazione porti', () => {
         code: 1,
         status: 'ACTIVE',
         initialZoneId: 'Asia/Kathmandu',
-        version: { name: 'Porto A', effectiveFrom: null, countryCode: 'IT' },
+        version: { name: 'Porto A', effectiveFrom: null, countryCode: 'NP' },
       },
     })
     if (!result.ok) throw new Error('Creazione fallita')
@@ -85,7 +85,7 @@ describe('creazione e consultazione porti', () => {
     for (const values of [
       { name: 'Cafe' },
       { name: 'Café', locality: 'Savona' },
-      { name: 'Café', countryCode: 'FR' },
+      { name: 'Café', countryCode: 'FR', initialZoneId: 'Europe/Paris' },
       { name: 'Porto  A' },
       { name: 'Porto A' },
       { name: 'A|B', locality: 'C' },
@@ -305,4 +305,57 @@ describe('migrazione porti da v3 allo schema corrente', () => {
     expect(context()).toEqual(previous)
     expect(readFileSync(file('v3'))).toEqual(original)
   })
+})
+
+it('PR06 validazione autorevole paese/fuso, alias e paese senza voce: rollback di dati e metadati', async () => {
+  const before = archives.current(),
+    ctx = context()
+  for (const values of [
+    { countryCode: 'IT', initialZoneId: 'Europe/London' },
+    { countryCode: 'US', initialZoneId: 'Europe/Rome' },
+    { countryCode: 'BV', initialZoneId: 'UTC' },
+    { countryCode: 'HM', initialZoneId: 'Australia/Perth' },
+    { countryCode: 'IT', initialZoneId: 'UTC' },
+    { countryCode: 'US', initialZoneId: 'Europe/Inesistente' },
+  ])
+    expect(await create(values)).toMatchObject({
+      ok: false,
+      error: { code: 'INVALID_TIME_ZONE', fields: [{ path: ['initialZoneId'] }] },
+    })
+  expect(archives.current()).toEqual(before)
+  expect(context()).toEqual(ctx)
+  expect(sql().prepare('SELECT count(*) FROM ports').pluck().get()).toBe(0)
+  expect(await create({ countryCode: 'US', initialZoneId: 'US/Eastern' })).toMatchObject({
+    ok: true,
+    value: { initialZoneId: 'US/Eastern' },
+  })
+  expect(
+    await create({ name: 'Territorio', countryCode: 'VA', initialZoneId: 'Europe/Vatican' }),
+  ).toMatchObject({ ok: true, value: { initialZoneId: 'Europe/Vatican' } })
+})
+it('PR06 riapre porti preesistenti con paese/fuso incompatibili senza riscrittura dello storico', async () => {
+  const result = await create()
+  if (!result.ok) throw Error('create')
+  sql().exec("UPDATE port_time_zones SET zone_id='US/Eastern'")
+  await archives.close()
+  const bytes = readFileSync(file('A'))
+  await archives.open(file('A'))
+  const before = archives.current(),
+    ctx = context()
+  const read = await ports.get({
+    context: { sessionId: ctx.sessionId },
+    query: { id: result.value.id },
+  })
+  expect(read).toMatchObject({
+    ok: true,
+    value: { initialZoneId: 'US/Eastern', version: { countryCode: 'IT' } },
+  })
+  expect(await list()).toMatchObject({
+    ok: true,
+    value: { items: [{ initialZoneId: 'US/Eastern' }] },
+  })
+  expect(archives.current()).toEqual(before)
+  expect(context()).toEqual(ctx)
+  await archives.close()
+  expect(readFileSync(file('A'))).toEqual(bytes)
 })

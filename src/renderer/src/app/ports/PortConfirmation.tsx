@@ -1,3 +1,4 @@
+import { formatUtcInstant } from '../../api/date-display'
 import { useNumericFormat } from '../../api/use-numeric-preference'
 import { formatNumeric } from '../../api/numeric-input'
 import type { NumericFormat } from '../../../../shared/contracts/numeric-preference'
@@ -62,6 +63,20 @@ export function displayPreviewValue(
   format: NumericFormat,
 ): string {
   if (value === null) return '—'
+  if (
+    [
+      'arrival',
+      'Arrivo',
+      'moment',
+      'startedAt',
+      'endedAt',
+      'effectiveFrom',
+      'effectiveTo',
+      'tariffEffectiveFrom',
+    ].includes(field) &&
+    /^(?!0000)[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$/.test(value)
+  )
+    return formatUtcInstant(value)
   const numericFields = [
     'size',
     'weight',
@@ -185,10 +200,10 @@ export function PortConfirmation({
                     )
                   </Table.Td>
                   <Table.Td>{labels[change.field] ?? change.field}</Table.Td>
-                  <Table.Td>
+                  <Table.Td title={change.before ?? undefined}>
                     {displayPreviewValue(change.field, change.before, numericFormat)}
                   </Table.Td>
-                  <Table.Td>
+                  <Table.Td title={change.after ?? undefined}>
                     {displayPreviewValue(change.field, change.after, numericFormat)}
                   </Table.Td>
                 </Table.Tr>

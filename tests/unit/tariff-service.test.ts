@@ -329,7 +329,7 @@ it('copia da altro porto senza dipendenze e genera nuove identità per tutti gli
       payload: {
         name: 'Altro',
         locality: 'Altro',
-        countryCode: 'IT',
+        countryCode: 'US',
         initialZoneId: 'America/New_York',
       },
     }),

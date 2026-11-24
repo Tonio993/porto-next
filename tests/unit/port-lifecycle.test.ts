@@ -537,3 +537,31 @@ it('migra un v4 reale con porto iniziale conservando metadati, copia preventiva 
   ).toThrow()
   expect(readdirSync(folder).some((name) => name.includes('.prima-v17-'))).toBe(true)
 })
+
+it('PR06 correzione descrittiva del paese conserva il fuso operativo autonomo', async () => {
+  const initial = (await history()).versions.items[0]
+  const preview = value(
+    await ports.previewUpdateVersion({
+      context: context(),
+      payload: {
+        portId: port.id,
+        versionId: initial.id,
+        name: port.version.name,
+        locality: 'Genova',
+        countryCode: 'US',
+        moment: null,
+      },
+    }),
+  )
+  expect(preview.status).toBe('READY')
+  value(
+    await ports.confirmUpdateVersion({
+      context: preview.context,
+      payload: { previewId: preview.previewId },
+    }),
+  )
+  const after = await history()
+  expect(after.port.initialZoneId).toBe('Europe/Rome')
+  expect(after.port.version.countryCode).toBe('US')
+  expect(after.versions.items[0].effectiveMoment).toBeNull()
+})

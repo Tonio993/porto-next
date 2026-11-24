@@ -96,6 +96,8 @@ export interface StayIntervalDto {
   closingOperationId: string | null
   startedAt: string
   endedAt: string | null
+  openingMoment: ResolvedMomentDto
+  closingMoment: ResolvedMomentDto | null
 }
 export interface VoyageDto extends StayIntervalDto {
   vesselId: string

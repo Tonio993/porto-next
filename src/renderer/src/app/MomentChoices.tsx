@@ -1,3 +1,4 @@
+import { historicalMomentDetail } from '../api/date-display'
 import { Button, Group } from '@mantine/core'
 import type { ResolvedMomentDto } from '../../../shared/contracts/values'
 
@@ -14,6 +15,7 @@ export function MomentChoices({
     <Group>
       {choices.map((choice, index) => (
         <Button
+          title={historicalMomentDetail(choice)}
           key={choice.utc}
           variant="light"
           disabled={disabled}

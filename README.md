@@ -152,7 +152,11 @@ Dal dettaglio del tipo o dai pesi delle operazioni fisse, **Cronologia pesi** mo
 
 Dal dettaglio usa **Correggi tariffa** per cambiare dati o decorrenza, oppure **Elimina tariffa**, anche per tariffe iniziali, intermedie o future. L’anteprima mostra gli intervalli e i ricalcoli di operazioni e prestazioni da catalogo; una modifica che lascia attività tariffate senza copertura è bloccata, anche per le mancate. Le basi libere e le sostituzioni manuali, incluso zero, restano conservate; i calcoli teorici vengono aggiornati. La chiusura conserva la bozza: usa **Riprendi bozza**, **Ricarica contesto** dopo un conflitto e **Verifica esito della scrittura** dopo una comunicazione incerta, prima di riprovare.
 
-Con un archivio aperto, **Riferimenti temporali** permette di confermare il fuso aziendale iniziale (proposto `Europe/Rome`) e verificare un orario locale, scegliendo l'occorrenza durante il cambio dell'ora. La verifica non registra attività. Dopo la conferma il fuso non è modificabile in questo rilascio; la configurazione resta nel file, anche nelle copie e nei backup.
+Con un archivio aperto, **Riferimenti temporali** permette di scegliere da un selettore offline e confermare il fuso aziendale iniziale (proposto `Europe/Rome`) e verificare un orario locale, scegliendo l'occorrenza durante il cambio dell'ora. La verifica non registra attività. Dopo la conferma il fuso non è modificabile in questo rilascio; la configurazione resta nel file, anche nelle copie e nei backup.
+
+Nella creazione del porto il selettore offre solo fusi compatibili col paese: propone quello aziendale se compatibile, altrimenti l'unica opzione; con più fusi occorre scegliere. Cambiare paese riesamina la scelta. Se il dataset non ha associazioni supportate, la creazione è disabilitata con una spiegazione; correggere il paese di un porto esistente conserva il suo fuso operativo.
+
+Le date risolte sono presentate come `25/10/2026 02:30 (+02:00)`, con IANA e precisione originale nel dettaglio. Gli istanti tecnici sono dichiarati UTC; i controlli di input restano ISO e le ore ambigue richiedono una scelta esplicita. La notazione numerica non cambia date o offset. [Regole, risorsa offline e limiti PR06](doc/pr06/fusi-offline-e-date.md).
 
 Lo spike P00 usa dipendenze di sviluppo isolate e verifica numeri/fusi senza introdurre funzionalità applicative. Dopo `npm ci`, prepararlo ed eseguirlo con:
 

@@ -1917,6 +1917,7 @@ it('PR11: consultazione UTC decrescente a tre livelli, pagine globali e letture 
   expect(latest.visits[1].stays).toEqual([
     {
       ...latestOpening.visits[0].stays[0],
+      closingMoment: moved.endpoint.moment,
       closingOperationId: moved.id,
       endedAt: moved.endpoint.moment.utc,
     },
@@ -2120,4 +2121,67 @@ it('PR11: replay crescente da consultazione decrescente conserva identità, inte
   expect(all()).toEqual(events)
   expect(db().metadata()).toEqual(metadata)
   expect(sql().prepare('SELECT total_changes()').pluck().get()).toBe(changes)
+})
+
+it('PR06 permanenze backend con overlap: apertura/chiusura originali ai tre livelli e letture senza scritture', async () => {
+  const entry = await create({
+    ...input('ENTRY', '2026-10-25T02:30'),
+    moment: moment('2026-10-25T02:30', '+02:00'),
+  })
+  const opened = stays()[0]
+  for (const interval of [opened, opened.visits[0], opened.visits[0].stays[0]]) {
+    expect(interval.openingMoment).toEqual(entry.endpoint.moment)
+    expect(interval.closingMoment).toBeNull()
+  }
+  const exit = await create({
+    ...input('EXIT', '2026-10-25T02:30'),
+    moment: moment('2026-10-25T02:30', '+01:00'),
+  })
+  const saved = sql().serialize(),
+    ctx = context(),
+    metadata = db().metadata(),
+    changes = sql().prepare('SELECT total_changes()').pluck().get()
+  sql().pragma('query_only=ON')
+  try {
+    const closed = value(
+      await operations.stays({
+        context: { sessionId: ctx.sessionId },
+        query: { vesselId, page: 1, pageSize: 25 },
+      }),
+    ).items[0]
+    for (const interval of [closed, closed.visits[0], closed.visits[0].stays[0]]) {
+      expect(interval.openingMoment).toEqual(entry.endpoint.moment)
+      expect(interval.closingMoment).toEqual(exit.endpoint.moment)
+      expect(interval.startedAt).toBe(entry.endpoint.moment.utc)
+      expect(interval.endedAt).toBe(exit.endpoint.moment.utc)
+    }
+  } finally {
+    sql().pragma('query_only=OFF')
+  }
+  expect(sql().serialize()).toEqual(saved)
+  expect(context()).toEqual(ctx)
+  expect(db().metadata()).toEqual(metadata)
+  expect(sql().prepare('SELECT total_changes()').pluck().get()).toBe(changes)
+})
+it('PR06 permanenze tra porti: chiusura alla partenza e apertura all’arrivo, senza conversioni renderer', async () => {
+  const dest = await destination()
+  await create()
+  const move = await create(transfer(dest))
+  const voyage = stays()[0],
+    arrival = voyage.visits[0],
+    origin = voyage.visits[1]
+  expect(origin.closingMoment).toEqual(move.endpoint.moment)
+  expect(origin.stays[0].closingMoment).toEqual(move.endpoint.moment)
+  expect(arrival.openingMoment).toEqual(move.arrival!.moment)
+  expect(arrival.stays[0].openingMoment).toEqual(move.arrival!.moment)
+  expect(origin.closingMoment?.zoneId).toBe('Europe/Rome')
+  expect(arrival.openingMoment.zoneId).toBe('Europe/London')
+  expect(voyage.closingMoment).toBeNull()
+  // A historical tuple consistent in local/offset/UTC is authoritative even with a different IANA history.
+  sql()
+    .prepare("UPDATE operation_endpoints SET zone_id='Asia/Tokyo' WHERE id=?")
+    .run(move.arrival!.id)
+  const original = stays()[0].visits[0].openingMoment
+  expect(original).toEqual({ ...move.arrival!.moment, zoneId: 'Asia/Tokyo' })
+  expect(sql().pragma('foreign_key_check')).toEqual([])
 })

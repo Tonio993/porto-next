@@ -1,3 +1,4 @@
+import { MomentDisplay } from '../MomentDisplay'
 import { CalculationNumbers } from '../CalculationNumbers'
 import { formatNumeric } from '../../api/numeric-input'
 import { ExactNumericInput } from '../ExactNumericInput'
@@ -658,9 +659,7 @@ export function Services({
                             {!vesselId && (
                               <strong className="service-row-vessel">{s.vesselName}</strong>
                             )}
-                            {s.moment.localDateTime.slice(0, 10)}
-                            <br />
-                            {s.moment.localDateTime.slice(11)} ({s.moment.offset})
+                            <MomentDisplay moment={s.moment} />
                           </td>
                           <td>{s.category === 'FREE' ? 'Libera' : 'Catalogo'}</td>
                           <td>
@@ -724,8 +723,7 @@ export function Services({
               {detail.berthName ?? 'Banchina non specificata'}
             </p>
             <p>
-              {detail.moment.localDateTime} · {detail.moment.zoneId} · {detail.moment.offset} · UTC{' '}
-              {detail.moment.utc}
+              <MomentDisplay moment={detail.moment} detail />
             </p>
             <details className="tariff-long-value">
               <summary>Riferimenti della permanenza</summary>

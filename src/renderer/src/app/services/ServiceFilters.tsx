@@ -1,3 +1,4 @@
+import { stayIntervalLabel } from '../operations/StayInterval'
 import { useConsultationState, useConsultationPicker } from '../../api/use-consultation-state'
 import { useEffect, useState } from 'react'
 import { Button, Select, SimpleGrid, Stack, TextInput } from '@mantine/core'
@@ -200,7 +201,7 @@ export function ServiceFilters({
                 disabled={disabled || loading}
                 data={voyageOptions.map((v) => ({
                   value: v.id,
-                  label: v.startedAt + ' → ' + (v.endedAt ?? 'aperto'),
+                  label: stayIntervalLabel(v),
                 }))}
                 onChange={(voyageId) => {
                   onChange({ ...value, voyageId, portCallId: null, berthStayId: null })
@@ -225,7 +226,7 @@ export function ServiceFilters({
                   disabled={disabled}
                   data={visits.map((v) => ({
                     value: v.id,
-                    label: v.portName + ' · ' + v.startedAt,
+                    label: v.portName + ' · ' + stayIntervalLabel(v),
                   }))}
                   onChange={(portCallId) => onChange({ ...value, portCallId, berthStayId: null })}
                 />
@@ -239,7 +240,8 @@ export function ServiceFilters({
                   disabled={disabled}
                   data={visit.stays.map((v) => ({
                     value: v.id,
-                    label: (v.berthName ?? 'Banchina non specificata') + ' · ' + v.startedAt,
+                    label:
+                      (v.berthName ?? 'Banchina non specificata') + ' · ' + stayIntervalLabel(v),
                   }))}
                   onChange={(berthStayId) => onChange({ ...value, berthStayId })}
                 />

@@ -136,7 +136,12 @@ async function port(name = 'Genova', zone = 'Europe/Rome') {
   return value(
     await ports().create({
       context: context(),
-      payload: { name, locality: name, countryCode: 'IT', initialZoneId: zone },
+      payload: {
+        name,
+        locality: name,
+        countryCode: zone === 'Europe/London' ? 'GB' : 'IT',
+        initialZoneId: zone,
+      },
     }),
   ).id
 }

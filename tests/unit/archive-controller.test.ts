@@ -688,3 +688,66 @@ it('PR02: ricevute IPC protette da mittente/frame/sessione; nessuna seconda invo
   })
   expect(metadata).not.toHaveBeenCalled()
 })
+
+it('PR06 IPC diretto esegue la validazione paese/fuso e campi inattesi nel servizio reale', async () => {
+  const archives = new (
+    await import('../../src/backend/application/archives/archive-service')
+  ).ArchiveService()
+  try {
+    await archives.create(join(folder, 'pr06.ormeggi'), 'PR06')
+    registerPortIpc(new PortService(archives.coordinator), () => owner)
+    registerTimeIpc(new TimeService(archives.coordinator), () => owner)
+    const handler = (name: string) =>
+      vi.mocked(ipcMain.handle).mock.calls.find(([channel]) => channel === name)![1]
+    const event = {
+      sender: owner.webContents,
+      senderFrame: owner.webContents.mainFrame,
+    } as Electron.IpcMainInvokeEvent
+    const ctx = archives.context()!,
+      before = archives.current()
+    const payload = {
+      name: 'Porto',
+      locality: 'Genova',
+      countryCode: 'IT',
+      initialZoneId: 'Europe/London',
+    }
+    expect(await handler(portChannels.create)(event, { context: ctx, payload })).toMatchObject({
+      ok: false,
+      error: { code: 'INVALID_TIME_ZONE', fields: [{ path: ['initialZoneId'] }] },
+    })
+    expect(
+      await handler(portChannels.create)(event, {
+        context: ctx,
+        payload: { ...payload, initialZoneId: 'Europe/Rome', zoneId: 'Europe/Rome' },
+      }),
+    ).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } })
+    expect(
+      await handler(timeChannels.configureCompanyZone)(event, {
+        context: ctx,
+        payload: { zoneId: '+01:00' },
+      }),
+    ).toMatchObject({ ok: false, error: { code: 'INVALID_TIME_ZONE' } })
+    expect(
+      await handler(timeChannels.configureCompanyZone)(event, {
+        context: ctx,
+        payload: { zoneId: 'UTC', extra: true },
+      }),
+    ).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } })
+    expect(archives.current()).toEqual(before)
+    expect(archives.context()).toEqual(ctx)
+    expect(
+      await handler(timeChannels.configureCompanyZone)(event, {
+        context: ctx,
+        payload: { zoneId: 'UTC' },
+      }),
+    ).toMatchObject({ ok: true, value: { zoneId: 'UTC' } })
+    expect(
+      await handler(portChannels.create)(event, {
+        context: ctx,
+        payload: { ...payload, initialZoneId: 'Europe/Rome' },
+      }),
+    ).toMatchObject({ ok: false, error: { code: 'REVISION_CONFLICT' } })
+  } finally {
+    await archives.close()
+  }
+})

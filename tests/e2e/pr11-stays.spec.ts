@@ -1,4 +1,5 @@
-﻿import { mkdtempSync, rmSync } from 'node:fs'
+import { formatHistoricalMoment } from '../../src/renderer/src/api/date-display'
+import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { expect, test } from '@playwright/test'
@@ -117,7 +118,9 @@ test('PR11: permanenze recenti a ogni livello e azioni sul viaggio corretto, off
     await expect(voyages).toHaveCount(2)
     for (const [index, voyage] of saved.stays.items.entries()) {
       const article = voyages.nth(index)
-      await expect(article.locator(':scope > p')).toContainText(voyage.startedAt)
+      await expect(article.locator(':scope > p')).toContainText(
+        formatHistoricalMoment(voyage.openingMoment),
+      )
       await expect(article.locator('h3')).toHaveText(
         `Viaggio · ${voyage.endedAt ? 'Chiuso' : 'Aperto'}`,
       )
@@ -126,14 +129,14 @@ test('PR11: permanenze recenti a ogni livello e azioni sul viaggio corretto, off
       for (const [i, visit] of voyage.visits.entries()) {
         const section = visits.nth(i)
         await expect(section.locator(':scope > p')).toContainText(
-          `${visit.id} · ${visit.startedAt}`,
+          formatHistoricalMoment(visit.openingMoment),
         )
         await expect(section.locator('h4')).toHaveText(`Visita · ${visit.portName}`)
         const stays = section.locator(':scope > div')
         await expect(stays).toHaveCount(visit.stays.length)
         for (const [j, stay] of visit.stays.entries()) {
           const berth = stays.nth(j)
-          await expect(berth).toContainText(`${stay.id} · ${stay.startedAt}`)
+          await expect(berth).toContainText(formatHistoricalMoment(stay.openingMoment))
           await expect(berth).toContainText(`Apertura: ${stay.openingOperationId}`)
           await expect(berth).toContainText(`Chiusura: ${stay.closingOperationId ?? '—'}`)
           await expect(
@@ -165,13 +168,13 @@ test('PR11: permanenze recenti a ogni livello e azioni sul viaggio corretto, off
     await voyages.nth(0).getByRole('button', { name: 'Consulta entrata', exact: true }).focus()
     await page.keyboard.press('Enter')
     await expect(page.getByLabel('Dettaglio operazione', { exact: true })).toContainText(
-      saved.entry.endpoint.moment.utc,
+      formatHistoricalMoment(saved.entry.endpoint.moment),
     )
     await page.getByRole('button', { name: 'Permanenze', exact: true }).click()
     await voyages.nth(1).getByRole('button', { name: 'Consulta uscita', exact: true }).focus()
     await page.keyboard.press('Space')
     await expect(page.getByLabel('Dettaglio operazione', { exact: true })).toContainText(
-      saved.exit.endpoint.moment.utc,
+      formatHistoricalMoment(saved.exit.endpoint.moment),
     )
     const state = await page.evaluate(() => window.archives.getState())
     expect(state.ok && state.value.context).toEqual(saved.context)

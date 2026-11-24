@@ -1,3 +1,4 @@
+import { MomentDisplay } from '../MomentDisplay'
 import { VesselPicker } from '../operations/VesselPicker'
 import { CatalogPicker } from '../services/CatalogPicker'
 import { CalculationNumbers } from '../CalculationNumbers'
@@ -154,8 +155,7 @@ export function BaseCalculator({
             {formatNumeric(trace.size, numericFormat)}
           </p>
           <p>
-            {trace.moment.localDateTime.replace('T', ' ')} · {trace.moment.zoneId} ·{' '}
-            {trace.moment.offset} · UTC {trace.moment.utc}
+            <MomentDisplay moment={trace.moment} detail />
           </p>
           <CalculationNumbers value={trace} />
           <details>

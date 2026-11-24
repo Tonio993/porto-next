@@ -1,3 +1,4 @@
+import { MomentDisplay, UtcDisplay } from '../MomentDisplay'
 import { useNumericFormat } from '../../api/use-numeric-preference'
 import { useConsultationState, useConsultationPicker } from '../../api/use-consultation-state'
 import { useProtectedDraft } from '../DraftProtection'
@@ -450,7 +451,7 @@ export function Tariffs({
                 }}
               >
                 <strong>
-                  {t.effectiveMoment!.localDateTime.replace('T', ' ')} ({t.effectiveMoment!.offset})
+                  <MomentDisplay moment={t.effectiveMoment!} />
                 </strong>
                 <span>
                   {phaseLabels[t.phase]}
@@ -493,12 +494,16 @@ export function Tariffs({
             <>
               <Badge>{phaseLabels[detail.phase]}</Badge>
               <p className="tariff-long-value">
-                Decorrenza: {detail.effectiveMoment!.localDateTime.replace('T', ' ')} ·{' '}
-                {detail.effectiveMoment!.zoneId} · {detail.effectiveMoment!.offset}
+                Decorrenza: <MomentDisplay moment={detail.effectiveMoment!} detail />
                 <br />
-                Inizio incluso: {detail.effectiveFrom}
+                Inizio incluso: <UtcDisplay utc={detail.effectiveFrom!} />
                 <br />
-                Fine esclusa: {detail.effectiveTo ?? 'Senza limite finale'}
+                Fine esclusa:{' '}
+                {detail.effectiveTo ? (
+                  <UtcDisplay utc={detail.effectiveTo} />
+                ) : (
+                  'Senza limite finale'
+                )}
               </p>
               <Group>
                 <Button variant="default" disabled={busy} onClick={() => void create(true)}>

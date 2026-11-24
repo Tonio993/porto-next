@@ -214,7 +214,10 @@ test('P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità
       effectiveBase: '7.25',
     })
     await page.getByRole('button', { name: 'Operazioni', exact: true }).click()
-    await page.locator('.operations-rows button').filter({ hasText: '2026-05-03T12:00' }).click()
+    await page
+      .locator('.operations-rows button')
+      .filter({ hasText: '03/05/2026 12:00 (+02:00)' })
+      .click()
     await expect(page.getByLabel('Dettaglio operazione')).toContainText(
       'Totale basi effettive: 7,25 €',
     )

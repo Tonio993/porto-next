@@ -160,7 +160,7 @@ for (const [kind, plural, singular, newLabel] of [
       await confirm.click()
       await expect(add).toBeFocused()
       const future = history.getByRole('article').filter({ hasText: 'Futura' })
-      await expect(future).toContainText('2090-01-01T09:00:00.000Z')
+      await expect(future).toContainText('01/01/2090 10:00 (+01:00)')
       await future.scrollIntoViewIfNeeded()
       if (!packaged) await shot('cronologia-futura.png')
       await future.getByRole('button', { name: 'Correggi versione' }).click()

@@ -1,3 +1,4 @@
+import { proposedPortZone } from '../../../shared/time-zones'
 import { useConsultationState } from './use-consultation-state'
 import { useWriteAttempt } from './use-write-attempt'
 import { trackedRequest } from '../../../shared/contracts/write-outcomes'
@@ -54,6 +55,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
     context: ArchiveContextDto
   } | null>(null)
   const [draft, setDraft] = useState(empty)
+  const createGeneration = useRef(0)
   const companyZone = useRef(empty.initialZoneId)
   const [draftContext, setDraftContext] = useState<ArchiveContextDto | null>(null)
   const [editor, setEditor] = useState<VersionDraft | null>(null)
@@ -63,7 +65,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
   const [fields, setFields] = useState<Record<string, string>>({})
   const [createFields, setCreateFields] = useState<Record<string, string>>({})
   function discardDraft() {
-    setDraft({ ...empty, initialZoneId: companyZone.current })
+    setDraft({ ...empty, initialZoneId: proposedPortZone(empty.countryCode, companyZone.current) })
     setDraftContext(null)
     setEditor(null)
     setPreview(null)
@@ -141,12 +143,21 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
     return invalidateDetail
   }, [invalidateDetail, loadDetail, context.revision])
   useEffect(() => {
+    const generation = createGeneration.current
     void companyRequest(() =>
       window.time.getCompanyZone({ context: { sessionId: context.sessionId }, query: null }),
     ).then((result) => {
       if (result?.ok) {
         companyZone.current = result.value.zoneId
-        setDraft((value) => ({ ...value, initialZoneId: result.value.zoneId }))
+        if (generation !== createGeneration.current) return
+        setDraft((value) => ({
+          ...value,
+          initialZoneId: proposedPortZone(
+            value.countryCode,
+            result.value.zoneId,
+            value.initialZoneId,
+          ),
+        }))
         setDraftContext(result.context)
       }
     })
@@ -239,6 +250,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
     }
   }
   function openCreate() {
+    createGeneration.current++
     setDraftContext({ ...context })
     setCreateFields({})
     setError(null)
@@ -259,7 +271,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
       setCreateFields(fieldErrors(result.error.fields))
       return
     }
-    setDraft({ ...empty, initialZoneId: draft.initialZoneId })
+    setDraft({ ...empty, initialZoneId: proposedPortZone(empty.countryCode, companyZone.current) })
     setDraftContext(result.context)
     select(result.value.id)
     setNotice(`Porto ${result.value.code} creato.`)
@@ -436,7 +448,16 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
       setHistoryPage(page)
     },
     draft,
-    setDraft,
+    setDraft: (value: CreatePortDto) => {
+      createGeneration.current++
+      setDraft((previous) => ({
+        ...value,
+        initialZoneId:
+          value.countryCode === previous.countryCode
+            ? value.initialZoneId
+            : proposedPortZone(value.countryCode, companyZone.current, value.initialZoneId),
+      }))
+    },
     draftContext,
     createFields,
     create,

@@ -500,7 +500,7 @@ it('EXIT ed ENTRY indipendenti ai due istanti di uno spostamento tra porti; MOVE
       payload: {
         name: 'Altro',
         locality: 'Altro',
-        countryCode: 'IT',
+        countryCode: 'US',
         initialZoneId: 'America/New_York',
       },
     }),

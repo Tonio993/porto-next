@@ -90,6 +90,8 @@ Per le cinque anagrafiche operative:
 - eliminazione fisica soltanto senza riferimenti, senza cancellare automaticamente gli elementi bloccanti;
 - niente accorpamento automatico di versioni ridondanti e niente versioni nuove identiche alla precedente.
 
+La creazione del porto usa un selettore offline paese/fuso con validazione autorevole dell'associazione; riferimenti salvati e correzioni descrittive restano indipendenti dal nuovo elenco. I momenti storici mostrano locale/offset conservati nel formato `dd/mm/yyyy HH:mm (offset numerico)`, con IANA nel dettaglio; istanti solo UTC restano dichiarati UTC. [Contratti e dataset PR06](pr06/fusi-offline-e-date.md). La deroga del ciclo [PR01–PR12](dev/piano-interventi-post-rilascio.md#verifiche-degli-step-e-checkpoint) differisce anche la prova della risorsa nel pacchetto a K4.
+
 Fonti: dominio §1.5; requisiti §2.8; modello §§3.9–3.10.
 
 ### 2.2 Operazioni nave e permanenze

@@ -429,6 +429,30 @@ export class OperationRepository {
       .run(...values)
     new AssignmentRepository(this.database).saveSubjects(c.id, c.subjects)
   }
+  private intervalMoments(
+    interval: Pick<
+      StayIntervalDto,
+      'openingOperationId' | 'closingOperationId' | 'startedAt' | 'endedAt'
+    >,
+  ) {
+    const read = (operationId: string, utc: string) => {
+      const row = this.database.sqlite
+        .prepare(
+          'SELECT local_date_time, zone_id, utc_offset, utc FROM operation_endpoints WHERE operation_id=? AND utc=?',
+        )
+        .get(operationId, utc) as MomentColumns | undefined
+      if (!row)
+        throw new ArchiveError('INVALID_ARCHIVE', 'Estremo della permanenza non disponibile.')
+      return momentFromColumns(row)
+    }
+    return {
+      openingMoment: read(interval.openingOperationId, interval.startedAt),
+      closingMoment:
+        interval.closingOperationId && interval.endedAt
+          ? read(interval.closingOperationId, interval.endedAt)
+          : null,
+    }
+  }
   stays(vesselId: string, page: number, pageSize: number): PageDto<VoyageDto> {
     const sql = this.database.sqlite
     const total = sql
@@ -439,21 +463,29 @@ export class OperationRepository {
       .prepare(
         `SELECT ${intervalSelection}, vessel_id AS vesselId, vessel_version_id AS vesselVersionId FROM voyages WHERE vessel_id=? ORDER BY started_at DESC, id DESC LIMIT ? OFFSET ?`,
       )
-      .all(vesselId, pageSize, (page - 1) * pageSize) as Omit<VoyageDto, 'visits'>[]
+      .all(vesselId, pageSize, (page - 1) * pageSize) as Omit<
+      VoyageDto,
+      'visits' | 'openingMoment' | 'closingMoment'
+    >[]
     return {
       total,
       page,
       pageSize,
       items: voyages.map((v) => ({
         ...v,
+        ...this.intervalMoments(v),
         visits: (
           sql
             .prepare(
               `SELECT ${intervalSelection},port_id AS portId,port_version_id AS portVersionId FROM port_calls WHERE voyage_id=? ORDER BY started_at DESC, id DESC`,
             )
-            .all(v.id) as (StayIntervalDto & { portId: string; portVersionId: string })[]
+            .all(v.id) as (Omit<StayIntervalDto, 'openingMoment' | 'closingMoment'> & {
+            portId: string
+            portVersionId: string
+          })[]
         ).map((p) => ({
           ...p,
+          ...this.intervalMoments(p),
           portName: sql
             .prepare('SELECT name FROM port_versions WHERE id=?')
             .pluck()
@@ -463,12 +495,13 @@ export class OperationRepository {
               .prepare(
                 `SELECT ${intervalSelection},berth_id AS berthId,berth_version_id AS berthVersionId FROM berth_stays WHERE port_call_id=? ORDER BY started_at DESC, id DESC`,
               )
-              .all(p.id) as (StayIntervalDto & {
+              .all(p.id) as (Omit<StayIntervalDto, 'openingMoment' | 'closingMoment'> & {
               berthId: string | null
               berthVersionId: string | null
             })[]
           ).map((b) => ({
             ...b,
+            ...this.intervalMoments(b),
             berthName: b.berthVersionId
               ? (sql
                   .prepare('SELECT name FROM berth_versions WHERE id=?')

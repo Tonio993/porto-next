@@ -1,3 +1,4 @@
+import { UtcDisplay } from './MomentDisplay'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Badge, Button, Modal, TextInput } from '@mantine/core'
 import {
@@ -12,12 +13,6 @@ import {
   IconPlus,
 } from '@tabler/icons-react'
 import type { useArchives } from '../api/use-archives'
-
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat('it-IT', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value))
 
 export function ArchivePage({ archives }: { archives: ReturnType<typeof useArchives> }) {
   const { state, busy, setError, setNotice, run, update } = archives
@@ -131,7 +126,9 @@ export function ArchivePage({ archives }: { archives: ReturnType<typeof useArchi
                       <strong>{item.name}</strong>
                       <span title={item.path}>{item.path}</span>
                     </span>
-                    <span className="recent-date">{formatDate(item.lastOpenedAt)}</span>
+                    <span className="recent-date">
+                      <UtcDisplay utc={item.lastOpenedAt} />
+                    </span>
                     <IconChevronRight size={18} />
                   </button>
                 ))}
@@ -160,11 +157,15 @@ export function ArchivePage({ archives }: { archives: ReturnType<typeof useArchi
           <div className="archive-meta">
             <div>
               <span>Creato il</span>
-              <strong>{formatDate(active.createdAt)}</strong>
+              <strong>
+                <UtcDisplay utc={active.createdAt} />
+              </strong>
             </div>
             <div>
               <span>Ultima modifica</span>
-              <strong>{formatDate(active.updatedAt)}</strong>
+              <strong>
+                <UtcDisplay utc={active.updatedAt} />
+              </strong>
             </div>
             <div>
               <span>Versione archivio</span>

@@ -182,7 +182,7 @@ for (const [kind, plural, singular, newLabel] of [
       await confirm.click()
       await expect(add).toBeFocused()
       const future = history.getByRole('article').filter({ hasText: 'Futura' })
-      await expect(future).toContainText('2090-01-01T09:00:00.000Z')
+      await expect(future).toContainText('01/01/2090 10:00 (+01:00)')
       await expect(future).toContainText('IMO: 001-B')
       await expect(future).toContainText('Dimensione: 2.200')
       await expect(

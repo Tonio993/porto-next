@@ -1,3 +1,4 @@
+import { MomentDisplay } from '../MomentDisplay'
 import { Button, TextInput } from '@mantine/core'
 import type { MomentInputDto, MomentResolutionDto } from '../../../../shared/contracts/values'
 import { MomentChoices } from '../MomentChoices'
@@ -50,6 +51,11 @@ export function VersionMomentFields({
             }
           />
         </>
+      )}
+      {resolution?.status === 'RESOLVED' && (
+        <p>
+          <MomentDisplay moment={resolution.moment} detail />
+        </p>
       )}
       {moment.selectedOffset && <p>Offset scelto: {moment.selectedOffset}</p>}
     </>

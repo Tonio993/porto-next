@@ -66,7 +66,7 @@ test('gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del port
     await expect(detail.getByRole('button', { name: 'Nuova versione', exact: true })).toBeFocused()
     await expect(history).toContainText('Versione con decorrenza · Futura')
     await expect(detail).toContainText('Porto iniziale')
-    await expect(history).toContainText('2027-01-01T09:00:00.000Z')
+    await expect(history).toContainText('01/01/2027 10:00 (+01:00)')
 
     // A draft keeps its original revision even when a native/archive command changes data.
     await history

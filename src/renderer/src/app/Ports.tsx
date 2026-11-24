@@ -1,6 +1,7 @@
+import { TimeZonePicker } from './TimeZonePicker'
 import { useProtectedDraft } from './DraftProtection'
 import { useEffect, useRef, useState } from 'react'
-import { Button, Group, Modal, Stack, TextInput } from '@mantine/core'
+import { Button, Group, Modal, Stack } from '@mantine/core'
 import type { useArchives } from '../api/use-archives'
 import { usePorts } from '../api/use-ports'
 import { PortDescriptionFields } from './ports/PortDescriptionFields'
@@ -198,16 +199,13 @@ export function Ports({
                 disabled={ports.busy}
                 fields={ports.createFields}
               />
-              <TextInput
+              <TimeZonePicker
                 label="Fuso IANA del porto"
-                required
-                disabled={ports.busy || !ports.draftContext}
-                description="Proposto dal fuso aziendale. Rimane autonomo dopo la creazione."
                 value={ports.draft.initialZoneId}
+                country={ports.draft.countryCode}
+                disabled={ports.busy || !ports.draftContext}
                 error={ports.createFields.initialZoneId}
-                onChange={(event) =>
-                  ports.setDraft({ ...ports.draft, initialZoneId: event.currentTarget.value })
-                }
+                onChange={(initialZoneId) => ports.setDraft({ ...ports.draft, initialZoneId })}
               />
               {ports.draftContext && ports.draftContext.revision !== ports.revision && (
                 <StateMessage kind="warning" title="Bozza da aggiornare">
@@ -225,7 +223,10 @@ export function Ports({
                 >
                   Ricarica dati
                 </Button>
-                <Button type="submit" disabled={ports.busy || !ports.draftContext}>
+                <Button
+                  type="submit"
+                  disabled={ports.busy || !ports.draftContext || !ports.draft.initialZoneId}
+                >
                   Crea porto
                 </Button>
               </Group>

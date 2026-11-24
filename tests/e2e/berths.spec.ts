@@ -109,7 +109,7 @@ test('amministra le banchine dal porto e conserva dati e contesto nel percorso E
     await confirm.click()
     await expect(addVersion).toBeFocused()
     const future = history.getByRole('article').filter({ hasText: 'Futura' })
-    await expect(future).toContainText('2090-01-01T09:00:00.000Z')
+    await expect(future).toContainText('01/01/2090 10:00 (+01:00)')
     await future.getByRole('button', { name: 'Correggi versione' }).click()
     const correction = page.getByRole('dialog', { name: 'Correggi versione banchina' })
     await correction.getByLabel('Nome banchina').fill('Molo futuro corretto')

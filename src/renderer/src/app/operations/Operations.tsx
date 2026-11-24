@@ -1,3 +1,5 @@
+import { StayInterval } from './StayInterval'
+import { MomentDisplay } from '../MomentDisplay'
 import { ExactNumericInput } from '../ExactNumericInput'
 import { useNumericFormat } from '../../api/use-numeric-preference'
 import type { NumericFormat } from '../../../../shared/contracts/numeric-preference'
@@ -649,7 +651,7 @@ export function Operations({
                     {operationLabels[o.operationType]} · {executionLabels[o.executionStatus]}
                   </strong>
                   <span>
-                    {o.endpoint.moment.localDateTime} · {o.endpoint.portName}
+                    <MomentDisplay moment={o.endpoint.moment} /> · {o.endpoint.portName}
                   </span>
                 </button>
               ))}
@@ -840,7 +842,7 @@ export function Operations({
               </Button>
               <h3>Viaggio · {v.endedAt ? 'Chiuso' : 'Aperto'}</h3>
               <p>
-                Inizio UTC {v.startedAt} · Fine UTC {v.endedAt ?? 'Aperta'}
+                <StayInterval interval={v} />
               </p>
               <details>
                 <summary>Identità del viaggio</summary>
@@ -885,7 +887,7 @@ export function Operations({
                   </Button>
                   <h4>Visita · {p.portName}</h4>
                   <p>
-                    {p.id} · {p.startedAt} → {p.endedAt ?? 'Aperta'}
+                    {p.id} · <StayInterval interval={p} />
                   </p>
                   {p.stays.map((b) => (
                     <div key={b.id}>
@@ -898,7 +900,7 @@ export function Operations({
                       </Button>
                       <strong>Ormeggio · {b.berthName ?? 'Banchina non specificata'}</strong>
                       <p>
-                        {b.id} · {b.startedAt} → {b.endedAt ?? 'Aperto'}
+                        {b.id} · <StayInterval interval={b} />
                       </p>
                       <p>
                         Apertura: {b.openingOperationId}

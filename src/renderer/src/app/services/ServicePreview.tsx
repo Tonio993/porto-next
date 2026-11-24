@@ -1,3 +1,4 @@
+import { MomentDisplay } from '../MomentDisplay'
 import { CalculationNumbers } from '../CalculationNumbers'
 import { formatNumeric } from '../../api/numeric-input'
 import { useNumericFormat } from '../../api/use-numeric-preference'
@@ -38,8 +39,7 @@ function Values({ value }: { value: ServiceActivityDto }) {
         {value.vesselName} · {value.portName} · {value.berthName ?? 'Banchina non specificata'}
       </p>
       <p>
-        {value.moment.localDateTime} · {value.moment.zoneId} · {value.moment.offset} · UTC{' '}
-        {value.moment.utc}
+        <MomentDisplay moment={value.moment} detail />
       </p>
       <p>
         Viaggio: {value.context.voyageId}

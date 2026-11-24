@@ -1,3 +1,4 @@
+import { MomentDisplay, UtcDisplay } from '../MomentDisplay'
 import { formatNumeric } from '../../api/numeric-input'
 import { ExactNumericInput } from '../ExactNumericInput'
 import { useNumericFormat } from '../../api/use-numeric-preference'
@@ -461,9 +462,12 @@ export function WeightHistory({
                   </>
                 ) : (
                   <p>
-                    Decorrenza: {draft.before?.effectiveMoment?.localDateTime} · peso{' '}
-                    {formatNumeric(draft.before?.weight ?? '—', numericFormat)}. Le attività saranno
-                    ricalcolate con la sequenza restante.
+                    Decorrenza:{' '}
+                    {draft.before?.effectiveMoment && (
+                      <MomentDisplay moment={draft.before.effectiveMoment} detail />
+                    )}{' '}
+                    · peso {formatNumeric(draft.before?.weight ?? '—', numericFormat)}. Le attività
+                    saranno ricalcolate con la sequenza restante.
                   </p>
                 )}
                 <Button
@@ -528,17 +532,17 @@ export function WeightHistory({
                   <Badge>{phaseLabels[v.phase]}</Badge>
                 </Group>
                 <p>
-                  {v.effectiveMoment
-                    ? v.effectiveMoment.localDateTime +
-                      ' · ' +
-                      v.effectiveMoment.zoneId +
-                      ' · ' +
-                      v.effectiveMoment.offset
-                    : 'Peso iniziale senza decorrenza'}
+                  {v.effectiveMoment ? (
+                    <MomentDisplay moment={v.effectiveMoment} detail />
+                  ) : (
+                    'Peso iniziale senza decorrenza'
+                  )}
                   <br />
-                  Inizio incluso: {v.effectiveFrom ?? 'Senza limite iniziale'}
+                  Inizio incluso:{' '}
+                  {v.effectiveFrom ? <UtcDisplay utc={v.effectiveFrom} /> : 'Senza limite iniziale'}
                   <br />
-                  Fine esclusa: {v.effectiveTo ?? 'Senza limite finale'}
+                  Fine esclusa:{' '}
+                  {v.effectiveTo ? <UtcDisplay utc={v.effectiveTo} /> : 'Senza limite finale'}
                 </p>
                 <Group>
                   <Button

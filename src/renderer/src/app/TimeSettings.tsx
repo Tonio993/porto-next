@@ -1,3 +1,5 @@
+import { TimeZonePicker } from './TimeZonePicker'
+import { MomentDisplay } from './MomentDisplay'
 import { useProtectedDraft } from './DraftProtection'
 import { useWriteAttempt } from '../api/use-write-attempt'
 import { trackedRequest } from '../../../shared/contracts/write-outcomes'
@@ -108,14 +110,11 @@ export function TimeSettings({ archives }: { archives: ReturnType<typeof useArch
         {company && !company.confirmed && (
           <form onSubmit={(event) => void configure(event)}>
             <Stack gap="sm" align="flex-start">
-              <TextInput
+              <TimeZonePicker
                 label="Fuso IANA aziendale"
-                description="Per esempio Europe/Rome, Europe/London o Asia/Kathmandu."
                 value={zoneId}
-                onChange={(event) => setZoneId(event.currentTarget.value)}
-                required
+                onChange={setZoneId}
                 disabled={busy || loading || resolver.loading}
-                style={{ width: '100%' }}
               />
               <p>
                 Dopo la conferma, le variazioni del fuso non saranno disponibili in questo rilascio.
@@ -175,11 +174,9 @@ export function TimeSettings({ archives }: { archives: ReturnType<typeof useArch
             )}
             {resolution?.status === 'RESOLVED' && (
               <div role="status">
-                <p>Orario locale: {resolution.moment.localDateTime.replace('T', ' ')}</p>
                 <p>
-                  Fuso: {resolution.moment.zoneId} · Offset: {resolution.moment.offset}
+                  <MomentDisplay moment={resolution.moment} detail />
                 </p>
-                <p>UTC: {resolution.moment.utc}</p>
               </div>
             )}
           </>

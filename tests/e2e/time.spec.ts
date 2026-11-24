@@ -46,13 +46,14 @@ test('configura il fuso per archivio e risolve gap e occorrenze offline', async 
     await page.getByRole('textbox', { name: 'Nome dell’archivio' }).fill('Archivio temporale')
     await page.getByRole('button', { name: 'Scegli posizione' }).click()
     await page.getByRole('button', { name: 'Riferimenti temporali', exact: true }).click()
-    await expect(page.getByRole('textbox', { name: 'Fuso IANA aziendale' })).toHaveValue(
+    await expect(page.getByRole('combobox', { name: 'Fuso IANA aziendale' })).toHaveValue(
       'Europe/Rome',
     )
-    await page.getByRole('textbox', { name: 'Fuso IANA aziendale' }).fill('+01:00')
-    await page.getByRole('button', { name: 'Conferma fuso iniziale' }).click()
-    await expect(page.getByRole('alert')).toContainText('Scegli un fuso IANA valido')
-    await page.getByRole('textbox', { name: 'Fuso IANA aziendale' }).fill('Europe/Rome')
+    await page.getByRole('combobox', { name: 'Fuso IANA aziendale' }).fill('+01:00')
+    await expect(page.getByRole('option')).toHaveCount(0)
+    await page.keyboard.press('Escape')
+    await page.getByRole('combobox', { name: 'Fuso IANA aziendale' }).fill('Europe/Rome')
+    await page.getByRole('option', { name: 'Europe/Rome', exact: true }).click()
     await page.getByRole('button', { name: 'Conferma fuso iniziale' }).click()
     await expect(page.getByText('Fuso aziendale confermato:')).toContainText('Europe/Rome')
     const date = page.getByLabel('Data e ora locale')
@@ -63,10 +64,14 @@ test('configura il fuso per archivio e risolve gap e occorrenze offline', async 
     await page.getByRole('button', { name: 'Verifica orario' }).click()
     await expect(page.getByText('Quest’ora si presenta due volte.')).toBeVisible()
     await page.getByRole('button', { name: 'Prima occorrenza (+02:00)', exact: true }).click()
-    await expect(page.getByText('UTC: 2026-10-25T00:30:00.000Z', { exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('status').filter({ hasText: '25/10/2026 02:30 (+02:00)' }),
+    ).toBeVisible()
     await page.getByRole('button', { name: 'Verifica orario' }).click()
     await page.getByRole('button', { name: 'Seconda occorrenza (+01:00)', exact: true }).click()
-    await expect(page.getByText('UTC: 2026-10-25T01:30:00.000Z', { exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('status').filter({ hasText: '25/10/2026 02:30 (+01:00)' }),
+    ).toBeVisible()
     if (!process.env.PORTO_PACKAGED_EXE)
       await page.screenshot({ path: testInfo.outputPath('time-settings.png') })
     const context = await page.evaluate(async () => {
@@ -105,7 +110,9 @@ test('configura il fuso per archivio e risolve gap e occorrenze offline', async 
     await expect(page.getByText('Fuso aziendale confermato:')).toContainText('Europe/Rome')
     await page.getByLabel('Data e ora locale').fill('2026-11-10T09:00')
     await page.getByRole('button', { name: 'Verifica orario' }).click()
-    await expect(page.getByText('UTC: 2026-11-10T08:00:00.000Z', { exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('status').filter({ hasText: '10/11/2026 09:00 (+01:00)' }),
+    ).toBeVisible()
   } finally {
     await app?.close()
     rmSync(folder, { recursive: true, force: true })

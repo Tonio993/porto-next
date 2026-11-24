@@ -1,3 +1,4 @@
+import { MomentDisplay } from '../MomentDisplay'
 import { useNumericFormat } from '../../api/use-numeric-preference'
 import { useProtectedDraft } from '../DraftProtection'
 import { SingleFlight } from '../../api/single-flight'
@@ -281,8 +282,7 @@ export function TariffMaintenanceEditor({
           </Button>
         )}
         <p>
-          Decorrenza originale: {original.effectiveMoment.localDateTime} ·{' '}
-          {original.effectiveMoment.zoneId} · {original.effectiveMoment.offset}
+          Decorrenza originale: <MomentDisplay moment={original.effectiveMoment} detail />
         </p>
         {preview && mode === 'UPDATE' && (
           <ConfigurationDetails configurations={preview.tariff.configurations} />

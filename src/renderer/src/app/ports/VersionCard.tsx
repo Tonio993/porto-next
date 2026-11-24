@@ -1,3 +1,5 @@
+import { MomentDisplay, UtcDisplay } from '../MomentDisplay'
+import { formatUtcInstant } from '../../api/date-display'
 import { Badge, Button, Group } from '@mantine/core'
 import type { VersionIntervalDto } from '../../../../shared/contracts/master-data'
 
@@ -18,7 +20,7 @@ export function VersionCard({
     <article
       className="port-version"
       data-phase={version.phase}
-      aria-label={`Versione ${version.effectiveFrom ?? 'iniziale'}`}
+      aria-label={`Versione ${version.effectiveFrom ? formatUtcInstant(version.effectiveFrom) : 'iniziale'}`}
     >
       <h3>
         {version.effectiveFrom === null ? 'Versione iniziale' : 'Versione con decorrenza'} ·{' '}
@@ -41,14 +43,22 @@ export function VersionCard({
       <p>{description}</p>
 
       <p>
-        {version.effectiveMoment
-          ? `Dal ${version.effectiveMoment.localDateTime.replace('T', ' ')} · ${version.effectiveMoment.zoneId} · offset ${version.effectiveMoment.offset} · UTC ${version.effectiveFrom}`
-          : 'Da sempre (nessun limite inferiore)'}
+        {version.effectiveMoment ? (
+          <>
+            Dal <MomentDisplay moment={version.effectiveMoment} detail />
+          </>
+        ) : (
+          'Da sempre (nessun limite inferiore)'
+        )}
       </p>
       <p>
-        {version.effectiveTo
-          ? `Fino a ${version.effectiveTo} UTC (escluso)`
-          : 'Senza limite finale'}
+        {version.effectiveTo ? (
+          <>
+            Fino a <UtcDisplay utc={version.effectiveTo} /> (escluso)
+          </>
+        ) : (
+          'Senza limite finale'
+        )}
       </p>
       <Group gap="xs">
         <Button variant="light" disabled={disabled} onClick={onEdit}>

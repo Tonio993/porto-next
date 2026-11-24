@@ -126,11 +126,11 @@ test('UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti rea
       body: JSON.stringify({ normal: contrastNormal, hover: contrastHover }),
       contentType: 'application/json',
     })
-    await creation.getByLabel('Fuso IANA del porto').fill('+01:00')
+    await creation.getByLabel('Nome del porto').fill('')
     await creation.getByRole('button', { name: 'Crea porto', exact: true }).click()
-    await expect(creation.getByLabel('Fuso IANA del porto')).toHaveAttribute('aria-invalid', 'true')
+    await expect(creation.getByLabel('Nome del porto')).toBeFocused()
     await shot('errore-campo-minimo')
-    await creation.getByLabel('Fuso IANA del porto').fill('Europe/Rome')
+    await creation.getByLabel('Nome del porto').fill('Porto di Genova')
     await creation.getByRole('button', { name: 'Crea porto', exact: true }).click()
     const detail = page.getByRole('region', { name: 'Dettaglio porto' })
     await expect(detail).toContainText('Porto 1 · Porto di Genova')

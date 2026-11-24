@@ -223,7 +223,7 @@ test('P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo
     await dialog.getByRole('button', { name: 'Conferma modifica', exact: true }).click()
     await expect(dialog).toHaveCount(0)
     await expect(list).toContainText('3 tariffe')
-    await expect(detail).toContainText('2098-12-31T23:00:00.000Z')
+    await expect(detail).toContainText('01/01/2099 00:00 (+01:00)')
     await detail.getByRole('button', { name: 'Apri calcolatore', exact: true }).click()
     await dialog.getByLabel('Nave', { exact: true }).click()
     await page.getByRole('option', { name: /Stella del mare/ }).click()
@@ -278,7 +278,7 @@ test('P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo
     await dialog.getByRole('button', { name: 'Conferma modifica', exact: true }).click()
     await expect(dialog).toHaveCount(0)
     await expect(detail).toContainText('America/New_York')
-    await expect(detail).toContainText('2026-01-01T05:00:00.000Z')
+    await expect(detail).toContainText('01/01/2026 00:00 (-05:00)')
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1440, 900))
     await shot('dettaglio-desktop.png')
     await app.evaluate(({ dialog }, copy) => {

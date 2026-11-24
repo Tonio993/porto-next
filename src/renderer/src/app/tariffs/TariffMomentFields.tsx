@@ -1,3 +1,4 @@
+import { MomentDisplay } from '../MomentDisplay'
 import { Button, Group, Stack, TextInput } from '@mantine/core'
 import type { MomentInputDto, MomentResolutionDto } from '../../../../shared/contracts/values'
 import { MomentChoices } from '../MomentChoices'
@@ -53,8 +54,7 @@ export function TariffMomentFields({
       {moment.selectedOffset && <p>Offset scelto: {moment.selectedOffset}</p>}
       {resolution?.status === 'RESOLVED' && (
         <p className="tariff-long-value">
-          Fuso {resolution.moment.zoneId} · offset {resolution.moment.offset} · UTC{' '}
-          {resolution.moment.utc}
+          <MomentDisplay moment={resolution.moment} detail />
         </p>
       )}
     </Stack>

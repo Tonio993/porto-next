@@ -247,3 +247,43 @@ describe('migrazione da v2 allo schema corrente', () => {
     expect(context()).toEqual(previous)
   })
 })
+
+it('PR06 configurazione UTC/alias, lettura e conferma ripetuta non riscrivono fusi salvati', async () => {
+  const sql = archives.coordinator.requireSession().database.sqlite
+  sql.exec("UPDATE company_time_zone SET zone_id='US/Eastern',confirmed=1")
+  const before = archives.current(),
+    ctx = context()
+  expect(await time.getCompanyZone(query())).toMatchObject({
+    ok: true,
+    value: { zoneId: 'US/Eastern', confirmed: true },
+  })
+  expect(await configure('US/Eastern')).toMatchObject({ ok: true, context: ctx })
+  expect(await configure('America/New_York')).toMatchObject({
+    ok: false,
+    error: { code: 'VALIDATION_ERROR' },
+  })
+  expect(archives.current()).toEqual(before)
+  await archives.close()
+  await archives.open(file('A'))
+  expect(await time.getCompanyZone(query())).toMatchObject({
+    ok: true,
+    value: { zoneId: 'US/Eastern', confirmed: true },
+  })
+})
+it('PR06 UTC esplicito può essere confermato; configurazione con campi inattesi non scrive', async () => {
+  const before = archives.current()
+  expect(
+    await time.configureCompanyZone({
+      context: context(),
+      payload: { zoneId: 'UTC', countryCode: 'IT' },
+    } as never),
+  ).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } })
+  expect(archives.current()).toEqual(before)
+  expect(await configure('UTC')).toMatchObject({
+    ok: true,
+    value: { zoneId: 'UTC', confirmed: true },
+  })
+  const saved = archives.current()
+  expect(await configure('UTC')).toMatchObject({ ok: true })
+  expect(archives.current()).toEqual(saved)
+})

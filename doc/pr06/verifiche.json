@@ -1,0 +1,777 @@
+{
+  "task": "PR06",
+  "date": "2026-11-24",
+  "branch": "main",
+  "head": "40ef3b4df6d8421c41cb5addd9be5a1cab13eeaa",
+  "initialWorkingTree": "clean",
+  "delivery": "uncommitted working tree; no commit authorized",
+  "schemaVersion": 17,
+  "policy": "PR01–PR12 unit/static/doc checks only; K2 coverage review performed; desktop/build/package/integrated and packaged resource probe deferred to K4",
+  "newTests": {
+    "datasetAndFormat": 30,
+    "callers": 19,
+    "backendAndIpc": 8,
+    "total": 57
+  },
+  "environment": {
+    "platform": "win32",
+    "architecture": "x64",
+    "hostNode": "v24.21.0",
+    "electron": "45.2.3",
+    "icu": "78.2",
+    "tz": "2026e",
+    "electronNode": "24.22.2"
+  },
+  "dataset": {
+    "version": "2026f",
+    "source": "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz",
+    "archiveSha256": "01b4a91cec5167ed48c11e8ab78f2048cead78ce94b0cafcad0ae8c5a3044d3d",
+    "license": "Public domain",
+    "countries": 247,
+    "names": 593,
+    "availableZones": 593,
+    "unsupportedNames": [],
+    "sources": {
+      "zone.tab": "e2e8e31c4e10f44576c79345e76060591dbb3eef6ce14e006afc8a373caa9593",
+      "zone1970.tab": "5f23781702bf51408ff1581daa109ab3b9257fb433b1554e579d92172892c0cf",
+      "backward": "b8296b9ef1ece72d813878132c0f17e2c52b26af6004eeb9c37d049b64cd9401",
+      "etcetera": "7281f095b42c13c4ae36b8bcba884e81dbb38127221fc1d9805c4dbf852487db",
+      "version": "9f9a9e6bfd18cd6a0a4d65764931072577edcbb731981a068ef52bba6615b1de",
+      "LICENSE": "0613408568889f5739e5ae252b722a2659c02002839ad970a63dc5e9174b27cf"
+    }
+  },
+  "runs": [
+    {
+      "name": "core",
+      "command": null,
+      "report": "test-results/pr06-core.json",
+      "log": "test-results/pr06-core.log",
+      "reportSha256": "e622ed35d7cd70f94d3d9e5876154fe8928b058198dba1cb9b28930fdd6d1035",
+      "npmExitCode": null,
+      "electronExitCode": null,
+      "electronProcess": null,
+      "files": 3,
+      "tests": {
+        "total": 35,
+        "passed": 35,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": []
+    },
+    {
+      "name": "zones",
+      "command": "npm.cmd test -- tests/unit/time-zones-display.test.ts --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-zones.json",
+      "report": "test-results/pr06-zones.json",
+      "log": "test-results/pr06-zones.log",
+      "reportSha256": "1490f2f4566301030d2496c87d2ddd34faede07ccbdffa1c9277e144c319ffea",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "electronProcess": "test-results/pr06-zones-electron-process.json",
+      "files": 1,
+      "tests": {
+        "total": 30,
+        "passed": 30,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": []
+    },
+    {
+      "name": "services",
+      "command": "npm.cmd test -- tests/unit/port-service.test.ts tests/unit/port-lifecycle.test.ts tests/unit/time-service.test.ts tests/unit/archive-controller.test.ts tests/unit/operation-service.test.ts --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-services.json",
+      "report": "test-results/pr06-services.json",
+      "log": "test-results/pr06-services.log",
+      "reportSha256": "7f7773f16b737c51d251bf6345a189e42f7251befea475901794a70cdf932a4b",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "electronProcess": "test-results/pr06-services-electron-process.json",
+      "files": 5,
+      "tests": {
+        "total": 106,
+        "passed": 105,
+        "failed": 1,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "operation-service.test.ts",
+          "test": "PR11: consultazione UTC decrescente a tre livelli, pagine globali e letture senza scritture",
+          "messages": [
+            "AssertionError: expected [ { …(10) } ] to deeply equal [ { …(10) } ]\n    at C:/Other/porto-next/tests/unit/operation-service.test.ts:1917:34\n    at async file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:2801:20"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "callers",
+      "command": "npm.cmd test -- tests/unit/time-callers.test.tsx tests/unit/numeric-callers.test.tsx tests/unit/paged-pickers.test.tsx tests/unit/paged-picker-presentation.test.tsx --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-callers.json",
+      "report": "test-results/pr06-callers.json",
+      "log": "test-results/pr06-callers.log",
+      "reportSha256": "9c63ef195d51c108513e96c2e129597369b82cbfbe03b75a7541f5268f21d9d3",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "electronProcess": "test-results/pr06-callers-electron-process.json",
+      "files": 4,
+      "tests": {
+        "total": 148,
+        "passed": 147,
+        "failed": 1,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 metadati archivio e recenti usano UTC esplicito e conservano precisione nel dettaglio",
+          "messages": [
+            "AssertionError: expected [ { …(10) }, { …(10) } ] to have a length of 3 but got 2\n    at Proxy.<anonymous> (file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/index.CZzC1gGg.js:1861:20)\n    at Proxy.<anonymous> (file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/index.CZzC1gGg.js:1656:14)\n    at Proxy.methodWrapper (file:///C:/Other/porto-next/node_modules/chai/index.js:1737:25)\n    at C:/Other/porto-next/tests/unit/time-callers.test.tsx:149:17\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:1632:35\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:2801:26\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3338:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3333:10)\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3318:20"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "callers2",
+      "command": "npm.cmd test -- tests/unit/time-callers.test.tsx tests/unit/operation-service.test.ts --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-callers2.json",
+      "report": "test-results/pr06-callers2.json",
+      "log": "test-results/pr06-callers2.log",
+      "reportSha256": "7df20f00db53c0373ae197a28aa44849a3ad5797a05d0902a57903bdcf17e41d",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "electronProcess": "test-results/pr06-callers2-electron-process.json",
+      "files": 2,
+      "tests": {
+        "total": 67,
+        "passed": 66,
+        "failed": 1,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 filtri permanenze ricevono label da tuple backend, anche fuori pagina e con estremi aperti",
+          "messages": [
+            "TypeError: Cannot read properties of undefined (reading 'props')\n    at C:/Other/porto-next/tests/unit/time-callers.test.tsx:220:62\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:1632:35\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:2801:26\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3338:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3333:10)\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3318:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3276:10)\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3922:64"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "targeted-final",
+      "command": "npm.cmd test -- tests/unit/time-zones-display.test.ts tests/unit/time-callers.test.tsx tests/unit/operation-service.test.ts tests/unit/port-service.test.ts tests/unit/time-service.test.ts tests/unit/port-lifecycle.test.ts tests/unit/archive-controller.test.ts --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-targeted-final.json",
+      "report": "test-results/pr06-targeted-final.json",
+      "log": "test-results/pr06-targeted-final.log",
+      "reportSha256": "7383f626c2cf371e44c48e265ec559d54e431afc497155b2a8465d1f12e59448",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "electronProcess": "test-results/pr06-targeted-final-electron-process.json",
+      "files": 7,
+      "tests": {
+        "total": 157,
+        "passed": 156,
+        "failed": 1,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "time-zones-display.test.ts",
+          "test": "PR06 dataset IANA versionato: hash fonti, generazione riproducibile e paesi ISO",
+          "messages": [
+            "AssertionError: expected '{\\n  \"version\": \"2026f\",\\n  \"source\":…' to be '{\\n  \"version\": \"2026f\",\\n  \"source\":…' // Object.is equality\n    at C:/Other/porto-next/tests/unit/time-zones-display.test.ts:49:42\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:1632:35\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:2801:26\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3338:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3333:10)\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3318:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3276:10)\n    at file:///C:/Other/porto-next/node_modules/vitest/dist/chunks/run.CjdgFZiW.js:3922:64"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "zones-final",
+      "command": "npm.cmd test -- tests/unit/time-zones-display.test.ts --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-zones-final.json",
+      "report": "test-results/pr06-zones-final.json",
+      "log": "test-results/pr06-zones-final.log",
+      "reportSha256": "c28f4ac2573646cec4ecab10b07e1a96d92b08b03e08838d7826ce64a99e5f17",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "electronProcess": "test-results/pr06-zones-final-electron-process.json",
+      "files": 1,
+      "tests": {
+        "total": 30,
+        "passed": 30,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": []
+    },
+    {
+      "name": "full",
+      "command": "npm.cmd test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-full.json",
+      "report": "test-results/pr06-full.json",
+      "log": "test-results/pr06-full.log",
+      "reportSha256": "7f4b4d4e5d5ca5ccc08bfeac9c9e23de7bd21298fc23befe505187b9d3ddadb3",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "electronProcess": "test-results/pr06-full-electron-process.json",
+      "files": 49,
+      "tests": {
+        "total": 855,
+        "passed": 854,
+        "failed": 1,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "service-service.test.ts",
+          "test": "nuova operazione blocca prestazioni orfane e riattribuisce quelle successive atomicamente",
+          "messages": [
+            "Error: ENOTEMPTY, Directory not empty: 'C:\\Users\\ANTONI~1.IUE\\AppData\\Local\\Temp\\porto-p14-krrhzb'\n    at rmSync (node:fs:1282:18)\n    at C:/Other/porto-next/tests/unit/service-service.test.ts:188:3\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cleanup-diagnostic",
+      "command": "npm.cmd test -- tests/unit/service-service.test.ts -t nuova operazione blocca prestazioni orfane e riattribuisce quelle successive atomicamente --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-cleanup-diagnostic.json",
+      "report": "test-results/pr06-cleanup-diagnostic.json",
+      "log": "test-results/pr06-cleanup-diagnostic.log",
+      "reportSha256": "5fd7e5a6042a9e1b6ab5ed0dc2197834aba8fb8997da16c917448f9f44dbcf87",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "electronProcess": "test-results/pr06-cleanup-diagnostic-electron-process.json",
+      "files": 1,
+      "tests": {
+        "total": 57,
+        "passed": 1,
+        "failed": 0,
+        "pending": 56
+      },
+      "failures": []
+    },
+    {
+      "name": "metadata-correction",
+      "command": "npm.cmd test -- tests/unit/time-zones-display.test.ts tests/unit/time-callers.test.tsx tests/unit/numeric-callers.test.tsx --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-metadata-correction.json",
+      "report": "test-results/pr06-metadata-correction.json",
+      "log": "test-results/pr06-metadata-correction.log",
+      "reportSha256": "c7d86a4f76854bcd533463d73e52646014660cabc9a8e7a85cf292aa9d05fdcc",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "electronProcess": "test-results/pr06-metadata-correction-electron-process.json",
+      "files": 3,
+      "tests": {
+        "total": 69,
+        "passed": 50,
+        "failed": 19,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 MomentChoices conserva scelta esplicita e distingue le due occorrenze senza normalizzare input",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_0__.historicalMomentDetail) is not a function"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 campi decorrenza reali versione separano ISO da display",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_0__.historicalMomentDetail) is not a function"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 campi decorrenza reali tariffa separano ISO da display",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_0__.historicalMomentDetail) is not a function"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 VersionCard: inizio storico e fine tecnica esclusa, senza dipendenza dalla notazione numerica",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_1__.formatUtcInstant) is not a function"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 permanenze aperte/chiuse mostrano tuple backend e precisione, UTC soltanto se disponibile da solo",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_0__.formatHistoricalMoment) is not a function"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 anteprime scalari note, payload opachi conservati e notazione PR04 indipendente",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_0__.formatUtcInstant) is not a function"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 metadati archivio e recenti usano UTC esplicito e conservano precisione nel dettaglio",
+          "messageSummary": [
+            "AssertionError: expected [ 'Istante UTC non disponibile', …(1) ] to deeply equal [ …(2) ]"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 OperationDetail usa entrambe le tuple dei due estremi e dei calcoli senza cambiarle",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_0__.historicalMomentDetail) is not a function"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 copia tariffa e calcolatore reale usano la tupla risolta, ISO nella query",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_0__.formatHistoricalMoment) is not a function"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 cronologia pesi e tariffe: tuple storiche e estremi tecnici aperti/chiusi nei chiamanti",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_0__.historicalMomentDetail) is not a function"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 lista/dettaglio e anteprima prestazione mantengono il momento completo",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_0__.historicalMomentDetail) is not a function"
+          ]
+        },
+        {
+          "file": "time-callers.test.tsx",
+          "test": "PR06 filtri permanenze ricevono label da tuple backend, anche fuori pagina e con estremi aperti",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_0__.formatHistoricalMoment) is not a function"
+          ]
+        },
+        {
+          "file": "time-zones-display.test.ts",
+          "test": "PR06 confini calendario/padding 0001-01-01T00:00",
+          "messageSummary": ["ReferenceError: technicalUtc is not defined"]
+        },
+        {
+          "file": "time-zones-display.test.ts",
+          "test": "PR06 confini calendario/padding 0099-09-09T09:09",
+          "messageSummary": ["ReferenceError: technicalUtc is not defined"]
+        },
+        {
+          "file": "time-zones-display.test.ts",
+          "test": "PR06 confini calendario/padding 2000-02-29T23:59",
+          "messageSummary": ["ReferenceError: technicalUtc is not defined"]
+        },
+        {
+          "file": "time-zones-display.test.ts",
+          "test": "PR06 confini calendario/padding 9999-12-31T23:59",
+          "messageSummary": ["ReferenceError: technicalUtc is not defined"]
+        },
+        {
+          "file": "time-zones-display.test.ts",
+          "test": "PR06 gap respinto e due occorrenze esplicite distinguibili con offset",
+          "messageSummary": ["TypeError: undefined is not a function"]
+        },
+        {
+          "file": "time-zones-display.test.ts",
+          "test": "PR06 offset con secondi e tupla storica non reinterpretata secondo IANA corrente",
+          "messageSummary": [
+            "TypeError: (0 , __vite_ssr_import_8__.formatHistoricalMoment) is not a function"
+          ]
+        },
+        {
+          "file": "time-zones-display.test.ts",
+          "test": "PR06 istante tecnico al minuto conserva la precisione originale e ignora il fuso del processo",
+          "messageSummary": [
+            "AssertionError: [1124/165731.146:ERROR:third_party\\crashpad\\crashpad\\util\\win\\registration_protocol_win.cc:108] CreateFile: Access is denied. (0x5)\r"
+          ]
+        }
+      ],
+      "reason": "Incorrect mechanical replacement during editing, corrected before passing selection"
+    },
+    {
+      "name": "metadata-correction2",
+      "command": "npm.cmd test -- tests/unit/time-zones-display.test.ts tests/unit/time-callers.test.tsx tests/unit/numeric-callers.test.tsx --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-metadata-correction2.json",
+      "report": "test-results/pr06-metadata-correction2.json",
+      "log": "test-results/pr06-metadata-correction2.log",
+      "reportSha256": "719a14adaad01ffafa6aab6a8d36ad63b443bb319d3b5c62592248f89cc2d845",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "electronProcess": "test-results/pr06-metadata-correction2-electron-process.json",
+      "files": 3,
+      "tests": {
+        "total": 69,
+        "passed": 69,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "reason": "Correction verified in production formatter, ArchivePage caller, isolated TZ and numeric regressions"
+    },
+    {
+      "name": "final-full",
+      "command": "npm.cmd test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr06-final-full.json",
+      "report": "test-results/pr06-final-full.json",
+      "log": "test-results/pr06-final-full.log",
+      "reportSha256": "b735fabdcca784ab385ef21cccc4df3e82ef1cfa63a3070d721ba9cb12c83f2b",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "electronProcess": "test-results/pr06-final-full-electron-process.json",
+      "files": 49,
+      "tests": {
+        "total": 855,
+        "passed": 855,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "reason": "Required after product and unit changes for explicit ISO technical metadata; not a retry for a green result"
+    }
+  ],
+  "fullSuite": {
+    "total": 855,
+    "passed": 855,
+    "failed": 0,
+    "pending": 0,
+    "files": 49,
+    "npmExitCode": 0,
+    "electronExitCode": 0,
+    "newTestsPassed": 57,
+    "reasonForNewFull": "Final contract audit found technical metadata accepts ISO with explicit offsets or missing milliseconds. Corrected technical presentation only, extended existing tests, passed selected 69/69 and static checks, then full suite required for final sources.",
+    "limitation": "Prior full 854/855 ENOTEMPTY in service-service afterEach remains an observed cleanup failure with unknown cause. Selective 1/1 and final 855/855 do not establish its cause or resolution. No timeout/retry/exclusion changes."
+  },
+  "staticChecks": {
+    "check": {
+      "args": ["C:\\nvm4w\\nodejs\\node_modules\\npm\\bin\\npm-cli.js", "run", "check"],
+      "exitCode": 1,
+      "signal": null,
+      "log": "test-results/pr06-check.log",
+      "typescriptNode": "passed",
+      "typescriptWeb": "passed",
+      "eslint": "passed",
+      "prettier": "failed only pre-existing doc/dev/punti-issue.md"
+    },
+    "postDesktopTypes": {
+      "args": ["node_modules/typescript/bin/tsc", "--noEmit", "-p", "tsconfig.node.json"],
+      "exitCode": 0,
+      "signal": null
+    },
+    "postDesktopLint": {
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "tests/e2e/time.spec.ts",
+        "tests/e2e/pr06-time-zones.spec.ts"
+      ],
+      "exitCode": 0,
+      "signal": null
+    },
+    "finalTypes": {
+      "args": ["C:\\nvm4w\\nodejs\\node_modules\\npm\\bin\\npm-cli.js", "run", "typecheck"],
+      "exitCode": 0,
+      "signal": null,
+      "log": "test-results/pr06-final-types.log"
+    },
+    "finalLint": {
+      "args": [
+        "node_modules/eslint/bin/eslint.js",
+        "src/renderer/src/api/date-display.ts",
+        "src/renderer/src/app/MomentDisplay.tsx",
+        "tests/unit/time-zones-display.test.ts",
+        "tests/unit/time-callers.test.tsx"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "log": "test-results/pr06-final-lint.log"
+    }
+  },
+  "originalIssueSource": {
+    "path": "doc/dev/punti-issue.md",
+    "sha256": "8e5b4e0c57c3fea049a8ad3fcf5104a82b42fe4ccd12a68c064595f6767fc185",
+    "gitObject": "8b1d0230e8bbb260a7b8d5c76cbcbb0ebdb282f2",
+    "headObject": "8b1d0230e8bbb260a7b8d5c76cbcbb0ebdb282f2"
+  },
+  "sourceEvidence": {
+    "firstFull": {
+      "src/backend/application/ports/port-service.ts": "53c01053339f53d5b1fdf44e6a49e701a85e44d09382c8691b15605669c8ec1e",
+      "src/backend/application/time/time-service.ts": "a9f097991c60d928e7fa0d89d8d8f164c38b0e4e70906748019f1f06d48f7da4",
+      "src/backend/domain/operations/replay.ts": "75ba5f8e60a209b9333c857d38a9830eb2b837976cd551fc626de404a0a74a3c",
+      "src/backend/infrastructure/database/operation-repository.ts": "0573f50240b09007ff9efcdf629f12f717303e47d3a652de9ad57a5dfba3a4a6",
+      "src/renderer/src/api/use-ports.ts": "1bb2410f6e9ddfacb5c68acefc85819907e4cb72974e5957e9b85446c5854261",
+      "src/renderer/src/app/ArchivePage.tsx": "a7f42d4f95e5f8c5fc4f341d3f0c41a6e62a06f8c1e7cbc5264b89dc67797e00",
+      "src/renderer/src/app/MomentChoices.tsx": "a960472fcc6d5dcb001e50d5299ce886974ea5d49cb0e5fc2a11ded684c33114",
+      "src/renderer/src/app/Ports.tsx": "411ecb67910466426bf2dc62d8ad3c20252103aa6b7f8e1fbadc89eff54cf9c3",
+      "src/renderer/src/app/TimeSettings.tsx": "e8b308316e71c556f2f9aed9467017fa74cecc8bfa9a054737f702ca73e1db01",
+      "src/renderer/src/app/operations/OperationDetail.tsx": "b58943bf7a48ba0aa3fe5111ef30217a2b18498d7bd0f0614e0b742567b38c53",
+      "src/renderer/src/app/operations/Operations.tsx": "e6c52d96817d19fe17fb5ab1d42486d901b24809c73c4375adf88b3239892473",
+      "src/renderer/src/app/ports/PortConfirmation.tsx": "813a7c43a368b53ec610bba0f7a46e93020dc98fe36eb638f0002ecca63144b5",
+      "src/renderer/src/app/ports/PortDetail.tsx": "9e265cf703d87821af90dd3f171e8bc9833dd47ce13b7572e58fe49546825d92",
+      "src/renderer/src/app/ports/VersionCard.tsx": "03075e1be3a18c9f7bd8b76881c0f0dc928d79958a44d2c835ee1b4186c9b5f6",
+      "src/renderer/src/app/ports/VersionMomentFields.tsx": "30592a3170443405a97958cc3cfc49b5b62f0b514cf6b5057300d99903e8cdd6",
+      "src/renderer/src/app/services/ServiceFilters.tsx": "e9d9dd7c4d62b8f5e9780f4a43da2c8c3c628264ccf2c58c375d2b48637d93c0",
+      "src/renderer/src/app/services/ServicePreview.tsx": "bf51817864b6cd1d1d39c5d950db1bbd8910a42f6af113d241184c2443fd6bfb",
+      "src/renderer/src/app/services/Services.tsx": "c310cfbfd579752e2482a829c076ddb7730601509c62ee2467013909e2e0cf83",
+      "src/renderer/src/app/tariffs/BaseCalculator.tsx": "03631c33724db2d5e039ac2dc55bad543ae506058882c42125803ad016bd04d2",
+      "src/renderer/src/app/tariffs/CopyTariffFields.tsx": "e3fb51d8b563c277d6b961f7c02d19cb1e59d3c2ff6005f41df48e5496d03199",
+      "src/renderer/src/app/tariffs/TariffMaintenanceEditor.tsx": "a15e690e57de1ea6911474ef3416b956ac4396c37ff235bccd129061f5407893",
+      "src/renderer/src/app/tariffs/TariffMomentFields.tsx": "21cb1164052fe7fcad23275939df7583e03e9616038a15db3be8dccc04aeb55d",
+      "src/renderer/src/app/tariffs/Tariffs.tsx": "c70db31650208e75b3690c44816a9ba1b4257a272136da125ca8ae7c5be459cc",
+      "src/renderer/src/app/weights/WeightHistory.tsx": "de1227d4c451f238ce3d594bc7d669081632e9ffc85257246473eb70028df6a5",
+      "src/shared/contracts/operations.ts": "040018abafea2da42482ad65023c883754eaf4d38d16634410acb5b4e5cbbf2d",
+      "tests/e2e/berths.spec.ts": "81e85570832fe164053b687efdd36e70aa1dda2bc92770d5bfeea2e1a33f97a7",
+      "tests/e2e/inter-port-movements.spec.ts": "e2372b709692346cbbbbf77c9d4941109cd892e7ebc87efff2e1d684322863a0",
+      "tests/e2e/port-lifecycle.spec.ts": "cc8e592fe2aeb131940ac59ea47a770a759eff540890404a6c45ab433b843749",
+      "tests/e2e/ports.spec.ts": "5b1b2571a389cc95b6e53ee1f64adfe96b7448f407c26b3944e2bf937c2a4dda",
+      "tests/e2e/pr11-stays.spec.ts": "3b8202d806c8ece7c5f02b3f6210121e386403582ffb10c5cd31f360be0245ef",
+      "tests/e2e/services.spec.ts": "a4bb3a1020183eae39117fbaab3d93f9f6a7eb23d32b62f9960f6f95966118c7",
+      "tests/e2e/subjects.spec.ts": "4786640f620f9b64ae5a6b97ef297e7f1d82b9dfa2ae78ff7c16fca65b514437",
+      "tests/e2e/tariffs-async.spec.ts": "717a0f74d26afa94758bf12e231bf6dc6416ee8546cfae1134971c3ae9dc1bd6",
+      "tests/e2e/tariffs.spec.ts": "6c8771f6f29e556d3b7be0dcc54ba76ce38f1b74880aa325c96fccd0ed645a24",
+      "tests/e2e/time.spec.ts": "e73a978822901506237a07fbc9ffad5cce1458744e97ecd00aa51335baa2e44c",
+      "tests/e2e/ui01.spec.ts": "828cccd60781f5331011998760387912963167ce5e2e211b1ed5d6ead9abf728",
+      "tests/e2e/vessels.spec.ts": "8c26bc04d20ad0d41f2eb8ff3b093fd61616713584c6daa2680de51a00fe7d59",
+      "tests/unit/archive-controller.test.ts": "80f604777bafd5318202b80348e5b24e45c21f2d59e67ffe3b16948a2c88a19c",
+      "tests/unit/operation-service.test.ts": "e3939725899a9d533ed581858e7d45bf69e9bf4cb52c58fd2388a368b543da5f",
+      "tests/unit/port-lifecycle.test.ts": "9815eeb90af41c7298620506b90eb61b3a169d9f2112a787629800c24162ba21",
+      "tests/unit/port-service.test.ts": "4ec43bb4303d3fc3ec358d8410e84691d38da1edba9dcb31ca35c338745ac9ff",
+      "tests/unit/service-service.test.ts": "397b8e0e8acaa4459320a448ef04f9b95d48722aba2773d37f1ab6e10c2b0b88",
+      "tests/unit/tariff-maintenance.test.ts": "2b8ba9d8bd2f1624faac80a04ed7b19064fe6039a5cb068f37c75f2657ec7c10",
+      "tests/unit/tariff-service.test.ts": "c66f7580900e34a288daf519b9fa48df9893d65bf81403d84428a95a98f75e10",
+      "tests/unit/time-service.test.ts": "8589c6c214a7a3a35875335dbae4d62f4273af88b081e80a7a7394eebb1d714c",
+      "tests/unit/weight-service.test.ts": "cd1cec80ea0e48b629ecf1ddfaacfa2fc1e107b2371b8c7c1e6f6b7271e8b4de",
+      "tsconfig.node.json": "2c8d6a7cdc739ee5be0f0817a946805046a0a5cbba2ce3aec4b23ad4de20a073",
+      "resources/time-zones/2026f/LICENSE": "0613408568889f5739e5ae252b722a2659c02002839ad970a63dc5e9174b27cf",
+      "resources/time-zones/2026f/backward": "b8296b9ef1ece72d813878132c0f17e2c52b26af6004eeb9c37d049b64cd9401",
+      "resources/time-zones/2026f/etcetera": "7281f095b42c13c4ae36b8bcba884e81dbb38127221fc1d9805c4dbf852487db",
+      "resources/time-zones/2026f/version": "9f9a9e6bfd18cd6a0a4d65764931072577edcbb731981a068ef52bba6615b1de",
+      "resources/time-zones/2026f/zone.tab": "e2e8e31c4e10f44576c79345e76060591dbb3eef6ce14e006afc8a373caa9593",
+      "resources/time-zones/2026f/zone1970.tab": "5f23781702bf51408ff1581daa109ab3b9257fb433b1554e579d92172892c0cf",
+      "scripts/generate-time-zones.mjs": "44a9961088da63c318352b6218be3db052b00e925fa6dde0dd6682bea1d4fe09",
+      "src/backend/application/time/selectable-zone.ts": "1948348cfd6c69546f331ceecb5e9b6e77ac7a9e4911646989d50645bfb758f4",
+      "src/renderer/src/api/date-display.ts": "737164b399f5d2ed6f6ce3903107eda9f50e2081e0a8c178ee56de686d800fbe",
+      "src/renderer/src/app/MomentDisplay.tsx": "dffe0ad778118df0b3606445a8d0b96d97dc84e296e4babbd0323c1a59d3eb0f",
+      "src/renderer/src/app/TimeZonePicker.tsx": "7b871cdfe443cad0c5f696313990f5f822a9c97a5f257e1b35337cf2455492fc",
+      "src/renderer/src/app/operations/StayInterval.tsx": "e914654e2dae72d10fbf2f2eacb7c075677588a8cfd622ac9a3c9c4842e3398f",
+      "src/shared/data/time-zones.json": "7635236f06869adf2d27e85497713f5b41407fe97b620f3c7cf4615e2791927f",
+      "src/shared/time-zones.ts": "87bbf1a647cc4a48161eee4d657a0895b10e715340245bbfd73c296c224c9456",
+      "tests/e2e/pr06-time-zones.spec.ts": "3b1a3f5be80b7017a16ce8f12dc82eb50d092867df47a22af8e9ccaeeffca5d4",
+      "tests/unit/time-callers.test.tsx": "bb4786fa20acde68ee24f75abc5a713c42e73ff8305ce0bbc1708669ae2348ad",
+      "tests/unit/time-zones-display.test.ts": "5ab61c8b107c86b6bf719630584d3058fd37aa9e7f697adca2427811a89bf487"
+    },
+    "finalFull": {
+      "src/backend/application/ports/port-service.ts": "53c01053339f53d5b1fdf44e6a49e701a85e44d09382c8691b15605669c8ec1e",
+      "src/backend/application/time/time-service.ts": "a9f097991c60d928e7fa0d89d8d8f164c38b0e4e70906748019f1f06d48f7da4",
+      "src/backend/domain/operations/replay.ts": "75ba5f8e60a209b9333c857d38a9830eb2b837976cd551fc626de404a0a74a3c",
+      "src/backend/infrastructure/database/operation-repository.ts": "0573f50240b09007ff9efcdf629f12f717303e47d3a652de9ad57a5dfba3a4a6",
+      "src/renderer/src/api/use-ports.ts": "1bb2410f6e9ddfacb5c68acefc85819907e4cb72974e5957e9b85446c5854261",
+      "src/renderer/src/app/ArchivePage.tsx": "a7f42d4f95e5f8c5fc4f341d3f0c41a6e62a06f8c1e7cbc5264b89dc67797e00",
+      "src/renderer/src/app/MomentChoices.tsx": "a960472fcc6d5dcb001e50d5299ce886974ea5d49cb0e5fc2a11ded684c33114",
+      "src/renderer/src/app/Ports.tsx": "411ecb67910466426bf2dc62d8ad3c20252103aa6b7f8e1fbadc89eff54cf9c3",
+      "src/renderer/src/app/TimeSettings.tsx": "e8b308316e71c556f2f9aed9467017fa74cecc8bfa9a054737f702ca73e1db01",
+      "src/renderer/src/app/operations/OperationDetail.tsx": "b58943bf7a48ba0aa3fe5111ef30217a2b18498d7bd0f0614e0b742567b38c53",
+      "src/renderer/src/app/operations/Operations.tsx": "e6c52d96817d19fe17fb5ab1d42486d901b24809c73c4375adf88b3239892473",
+      "src/renderer/src/app/ports/PortConfirmation.tsx": "813a7c43a368b53ec610bba0f7a46e93020dc98fe36eb638f0002ecca63144b5",
+      "src/renderer/src/app/ports/PortDetail.tsx": "9e265cf703d87821af90dd3f171e8bc9833dd47ce13b7572e58fe49546825d92",
+      "src/renderer/src/app/ports/VersionCard.tsx": "03075e1be3a18c9f7bd8b76881c0f0dc928d79958a44d2c835ee1b4186c9b5f6",
+      "src/renderer/src/app/ports/VersionMomentFields.tsx": "30592a3170443405a97958cc3cfc49b5b62f0b514cf6b5057300d99903e8cdd6",
+      "src/renderer/src/app/services/ServiceFilters.tsx": "e9d9dd7c4d62b8f5e9780f4a43da2c8c3c628264ccf2c58c375d2b48637d93c0",
+      "src/renderer/src/app/services/ServicePreview.tsx": "bf51817864b6cd1d1d39c5d950db1bbd8910a42f6af113d241184c2443fd6bfb",
+      "src/renderer/src/app/services/Services.tsx": "c310cfbfd579752e2482a829c076ddb7730601509c62ee2467013909e2e0cf83",
+      "src/renderer/src/app/tariffs/BaseCalculator.tsx": "03631c33724db2d5e039ac2dc55bad543ae506058882c42125803ad016bd04d2",
+      "src/renderer/src/app/tariffs/CopyTariffFields.tsx": "e3fb51d8b563c277d6b961f7c02d19cb1e59d3c2ff6005f41df48e5496d03199",
+      "src/renderer/src/app/tariffs/TariffMaintenanceEditor.tsx": "a15e690e57de1ea6911474ef3416b956ac4396c37ff235bccd129061f5407893",
+      "src/renderer/src/app/tariffs/TariffMomentFields.tsx": "21cb1164052fe7fcad23275939df7583e03e9616038a15db3be8dccc04aeb55d",
+      "src/renderer/src/app/tariffs/Tariffs.tsx": "c70db31650208e75b3690c44816a9ba1b4257a272136da125ca8ae7c5be459cc",
+      "src/renderer/src/app/weights/WeightHistory.tsx": "de1227d4c451f238ce3d594bc7d669081632e9ffc85257246473eb70028df6a5",
+      "src/shared/contracts/operations.ts": "040018abafea2da42482ad65023c883754eaf4d38d16634410acb5b4e5cbbf2d",
+      "tests/e2e/berths.spec.ts": "81e85570832fe164053b687efdd36e70aa1dda2bc92770d5bfeea2e1a33f97a7",
+      "tests/e2e/inter-port-movements.spec.ts": "e2372b709692346cbbbbf77c9d4941109cd892e7ebc87efff2e1d684322863a0",
+      "tests/e2e/port-lifecycle.spec.ts": "cc8e592fe2aeb131940ac59ea47a770a759eff540890404a6c45ab433b843749",
+      "tests/e2e/ports.spec.ts": "5b1b2571a389cc95b6e53ee1f64adfe96b7448f407c26b3944e2bf937c2a4dda",
+      "tests/e2e/pr11-stays.spec.ts": "3b8202d806c8ece7c5f02b3f6210121e386403582ffb10c5cd31f360be0245ef",
+      "tests/e2e/services.spec.ts": "a4bb3a1020183eae39117fbaab3d93f9f6a7eb23d32b62f9960f6f95966118c7",
+      "tests/e2e/subjects.spec.ts": "4786640f620f9b64ae5a6b97ef297e7f1d82b9dfa2ae78ff7c16fca65b514437",
+      "tests/e2e/tariffs-async.spec.ts": "717a0f74d26afa94758bf12e231bf6dc6416ee8546cfae1134971c3ae9dc1bd6",
+      "tests/e2e/tariffs.spec.ts": "6c8771f6f29e556d3b7be0dcc54ba76ce38f1b74880aa325c96fccd0ed645a24",
+      "tests/e2e/time.spec.ts": "557cd0ccb7d85e941b405b18e5161952834af51200f29623350500d7afc98208",
+      "tests/e2e/ui01.spec.ts": "828cccd60781f5331011998760387912963167ce5e2e211b1ed5d6ead9abf728",
+      "tests/e2e/vessels.spec.ts": "8c26bc04d20ad0d41f2eb8ff3b093fd61616713584c6daa2680de51a00fe7d59",
+      "tests/unit/archive-controller.test.ts": "80f604777bafd5318202b80348e5b24e45c21f2d59e67ffe3b16948a2c88a19c",
+      "tests/unit/operation-service.test.ts": "e3939725899a9d533ed581858e7d45bf69e9bf4cb52c58fd2388a368b543da5f",
+      "tests/unit/port-lifecycle.test.ts": "9815eeb90af41c7298620506b90eb61b3a169d9f2112a787629800c24162ba21",
+      "tests/unit/port-service.test.ts": "4ec43bb4303d3fc3ec358d8410e84691d38da1edba9dcb31ca35c338745ac9ff",
+      "tests/unit/service-service.test.ts": "397b8e0e8acaa4459320a448ef04f9b95d48722aba2773d37f1ab6e10c2b0b88",
+      "tests/unit/tariff-maintenance.test.ts": "2b8ba9d8bd2f1624faac80a04ed7b19064fe6039a5cb068f37c75f2657ec7c10",
+      "tests/unit/tariff-service.test.ts": "c66f7580900e34a288daf519b9fa48df9893d65bf81403d84428a95a98f75e10",
+      "tests/unit/time-service.test.ts": "8589c6c214a7a3a35875335dbae4d62f4273af88b081e80a7a7394eebb1d714c",
+      "tests/unit/weight-service.test.ts": "cd1cec80ea0e48b629ecf1ddfaacfa2fc1e107b2371b8c7c1e6f6b7271e8b4de",
+      "tsconfig.node.json": "2c8d6a7cdc739ee5be0f0817a946805046a0a5cbba2ce3aec4b23ad4de20a073",
+      "resources/time-zones/2026f/LICENSE": "0613408568889f5739e5ae252b722a2659c02002839ad970a63dc5e9174b27cf",
+      "resources/time-zones/2026f/backward": "b8296b9ef1ece72d813878132c0f17e2c52b26af6004eeb9c37d049b64cd9401",
+      "resources/time-zones/2026f/etcetera": "7281f095b42c13c4ae36b8bcba884e81dbb38127221fc1d9805c4dbf852487db",
+      "resources/time-zones/2026f/version": "9f9a9e6bfd18cd6a0a4d65764931072577edcbb731981a068ef52bba6615b1de",
+      "resources/time-zones/2026f/zone.tab": "e2e8e31c4e10f44576c79345e76060591dbb3eef6ce14e006afc8a373caa9593",
+      "resources/time-zones/2026f/zone1970.tab": "5f23781702bf51408ff1581daa109ab3b9257fb433b1554e579d92172892c0cf",
+      "scripts/generate-time-zones.mjs": "44a9961088da63c318352b6218be3db052b00e925fa6dde0dd6682bea1d4fe09",
+      "src/backend/application/time/selectable-zone.ts": "1948348cfd6c69546f331ceecb5e9b6e77ac7a9e4911646989d50645bfb758f4",
+      "src/renderer/src/api/date-display.ts": "477a2449ed599c2cfbb14d4d699f76239fd12eb34bfe0dfaaa49d29ffb80cf3d",
+      "src/renderer/src/app/MomentDisplay.tsx": "ec3bceccb720d18037a8a99822b244eeb2b0b268c3a2a107625b78dea0fa4364",
+      "src/renderer/src/app/TimeZonePicker.tsx": "7b871cdfe443cad0c5f696313990f5f822a9c97a5f257e1b35337cf2455492fc",
+      "src/renderer/src/app/operations/StayInterval.tsx": "e914654e2dae72d10fbf2f2eacb7c075677588a8cfd622ac9a3c9c4842e3398f",
+      "src/shared/data/time-zones.json": "7635236f06869adf2d27e85497713f5b41407fe97b620f3c7cf4615e2791927f",
+      "src/shared/time-zones.ts": "87bbf1a647cc4a48161eee4d657a0895b10e715340245bbfd73c296c224c9456",
+      "tests/e2e/pr06-time-zones.spec.ts": "517f2175b1dc88a915abe87ee301cd263076a4251ca301e11c9608cab736cc1b",
+      "tests/unit/time-callers.test.tsx": "ee2f9865104cff5644df568c329257ea34a28f088b20428e92ae8180c468d2e9",
+      "tests/unit/time-zones-display.test.ts": "3657bfdc6b0ff7a4d4b8f009c15f74d39462a8ff97247cda02576c9682ffa1d2"
+    },
+    "unchangedAfterFinalFullStarted": true,
+    "sha256": {
+      "resources/time-zones/2026f/LICENSE": "0613408568889f5739e5ae252b722a2659c02002839ad970a63dc5e9174b27cf",
+      "resources/time-zones/2026f/backward": "b8296b9ef1ece72d813878132c0f17e2c52b26af6004eeb9c37d049b64cd9401",
+      "resources/time-zones/2026f/etcetera": "7281f095b42c13c4ae36b8bcba884e81dbb38127221fc1d9805c4dbf852487db",
+      "resources/time-zones/2026f/version": "9f9a9e6bfd18cd6a0a4d65764931072577edcbb731981a068ef52bba6615b1de",
+      "resources/time-zones/2026f/zone.tab": "e2e8e31c4e10f44576c79345e76060591dbb3eef6ce14e006afc8a373caa9593",
+      "resources/time-zones/2026f/zone1970.tab": "5f23781702bf51408ff1581daa109ab3b9257fb433b1554e579d92172892c0cf",
+      "scripts/generate-time-zones.mjs": "44a9961088da63c318352b6218be3db052b00e925fa6dde0dd6682bea1d4fe09",
+      "src/backend/application/ports/port-service.ts": "53c01053339f53d5b1fdf44e6a49e701a85e44d09382c8691b15605669c8ec1e",
+      "src/backend/application/time/selectable-zone.ts": "1948348cfd6c69546f331ceecb5e9b6e77ac7a9e4911646989d50645bfb758f4",
+      "src/backend/application/time/time-service.ts": "a9f097991c60d928e7fa0d89d8d8f164c38b0e4e70906748019f1f06d48f7da4",
+      "src/backend/domain/operations/replay.ts": "75ba5f8e60a209b9333c857d38a9830eb2b837976cd551fc626de404a0a74a3c",
+      "src/backend/infrastructure/database/operation-repository.ts": "0573f50240b09007ff9efcdf629f12f717303e47d3a652de9ad57a5dfba3a4a6",
+      "src/renderer/src/api/date-display.ts": "477a2449ed599c2cfbb14d4d699f76239fd12eb34bfe0dfaaa49d29ffb80cf3d",
+      "src/renderer/src/api/use-ports.ts": "1bb2410f6e9ddfacb5c68acefc85819907e4cb72974e5957e9b85446c5854261",
+      "src/renderer/src/app/ArchivePage.tsx": "a7f42d4f95e5f8c5fc4f341d3f0c41a6e62a06f8c1e7cbc5264b89dc67797e00",
+      "src/renderer/src/app/MomentChoices.tsx": "a960472fcc6d5dcb001e50d5299ce886974ea5d49cb0e5fc2a11ded684c33114",
+      "src/renderer/src/app/MomentDisplay.tsx": "ec3bceccb720d18037a8a99822b244eeb2b0b268c3a2a107625b78dea0fa4364",
+      "src/renderer/src/app/Ports.tsx": "411ecb67910466426bf2dc62d8ad3c20252103aa6b7f8e1fbadc89eff54cf9c3",
+      "src/renderer/src/app/TimeSettings.tsx": "e8b308316e71c556f2f9aed9467017fa74cecc8bfa9a054737f702ca73e1db01",
+      "src/renderer/src/app/TimeZonePicker.tsx": "7b871cdfe443cad0c5f696313990f5f822a9c97a5f257e1b35337cf2455492fc",
+      "src/renderer/src/app/operations/OperationDetail.tsx": "b58943bf7a48ba0aa3fe5111ef30217a2b18498d7bd0f0614e0b742567b38c53",
+      "src/renderer/src/app/operations/Operations.tsx": "e6c52d96817d19fe17fb5ab1d42486d901b24809c73c4375adf88b3239892473",
+      "src/renderer/src/app/operations/StayInterval.tsx": "e914654e2dae72d10fbf2f2eacb7c075677588a8cfd622ac9a3c9c4842e3398f",
+      "src/renderer/src/app/ports/PortConfirmation.tsx": "813a7c43a368b53ec610bba0f7a46e93020dc98fe36eb638f0002ecca63144b5",
+      "src/renderer/src/app/ports/PortDetail.tsx": "9e265cf703d87821af90dd3f171e8bc9833dd47ce13b7572e58fe49546825d92",
+      "src/renderer/src/app/ports/VersionCard.tsx": "03075e1be3a18c9f7bd8b76881c0f0dc928d79958a44d2c835ee1b4186c9b5f6",
+      "src/renderer/src/app/ports/VersionMomentFields.tsx": "30592a3170443405a97958cc3cfc49b5b62f0b514cf6b5057300d99903e8cdd6",
+      "src/renderer/src/app/services/ServiceFilters.tsx": "e9d9dd7c4d62b8f5e9780f4a43da2c8c3c628264ccf2c58c375d2b48637d93c0",
+      "src/renderer/src/app/services/ServicePreview.tsx": "bf51817864b6cd1d1d39c5d950db1bbd8910a42f6af113d241184c2443fd6bfb",
+      "src/renderer/src/app/services/Services.tsx": "c310cfbfd579752e2482a829c076ddb7730601509c62ee2467013909e2e0cf83",
+      "src/renderer/src/app/tariffs/BaseCalculator.tsx": "03631c33724db2d5e039ac2dc55bad543ae506058882c42125803ad016bd04d2",
+      "src/renderer/src/app/tariffs/CopyTariffFields.tsx": "e3fb51d8b563c277d6b961f7c02d19cb1e59d3c2ff6005f41df48e5496d03199",
+      "src/renderer/src/app/tariffs/TariffMaintenanceEditor.tsx": "a15e690e57de1ea6911474ef3416b956ac4396c37ff235bccd129061f5407893",
+      "src/renderer/src/app/tariffs/TariffMomentFields.tsx": "21cb1164052fe7fcad23275939df7583e03e9616038a15db3be8dccc04aeb55d",
+      "src/renderer/src/app/tariffs/Tariffs.tsx": "c70db31650208e75b3690c44816a9ba1b4257a272136da125ca8ae7c5be459cc",
+      "src/renderer/src/app/weights/WeightHistory.tsx": "de1227d4c451f238ce3d594bc7d669081632e9ffc85257246473eb70028df6a5",
+      "src/shared/contracts/operations.ts": "040018abafea2da42482ad65023c883754eaf4d38d16634410acb5b4e5cbbf2d",
+      "src/shared/data/time-zones.json": "7635236f06869adf2d27e85497713f5b41407fe97b620f3c7cf4615e2791927f",
+      "src/shared/time-zones.ts": "87bbf1a647cc4a48161eee4d657a0895b10e715340245bbfd73c296c224c9456",
+      "tests/e2e/berths.spec.ts": "81e85570832fe164053b687efdd36e70aa1dda2bc92770d5bfeea2e1a33f97a7",
+      "tests/e2e/inter-port-movements.spec.ts": "e2372b709692346cbbbbf77c9d4941109cd892e7ebc87efff2e1d684322863a0",
+      "tests/e2e/port-lifecycle.spec.ts": "cc8e592fe2aeb131940ac59ea47a770a759eff540890404a6c45ab433b843749",
+      "tests/e2e/ports.spec.ts": "5b1b2571a389cc95b6e53ee1f64adfe96b7448f407c26b3944e2bf937c2a4dda",
+      "tests/e2e/pr06-time-zones.spec.ts": "517f2175b1dc88a915abe87ee301cd263076a4251ca301e11c9608cab736cc1b",
+      "tests/e2e/pr11-stays.spec.ts": "3b8202d806c8ece7c5f02b3f6210121e386403582ffb10c5cd31f360be0245ef",
+      "tests/e2e/services.spec.ts": "a4bb3a1020183eae39117fbaab3d93f9f6a7eb23d32b62f9960f6f95966118c7",
+      "tests/e2e/subjects.spec.ts": "4786640f620f9b64ae5a6b97ef297e7f1d82b9dfa2ae78ff7c16fca65b514437",
+      "tests/e2e/tariffs-async.spec.ts": "717a0f74d26afa94758bf12e231bf6dc6416ee8546cfae1134971c3ae9dc1bd6",
+      "tests/e2e/tariffs.spec.ts": "6c8771f6f29e556d3b7be0dcc54ba76ce38f1b74880aa325c96fccd0ed645a24",
+      "tests/e2e/time.spec.ts": "557cd0ccb7d85e941b405b18e5161952834af51200f29623350500d7afc98208",
+      "tests/e2e/ui01.spec.ts": "828cccd60781f5331011998760387912963167ce5e2e211b1ed5d6ead9abf728",
+      "tests/e2e/vessels.spec.ts": "8c26bc04d20ad0d41f2eb8ff3b093fd61616713584c6daa2680de51a00fe7d59",
+      "tests/unit/archive-controller.test.ts": "80f604777bafd5318202b80348e5b24e45c21f2d59e67ffe3b16948a2c88a19c",
+      "tests/unit/operation-service.test.ts": "e3939725899a9d533ed581858e7d45bf69e9bf4cb52c58fd2388a368b543da5f",
+      "tests/unit/port-lifecycle.test.ts": "9815eeb90af41c7298620506b90eb61b3a169d9f2112a787629800c24162ba21",
+      "tests/unit/port-service.test.ts": "4ec43bb4303d3fc3ec358d8410e84691d38da1edba9dcb31ca35c338745ac9ff",
+      "tests/unit/service-service.test.ts": "397b8e0e8acaa4459320a448ef04f9b95d48722aba2773d37f1ab6e10c2b0b88",
+      "tests/unit/tariff-maintenance.test.ts": "2b8ba9d8bd2f1624faac80a04ed7b19064fe6039a5cb068f37c75f2657ec7c10",
+      "tests/unit/tariff-service.test.ts": "c66f7580900e34a288daf519b9fa48df9893d65bf81403d84428a95a98f75e10",
+      "tests/unit/time-callers.test.tsx": "ee2f9865104cff5644df568c329257ea34a28f088b20428e92ae8180c468d2e9",
+      "tests/unit/time-service.test.ts": "8589c6c214a7a3a35875335dbae4d62f4273af88b081e80a7a7394eebb1d714c",
+      "tests/unit/time-zones-display.test.ts": "3657bfdc6b0ff7a4d4b8f009c15f74d39462a8ff97247cda02576c9682ffa1d2",
+      "tests/unit/weight-service.test.ts": "cd1cec80ea0e48b629ecf1ddfaacfa2fc1e107b2371b8c7c1e6f6b7271e8b4de",
+      "tsconfig.node.json": "2c8d6a7cdc739ee5be0f0817a946805046a0a5cbba2ce3aec4b23ad4de20a073"
+    },
+    "firstToFinalChanges": [
+      "tests/e2e/time.spec.ts",
+      "src/renderer/src/api/date-display.ts",
+      "src/renderer/src/app/MomentDisplay.tsx",
+      "tests/e2e/pr06-time-zones.spec.ts",
+      "tests/unit/time-callers.test.tsx",
+      "tests/unit/time-zones-display.test.ts"
+    ]
+  },
+  "historicalResults": "PR05 798/798 and PR04 675/675 preserved; PR02/PR11/PR03 failures/reruns not reclassified. PR06 inter-port migration 3/3 and weights 28/28 are separate passing results.",
+  "deferred": {
+    "desktopPrepared": [
+      "tests/e2e/pr06-time-zones.spec.ts (3 new scenarios)",
+      "12 existing desktop files updated"
+    ],
+    "executed": false,
+    "build": false,
+    "package": false,
+    "k2": "coverage review only",
+    "k4": "final full desktop/build/package, dataset probe in packaged executable, UTC precision/overlap/focus/offline and inherited cleanup limit",
+    "next": "PR07; opaque temporal payloads need PR08 projections"
+  },
+  "documentation": {
+    "profile": "documentazione",
+    "initialSummary": "test-results/verification/2026-11-24T15-54-29.246Z-coordinator-Ns5EkP/summary.md",
+    "initialExitCode": 1,
+    "initialPhases": {
+      "documents": "passed",
+      "diff": "passed",
+      "formatting": "failed only doc/dev/punti-issue.md"
+    },
+    "finalSummary": "test-results/verification/2026-11-24T16-06-19.452Z-coordinator-nlz1OF/summary.md",
+    "finalExitCode": 1,
+    "finalPhases": {
+      "documents": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "diff": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "typescript-node": {
+        "status": "not-requested"
+      },
+      "typescript-web": {
+        "status": "not-requested"
+      },
+      "eslint": {
+        "status": "not-requested"
+      },
+      "formatting": {
+        "status": "failed",
+        "exitCode": 1
+      },
+      "fixtures": {
+        "status": "not-requested"
+      },
+      "backend": {
+        "status": "not-requested"
+      },
+      "build": {
+        "status": "not-requested"
+      },
+      "desktop": {
+        "status": "not-requested"
+      },
+      "package": {
+        "status": "not-requested"
+      },
+      "packaged-desktop": {
+        "status": "not-requested"
+      }
+    },
+    "finalNote": "Only pre-existing formatting in doc/dev/punti-issue.md fails. After adding these final evidence references, run documents checker, selected Prettier and git diff --check again; no product/unit changes."
+  },
+  "previousFullSuite": {
+    "total": 855,
+    "passed": 854,
+    "failed": 1,
+    "pending": 0,
+    "files": 49,
+    "npmExitCode": 1,
+    "electronExitCode": 1,
+    "newTestsAllPassed": true,
+    "limitation": "ENOTEMPTY in service-service afterEach rmSync; directory still existed but exposed no entries on read-only inspection; root cause unproven. Diagnostic selected case passed 1/1 with 56 not selected. Full result remains 854/855; no retry/timeout/exclusion changes and no full rerun."
+  }
+}

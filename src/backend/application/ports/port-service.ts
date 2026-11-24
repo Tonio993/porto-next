@@ -3,7 +3,7 @@ import { portDescription, entityId } from './port-input'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
 import type { CreatePortDto, PortListQueryDto } from '../../../shared/contracts/ports'
 import { ArchiveError } from '../../../shared/errors/archive-error'
-import { initialPortTimeZone } from '../../domain/values/moments'
+import { selectableZone } from '../time/selectable-zone'
 import { PortRepository } from '../../infrastructure/database/port-repository'
 import type { ArchiveCoordinator } from '../archives/archive-coordinator'
 import { record } from '../archives/context-validation'
@@ -18,19 +18,7 @@ export class PortService extends PortLifecycleService {
       const input = record(payload, ['name', 'locality', 'countryCode', 'initialZoneId'])
       const { name, locality, countryCode } = portDescription(input)
       // The company zone is only a proposal; each new port stores its own choice.
-      if (typeof input.initialZoneId !== 'string')
-        throw new ArchiveError('VALIDATION_ERROR', 'Scegli il fuso iniziale del porto.')
-      let initialZoneId: string
-      try {
-        initialZoneId = initialPortTimeZone(
-          database.companyZone().zoneId,
-          input.initialZoneId,
-        ).zoneId
-      } catch {
-        throw new ArchiveError('INVALID_TIME_ZONE', 'Scegli un fuso IANA valido.', [
-          { path: ['initialZoneId'], code: 'INVALID_TIME_ZONE', message: 'Fuso IANA non valido.' },
-        ])
-      }
+      const initialZoneId = selectableZone(input.initialZoneId, countryCode)
       return new PortRepository(database, this.now).create({
         name,
         locality,

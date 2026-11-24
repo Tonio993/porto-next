@@ -1,3 +1,4 @@
+import { MomentDisplay } from '../MomentDisplay'
 import { CalculationNumbers } from '../CalculationNumbers'
 import { formatNumeric } from '../../api/numeric-input'
 import { useNumericFormat } from '../../api/use-numeric-preference'
@@ -20,9 +21,7 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
         {e.berthName ?? 'Banchina non specificata'}
       </p>
       <p>
-        {e.moment.localDateTime} · {e.moment.zoneId} · offset {e.moment.offset}
-        <br />
-        UTC {e.moment.utc}
+        <MomentDisplay moment={e.moment} detail />
       </p>
       {o.arrival && (
         <>
@@ -31,10 +30,7 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
             {o.arrival.portName} · {o.arrival.berthName ?? 'Banchina non specificata'}
           </p>
           <p>
-            {o.arrival.moment.localDateTime} · {o.arrival.moment.zoneId} · offset{' '}
-            {o.arrival.moment.offset}
-            <br />
-            UTC {o.arrival.moment.utc}
+            <MomentDisplay moment={o.arrival.moment} detail />
           </p>
           <details>
             <summary>Riferimenti di arrivo</summary>
@@ -74,7 +70,8 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
                   : ''}
             </h4>
             <p>
-              {e.portName} · {r.moment.localDateTime} · {r.moment.zoneId} · {r.vesselName}
+              {e.portName} · <MomentDisplay moment={r.moment} /> · {r.moment.zoneId} ·{' '}
+              {r.vesselName}
             </p>
             <p>
               Valore tariffario: {formatMoney(r.tariffValue, numericFormat)} · Peso:{' '}

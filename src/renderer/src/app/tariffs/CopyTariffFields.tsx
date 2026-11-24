@@ -1,3 +1,4 @@
+import { formatHistoricalMoment } from '../../api/date-display'
 import { useEffect, useState } from 'react'
 import { Button, Select, Stack } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
@@ -69,7 +70,7 @@ export function CopyTariffFields({
         data={
           list?.items.map((t) => ({
             value: t.id,
-            label: `${t.effectiveMoment!.localDateTime.replace('T', ' ')} (${t.effectiveMoment!.offset})`,
+            label: formatHistoricalMoment(t.effectiveMoment!),
           })) ?? []
         }
         disabled={disabled || loading || copying}

@@ -500,7 +500,7 @@ for (const category of ['FREE', 'CATALOG'] as const)
         await modal.getByRole('button', { name: 'Conferma variazione' }).click()
         await expect(modal).toHaveCount(0)
         await expect(detail).toContainText('Effettuata')
-        await expect(detail).toContainText('2026-05-02T13:30')
+        await expect(detail).toContainText('02/05/2026 13:30 (+02:00)')
         await expect(page.locator(':focus')).toHaveText(
           /Modifica prestazione|Ricarica consultazione/,
         )

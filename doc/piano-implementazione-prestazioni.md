@@ -218,6 +218,8 @@ L'analisi espone oggetti creati, modificati o rimossi, attribuzioni, fonti dei s
 
 Le revisioni grafiche sono attività implementative con verifica nell'applicazione Electron. Affiancano le revisioni tecniche della sezione 7.2 e mantengono invariati perimetro funzionale, contratti applicativi e regole di dominio. Gli ID `UI01`–`UI04` non rinumerano i task funzionali e hanno stato autonomo nel registro.
 
+**Selettori PR05:** ricerca e scelta nei picker paginati usano un unico controllo con ricerca backend, pagine nel dropdown e scelta mantenuta fuori pagina/filtro. Gli adapter distinguono nuovi riferimenti, consultazione storica, retained originale e null secondo il chiamante; errore o esclusione dal filtro non dimostrano assenza. [Contratti, chiamanti e copertura PR05](pr05/selettori-paginati.md). Le interazioni desktop restano differite a K4 secondo la deroga PR01–PR12.
+
 | ID   | Collocazione                           | Risultato atteso                                                                                             |
 | ---- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | UI01 | Dopo P04, prima di P05–P07.            | Struttura comune e percorso Porti come riferimento visivo per le anagrafiche successive.                     |

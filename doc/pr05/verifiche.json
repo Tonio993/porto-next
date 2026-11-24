@@ -1,0 +1,377 @@
+{
+  "task": "PR05",
+  "date": "2026-11-24",
+  "branch": "main",
+  "head": "909ea40e99647d09e536a8fd66c8fad2456a8976",
+  "initialWorkingTree": "clean",
+  "delivery": "committed on subsequent explicit user request; original delivery was uncommitted",
+  "schemaVersion": 17,
+  "newTests": {
+    "adapters": 106,
+    "presentation": 7,
+    "callers": 7,
+    "backend": 3,
+    "total": 123
+  },
+  "policy": "PR01–PR12: unit tests and pertinent static/document checks only; K2 review after PR06, integrated execution at K4",
+  "environment": {
+    "platform": "win32",
+    "architecture": "x64",
+    "hostNode": "v24.21.0",
+    "electron": "45.2.3"
+  },
+  "runs": [
+    {
+      "name": "pr05-dev",
+      "command": "npm.cmd test -- tests/unit/consultation-state.test.tsx tests/unit/numeric-callers.test.tsx tests/unit/berth-service.test.ts --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr05-dev.json",
+      "report": "test-results/pr05-dev.json",
+      "log": "test-results/pr05-dev.log",
+      "electronProcess": "test-results/pr05-dev-process.json",
+      "npmExitCode": null,
+      "electronExitCode": 1,
+      "tests": {
+        "total": 67,
+        "passed": 62,
+        "failed": 5,
+        "pending": 0
+      },
+      "files": 3,
+      "reportSha256": "0d5cba5d627de46670fe4e69ecf697b6e9aec7fd9f1cd27209f0a94838d6e53b"
+    },
+    {
+      "name": "pr05-targeted",
+      "command": "npm.cmd test -- tests/unit/paged-pickers.test.tsx tests/unit/berth-service.test.ts --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr05-targeted.json",
+      "report": "test-results/pr05-targeted.json",
+      "log": "test-results/pr05-targeted.log",
+      "electronProcess": "test-results/pr05-targeted-process.json",
+      "npmExitCode": null,
+      "electronExitCode": 1,
+      "tests": {
+        "total": 83,
+        "passed": 73,
+        "failed": 10,
+        "pending": 0
+      },
+      "files": 2,
+      "reportSha256": "b28b21d9efb444d64e8f779ebfa26ce2adad465bc65a5dbc1dc80d4a72f320be"
+    },
+    {
+      "name": "pr05-targeted2",
+      "command": "npm.cmd test -- tests/unit/paged-pickers.test.tsx tests/unit/paged-picker-presentation.test.tsx tests/unit/numeric-callers.test.tsx --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr05-targeted2.json",
+      "report": "test-results/pr05-targeted2.json",
+      "log": "test-results/pr05-targeted2.log",
+      "electronProcess": "test-results/pr05-targeted2-process.json",
+      "npmExitCode": null,
+      "electronExitCode": 1,
+      "tests": {
+        "total": 101,
+        "passed": 100,
+        "failed": 1,
+        "pending": 0
+      },
+      "files": 3,
+      "reportSha256": "c70c62a0274cd0fd2a94a6608e128976fc489b3daaa69cfdb9215a0f7db24488"
+    },
+    {
+      "name": "pr05-targeted3",
+      "command": "npm.cmd test -- tests/unit/paged-pickers.test.tsx tests/unit/paged-picker-presentation.test.tsx tests/unit/numeric-callers.test.tsx tests/unit/berth-service.test.ts tests/unit/consultation-state.test.tsx --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr05-targeted3.json",
+      "report": "test-results/pr05-targeted3.json",
+      "log": "test-results/pr05-targeted3.log",
+      "electronProcess": "test-results/pr05-targeted3-process.json",
+      "npmExitCode": null,
+      "electronExitCode": 1,
+      "tests": {
+        "total": 182,
+        "passed": 170,
+        "failed": 12,
+        "pending": 0
+      },
+      "files": 5,
+      "reportSha256": "27eea925178f82bcc0cd070f12dd84c2830584251f4bb6eab4f67eb9c3335bb3"
+    },
+    {
+      "name": "pr05-targeted4",
+      "command": "npm.cmd test -- tests/unit/paged-pickers.test.tsx tests/unit/consultation-state.test.tsx --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr05-targeted4.json",
+      "report": "test-results/pr05-targeted4.json",
+      "log": "test-results/pr05-targeted4.log",
+      "electronProcess": "test-results/pr05-targeted4-process.json",
+      "npmExitCode": null,
+      "electronExitCode": 1,
+      "tests": {
+        "total": 154,
+        "passed": 152,
+        "failed": 2,
+        "pending": 0
+      },
+      "files": 2,
+      "reportSha256": "d003a9a536d2fde3de5107b1e2104ee34b4398f2d9465db7fa6bdd7a5da5a8e7"
+    },
+    {
+      "name": "pr05-targeted-final",
+      "command": "npm.cmd test -- tests/unit/paged-pickers.test.tsx tests/unit/paged-picker-presentation.test.tsx tests/unit/numeric-callers.test.tsx tests/unit/berth-service.test.ts tests/unit/consultation-state.test.tsx --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr05-targeted-final.json",
+      "report": "test-results/pr05-targeted-final.json",
+      "log": "test-results/pr05-targeted-final.log",
+      "electronProcess": "test-results/pr05-targeted-final-process.json",
+      "npmExitCode": null,
+      "electronExitCode": 0,
+      "tests": {
+        "total": 190,
+        "passed": 190,
+        "failed": 0,
+        "pending": 0
+      },
+      "files": 5,
+      "reportSha256": "282dd1cdef58bfe444dbe7b67fc813b67f946b0394433da2183b34da85196c64"
+    },
+    {
+      "name": "pr05-full",
+      "command": "npm.cmd test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr05-full.json",
+      "report": "test-results/pr05-full.json",
+      "log": "test-results/pr05-full.log",
+      "electronProcess": "test-results/pr05-full-process.json",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "tests": {
+        "total": 798,
+        "passed": 798,
+        "failed": 0,
+        "pending": 0
+      },
+      "files": 47,
+      "reportSha256": "5ea1e8908f70f80848a25787d5ac6aa2b16057571eba90b66868631c74343327"
+    }
+  ],
+  "staticChecks": [
+    {
+      "command": "npm.cmd run check",
+      "log": "test-results/pr05-check.log",
+      "exitCode": 1,
+      "note": "First development check: unused new test parameter, fixed before full suite."
+    },
+    {
+      "command": "npm.cmd run check",
+      "log": "test-results/pr05-check-final.log",
+      "exitCode": 1,
+      "typeScript": "passed",
+      "eslint": "passed",
+      "prettier": "Only preserved doc/dev/punti-issue.md"
+    },
+    {
+      "command": "npm.cmd run check",
+      "log": "test-results/pr05-check-delivery.log",
+      "process": "test-results/pr05-check-delivery-process.json",
+      "exitCode": 1,
+      "typeScript": "passed",
+      "eslint": "passed",
+      "prettier": "Only preserved doc/dev/punti-issue.md"
+    }
+  ],
+  "preservedSource": {
+    "path": "doc/dev/punti-issue.md",
+    "sha256": "8e5b4e0c57c3fea049a8ad3fcf5104a82b42fe4ccd12a68c064595f6767fc185",
+    "previousEvidence": "doc/pr04/verifiche.json#preservedSource",
+    "previousSha256": "8e5b4e0c57c3fea049a8ad3fcf5104a82b42fe4ccd12a68c064595f6767fc185",
+    "gitObject": "8b1d0230e8bbb260a7b8d5c76cbcbb0ebdb282f2",
+    "headObject": "8b1d0230e8bbb260a7b8d5c76cbcbb0ebdb282f2",
+    "unchanged": true,
+    "comparison": "Exact SHA-256 matches the previous PR04 working tree evidence; normalized Git object also matches HEAD. Checkout file has CRLF, repository blob LF."
+  },
+  "sourceHashes": [
+    {
+      "path": "src/backend/application/berths/berth-service.ts",
+      "sha256": "c05614a4b7885d8245c68dafd2d21f5c435f094d2983271c952c9790947c5a32",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/backend/infrastructure/database/berth-repository.ts",
+      "sha256": "ce4a79bc84901424f99add1fbf7483e225404c356900251d7853be94e6969560",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/api/use-consultation-state.tsx",
+      "sha256": "d797dfa75fd9323e9f567d11c84a101c92d5ef9b59fc5dd04ab9aaf50353f8d5",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/api/use-paged-picker.ts",
+      "sha256": "9726b56c522fddff0078c194e9870f9ac465708feeef5e20f98b25f4efe846b0",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/PagedPicker.tsx",
+      "sha256": "4df19f1c864c65764db4f7e42d3676443df209521561df7dd17fc1174232c12b",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/operations/AssignmentEditor.tsx",
+      "sha256": "ed6f9cd3272c681f3a9ceb36f347a6fee8024935d2da5ecb73e938df4b5ab9ef",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/operations/BerthPicker.tsx",
+      "sha256": "9bb4493c50a5b2f91a44b9b76edcc719718d5432285caa0e943cf79cc5f353c8",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/operations/OperationCompletionEditor.tsx",
+      "sha256": "1fa1fde8ab31012623b94c3b3213d4b574d679d25677aa23dae8ca1c19a4855e",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/operations/Operations.tsx",
+      "sha256": "f0aa0eba16ae7942a3bb04b0a60e72e318006783bb7278d095ae294cb706da63",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/operations/SubjectPicker.tsx",
+      "sha256": "e42f20b38cbf606d950538b3538954f960055b06e60ca0c70e0e260c45f64015",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/operations/VesselPicker.tsx",
+      "sha256": "c3a1cdae930386cff6d06d37c69d9d5235a742565566e16597cf5610f33375e0",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/services/CatalogPicker.tsx",
+      "sha256": "6f613c8a1e854b73c7c31e0c3f1a1426058554d0029e51f840f25ace6a7346e0",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/services/ServiceFilters.tsx",
+      "sha256": "ef3b59982139a5fb93537ee816c4174966c45c69fb452e97ca708e75aeefe51b",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/services/Services.tsx",
+      "sha256": "c9c38422cd2440545f6ecf476e9b240a07d9b73d736d17d81856cff2b0c27d56",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/tariffs/BaseCalculator.tsx",
+      "sha256": "8fcd451424473d327b4c7ef1cdb75fdb3fd2838480a8fd24e56c0a561c585e0a",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/tariffs/PortPicker.tsx",
+      "sha256": "05901eed614e7a8d51e3595976d342487cc53632698bd482a5c7d52ab7ea6e5c",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/app/tariffs/Tariffs.tsx",
+      "sha256": "f33da512158971fb755defa9dd51b3da196c272d1d39cf4b13b23adcb0bde553",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/renderer/src/styles.css",
+      "sha256": "c4252a8eb0768987854fcfd8169cd958538a41d9b992575d66022931303fa53b",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "src/shared/contracts/berths.ts",
+      "sha256": "77a4041260eea258ceb0b8fd5cdc4b1b0feb0c1b46c49707ee1925d88fbcecde",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "tests/e2e/pr03-navigation.spec.ts",
+      "sha256": "cab3b2bcec8da77a92f1fcb34599af9f3be14cc9bd379557d676f7af06f55f30",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "tests/e2e/pr05-pickers.spec.ts",
+      "sha256": "19583910bdfd342a4998dc70ac696c8d0c5e277953c3bb9872699cc62b2c083f",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "tests/e2e/services.spec.ts",
+      "sha256": "0e0c160ad83ec4e45eabec1822974e874868b6caa7c10042560c355787607892",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "tests/e2e/tariffs.spec.ts",
+      "sha256": "8ac8cb737a07fc7f401712951c1eb6b231b11ab712346af350fb9f19e6278402",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "tests/e2e/ui03.spec.ts",
+      "sha256": "b4a0f170d865c1b5f0d33003a518c023cd32975ac15be18220646edc8a8e4d37",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "tests/unit/berth-service.test.ts",
+      "sha256": "b5e18b2b9fd85af0f2f250eca41cb0e776e0dfdd36b3c3280961a8b31e43fd8f",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "tests/unit/consultation-state.test.tsx",
+      "sha256": "055adba720872f933378cf679f3ceaaa795e3f906a7d2da6c3dcab8e0e1713f5",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "tests/unit/numeric-callers.test.tsx",
+      "sha256": "6681c206cab10297f3583f263335be55e72cfe629dd551b6edda9c18f92f3fb4",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "tests/unit/paged-picker-presentation.test.tsx",
+      "sha256": "ba830da71cea3b541a8f82695bac66f3c458acf22a12178503a154ed06ce399e",
+      "unchangedSinceFullStarted": true
+    },
+    {
+      "path": "tests/unit/paged-pickers.test.tsx",
+      "sha256": "50241b3dcaafdcf6092c812b7a0633829fd600f19f60079bb7ab730c1182f726",
+      "unchangedSinceFullStarted": true
+    }
+  ],
+  "deferred": {
+    "desktopPrepared": ["tests/e2e/pr05-pickers.spec.ts (3 scenarios)"],
+    "desktopUpdated": [
+      "tests/e2e/pr03-navigation.spec.ts",
+      "tests/e2e/services.spec.ts",
+      "tests/e2e/tariffs.spec.ts",
+      "tests/e2e/ui03.spec.ts"
+    ],
+    "notExecuted": ["desktop", "build", "packaging", "integrated profiles"],
+    "checkpoint": "K4"
+  },
+  "limits": [
+    "Unit harness has no DOM and does not attest Chromium focus, keyboard, portal or manual human sessions.",
+    "Previous PR02/PR11/PR03 full-suite limits remain historical; PR04 675/675 preserved.",
+    "Native npm codes of development selections were not separately captured; Electron codes and Vitest reports retained."
+  ],
+  "documentation": {
+    "command": "npm.cmd run verify -- documentazione --document doc/pr05/selettori-paginati.md --document doc/stato-implementazione-prestazioni.md --document doc/dev/piano-interventi-post-rilascio.md --document doc/piano-implementazione-prestazioni.md",
+    "exitCode": 1,
+    "utf8": "passed",
+    "localLinksAndAnchors": "passed",
+    "gitDiff": "passed",
+    "formatting": "Only preserved doc/dev/punti-issue.md",
+    "summary": "test-results/verification/2026-11-24T14-56-29.421Z-coordinator-d6GJdc/summary.md",
+    "log": "test-results/pr05-documentation-final.log",
+    "previousSummary": "test-results/verification/2026-11-24T14-54-17.716Z-coordinator-0GSby2/summary.md",
+    "process": "test-results/pr05-documentation-final-process.json"
+  },
+  "sourceEvidenceReview": {
+    "sourceCount": 29,
+    "hashMismatches": [],
+    "fullUnitResultsReused": true,
+    "implementationCommit": "ce45f77778206d2ebccfe90325a0c5d7e30ed0cb"
+  },
+  "implementationCommit": "ce45f77778206d2ebccfe90325a0c5d7e30ed0cb",
+  "versioningVerification": {
+    "implementationCommit": "ce45f77778206d2ebccfe90325a0c5d7e30ed0cb",
+    "fullUnitResultsReused": true,
+    "sourceHashMismatches": [],
+    "documentation": {
+      "command": "npm.cmd run verify -- documentazione --document doc/pr05/selettori-paginati.md --document doc/stato-implementazione-prestazioni.md --document doc/dev/piano-interventi-post-rilascio.md --document doc/piano-implementazione-prestazioni.md",
+      "exitCode": 1,
+      "utf8": "passed",
+      "localLinksAndAnchors": "passed",
+      "gitDiff": "passed",
+      "formatting": "Only preserved doc/dev/punti-issue.md",
+      "summary": "test-results/verification/2026-11-24T15-02-35.682Z-coordinator-hzfNrZ/summary.md",
+      "log": "test-results/pr05-documentation-commit.log",
+      "process": "test-results/pr05-documentation-commit-process.json"
+    }
+  }
+}

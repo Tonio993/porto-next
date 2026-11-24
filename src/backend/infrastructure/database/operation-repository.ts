@@ -437,7 +437,7 @@ export class OperationRepository {
       .get(vesselId) as number
     const voyages = sql
       .prepare(
-        `SELECT ${intervalSelection}, vessel_id AS vesselId, vessel_version_id AS vesselVersionId FROM voyages WHERE vessel_id=? ORDER BY started_at DESC LIMIT ? OFFSET ?`,
+        `SELECT ${intervalSelection}, vessel_id AS vesselId, vessel_version_id AS vesselVersionId FROM voyages WHERE vessel_id=? ORDER BY started_at DESC, id DESC LIMIT ? OFFSET ?`,
       )
       .all(vesselId, pageSize, (page - 1) * pageSize) as Omit<VoyageDto, 'visits'>[]
     return {
@@ -449,7 +449,7 @@ export class OperationRepository {
         visits: (
           sql
             .prepare(
-              `SELECT ${intervalSelection},port_id AS portId,port_version_id AS portVersionId FROM port_calls WHERE voyage_id=? ORDER BY started_at`,
+              `SELECT ${intervalSelection},port_id AS portId,port_version_id AS portVersionId FROM port_calls WHERE voyage_id=? ORDER BY started_at DESC, id DESC`,
             )
             .all(v.id) as (StayIntervalDto & { portId: string; portVersionId: string })[]
         ).map((p) => ({
@@ -461,7 +461,7 @@ export class OperationRepository {
           stays: (
             sql
               .prepare(
-                `SELECT ${intervalSelection},berth_id AS berthId,berth_version_id AS berthVersionId FROM berth_stays WHERE port_call_id=? ORDER BY started_at`,
+                `SELECT ${intervalSelection},berth_id AS berthId,berth_version_id AS berthVersionId FROM berth_stays WHERE port_call_id=? ORDER BY started_at DESC, id DESC`,
               )
               .all(p.id) as (StayIntervalDto & {
               berthId: string | null

@@ -419,7 +419,7 @@ it('rollback dopo rimozione dei componenti e riattribuzione conserva metadati e 
   expect(await confirm(p)).toMatchObject({ ok: false })
   expect(snapshot()).toEqual(before)
   expect(new ServiceRepository(db()).get(svc.id).context.berthStayId).not.toBe(
-    stays()[0].visits[0].stays[0].id,
+    stays()[0].visits[0].stays[1].id,
   )
   sql().exec('DROP TRIGGER stop_delete')
   value(await confirm(p))
@@ -625,7 +625,7 @@ it('riattribuisce indipendentemente soggetti ereditati e override di prestazione
   await create()
   const originalStay = stays()[0].visits[0].stays[0]
   const op = await movement(),
-    removedStay = stays()[0].visits[0].stays[1]
+    removedStay = stays()[0].visits[0].stays[0]
   const customers = new CustomerService(archives.coordinator),
     assignments = new AssignmentService(archives.coordinator)
   const ancestor = value(

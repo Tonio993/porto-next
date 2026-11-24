@@ -321,8 +321,8 @@ it('spostamento interno mancato riattribuisce FREE/CATALOG, conserva assegnazion
   const freeService = await free('2026-06-02T13:00'),
     catalog = await free('2026-06-03T12:00', 'MISSED', true)
   const original = stays()[0],
-    originStay = original.visits[0].stays[0],
-    removed = original.visits[0].stays[1]
+    originStay = original.visits[0].stays[1],
+    removed = original.visits[0].stays[0]
   const p = value(await completePreview(move, { executionStatus: 'MISSED' }))
   expect(p.summary.reattributed).toBe(2)
   expect(p.summary.deleted).toBe(1)
@@ -358,8 +358,8 @@ it('spostamento effettuato riattribuisce ai confini e blocca l’intervallo di t
   await create()
   const move = await movement(),
     before = stays(),
-    origin = before[0].visits[0].stays[0],
-    destination = before[0].visits[0].stays[1]
+    origin = before[0].visits[0].stays[1],
+    destination = before[0].visits[0].stays[0]
   const departure = await free('2026-06-02T12:00'),
     arrival = await free('2026-06-02T13:00')
   const blocked = value(await completePreview(move, { arrivalMoment: moment('2026-06-02T13:01') }))
@@ -367,7 +367,7 @@ it('spostamento effettuato riattribuisce ai confini e blocca l’intervallo di t
   await complete(move, { moment: moment('2026-06-02T12:01') })
   expect(new ServiceRepository(db()).get(departure.id).context.berthStayId).toBe(origin.id)
   expect(new ServiceRepository(db()).get(arrival.id).context.berthStayId).toBe(destination.id)
-  expect(stays()[0].visits[0].stays[1].id).toBe(destination.id)
+  expect(stays()[0].visits[0].stays[0].id).toBe(destination.id)
   expect(sql().pragma('foreign_key_check')).toEqual([])
 })
 
@@ -393,7 +393,7 @@ it('spostamento esterno mancato riattribuisce nel porto origine e ricalcola CATA
     move = await movement('2026-06-02T12:00', '2026-06-02T13:00', dest, null)
   const freeService = await free('2026-06-03T12:00'),
     catalog = await free('2026-06-03T12:00', 'PERFORMED', true),
-    origin = stays()[0].visits[0]
+    origin = stays()[0].visits[1]
   expect(catalog.base).toBe('215.00')
   await complete(move, { executionStatus: 'MISSED' })
   expect(stays()[0].visits).toHaveLength(1)
@@ -429,15 +429,15 @@ it('cambio interno → esterno → nuovo interno assegna nuove identità soltant
   expect(result).toEqual(p.operationValues)
   expect(result.charges.map((c) => c.chargeKind)).toEqual(['EXIT', 'ENTRY'])
   expect(stays()[0].id).toBe(original.id)
-  expect(stays()[0].visits[1].id).toBe(visitEffect.reference.id)
-  expect(stays()[0].visits[1].stays[0].id).toBe(original.visits[0].stays[1].id)
+  expect(stays()[0].visits[0].id).toBe(visitEffect.reference.id)
+  expect(stays()[0].visits[0].stays[0].id).toBe(original.visits[0].stays[0].id)
   expect(sql().pragma('foreign_key_check')).toEqual([])
 })
 
 it('una permanenza rimossa e ricreata riceve nuova identità; la precedente assegnazione non riappare', async () => {
   await create()
   const move = await movement(),
-    old = stays()[0].visits[0].stays[1]
+    old = stays()[0].visits[0].stays[0]
   const customer = value(
     await new CustomerService(archives.coordinator).create({
       context: context(),
@@ -447,7 +447,7 @@ it('una permanenza rimossa e ricreata riceve nuova identità; la precedente asse
   sql().prepare('UPDATE berth_stays SET customer_id=? WHERE id=?').run(customer.id, old.id)
   await complete(move, { executionStatus: 'MISSED' })
   const next = await movement('2026-06-02T14:00', '2026-06-02T15:00')
-  const recreated = stays()[0].visits[0].stays[1]
+  const recreated = stays()[0].visits[0].stays[0]
   expect(recreated.id).not.toBe(old.id)
   expect(recreated.openingOperationId).toBe(next.id)
   expect(
@@ -646,7 +646,7 @@ it('esterno effettuato diventa interno: visita rimossa, ormeggio ancorato, compo
     ).toBeUndefined()
   }
   expect(stays()[0].visits).toHaveLength(1)
-  expect(stays()[0].visits[0].stays[1].id).toBe(previous.visits[1].stays[0].id)
+  expect(stays()[0].visits[0].stays[0].id).toBe(previous.visits[0].stays[0].id)
   expect(new ServiceRepository(db()).get(service.id).base).toBe('115.00')
   expect(sql().pragma('foreign_key_check')).toEqual([])
 })
@@ -676,7 +676,7 @@ it('rollback dopo ricostruzione e riattribuzione ripristina dati, metadati e ant
     await operations.confirmComplete({ context: p.context, payload: { previewId: p.previewId } }),
   )
   expect(new ServiceRepository(db()).get(service.id).context.berthStayId).toBe(
-    original[0].visits[0].stays[0].id,
+    original[0].visits[0].stays[1].id,
   )
   expect(sql().pragma('foreign_key_check')).toEqual([])
 })

@@ -176,7 +176,7 @@ test('P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa
     }, operationFixtureIds)
     expect(hierarchy.items[0]).toMatchObject({
       id: 'voyage-p10',
-      visits: [{ id: 'visit-p10', stays: [{ id: 'stay-p10' }, { berthId: null }] }],
+      visits: [{ id: 'visit-p10', stays: [{ berthId: null }, { id: 'stay-p10' }] }],
     })
     modal = await start(page, '2026-05-03T12:30', '2026-05-03T14:00', 'Mancata')
     await submit(modal)

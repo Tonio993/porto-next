@@ -9,6 +9,8 @@ import { BerthService } from '../../src/backend/application/berths/berth-service
 import { TariffService } from '../../src/backend/application/tariffs/tariff-service'
 import { TimeService } from '../../src/backend/application/time/time-service'
 import { OperationService } from '../../src/backend/application/operations/operation-service'
+import { operationReplay } from '../../src/backend/application/operations/operation-replay'
+import { replayOperations } from '../../src/backend/domain/operations/replay'
 import { OperationRepository } from '../../src/backend/infrastructure/database/operation-repository'
 import type { ApplicationResult } from '../../src/shared/contracts/application'
 import type { CreateOperationDto } from '../../src/shared/contracts/operations'
@@ -778,12 +780,12 @@ it('P11: partenza origine, arrivo destinazione, intervallo aperto senza ormeggio
   expect(current.endedAt).toBeNull()
   expect(visit.id).toBe(first.visits[0].id)
   expect(visit.stays).toHaveLength(2)
-  expect(visit.stays[0]).toMatchObject({
+  expect(visit.stays[1]).toMatchObject({
     id: old.id,
     endedAt: move.endpoint.moment.utc,
     closingOperationId: move.id,
   })
-  expect(visit.stays[1]).toMatchObject({
+  expect(visit.stays[0]).toMatchObject({
     id: proposed,
     startedAt: move.arrival!.moment.utc,
     openingOperationId: move.id,
@@ -842,7 +844,7 @@ it('P11: due ormeggi consecutivi senza banchina restano distinti, anche in una v
   expect(current.visits[0].stays).toHaveLength(2)
   expect(new Set(current.visits[0].stays.map((b) => b.id)).size).toBe(2)
   expect(current.visits[0].stays.map((b) => b.berthId)).toEqual([null, null])
-  expect(current.visits[0].stays[1]).toMatchObject({
+  expect(current.visits[0].stays[0]).toMatchObject({
     openingOperationId: move.id,
     closingOperationId: first.closingOperationId,
     endedAt: first.endedAt,
@@ -1054,7 +1056,7 @@ it('P11: anagrafiche ai due estremi, nuove versioni durante il trasferimento e e
   value(await berths.confirm({ context: b.context, payload: { previewId: b.previewId } }))
   expect(all()[1].endpoint.berthName).toBe('Molo')
   expect(all()[1].arrival!.berthName).toBe('Nuovo molo')
-  expect(stays()[0].visits[0].stays[1].berthVersionId).toBe(all()[1].arrival!.berthVersionId)
+  expect(stays()[0].visits[0].stays[0].berthVersionId).toBe(all()[1].arrival!.berthVersionId)
   const v = value(
     await vessels.preview({
       context: context(),
@@ -1360,12 +1362,12 @@ it('P12: fusi e decorrenze distinti, due calcoli/override autonomi, viaggio cons
   expect(graph.id).toBe(first.id)
   expect(graph.endedAt).toBeNull()
   expect(graph.visits).toHaveLength(2)
-  expect(graph.visits[0]).toMatchObject({
+  expect(graph.visits[1]).toMatchObject({
     id: first.visits[0].id,
     endedAt: move.endpoint.moment.utc,
     closingOperationId: move.id,
   })
-  expect(graph.visits[1]).toMatchObject({
+  expect(graph.visits[0]).toMatchObject({
     portId: dest,
     startedAt: move.arrival!.moment.utc,
     openingOperationId: move.id,
@@ -1387,13 +1389,13 @@ it('P12: fusi e decorrenze distinti, due calcoli/override autonomi, viaggio cons
   expect(ctx(move.arrival!.moment.utc)).toMatchObject({
     status: 'IN_PORT',
     portId: dest,
-    portCallId: graph.visits[1].id,
+    portCallId: graph.visits[0].id,
   })
   const exit = await create(input('EXIT', '2026-06-02T12:00', 'PERFORMED'))
   expect(exit.endpoint.portId).toBe(dest)
   expect(stays()[0].closingOperationId).toBe(exit.id)
-  expect(stays()[0].visits[1].closingOperationId).toBe(exit.id)
-  expect(stays()[0].visits[0].closingOperationId).toBe(move.id)
+  expect(stays()[0].visits[0].closingOperationId).toBe(exit.id)
+  expect(stays()[0].visits[1].closingOperationId).toBe(move.id)
   const saved = all(),
     hierarchy = stays(),
     revision = context().revision
@@ -1686,7 +1688,7 @@ it('P12: versioni di porto e banchina di destinazione aggiornano estremo e nuova
     await ports.confirmInsertVersion({ context: p.context, payload: { previewId: p.previewId } }),
   )
   expect(all()[1].endpoint).toEqual(move.endpoint)
-  expect(stays()[0].visits[1].portVersionId).toBe(all()[1].arrival!.portVersionId)
+  expect(stays()[0].visits[0].portVersionId).toBe(all()[1].arrival!.portVersionId)
   const bp = value(
     await berths.preview({
       context: context(),
@@ -1701,7 +1703,7 @@ it('P12: versioni di porto e banchina di destinazione aggiornano estremo e nuova
   value(await berths.confirm({ context: bp.context, payload: { previewId: bp.previewId } }))
   const updated = all()[1]
   expect(updated.arrival!.berthName).toBe('Dest nuova')
-  expect(stays()[0].visits[1].stays[0].berthVersionId).toBe(updated.arrival!.berthVersionId)
+  expect(stays()[0].visits[0].stays[0].berthVersionId).toBe(updated.arrival!.berthVersionId)
   expect(updated.charges).toEqual(move.charges)
   const pd = value(
     await ports.previewDeleteVersion({
@@ -1762,15 +1764,15 @@ it('P12: ritorno a un porto già visitato, ambiguità locale fra porti e nuova v
   expect(back.endpoint.portId).toBe(dest)
   expect(stays()[0].visits).toHaveLength(3)
   expect(stays()[0].id).toBe(first.id)
-  expect(stays()[0].visits[0].id).toBe(first.visits[0].id)
-  expect(stays()[0].visits[2].id).not.toBe(first.visits[0].id)
+  expect(stays()[0].visits[2].id).toBe(first.visits[0].id)
+  expect(stays()[0].visits[0].id).not.toBe(first.visits[0].id)
   expect(stays()[0].visits[1].openingOperationId).toBe(moved.id)
   const internal = await create(movement('2026-06-04T12:00', '2026-06-04T13:00'))
   expect(internal.charges).toHaveLength(1)
-  expect(stays()[0].visits[2].stays).toHaveLength(2)
+  expect(stays()[0].visits[0].stays).toHaveLength(2)
   await create(input('EXIT', '2026-06-05T12:00'))
   expect(stays()[0].visits.every((v) => v.endedAt !== null)).toBe(true)
-  expect(stays()[0].visits[2].openingOperationId).toBe(back.id)
+  expect(stays()[0].visits[0].openingOperationId).toBe(back.id)
   expect(sql().pragma('foreign_key_check')).toEqual([])
 })
 it('P12: correzione descrittiva nave ricalcola entrambe le componenti atomicamente senza perdere override e tuple', async () => {
@@ -1835,4 +1837,287 @@ it('P12: correzione descrittiva nave ricalcola entrambe le componenti atomicamen
   expect(stays()).toEqual(graph)
   expect(BigInt(context().revision)).toBe(BigInt(ctx.revision) + 1n)
   expect(sql().pragma('foreign_key_check')).toEqual([])
+})
+
+it('PR11: consultazione UTC decrescente a tre livelli, pagine globali e letture senza scritture', async () => {
+  const firstEntry = await create(input('ENTRY', '2026-06-01T12:00'))
+  const firstId = stays()[0].id
+  const firstExit = await create(input('EXIT', '2026-06-01T14:00'))
+  const first = stays()[0]
+  const secondEntry = await create(input('ENTRY', '2026-06-02T12:00'))
+  const secondId = stays()[0].id
+  const secondExit = await create(input('EXIT', '2026-06-02T14:00'))
+  const second = stays()[0]
+  const latestEntry = await create(input('ENTRY', '2026-06-03T12:00'))
+  const latestOpening = stays()[0]
+  const dest = await destination()
+  const moved = await create({
+    ...transfer(dest),
+    moment: moment('2026-06-04T12:00'),
+    arrivalMoment: moment('2026-06-04T11:30'),
+  })
+  const recentVisit = stays()[0].visits[0]
+  const internal = await create({
+    ...movement('2026-06-05T12:00', '2026-06-05T13:00'),
+    destinationPortId: dest,
+  })
+  const latest = stays()[0]
+  expect([first.id, second.id, latest.id]).toEqual([firstId, secondId, latestOpening.id])
+  expect(
+    [first, second].map((v) => [
+      v.openingOperationId,
+      v.startedAt,
+      v.closingOperationId,
+      v.endedAt,
+    ]),
+  ).toEqual([
+    [firstEntry.id, firstEntry.endpoint.moment.utc, firstExit.id, firstExit.endpoint.moment.utc],
+    [
+      secondEntry.id,
+      secondEntry.endpoint.moment.utc,
+      secondExit.id,
+      secondExit.endpoint.moment.utc,
+    ],
+  ])
+  expect(latest).toMatchObject({
+    openingOperationId: latestEntry.id,
+    startedAt: latestEntry.endpoint.moment.utc,
+    closingOperationId: null,
+    endedAt: null,
+  })
+  expect(
+    latest.visits.map((p) => [
+      p.id,
+      p.openingOperationId,
+      p.startedAt,
+      p.closingOperationId,
+      p.endedAt,
+      p.portId,
+    ]),
+  ).toEqual([
+    [recentVisit.id, moved.id, '2026-06-04T10:30:00.000Z', null, null, dest],
+    [
+      latestOpening.visits[0].id,
+      latestEntry.id,
+      '2026-06-03T10:00:00.000Z',
+      moved.id,
+      moved.endpoint.moment.utc,
+      portId,
+    ],
+  ])
+  const recentStays = latest.visits[0].stays
+  expect(
+    recentStays.map((b) => [b.openingOperationId, b.startedAt, b.closingOperationId, b.endedAt]),
+  ).toEqual([
+    [internal.id, '2026-06-05T12:00:00.000Z', null, null],
+    [moved.id, '2026-06-04T10:30:00.000Z', internal.id, internal.endpoint.moment.utc],
+  ])
+  expect(recentStays[1].id).toBe(recentVisit.stays[0].id)
+  expect(recentStays[0].id).not.toBe(recentStays[1].id)
+  expect(latest.visits[1].stays).toEqual([
+    {
+      ...latestOpening.visits[0].stays[0],
+      closingOperationId: moved.id,
+      endedAt: moved.endpoint.moment.utc,
+    },
+  ])
+  // The arrival's local clock is earlier than departure; ordering uses UTC, never that label.
+  expect(moved.arrival!.moment.localDateTime).toBe('2026-06-04T11:30')
+  const metadata = db().metadata(),
+    originalContext = context(),
+    saved = sql().serialize()
+  const changes = sql().prepare('SELECT total_changes()').pluck().get()
+  const query = (page: number, pageSize = 2) =>
+    operations
+      .stays({
+        context: { sessionId: context().sessionId },
+        query: { vesselId, page, pageSize },
+      })
+      .then(value)
+  sql().pragma('query_only=ON')
+  try {
+    const page1 = await query(1),
+      page2 = await query(2),
+      page3 = await query(3)
+    expect(page1).toEqual({ items: [latest, second], total: 3, page: 1, pageSize: 2 })
+    expect(page2).toEqual({ items: [first], total: 3, page: 2, pageSize: 2 })
+    expect(page3).toEqual({ items: [], total: 3, page: 3, pageSize: 2 })
+    const global = [...page1.items, ...page2.items]
+    expect(new Set(global.map((v) => v.id)).size).toBe(3)
+    expect(global.map((v) => [v.id, v.startedAt])).toEqual([
+      [latest.id, latestEntry.endpoint.moment.utc],
+      [second.id, secondEntry.endpoint.moment.utc],
+      [first.id, firstEntry.endpoint.moment.utc],
+    ])
+    expect(global.flatMap((v) => v.visits)).toHaveLength(4)
+    expect(global.flatMap((v) => v.visits.flatMap((p) => p.stays))).toHaveLength(5)
+    for (const [i, voyage] of global.entries()) {
+      expect(new OperationRepository(db()).stays(vesselId, i + 1, 1).items).toEqual([voyage])
+      for (const visit of voyage.visits) {
+        expect(
+          sql().prepare('SELECT voyage_id FROM port_calls WHERE id=?').pluck().get(visit.id),
+        ).toBe(voyage.id)
+        for (const stay of visit.stays)
+          expect(
+            sql().prepare('SELECT port_call_id FROM berth_stays WHERE id=?').pluck().get(stay.id),
+          ).toBe(visit.id)
+      }
+    }
+    expect(await query(2)).toEqual(page2)
+    expect(await query(1)).toEqual(page1)
+    // Context resolution still follows event time and the original opening identities.
+    expect(await contextAt(latestEntry.endpoint.moment.utc)).toMatchObject({
+      voyageId: latest.id,
+      portCallId: latestOpening.visits[0].id,
+      berthStayId: latestOpening.visits[0].stays[0].id,
+    })
+    expect(await contextAt('2026-06-04T10:15:00.000Z')).toMatchObject({
+      status: 'IN_TRANSFER',
+      voyageId: latest.id,
+      portCallId: null,
+    })
+    expect(await contextAt(internal.arrival!.moment.utc)).toMatchObject({
+      voyageId: latest.id,
+      portCallId: recentVisit.id,
+      berthStayId: recentStays[0].id,
+    })
+    expect(db().metadata()).toEqual(metadata)
+    expect(context()).toEqual(originalContext)
+    expect(sql().prepare('SELECT total_changes()').pluck().get()).toBe(changes)
+    expect(sql().serialize()).toEqual(saved)
+    expect(sql().pragma('foreign_key_check')).toEqual([])
+    expect(sql().pragma('integrity_check', { simple: true })).toBe('ok')
+  } finally {
+    sql().pragma('query_only=OFF')
+  }
+})
+
+it.each([false, true])(
+  'PR11: lista vuota o singola (presente=%s), totali e ultima pagina stabili',
+  async (present) => {
+    if (present) await create()
+    const expected = stays(),
+      metadata = db().metadata(),
+      saved = sql().serialize()
+    const originalContext = context(),
+      changes = sql().prepare('SELECT total_changes()').pluck().get()
+    for (const page of [1, 2, 1]) {
+      const actual = value(
+        await operations.stays({
+          context: { sessionId: context().sessionId },
+          query: { vesselId, page, pageSize: 1 },
+        }),
+      )
+      expect(actual).toEqual({
+        items: page === 1 ? expected : [],
+        total: present ? 1 : 0,
+        page,
+        pageSize: 1,
+      })
+    }
+    if (present) {
+      expect(expected[0].visits).toHaveLength(1)
+      expect(expected[0].visits[0].stays).toHaveLength(1)
+      expect(
+        [expected[0], expected[0].visits[0], expected[0].visits[0].stays[0]].map(
+          (v) => v.startedAt,
+        ),
+      ).toEqual(Array(3).fill('2026-06-01T10:00:00.000Z'))
+    }
+    expect(context()).toEqual(originalContext)
+    expect(db().metadata()).toEqual(metadata)
+    expect(sql().prepare('SELECT total_changes()').pluck().get()).toBe(changes)
+    expect(sql().serialize()).toEqual(saved)
+  },
+)
+
+it('PR11: parità UTC consentita fra navi isolate; il vincolo reale esclude aperture simultanee fra fratelli', async () => {
+  const first = await create()
+  const other = value(
+    await vessels.create({
+      context: context(),
+      payload: {
+        registeredName: 'Seconda nave',
+        imoNumber: null,
+        vesselTypeId: 'STANDARD',
+        size: 2100,
+      },
+    }),
+  ).id
+  const simultaneous = await create({ ...input(), vesselId: other })
+  expect(simultaneous.endpoint.moment.utc).toBe(first.endpoint.moment.utc)
+  const metadata = db().metadata(),
+    changes = sql().prepare('SELECT total_changes()').pluck().get()
+  expect(await preview(input('EXIT'))).toMatchObject(failure('OPERATION_MINUTE_CONFLICT'))
+  // No fabricated same-parent ties: FK to the opening endpoint plus per-vessel UTC-minute
+  // uniqueness makes them unreachable in a valid chronology. ID is the defensive tie-breaker.
+  for (const id of [vesselId, other, vesselId]) {
+    const read = value(
+      await operations.stays({
+        context: { sessionId: context().sessionId },
+        query: { vesselId: id, page: 1, pageSize: 1 },
+      }),
+    )
+    expect(read.total).toBe(1)
+    expect(read.items[0]).toMatchObject({
+      vesselId: id,
+      openingOperationId: id === vesselId ? first.id : simultaneous.id,
+      startedAt: first.endpoint.moment.utc,
+    })
+    expect(read.items[0].visits[0].openingOperationId).toBe(read.items[0].openingOperationId)
+    expect(read.items[0].visits[0].stays[0].openingOperationId).toBe(
+      read.items[0].openingOperationId,
+    )
+  }
+  expect(db().metadata()).toEqual(metadata)
+  expect(sql().prepare('SELECT total_changes()').pluck().get()).toBe(changes)
+  expect(sql().pragma('foreign_key_check')).toEqual([])
+})
+
+it('PR11: replay crescente da consultazione decrescente conserva identità, intervalli e soggetti senza effetti', async () => {
+  await create()
+  const dest = await destination()
+  await create(transfer(dest))
+  await create({ ...movement('2026-06-03T12:00', '2026-06-03T13:00'), destinationPortId: dest })
+  await create(input('EXIT', '2026-06-04T12:00'))
+  await create(input('ENTRY', '2026-06-05T12:00'))
+  const previous = stays(),
+    events = all()
+  const identities = new Map(
+    previous.flatMap((v) =>
+      v.visits.flatMap((p) =>
+        p.stays.map(
+          (b) =>
+            [
+              b.openingOperationId,
+              { voyageId: v.id, portCallId: p.id, berthStayId: b.id },
+            ] as const,
+        ),
+      ),
+    ),
+  )
+  expect(events.map((o) => o.endpoint.moment.utc)).toEqual([
+    '2026-06-01T10:00:00.000Z',
+    '2026-06-02T10:00:00.000Z',
+    '2026-06-03T11:00:00.000Z',
+    '2026-06-04T11:00:00.000Z',
+    '2026-06-05T10:00:00.000Z',
+  ])
+  const metadata = db().metadata(),
+    changes = sql().prepare('SELECT total_changes()').pluck().get()
+  const replayed = replayOperations([...events].reverse(), previous, identities)
+  // Reverse the expected presentation explicitly at every level; compare the entire DTO graph.
+  const chronological = [...previous].reverse().map((v) => ({
+    ...v,
+    visits: [...v.visits].reverse().map((p) => ({ ...p, stays: [...p.stays].reverse() })),
+  }))
+  expect(replayed).toEqual(chronological)
+  const plan = operationReplay(db(), [...events].reverse(), vesselId, identities)
+  expect(plan.persistence.effects).toEqual([])
+  expect(plan.persistence.blockers).toEqual([])
+  expect(plan.subjects.effects).toEqual([])
+  expect(stays()).toEqual(previous)
+  expect(all()).toEqual(events)
+  expect(db().metadata()).toEqual(metadata)
+  expect(sql().prepare('SELECT total_changes()').pluck().get()).toBe(changes)
 })

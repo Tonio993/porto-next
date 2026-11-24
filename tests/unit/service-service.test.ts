@@ -1146,7 +1146,7 @@ it('P16: effettuata con dati effettivi, nuove versioni, permanenza e soggetti; m
       context: { sessionId: context().sessionId },
       query: { vesselId, page: 1, pageSize: 25 },
     }),
-  ).items[0].visits[0].stays[1]
+  ).items[0].visits[0].stays[0]
   await assign({ kind: 'BERTH_STAY', id: stay.id }, person.id)
   expect(
     await previewChange(

@@ -224,10 +224,12 @@ it.each(['PLANNED', 'PERFORMED', 'MISSED'] as const)(
     const voyage = stays()[0]
     expect(voyage.id).toBe(original.id)
     expect(voyage.visits[0].id).toBe(original.visits[0].id)
-    expect(voyage.visits[0].stays[0].id).toBe(original.visits[0].stays[0].id)
+    expect(voyage.visits[0].stays[status === 'MISSED' ? 0 : 1].id).toBe(
+      original.visits[0].stays[0].id,
+    )
     expect(voyage.visits[0].stays).toHaveLength(status === 'MISSED' ? 1 : 2)
     if (status !== 'MISSED') {
-      const next = voyage.visits[0].stays[1]
+      const next = voyage.visits[0].stays[0]
       expect(next.openingOperationId).toBe(result.id)
       expect(next.closingOperationId).toBe(exit.id)
       expect(p.effects.items.some((e) => e.reference.id === next.id && e.action === 'CREATE')).toBe(
@@ -301,7 +303,7 @@ it('riattribuisce FREE e CATALOG tra ormeggi, conserva assegnazioni esplicite, b
     ),
   ).toBe(true)
   value(await confirmInsertion(p))
-  const newStay = stays()[0].visits[0].stays[1]
+  const newStay = stays()[0].visits[0].stays[0]
   const services = new ServiceRepository(db())
   expect(services.get(early.id)).toEqual(early)
   expect(services.get(later.id)).toMatchObject({

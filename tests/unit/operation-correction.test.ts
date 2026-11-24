@@ -713,12 +713,12 @@ it('ridetermina versioni ai due estremi e basi conservando le due identità econ
 it('cambio nave di spostamento ricostruisce entrambi gli ormeggi e conserva la destinazione ancorata', async () => {
   await create()
   const move = await movement(),
-    stay = stays()[0].visits[0].stays[1]
+    stay = stays()[0].visits[0].stays[0]
   const second = await otherVessel()
   await create({ ...input(), vesselId: second })
   await correct(move, { vesselId: second, interpretationPortId: null })
   expect(stays()[0].visits[0].stays).toHaveLength(1)
-  expect(new OperationRepository(db()).stays(second, 1, 100).items[0].visits[0].stays[1].id).toBe(
+  expect(new OperationRepository(db()).stays(second, 1, 100).items[0].visits[0].stays[0].id).toBe(
     stay.id,
   )
 })

@@ -428,7 +428,7 @@ test('P17A: spostamento esterno effettuato, fusi distinti, due componenti e iden
   expect(after.value.items[0].visits.map((p) => p.id)).toEqual(
     before.value.items[0].visits.map((p) => p.id),
   )
-  expect(after.value.items[0].visits[1].stays[0].id).toBe(
-    before.value.items[0].visits[1].stays[0].id,
+  expect(after.value.items[0].visits[0].stays[0].id).toBe(
+    before.value.items[0].visits[0].stays[0].id,
   )
 })

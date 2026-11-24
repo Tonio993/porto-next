@@ -143,7 +143,7 @@ test('P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità
     expect(move.charges[1].calculation.vesselVersionId).toBe('vv-arrival')
     expect(saved.stays[0]).toMatchObject({ id: 'voyage-p10', endedAt: null })
     expect(saved.stays[0].visits).toHaveLength(2)
-    expect(saved.stays[0].visits[1]).toMatchObject({
+    expect(saved.stays[0].visits[0]).toMatchObject({
       openingOperationId: move.id,
       portId: ids.destinationPortId,
     })
@@ -166,7 +166,7 @@ test('P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità
         animations: 'disabled',
       })
     await consult('2026-05-03T10:30')
-    await expect(page.getByLabel('Contesto operativo')).toContainText(saved.stays[0].visits[1].id)
+    await expect(page.getByLabel('Contesto operativo')).toContainText(saved.stays[0].visits[0].id)
     // A missed return does not create a third visit or provide a new origin.
     modal = await start(page, '2026-05-04T12:00', '2026-05-04T14:30', 'Mancata')
     await modal.getByRole('combobox', { name: 'Porto di destinazione', exact: true }).click()

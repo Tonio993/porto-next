@@ -258,7 +258,7 @@ it('spostamento esterno: coppie distinte ai due estremi, override comune, istant
   await assign(h.p, null, a)
   const op = await create(move(destination)),
     v = stays()[0],
-    dest = v.visits[1]
+    dest = v.visits[0]
   await assign(target('PORT_CALL', dest.id), d, b)
   const read = () => all().find((o) => o.id === op.id)!
   expect(read().charges.map((c) => c.subjects)).toMatchObject([
@@ -299,7 +299,7 @@ it('interno e uscita ereditano origine; MISSED non genera elementi fittizi e con
   await assign(h.p, null, a)
   await assign(h.b, d)
   const internal = await create(move()),
-    stay = stays()[0].visits[0].stays[1]
+    stay = stays()[0].visits[0].stays[0]
   expect(internal.charges[0].subjects.customer?.id).toBe(d)
   await assign(target('BERTH_STAY', stay.id), c)
   const missed = await create(move(destination, '2026-06-01T16:00', '2026-06-03T12:00', 'MISSED'))
@@ -643,7 +643,7 @@ it('MISSED all’arrivo eredita da una destinazione realmente esistente al propr
     agency: null,
   })
   await create(move(dest, '2026-06-02T12:00', '2026-06-02T13:00'))
-  const visit = stays()[0].visits[1],
+  const visit = stays()[0].visits[0],
     t = target('PORT_CALL', visit.id)
   await assign(t, d, a)
   const updated = all().find((o) => o.id === missed.id)!

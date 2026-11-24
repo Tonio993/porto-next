@@ -154,6 +154,7 @@ Fonti: requisiti §§2.11 e 2.13; proposta di modello §3.13.
 - Le operazioni generano una componente economica, oppure due per lo spostamento tra porti. Le due componenti conservano autonomamente porto, momento, versione nave, soggetti e calcolo.
 - La sostituzione manuale della base delle **componenti di operazione nave**, prevista dal modello §3.12.11, è distinta dal calcolo tariffario, che resta conservato; può essere zero. Non viene estesa alle prestazioni da catalogo.
 - Gli importi usano decimali esatti, EUR e arrotondamento commerciale a due decimali dopo ciascun passaggio monetario. DTO e persistenza non introducono approssimazioni tramite `number` binari.
+- Per PR04, su richiesta del 24 novembre 2026, la notazione di quantità, fattori e importi in input/visualizzazione è configurabile come preferenza utente locale, separata dai DTO canonici e dai dati dell'archivio. Cambio di formato senza reinterpretazione delle bozze; nessuna variazione di valuta, precisione o arrotondamento. [Configurazione e criteri PR04](dev/piano-interventi-post-rilascio.md#numeri-e-selezione).
 - `MISSED` non azzera automaticamente l'importo. In questo rilascio si espone la base; le regole economiche dinamiche saranno un incremento successivo.
 
 Fonti: requisiti §§2.11, 2.14 e 2.15; dominio, precisione e arrotondamento; modello §3.12.

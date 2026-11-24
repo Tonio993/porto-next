@@ -1,3 +1,4 @@
+import type { ConsultationPicker } from '../../api/use-consultation-state'
 import { useEffect, useState } from 'react'
 import { Select } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
@@ -11,6 +12,7 @@ export function BerthPicker({
   value,
   onChange,
   disabled,
+  consultation,
   historical = false,
   retained,
 }: {
@@ -18,12 +20,14 @@ export function BerthPicker({
   portId: string
   value: string | null
   onChange: (value: string | null) => void
+  consultation?: Pick<ConsultationPicker, 'page' | 'setPage' | 'current'>
   historical?: boolean
   retained?: { id: string; label: string } | null
   disabled: boolean
 }) {
-  const [page, setPage] = useState(1),
-    [list, setList] = useState<PageDto<BerthDto> | null>(null),
+  const [localPage, setLocalPage] = useState(1)
+  const { page, setPage } = consultation ?? { page: localPage, setPage: setLocalPage }
+  const [list, setList] = useState<PageDto<BerthDto> | null>(null),
     [error, setError] = useState<string | null>(null)
   const [chosen, setChosen] = useState<{ value: string; label: string } | null>(null)
   const { request, invalidate, loading } = useApplicationRequest(context, setError)
@@ -34,9 +38,35 @@ export function BerthPicker({
         query: { portId, page, pageSize: 25, selectableOnly: !historical },
       }),
     ).then((r) => {
-      if (r?.ok) setList(r.value)
+      if (r?.ok && (!consultation || consultation.current())) {
+        setList(r.value)
+        const last = Math.max(1, Math.ceil(r.value.total / 25))
+        if (page > last) setPage(last)
+      }
     })
-  }, [request, context.sessionId, context.revision, portId, page, historical])
+    return invalidate
+  }, [request, invalidate, context.sessionId, context.revision, portId, page, historical])
+  const { request: readChosen, invalidate: invalidateChosen } = useApplicationRequest(
+    context,
+    setError,
+  )
+  useEffect(() => {
+    setChosen(null)
+    if (!historical || !value) return
+    void readChosen(() =>
+      window.berths.history({
+        context: { sessionId: context.sessionId },
+        query: { id: value, page: 1, pageSize: 1 },
+      }),
+    ).then((r) => {
+      if (r?.ok && r.value.berth.portId === portId)
+        setChosen({
+          value: r.value.berth.id,
+          label: r.value.berth.code + ' · ' + r.value.berth.version.name,
+        })
+    })
+    return invalidateChosen
+  }, [readChosen, invalidateChosen, context.sessionId, context.revision, portId, historical, value])
   const options =
     list?.items.map((b) => ({
       value: b.id,

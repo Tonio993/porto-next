@@ -1,3 +1,4 @@
+import { useConsultationState, useConsultationPicker } from '../../api/use-consultation-state'
 import { useProtectedDraft } from '../DraftProtection'
 import { useWriteAttempt } from '../../api/use-write-attempt'
 import { trackedRequest } from '../../../../shared/contracts/write-outcomes'
@@ -48,13 +49,18 @@ export function Tariffs({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
+  const consultationPicker = useConsultationPicker('tariffPorts')
   const context = archives.state.context!
-  const [portId, setPortId] = useState<string | null>(null)
+  const [portId, setPortId] = useConsultationState('tariffOwner', 'portId')
   const [port, setPort] = useState<PortDto | null>(null)
-  const [page, setPage] = useState(1),
+  const [page, setPage, pageCurrent] = useConsultationState('tariffs', 'page', portId),
     [reload, setReload] = useState(0)
   const [list, setList] = useState<PageDto<TariffSummaryDto> | null>(null)
-  const [selected, setSelected] = useState<string | null>(null),
+  const [selected, setSelected, selectionCurrent] = useConsultationState(
+      'tariffs',
+      'selection',
+      portId,
+    ),
     [detail, setDetail] = useState<TariffDto | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [draftVisible, setDraftVisible] = useState(true)
@@ -87,13 +93,17 @@ export function Tariffs({
     effectsRequest = useApplicationRequest(context, setDialogError),
     copyRequest = useApplicationRequest(context, setDialogError)
   useEffect(() => {
-    if (!portId) return
+    if (!portId) {
+      setPort(null)
+      return
+    }
     void readPort(() =>
       window.ports.get({ context: { sessionId: context.sessionId }, query: { id: portId } }),
     ).then((r) => {
       if (r?.ok) setPort(r.value)
     })
-  }, [readPort, portId, context.sessionId, context.revision])
+    return portRequest.invalidate
+  }, [readPort, portRequest.invalidate, portId, context.sessionId, context.revision])
   const { request: readList } = listRequest,
     { request: readDetail, invalidate: invalidateDetail } = detailRequest
   const discardDraft = () => {
@@ -145,26 +155,41 @@ export function Tariffs({
     return () => onDialogChange(false)
   }, [anyDialogOpen, onDialogChange])
   useEffect(() => {
-    if (!portId) return
+    if (!portId) {
+      setList(null)
+      return
+    }
     void readList(() =>
       window.tariffs.list({
         context: { sessionId: context.sessionId },
         query: { portId, page, pageSize: 25 },
       }),
     ).then((r) => {
-      if (r?.ok) {
+      if (r?.ok && pageCurrent()) {
         setList(r.value)
         const last = Math.max(1, Math.ceil(r.value.total / 25))
         if (page > last) setPage(last)
       }
     })
-  }, [readList, portId, page, context.sessionId, context.revision, reload])
+    return listRequest.invalidate
+  }, [readList, listRequest.invalidate, portId, page, context.sessionId, context.revision, reload])
   useEffect(() => {
-    if (!selected) return
-    void readDetail(() =>
-      window.tariffs.get({ context: { sessionId: context.sessionId }, query: { id: selected } }),
+    if (!selected) {
+      setDetail(null)
+      return
+    }
+    void readDetail(
+      () =>
+        window.tariffs.get({ context: { sessionId: context.sessionId }, query: { id: selected } }),
+      { expectedAbsence: true },
     ).then((r) => {
+      if (!selectionCurrent()) return
       if (r?.ok) setDetail(r.value)
+      else if (r && !r.ok && r.error.code === 'NOT_FOUND') {
+        setSelected(null)
+        setDetail(null)
+        setError(null)
+      }
     })
     return invalidateDetail
   }, [invalidateDetail, readDetail, selected, context.sessionId, context.revision, reload])
@@ -374,6 +399,8 @@ export function Tariffs({
             </Button>
           </Group>
           <PortPicker
+            consultation={consultationPicker}
+            onMissing={() => setPortId((current) => (current === portId ? null : current))}
             context={context}
             value={portId}
             disabled={busy}
@@ -386,9 +413,7 @@ export function Tariffs({
                   portRequest.invalidate()
                   setPort(null)
                   setPortId(id)
-                  setPage(1)
                   setList(null)
-                  setSelected(null)
                   setDetail(null)
                   setError(null)
                   setNotice(null)

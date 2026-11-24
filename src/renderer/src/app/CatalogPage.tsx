@@ -1,5 +1,5 @@
+import { useConsultationState } from '../api/use-consultation-state'
 import { useDraftProtection } from './DraftProtection'
-import { useState } from 'react'
 import { Button, Group } from '@mantine/core'
 import type { useArchives } from '../api/use-archives'
 import { Catalog } from './Catalog'
@@ -9,7 +9,7 @@ export function CatalogPage(props: {
   onDialogChange: (open: boolean) => void
 }) {
   const guard = useDraftProtection()
-  const [section, setSection] = useState('CATALOG')
+  const [section, setSection] = useConsultationState('navigation', 'catalog')
   return (
     <>
       <Group className="master-data-nav" gap="xs" aria-label="Sezioni catalogo">

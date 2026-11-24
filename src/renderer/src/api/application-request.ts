@@ -2,7 +2,7 @@ import type { ApplicationResult } from '../../../shared/contracts/application'
 import type { ResponseScope } from './response-scope'
 
 export interface RequestOptions {
-  /** Only recovery reads whose caller handles absence may opt in. */
+  /** Reads whose caller explicitly handles absence (recovery or consultation revalidation). */
   expectedAbsence?: boolean
 }
 

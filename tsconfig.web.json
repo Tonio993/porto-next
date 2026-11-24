@@ -12,5 +12,10 @@
     "skipLibCheck": true,
     "types": ["vite/client"]
   },
-  "include": ["src/renderer/**/*", "src/shared/**/*.ts", "tests/unit/**/*.test.tsx"]
+  "include": [
+    "src/renderer/**/*",
+    "src/shared/**/*.ts",
+    "tests/unit/**/*.test.tsx",
+    "tests/unit/support/**/*.tsx"
+  ]
 }

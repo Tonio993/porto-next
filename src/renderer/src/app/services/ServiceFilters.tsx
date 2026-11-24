@@ -1,3 +1,4 @@
+import { useConsultationState, useConsultationPicker } from '../../api/use-consultation-state'
 import { useEffect, useState } from 'react'
 import { Button, Select, SimpleGrid, Stack, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
@@ -14,22 +15,33 @@ import { executionLabels } from '../operations/OperationDetail'
 
 export type ServiceFiltersValue = Omit<ServiceListQuery, 'vesselId' | 'page' | 'pageSize'>
 export function ServiceFilters({
+  selectedVoyage,
+  referenceError,
   context,
   vesselId,
   value,
   onChange,
   disabled,
 }: {
+  selectedVoyage: VoyageDto | null
+  referenceError: string | null
   context: ArchiveContextDto
   vesselId: string | null
   value: ServiceFiltersValue
   onChange: (value: ServiceFiltersValue) => void
   disabled: boolean
 }) {
-  const [expanded, setExpanded] = useState(false)
-  const [page, setPage] = useState(1),
+  const portConsultation = useConsultationPicker('servicePorts', vesselId)
+  const berthConsultation = useConsultationPicker(
+    'serviceBerths',
+    JSON.stringify([vesselId, value.portId ?? null]),
+  )
+  const customerConsultation = useConsultationPicker('serviceCustomers', vesselId)
+  const agencyConsultation = useConsultationPicker('serviceAgencies', vesselId)
+  const typeConsultation = useConsultationPicker('serviceTypes', vesselId)
+  const [expanded, setExpanded] = useConsultationState('services', 'expanded', vesselId)
+  const [page, setPage] = useConsultationState('services', 'voyagePage', vesselId),
     [voyages, setVoyages] = useState<PageDto<VoyageDto> | null>(null),
-    [chosen, setChosen] = useState<VoyageDto | null>(null),
     [error, setError] = useState<string | null>(null)
   const { request, invalidate, loading } = useApplicationRequest(context, setError)
   useEffect(() => {
@@ -40,12 +52,18 @@ export function ServiceFilters({
         query: { vesselId, page, pageSize: 25 },
       }),
     ).then((r) => {
-      if (r?.ok) setVoyages(r.value)
+      if (r?.ok) {
+        setVoyages(r.value)
+        const last = Math.max(1, Math.ceil(r.value.total / 25))
+        if (page > last) setPage(last)
+      }
     })
-  }, [request, context.sessionId, context.revision, vesselId, page, expanded])
+    return invalidate
+  }, [request, invalidate, context.sessionId, context.revision, vesselId, page, expanded])
   const options = voyages?.items ?? []
   const selected =
-    options.find((v) => v.id === value.voyageId) ?? (chosen?.id === value.voyageId ? chosen : null)
+    options.find((v) => v.id === value.voyageId) ??
+    (selectedVoyage?.id === value.voyageId ? selectedVoyage : null)
   const voyageOptions = [...options]
   if (selected && !options.some((v) => v.id === selected.id)) voyageOptions.unshift(selected)
   const visits = selected?.visits ?? [],
@@ -54,8 +72,9 @@ export function ServiceFilters({
   return (
     <details
       className="service-filters"
+      open={expanded}
       onToggle={(e) => {
-        if (e.currentTarget.open) setExpanded(true)
+        setExpanded(e.currentTarget.open)
       }}
     >
       <summary>
@@ -124,6 +143,7 @@ export function ServiceFilters({
           <p>Il periodo usa istanti UTC; gli estremi sono inclusi. Tutti i filtri si combinano.</p>
           {value.category !== 'FREE' && (
             <CatalogPicker
+              consultation={typeConsultation}
               context={context}
               historical
               value={value.serviceTypeId ?? null}
@@ -132,6 +152,7 @@ export function ServiceFilters({
             />
           )}
           <PortPicker
+            consultation={portConsultation}
             context={context}
             value={value.portId ?? null}
             disabled={disabled}
@@ -139,6 +160,7 @@ export function ServiceFilters({
           />
           {value.portId && (
             <BerthPicker
+              consultation={berthConsultation}
               key={value.portId}
               context={context}
               historical
@@ -150,6 +172,7 @@ export function ServiceFilters({
           )}
           <SubjectPicker
             kind="customer"
+            consultation={customerConsultation}
             historical
             context={context}
             value={value.customerId ?? null}
@@ -158,6 +181,7 @@ export function ServiceFilters({
           />
           <SubjectPicker
             kind="agency"
+            consultation={agencyConsultation}
             historical
             context={context}
             value={value.agencyId ?? null}
@@ -177,7 +201,6 @@ export function ServiceFilters({
                   label: v.startedAt + ' → ' + (v.endedAt ?? 'aperto'),
                 }))}
                 onChange={(voyageId) => {
-                  setChosen(voyageOptions.find((v) => v.id === voyageId) ?? null)
                   onChange({ ...value, voyageId, portCallId: null, berthStayId: null })
                 }}
               />
@@ -221,7 +244,7 @@ export function ServiceFilters({
               )}
             </>
           )}
-          {error && <p role="alert">{error}</p>}
+          {(error || referenceError) && <p role="alert">{error || referenceError}</p>}
           <Button variant="default" disabled={disabled} onClick={() => onChange({})}>
             Azzera filtri
           </Button>

@@ -1,3 +1,4 @@
+import { ConsultationWorkspace } from '../api/use-consultation-state'
 import { DraftProtection, useDraftProtection } from './DraftProtection'
 import { Services } from './services/Services'
 import { Operations } from './operations/Operations'
@@ -24,7 +25,9 @@ export function App() {
   // Remount forms, selections and future previews at every actual activation.
   return (
     <DraftProtection key={archives.state.context?.sessionId ?? 'closed'}>
-      <ArchiveWorkspace archives={archives} />
+      <ConsultationWorkspace>
+        <ArchiveWorkspace archives={archives} />
+      </ConsultationWorkspace>
     </DraftProtection>
   )
 }

@@ -1,3 +1,4 @@
+import { useConsultationState } from '../api/use-consultation-state'
 import { useProtectedDraft } from './DraftProtection'
 import { useWriteAttempt } from '../api/use-write-attempt'
 import { trackedRequest } from '../../../shared/contracts/write-outcomes'
@@ -42,11 +43,11 @@ export function Catalog({
     trigger: HTMLElement | null
   } | null>(null)
   const [reload, setReload] = useState(0)
-  const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('ALL')
-  const [page, setPage] = useState(1)
+  const [search, setSearch] = useConsultationState('catalog', 'search')
+  const [status, setStatus] = useConsultationState('catalog', 'status')
+  const [page, setPage, pageCurrent] = useConsultationState('catalog', 'page')
   const [list, setList] = useState<PageDto<ServiceTypeDto> | null>(null)
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected, selectionCurrent] = useConsultationState('catalog', 'selection')
   const [detail, setDetail] = useState<ServiceTypeDto | null>(null)
   const [fixed, setFixed] = useState<
     { operation: OperationType; initialWeight: InitialWeightDto }[]
@@ -128,18 +129,29 @@ export function Catalog({
         query: { search, status: status as 'ALL' | 'ACTIVE' | 'INACTIVE', page, pageSize: 25 },
       }),
     ).then((result) => {
-      if (result?.ok) {
+      if (result?.ok && pageCurrent()) {
         setList(result.value)
         const lastPage = Math.max(1, Math.ceil(result.value.total / result.value.pageSize))
         if (page > lastPage) setPage(lastPage)
       }
     })
-  }, [readList, context.sessionId, context.revision, search, status, page, reload])
+    return listRequest.invalidate
+  }, [
+    readList,
+    listRequest.invalidate,
+    context.sessionId,
+    context.revision,
+    search,
+    status,
+    page,
+    reload,
+  ])
   useEffect(() => {
     if (!selected) return
     void readDetail(() =>
       window.catalog.get({ context: { sessionId: context.sessionId }, query: { id: selected } }),
     ).then((result) => {
+      if (!selectionCurrent()) return
       if (result?.ok) setDetail(result.value)
       else if (result && !result.ok && result.error.code === 'NOT_FOUND') {
         setDetail(null)

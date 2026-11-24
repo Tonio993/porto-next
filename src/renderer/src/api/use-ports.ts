@@ -1,3 +1,4 @@
+import { useConsultationState } from './use-consultation-state'
 import { useWriteAttempt } from './use-write-attempt'
 import { trackedRequest } from '../../../shared/contracts/write-outcomes'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -39,10 +40,14 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
   const resolver = useApplicationRequest(context, setError)
   const effects = useApplicationRequest(context, setError)
   const [page, setPage] = useState<PortPageDto | null>(null)
-  const [search, setSearch] = useState('')
-  const [pageNumber, setPageNumber] = useState(1)
-  const [historyPage, setHistoryPage] = useState(1)
-  const [selection, setSelection] = useState<string | null>(null)
+  const [search, setSearch] = useConsultationState('ports', 'search')
+  const [pageNumber, setPageNumber, pageCurrent] = useConsultationState('ports', 'page')
+  const [selection, setSelection, selectionCurrent] = useConsultationState('ports', 'selection')
+  const [historyPage, setHistoryPage, historyPageCurrent] = useConsultationState(
+    'portHistory',
+    'page',
+    selection,
+  )
   const selected = useRef(selection)
   const [history, setHistory] = useState<{
     value: PortHistoryDto
@@ -101,10 +106,10 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
         query: { page: pageNumber, pageSize: 25, search },
       }),
     )
-    if (result?.ok) {
+    if (result?.ok && pageCurrent()) {
       setPage(result.value)
-      if (!result.value.items.length && result.value.total && pageNumber > 1)
-        setPageNumber(Math.ceil(result.value.total / 25))
+      if (!result.value.items.length && pageNumber > 1)
+        setPageNumber(Math.max(1, Math.ceil(result.value.total / 25)))
     }
   }, [listRequest, context.sessionId, pageNumber, search])
   const loadDetail = useCallback(async () => {
@@ -115,7 +120,7 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
         query: { id: selection, page: historyPage, pageSize: 25 },
       }),
     )
-    if (!result) return
+    if (!result || !selectionCurrent() || !historyPageCurrent()) return
     if (result.ok) {
       setHistory({ value: result.value, context: result.context })
       if (!result.value.versions.items.length && historyPage > 1)
@@ -129,7 +134,8 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
   }, [detailRequest, context.sessionId, selection, historyPage, setError])
   useEffect(() => {
     void loadList()
-  }, [loadList, context.revision])
+    return list.invalidate
+  }, [list.invalidate, loadList, context.revision])
   useEffect(() => {
     void loadDetail()
     return invalidateDetail
@@ -190,7 +196,6 @@ export function usePorts(archives: ReturnType<typeof useArchives>, onRecovered?:
     selected.current = id
     setSelection(id)
     setHistory(null)
-    setHistoryPage(1)
     setEditor(null)
     setFields({})
     setError(null)

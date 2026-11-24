@@ -1,3 +1,4 @@
+import { useConsultationState } from './use-consultation-state'
 import { useWriteAttempt } from './use-write-attempt'
 import { trackedRequest } from '../../../shared/contracts/write-outcomes'
 import { useCallback, useEffect, useState } from 'react'
@@ -49,9 +50,17 @@ export function useBerths(
   const resolver = useApplicationRequest(context, setError)
   const effects = useApplicationRequest(context, setError)
   const [page, setPage] = useState<PageDto<BerthDto> | null>(null)
-  const [pageNumber, setPageNumber] = useState(1)
-  const [historyPage, setHistoryPage] = useState(1)
-  const [selection, setSelection] = useState<string | null>(null)
+  const [pageNumber, setPageNumber, pageCurrent] = useConsultationState('berths', 'page', portId)
+  const [selection, setSelection, selectionCurrent] = useConsultationState(
+    'berths',
+    'selection',
+    portId,
+  )
+  const [historyPage, setHistoryPage, historyPageCurrent] = useConsultationState(
+    'berthHistory',
+    'page',
+    selection,
+  )
   const [history, setHistory] = useState<{
     value: BerthHistoryDto
     context: ArchiveContextDto
@@ -101,7 +110,7 @@ export function useBerths(
         query: { portId, page: pageNumber, pageSize: 10, selectableOnly: false },
       }),
     )
-    if (result?.ok) {
+    if (result?.ok && pageCurrent()) {
       setPage(result.value)
       if (!result.value.items.length && pageNumber > 1)
         setPageNumber(Math.max(1, Math.ceil(result.value.total / 10)))
@@ -118,6 +127,7 @@ export function useBerths(
         query: { id: selection, page: historyPage, pageSize: 10 },
       }),
     )
+    if (!selectionCurrent() || !historyPageCurrent()) return
     if (result?.ok) {
       setHistory({ value: result.value, context: result.context })
       if (!result.value.versions.items.length && historyPage > 1)
@@ -131,7 +141,8 @@ export function useBerths(
 
   useEffect(() => {
     void loadList()
-  }, [loadList, revision])
+    return invalidateList
+  }, [invalidateList, loadList, revision])
   useEffect(() => {
     void loadHistory()
     return invalidateHistory
@@ -176,7 +187,6 @@ export function useBerths(
     setHistory(null)
     setDetailError(null)
     clearErrors()
-    setHistoryPage(1)
     setSelection(id)
   }
 

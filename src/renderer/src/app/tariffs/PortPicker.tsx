@@ -1,3 +1,4 @@
+import type { ConsultationPicker } from '../../api/use-consultation-state'
 import { useEffect, useState } from 'react'
 import { Select, Stack, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
@@ -12,16 +13,26 @@ export function PortPicker({
   disabled,
   label = 'Porto',
   retainedId,
+  consultation,
+  onMissing,
 }: {
   context: ArchiveContextDto
   value: string | null
   onChange: (id: string | null) => void
   disabled?: boolean
   label?: string
+  consultation?: ConsultationPicker
+  onMissing?: () => void
   retainedId?: string
 }) {
-  const [search, setSearch] = useState(''),
-    [page, setPage] = useState(1)
+  const [localSearch, setLocalSearch] = useState('')
+  const [localPage, setLocalPage] = useState(1)
+  const { search, setSearch, page, setPage } = consultation ?? {
+    search: localSearch,
+    setSearch: setLocalSearch,
+    page: localPage,
+    setPage: setLocalPage,
+  }
   const [list, setList] = useState<PortPageDto | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { request, invalidate, loading } = useApplicationRequest(context, setError)
@@ -40,8 +51,10 @@ export function PortPicker({
           value: r.value.id,
           label: `${r.value.code} · ${r.value.version.name}${r.value.status === 'INACTIVE' ? ' · Disattivato' : ''}`,
         })
+      else if (r && !r.ok && r.error.code === 'NOT_FOUND') onMissing?.()
     })
-  }, [readChosen, value, context.sessionId, context.revision])
+    return invalidateChosen
+  }, [readChosen, invalidateChosen, value, context.sessionId, context.revision])
   const options =
     list?.items.map((p) => ({
       value: p.id,
@@ -58,9 +71,14 @@ export function PortPicker({
         query: { search, page, pageSize: 25 },
       }),
     ).then((r) => {
-      if (r?.ok) setList(r.value)
+      if (r?.ok && (!consultation || consultation.current())) {
+        setList(r.value)
+        const last = Math.max(1, Math.ceil(r.value.total / 25))
+        if (page > last) setPage(last)
+      }
     })
-  }, [request, context.sessionId, context.revision, search, page])
+    return invalidate
+  }, [request, invalidate, context.sessionId, context.revision, search, page])
   return (
     <Stack gap="xs">
       <div className="tariff-port-picker">

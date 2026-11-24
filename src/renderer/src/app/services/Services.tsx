@@ -1,7 +1,9 @@
+import { useServiceFilterReferences } from '../../api/use-service-filter-references'
+import { useConsultationState, useConsultationPicker } from '../../api/use-consultation-state'
 import { useProtectedDraft } from '../DraftProtection'
 import { useWriteAttempt } from '../../api/use-write-attempt'
 import { trackedRequest } from '../../../../shared/contracts/write-outcomes'
-import { ServiceFilters, type ServiceFiltersValue } from './ServiceFilters'
+import { ServiceFilters } from './ServiceFilters'
 import { ServicePreview } from './ServicePreview'
 import { CatalogPicker } from './CatalogPicker'
 import { useEffect, useRef, useState } from 'react'
@@ -46,16 +48,28 @@ export function Services({
   archives: ReturnType<typeof useArchives>
   onDialogChange: (open: boolean) => void
 }) {
+  const consultationPicker = useConsultationPicker('serviceVessels')
   const context = archives.state.context!
-  const [vesselId, setVesselId] = useState<string | null>(null),
-    [page, setPage] = useState(1),
+  const [vesselId, setVesselId] = useConsultationState('serviceOwner', 'vesselId'),
+    [page, setPage, pageCurrent] = useConsultationState('services', 'page', vesselId),
     [reload, setReload] = useState(0)
-  const [filters, setFilters] = useState<ServiceFiltersValue>({}),
+  const [filters, setFilters, filtersCurrent] = useConsultationState(
+      'services',
+      'filters',
+      vesselId,
+    ),
     [preview, setPreview] = useState<ServiceChangePreviewDto | null>(null),
     [detailRevision, setDetailRevision] = useState<string | null>(null)
   const [list, setList] = useState<PageDto<ServiceActivityDto> | null>(null),
-    [selected, setSelected] = useState<{ id: string } | null>(null),
+    [selected, setSelected, selectionCurrent] = useConsultationState(
+      'services',
+      'selection',
+      vesselId,
+    ),
     [detail, setDetail] = useState<ServiceActivityDto | null>(null)
+  const references = useServiceFilterReferences(context, vesselId, filters, (patch) => {
+    if (filtersCurrent()) setFilters((previous) => ({ ...previous, ...patch }))
+  })
   const [draft, setDraft] = useState<Draft | null>(null),
     [open, setOpen] = useState(false),
     [resolution, setResolution] = useState<ServiceMomentDto | null>(null)
@@ -132,20 +146,46 @@ export function Services({
         query: { ...filters, vesselId, page, pageSize: 25 },
       }),
     ).then((r) => {
-      if (r?.ok) setList(r.value)
+      if (r?.ok && pageCurrent()) {
+        setList(r.value)
+        const last = Math.max(1, Math.ceil(r.value.total / 25))
+        if (page > last) setPage(last)
+      }
     })
-  }, [readList, context.sessionId, context.revision, vesselId, page, reload, filters])
+    return listing.invalidate
+  }, [
+    readList,
+    listing.invalidate,
+    context.sessionId,
+    context.revision,
+    vesselId,
+    page,
+    reload,
+    filters,
+  ])
   useEffect(() => {
-    if (!selected) return
-    void readDetail(() =>
-      window.services.get({
-        context: { sessionId: context.sessionId },
-        query: { id: selected.id },
-      }),
+    if (!selected) {
+      setDetail(null)
+      setDetailRevision(null)
+      return
+    }
+    void readDetail(
+      () =>
+        window.services.get({
+          context: { sessionId: context.sessionId },
+          query: { id: selected.id },
+        }),
+      { expectedAbsence: true },
     ).then((r) => {
+      if (!selectionCurrent()) return
       if (r?.ok) {
         setDetail(r.value)
         setDetailRevision(r.context.revision)
+      } else if (r && !r.ok && r.error.code === 'NOT_FOUND') {
+        setSelected(null)
+        setDetail(null)
+        setDetailRevision(null)
+        setError(null)
       }
     })
     return invalidateDetail
@@ -483,6 +523,8 @@ export function Services({
         </Group>
       </Group>
       <VesselPicker
+        consultation={consultationPicker}
+        onMissing={() => setVesselId((current) => (current === vesselId ? null : current))}
         context={context}
         value={vesselId}
         disabled={busy}
@@ -493,11 +535,8 @@ export function Services({
               listing.invalidate()
               reading.invalidate()
               invalidateEditor()
-              setFilters({})
               setVesselId(id)
-              setPage(1)
               setList(null)
-              setSelected(null)
               setDetail(null)
               setDraft(null)
 
@@ -507,6 +546,8 @@ export function Services({
         }}
       />
       <ServiceFilters
+        selectedVoyage={references.voyage}
+        referenceError={references.error}
         key={vesselId ?? 'all'}
         context={context}
         vesselId={vesselId}
@@ -526,14 +567,16 @@ export function Services({
             variant="default"
             disabled={busy}
             onClick={() => {
-              listing.invalidate()
-              reading.invalidate()
-              setVesselId(null)
-              setFilters({})
-              setPage(1)
-              setList(null)
-              setSelected(null)
-              setDetail(null)
+              guard.request({
+                label: 'consultare tutte le navi',
+                run: () => {
+                  listing.invalidate()
+                  reading.invalidate()
+                  setVesselId(null)
+                  setList(null)
+                  setDetail(null)
+                },
+              })
             }}
           >
             Tutte le navi

@@ -1,3 +1,4 @@
+import { useConsultationState } from './use-consultation-state'
 import { useWriteAttempt } from './use-write-attempt'
 import { trackedRequest } from '../../../shared/contracts/write-outcomes'
 import { useCallback, useEffect, useState } from 'react'
@@ -45,10 +46,14 @@ export function useCustomers(archives: ReturnType<typeof useArchives>, onRecover
   const resolver = useApplicationRequest(context, setError)
   const effects = useApplicationRequest(context, setError)
   const [page, setPage] = useState<PageDto<CustomerDto> | null>(null)
-  const [search, setSearch] = useState('')
-  const [pageNumber, setPageNumber] = useState(1)
-  const [historyPage, setHistoryPage] = useState(1)
-  const [selection, setSelection] = useState<string | null>(null)
+  const [search, setSearch] = useConsultationState('customers', 'search')
+  const [pageNumber, setPageNumber, pageCurrent] = useConsultationState('customers', 'page')
+  const [selection, setSelection, selectionCurrent] = useConsultationState('customers', 'selection')
+  const [historyPage, setHistoryPage, historyPageCurrent] = useConsultationState(
+    'customerHistory',
+    'page',
+    selection,
+  )
   const [history, setHistory] = useState<{
     value: CustomerHistoryDto
     context: ArchiveContextDto
@@ -98,7 +103,7 @@ export function useCustomers(archives: ReturnType<typeof useArchives>, onRecover
         query: { search, page: pageNumber, pageSize: 10, selectableOnly: false },
       }),
     )
-    if (result?.ok) {
+    if (result?.ok && pageCurrent()) {
       setPage(result.value)
       if (!result.value.items.length && pageNumber > 1)
         setPageNumber(Math.max(1, Math.ceil(result.value.total / 10)))
@@ -115,6 +120,7 @@ export function useCustomers(archives: ReturnType<typeof useArchives>, onRecover
         query: { id: selection, page: historyPage, pageSize: 10 },
       }),
     )
+    if (!selectionCurrent() || !historyPageCurrent()) return
     if (result?.ok) {
       setHistory({ value: result.value, context: result.context })
       if (!result.value.versions.items.length && historyPage > 1)
@@ -128,7 +134,8 @@ export function useCustomers(archives: ReturnType<typeof useArchives>, onRecover
 
   useEffect(() => {
     void loadList()
-  }, [loadList, revision])
+    return invalidateList
+  }, [invalidateList, loadList, revision])
   useEffect(() => {
     void loadHistory()
     return invalidateHistory
@@ -173,7 +180,6 @@ export function useCustomers(archives: ReturnType<typeof useArchives>, onRecover
     setHistory(null)
     setDetailError(null)
     clearErrors()
-    setHistoryPage(1)
     setSelection(id)
   }
 

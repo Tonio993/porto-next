@@ -1,3 +1,4 @@
+import type { ConsultationPicker } from '../../api/use-consultation-state'
 import { useEffect, useState } from 'react'
 import { Select, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
@@ -12,16 +13,26 @@ export function VesselPicker({
   onChange,
   disabled,
   retainedId,
+  consultation,
+  onMissing,
 }: {
   context: ArchiveContextDto
   value: string | null
   onChange: (id: string | null) => void
   disabled?: boolean
+  consultation?: ConsultationPicker
+  onMissing?: () => void
   retainedId?: string
 }) {
-  const [search, setSearch] = useState(''),
-    [page, setPage] = useState(1),
-    [list, setList] = useState<PageDto<VesselDto> | null>(null)
+  const [localSearch, setLocalSearch] = useState('')
+  const [localPage, setLocalPage] = useState(1)
+  const { search, setSearch, page, setPage } = consultation ?? {
+    search: localSearch,
+    setSearch: setLocalSearch,
+    page: localPage,
+    setPage: setLocalPage,
+  }
+  const [list, setList] = useState<PageDto<VesselDto> | null>(null)
   const [chosen, setChosen] = useState<{ value: string; label: string } | null>(null),
     [error, setError] = useState<string | null>(null)
   const { request, invalidate, loading } = useApplicationRequest(context, setError)
@@ -32,9 +43,14 @@ export function VesselPicker({
         query: { search, page, pageSize: 25, selectableOnly: false },
       }),
     ).then((r) => {
-      if (r?.ok) setList(r.value)
+      if (r?.ok && (!consultation || consultation.current())) {
+        setList(r.value)
+        const last = Math.max(1, Math.ceil(r.value.total / 25))
+        if (page > last) setPage(last)
+      }
     })
-  }, [request, context.sessionId, context.revision, search, page])
+    return invalidate
+  }, [request, invalidate, context.sessionId, context.revision, search, page])
   const { request: readChosen, invalidate: invalidateChosen } = useApplicationRequest(
     context,
     setError,
@@ -55,8 +71,10 @@ export function VesselPicker({
               r.value.version.registeredName +
               (r.value.selectable ? '' : ' · Disattivata'),
           })
+        else if (r && !r.ok && r.error.code === 'NOT_FOUND') onMissing?.()
       })
-  }, [readChosen, invalidateChosen, context.sessionId, context.revision, value])
+    return invalidateChosen
+  }, [readChosen, invalidateChosen, value, context.sessionId, context.revision])
   const options =
     list?.items.map((v) => ({
       value: v.id,

@@ -1,3 +1,4 @@
+import type { ConsultationPicker } from '../../api/use-consultation-state'
 import { useEffect, useState } from 'react'
 import { Select, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
@@ -11,6 +12,7 @@ export function CatalogPicker({
   value,
   onChange,
   disabled,
+  consultation,
   historical = false,
   retainedId = null,
 }: {
@@ -18,12 +20,19 @@ export function CatalogPicker({
   value: string | null
   onChange: (id: string | null) => void
   retainedId?: string | null
+  consultation?: ConsultationPicker
   historical?: boolean
   disabled: boolean
 }) {
-  const [search, setSearch] = useState(''),
-    [page, setPage] = useState(1),
-    [list, setList] = useState<PageDto<ServiceTypeDto> | null>(null),
+  const [localSearch, setLocalSearch] = useState('')
+  const [localPage, setLocalPage] = useState(1)
+  const { search, setSearch, page, setPage } = consultation ?? {
+    search: localSearch,
+    setSearch: setLocalSearch,
+    page: localPage,
+    setPage: setLocalPage,
+  }
+  const [list, setList] = useState<PageDto<ServiceTypeDto> | null>(null),
     [chosen, setChosen] = useState<{ value: string; label: string } | null>(null),
     [error, setError] = useState<string | null>(null)
   const { request, invalidate, loading } = useApplicationRequest(context, setError),
@@ -45,9 +54,14 @@ export function CatalogPicker({
         query: { search, page, pageSize: 25, status: historical ? 'ALL' : 'ACTIVE' },
       }),
     ).then((r) => {
-      if (r?.ok) setList(r.value)
+      if (r?.ok && (!consultation || consultation.current())) {
+        setList(r.value)
+        const last = Math.max(1, Math.ceil(r.value.total / 25))
+        if (page > last) setPage(last)
+      }
     })
-  }, [request, api, context.sessionId, context.revision, search, page, historical])
+    return invalidate
+  }, [request, invalidate, api, context.sessionId, context.revision, search, page, historical])
   const { request: readChosen, invalidate: invalidateChosen } = chosenRequest
   useEffect(() => {
     invalidateChosen()

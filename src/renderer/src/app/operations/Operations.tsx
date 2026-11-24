@@ -1,3 +1,4 @@
+import { useConsultationState, useConsultationPicker } from '../../api/use-consultation-state'
 import { operationCreationOutcome } from '../../api/operation-creation-outcome'
 import { SingleFlight } from '../../api/single-flight'
 import { useProtectedDraft } from '../DraftProtection'
@@ -87,13 +88,22 @@ export function Operations({
       },
     })
   }
+  const consultationPicker = useConsultationPicker('operationVessels')
   const context = archives.state.context!
-  const [vesselId, setVesselId] = useState<string | null>(null),
-    [page, setPage] = useState(1),
-    [stayPage, setStayPage] = useState(1)
+  const [vesselId, setVesselId] = useConsultationState('operationOwner', 'vesselId'),
+    [page, setPage, pageCurrent] = useConsultationState('operations', 'page', vesselId),
+    [stayPage, setStayPage, stayPageCurrent] = useConsultationState(
+      'operations',
+      'stayPage',
+      vesselId,
+    )
   const [list, setList] = useState<PageDto<VesselOperationDto> | null>(null),
     [stays, setStays] = useState<PageDto<VoyageDto> | null>(null)
-  const [selected, setSelected] = useState<string | null>(null),
+  const [selected, setSelected, selectionCurrent] = useConsultationState(
+      'operations',
+      'selection',
+      vesselId,
+    ),
     [detail, setDetail] = useState<VesselOperationDto | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null),
     [open, setOpen] = useState(false),
@@ -114,9 +124,13 @@ export function Operations({
     [error, setError] = useState<string | null>(null),
     [dialogError, setDialogError] = useState<string | null>(null),
     [notice, setNotice] = useState<string | null>(null)
-  const [view, setView] = useState('operations'),
+  const [view, setView] = useConsultationState('operations', 'view', vesselId),
     [reload, setReload] = useState(0)
-  const [contextInstant, setContextInstant] = useState(''),
+  const [contextInstant, setContextInstant] = useConsultationState(
+      'operations',
+      'instant',
+      vesselId,
+    ),
     [operationalContext, setOperationalContext] = useState<OperationalContextDto | null>(null)
   const trigger = useRef<HTMLElement | null>(null)
   const consultationFocus = useRef<HTMLButtonElement | null>(null)
@@ -251,35 +265,82 @@ export function Operations({
     return () => onDialogChange(false)
   }, [open, assignmentOpen, completionOpen, maintenanceOpen, onDialogChange])
   useEffect(() => {
-    if (!vesselId) return
+    if (!vesselId) {
+      setList(null)
+      return
+    }
     void readList(() =>
       window.operations.list({
         context: { sessionId: context.sessionId },
         query: { vesselId, page, pageSize: 25 },
       }),
     ).then((r) => {
-      if (r?.ok) setList(r.value)
+      if (r?.ok && pageCurrent()) {
+        setList(r.value)
+        const last = Math.max(1, Math.ceil(r.value.total / 25))
+        if (page > last) setPage(last)
+      }
     })
-  }, [readList, context.sessionId, context.revision, vesselId, page, reload])
+    return listRequest.invalidate
+  }, [
+    readList,
+    listRequest.invalidate,
+    context.sessionId,
+    context.revision,
+    vesselId,
+    page,
+    reload,
+  ])
   useEffect(() => {
-    if (!vesselId) return
+    if (!vesselId) {
+      setStays(null)
+      return
+    }
     void readStays(() =>
       window.operations.stays({
         context: { sessionId: context.sessionId },
         query: { vesselId, page: stayPage, pageSize: 25 },
       }),
     ).then((r) => {
-      if (r?.ok) setStays(r.value)
+      if (r?.ok && stayPageCurrent()) {
+        setStays(r.value)
+        const last = Math.max(1, Math.ceil(r.value.total / 25))
+        if (stayPage > last) setStayPage(last)
+      }
     })
-  }, [readStays, context.sessionId, context.revision, vesselId, stayPage, reload])
+    return stayRequest.invalidate
+  }, [
+    readStays,
+    stayRequest.invalidate,
+    context.sessionId,
+    context.revision,
+    vesselId,
+    stayPage,
+    reload,
+  ])
   useEffect(() => {
-    if (!selected) return
-    void readDetail(() =>
-      window.operations.get({ context: { sessionId: context.sessionId }, query: { id: selected } }),
+    if (!selected) {
+      setDetail(null)
+      setDetailRevision(null)
+      return
+    }
+    void readDetail(
+      () =>
+        window.operations.get({
+          context: { sessionId: context.sessionId },
+          query: { id: selected },
+        }),
+      { expectedAbsence: true },
     ).then((r) => {
+      if (!selectionCurrent()) return
       if (r?.ok) {
         setDetail(r.value)
         setDetailRevision(r.context.revision)
+      } else if (r && !r.ok && r.error.code === 'NOT_FOUND') {
+        setSelected(null)
+        setDetail(null)
+        setDetailRevision(null)
+        setError(null)
       }
     })
     return invalidateDetail
@@ -450,11 +511,8 @@ export function Operations({
         setVesselId(id)
         setList(null)
         setStays(null)
-        setSelected(null)
         setDetail(null)
         setDraft(null)
-        setPage(1)
-        setStayPage(1)
       },
     })
   }
@@ -498,7 +556,14 @@ export function Operations({
           )}
         </Group>
       </Group>
-      <VesselPicker context={context} value={vesselId} onChange={selectedVessel} disabled={busy} />
+      <VesselPicker
+        consultation={consultationPicker}
+        onMissing={() => setVesselId((current) => (current === vesselId ? null : current))}
+        context={context}
+        value={vesselId}
+        onChange={selectedVessel}
+        disabled={busy}
+      />
       {error && (
         <StateMessage kind="error" title="Consultazione non disponibile">
           {error}

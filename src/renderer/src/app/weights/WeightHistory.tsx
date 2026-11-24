@@ -1,3 +1,4 @@
+import { useConsultationState } from '../../api/use-consultation-state'
 import { useProtectedDraft } from '../DraftProtection'
 import { SingleFlight } from '../../api/single-flight'
 import { useEffect, useRef, useState, type RefObject } from 'react'
@@ -55,7 +56,7 @@ export function WeightHistory({
   onApplied: () => void
 }) {
   const context = archives.state.context!
-  const [page, setPage] = useState(1),
+  const [page, setPage, pageCurrent] = useConsultationState('weights', 'page', sequenceId),
     [reload, setReload] = useState(0)
   const [history, setHistory] = useState<WeightHistoryDto | null>(null)
   const [historyContext, setHistoryContext] = useState(context)
@@ -129,7 +130,7 @@ export function WeightHistory({
         query: { sequenceId, page, pageSize: 25 },
       }),
     ).then((r) => {
-      if (r?.ok) {
+      if (r?.ok && pageCurrent()) {
         setHistory(r.value)
         setHistoryContext(r.context)
         const last = Math.max(1, Math.ceil(r.value.versions.total / 25))

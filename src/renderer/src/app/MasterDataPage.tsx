@@ -1,9 +1,10 @@
+import { useConsultationState } from '../api/use-consultation-state'
 import { useDraftProtection } from './DraftProtection'
 import { Vessels } from './vessels/Vessels'
 import { Button, Group, Stack } from '@mantine/core'
 import type { useArchives } from '../api/use-archives'
 import { Ports } from './Ports'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { Customers } from './customers/Customers'
 import { Agencies } from './agencies/Agencies'
 
@@ -15,7 +16,7 @@ export function MasterDataPage({
   onDialogChange: (opened: boolean) => void
 }) {
   const guard = useDraftProtection()
-  const [section, setSection] = useState('Porti')
+  const [section, setSection] = useConsultationState('navigation', 'master')
   const dialogChange = useCallback(
     (opened: boolean) => {
       onDialogChange(opened)

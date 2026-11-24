@@ -53,15 +53,26 @@ export class BerthService implements BerthApi {
 
   list(request: QueryRequest<BerthListQuery>) {
     return this.coordinator.query(request, ({ database }, query) => {
-      const input = record(query, ['portId', 'page', 'pageSize', 'selectableOnly'])
+      const input = record(query, [
+        'portId',
+        'page',
+        'pageSize',
+        'selectableOnly',
+        ...(query && typeof query === 'object' && Object.hasOwn(query, 'search') ? ['search'] : []),
+      ])
       const portId = entityId(input.portId, 'portId')
       const { page, pageSize } = pagination(input.page, input.pageSize)
-      if (typeof input.selectableOnly !== 'boolean')
+      if (
+        typeof input.selectableOnly !== 'boolean' ||
+        (input.search !== undefined &&
+          (typeof input.search !== 'string' || [...input.search].length > 200))
+      )
         throw new ArchiveError('VALIDATION_ERROR', 'Filtro delle banchine non valido.')
       const now = this.now()
       new PortRepository(database, () => now).get(portId)
       return new BerthRepository(database, now).list({
         portId,
+        search: input.search as string | undefined,
         page,
         pageSize,
         selectableOnly: input.selectableOnly,

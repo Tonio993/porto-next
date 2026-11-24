@@ -407,3 +407,93 @@ it('ripristina v5 quando la migrazione fallisce dopo le prime istruzioni', async
     db.close()
   }
 })
+
+it('PR05 ricerca backend globale: 26 banchine, pagine e ricerca letterale Unicode per porto senza scritture', async () => {
+  const other = await createPort('Altro porto PR05')
+  const items = []
+  for (let index = 1; index <= 26; index++)
+    items.push(value(await create('PR05 Molo ' + String(index).padStart(2, '0'))))
+  const special = value(await create('Mòlo 100%_Speciale'))
+  value(await create('Mòlo 100%_Speciale', other.id))
+  const before = { ...context() }
+  const query = (search: string, page = 1, portId = port.id) =>
+    berths.list({
+      context: queryContext(),
+      query: { portId, search, page, pageSize: 25, selectableOnly: false },
+    })
+  const first = value(await query('pr05'))
+  const second = value(await query('PR05', 2))
+  expect(first).toMatchObject({ total: 26, page: 1, pageSize: 25 })
+  expect(first.items).toHaveLength(25)
+  expect(second.items.map((v) => v.id)).toEqual([items[25].id])
+  expect(second.total).toBe(26)
+  expect(value(await query('molo 26')).items.map((v) => v.id)).toEqual([items[25].id])
+  expect(value(await query('mo\u0300lo 100%_')).items.map((v) => v.id)).toEqual([special.id])
+  expect(value(await query('100%X')).total).toBe(0)
+  expect(value(await query('100%_', 1, other.id)).items).toHaveLength(1)
+  expect(value(await query('inesistente'))).toMatchObject({ total: 0, items: [] })
+  expect(context()).toEqual(before)
+})
+
+it('PR05 ricerca banchine per nomi storici prenotati, stato e porto disattivato; compatibilità query senza ricerca', async () => {
+  const berth = value(await create('Nome originale PR05'))
+  await apply({
+    operation: 'UPDATE_VERSION',
+    berthId: berth.id,
+    versionId: berth.version.id,
+    name: 'Nome corrente PR05',
+    moment: null,
+  })
+  const query = (search: string, selectableOnly = false) =>
+    berths.list({
+      context: queryContext(),
+      query: { portId: port.id, search, page: 1, pageSize: 25, selectableOnly },
+    })
+  expect(value(await query('originale')).items[0].version.name).toBe('Nome corrente PR05')
+  expect(value(await query('corrente')).items).toHaveLength(1)
+  await apply({ operation: 'DEACTIVATE_BERTH', berthId: berth.id })
+  expect(value(await query('originale', true)).total).toBe(0)
+  expect(value(await query('originale')).items[0].selectable).toBe(false)
+  expect((await list()).items.map((v) => v.id)).toEqual([berth.id])
+  const active = value(await create('Ancora attiva'))
+  const p = value(
+    await ports.previewDeactivate({ context: context(), payload: { portId: port.id } }),
+  )
+  value(await ports.confirmDeactivate({ context: p.context, payload: { previewId: p.previewId } }))
+  expect(value(await query('attiva', true)).total).toBe(0)
+  expect(value(await query('attiva')).items[0]).toMatchObject({ id: active.id, selectable: false })
+})
+
+it('PR05 ricerca banchine: validazione diretta di forma, limiti, contesto e tipi senza revisioni nuove', async () => {
+  const query = { portId: port.id, search: '', page: 1, pageSize: 25, selectableOnly: false }
+  const before = { ...context() }
+  for (const patch of [
+    { search: null },
+    { search: 3 },
+    { search: '😀'.repeat(201) },
+    { extra: true },
+    { page: 0 },
+    { pageSize: 101 },
+    { portId: 'wrong' },
+    { selectableOnly: null },
+  ]) {
+    expect(
+      await berths.list({ context: queryContext(), query: { ...query, ...patch } as typeof query }),
+    ).toMatchObject(failure('VALIDATION_ERROR'))
+  }
+  expect(
+    value(
+      await berths.list({ context: queryContext(), query: { ...query, search: '😀'.repeat(200) } }),
+    ).total,
+  ).toBe(0)
+  expect(
+    await berths.list({ context: { sessionId: '00000000-0000-4000-8000-000000000000' }, query }),
+  ).toMatchObject(failure('ARCHIVE_SESSION_CHANGED'))
+  expect(
+    await berths.list({
+      context: { ...queryContext(), extra: true } as ReturnType<typeof queryContext>,
+      query,
+    }),
+  ).toMatchObject(failure('VALIDATION_ERROR'))
+  expect(context()).toEqual(before)
+})

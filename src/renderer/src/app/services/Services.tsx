@@ -536,6 +536,7 @@ export function Services({
       </Group>
       <VesselPicker
         consultation={consultationPicker}
+        historical
         onMissing={() => setVesselId((current) => (current === vesselId ? null : current))}
         context={context}
         value={vesselId}
@@ -901,6 +902,7 @@ export function Services({
                     <VesselPicker
                       context={context}
                       value={draft.values.vesselId}
+                      retainedId={draft.original?.vesselId}
                       disabled={
                         busy ||
                         (draft.mode === 'COMPLETE' && draft.values.executionStatus === 'MISSED')
@@ -1035,6 +1037,7 @@ export function Services({
                     kind="customer"
                     context={context}
                     value={draft.values.specified.customerId}
+                    retainedId={draft.original?.specified.customerId}
                     disabled={busy}
                     onChange={(id) =>
                       change({
@@ -1047,6 +1050,7 @@ export function Services({
                     kind="agency"
                     context={context}
                     value={draft.values.specified.agencyId}
+                    retainedId={draft.original?.specified.agencyId}
                     disabled={busy}
                     onChange={(id) =>
                       change({

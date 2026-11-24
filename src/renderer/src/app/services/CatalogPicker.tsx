@@ -1,12 +1,7 @@
 import type { ConsultationPicker } from '../../api/use-consultation-state'
-import { useEffect, useState } from 'react'
-import { Select, TextInput } from '@mantine/core'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
-import type { ServiceTypeDto } from '../../../../shared/contracts/catalog'
-import type { PageDto } from '../../../../shared/contracts/master-data'
-import { useApplicationRequest } from '../../api/use-application-request'
-import { PageControls } from '../PageControls'
-
+import { usePagedPicker } from '../../api/use-paged-picker'
+import { PagedPicker } from '../PagedPicker'
 export function CatalogPicker({
   context,
   value,
@@ -14,7 +9,8 @@ export function CatalogPicker({
   disabled,
   consultation,
   historical = false,
-  retainedId = null,
+  retainedId,
+  required = !historical,
 }: {
   context: ArchiveContextDto
   value: string | null
@@ -23,110 +19,38 @@ export function CatalogPicker({
   consultation?: ConsultationPicker
   historical?: boolean
   disabled: boolean
+  required?: boolean
 }) {
-  const [localSearch, setLocalSearch] = useState('')
-  const [localPage, setLocalPage] = useState(1)
-  const { search, setSearch, page, setPage } = consultation ?? {
-    search: localSearch,
-    setSearch: setLocalSearch,
-    page: localPage,
-    setPage: setLocalPage,
-  }
-  const [list, setList] = useState<PageDto<ServiceTypeDto> | null>(null),
-    [chosen, setChosen] = useState<{ value: string; label: string } | null>(null),
-    [error, setError] = useState<string | null>(null)
-  const { request, invalidate, loading } = useApplicationRequest(context, setError),
-    chosenRequest = useApplicationRequest(context, setError)
-  const [retained, setRetained] = useState<{ value: string; label: string } | null>(null)
-  const { request: readRetained, invalidate: invalidateRetained } = useApplicationRequest(
+  const picker = usePagedPicker({
     context,
-    setError,
-  )
-  const api = window.catalog
-  const option = (s: ServiceTypeDto) => ({
-    value: s.id,
-    label: `${s.description}${s.status === 'ACTIVE' ? '' : ' · Disattivato'}`,
-  })
-  useEffect(() => {
-    void request(() =>
-      api.list({
+    owner: JSON.stringify(['catalog', historical, retainedId]),
+    consultation,
+    value,
+    retainedId,
+    onChange,
+    loadPage: (search, page) =>
+      window.catalog.list({
         context: { sessionId: context.sessionId },
         query: { search, page, pageSize: 25, status: historical ? 'ALL' : 'ACTIVE' },
       }),
-    ).then((r) => {
-      if (r?.ok && (!consultation || consultation.current())) {
-        setList(r.value)
-        const last = Math.max(1, Math.ceil(r.value.total / 25))
-        if (page > last) setPage(last)
-      }
-    })
-    return invalidate
-  }, [request, invalidate, api, context.sessionId, context.revision, search, page, historical])
-  const { request: readChosen, invalidate: invalidateChosen } = chosenRequest
-  useEffect(() => {
-    invalidateChosen()
-    setChosen(null)
-    if (value)
-      void readChosen(() =>
-        api.get({ context: { sessionId: context.sessionId }, query: { id: value } }),
-      ).then((r) => {
-        if (r?.ok) setChosen(option(r.value))
-      })
-  }, [readChosen, invalidateChosen, api, context.sessionId, context.revision, value])
-  useEffect(() => {
-    invalidateRetained()
-    setRetained(null)
-    if (retainedId)
-      void readRetained(() =>
-        api.get({ context: { sessionId: context.sessionId }, query: { id: retainedId } }),
-      ).then((r) => {
-        if (r?.ok) setRetained(option(r.value))
-      })
-  }, [readRetained, invalidateRetained, api, context.sessionId, context.revision, retainedId])
-  const options = list?.items.map(option) ?? []
-  if (retained?.value === retainedId && !options.some((o) => o.value === retainedId))
-    options.unshift(retained)
-  if (chosen?.value === value && !options.some((o) => o.value === value)) options.unshift(chosen)
+    loadOne: (id) =>
+      window.catalog.get({ context: { sessionId: context.sessionId }, query: { id } }),
+    option: (s) => ({
+      value: s.id,
+      label: s.description + (s.status === 'ACTIVE' ? '' : ' · Disattivato'),
+      disabled:
+        s.status !== 'ACTIVE' && s.id !== retainedId && !(historical && retainedId === undefined),
+    }),
+  })
   return (
-    <>
-      <TextInput
-        label="Cerca tipo di prestazione"
-        value={search}
-        disabled={disabled}
-        onChange={(e) => {
-          invalidate()
-          setList(null)
-          setSearch(e.currentTarget.value)
-          setPage(1)
-        }}
-      />
-      <Select
-        label="Tipo di prestazione"
-        required={!historical}
-        placeholder={historical ? 'Tutti i tipi' : 'Seleziona un tipo'}
-        clearable={historical}
-        clearButtonProps={{
-          tabIndex: 0,
-          'aria-hidden': false,
-          'aria-label': 'Rimuovi filtro tipo di prestazione',
-        }}
-        allowDeselect={historical}
-        data={options}
-        value={value}
-        disabled={disabled || loading}
-        error={error}
-        onChange={onChange}
-      />
-      {list && list.total > 25 && (
-        <PageControls
-          page={list}
-          disabled={disabled || loading}
-          onPage={(p) => {
-            invalidate()
-            setPage(p)
-          }}
-        />
-      )}
-    </>
+    <PagedPicker
+      {...picker}
+      label="Tipo di prestazione"
+      required={required}
+      placeholder={required ? 'Seleziona un tipo' : 'Tutti i tipi'}
+      clearable={!required}
+      clearLabel="Rimuovi filtro tipo di prestazione"
+      disabled={disabled}
+    />
   )
 }

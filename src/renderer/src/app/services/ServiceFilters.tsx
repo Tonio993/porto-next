@@ -153,6 +153,8 @@ export function ServiceFilters({
           )}
           <PortPicker
             consultation={portConsultation}
+            historical
+            clearable
             context={context}
             value={value.portId ?? null}
             disabled={disabled}

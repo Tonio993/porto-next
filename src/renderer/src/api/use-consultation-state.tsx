@@ -84,6 +84,13 @@ export function useConsultationPicker(
 ) {
   const [search, setSearch, searchCurrent] = useConsultationState(section, 'search', owner)
   const [page, setPage, pageCurrent] = useConsultationState(section, 'page', owner)
-  return { search, setSearch, page, setPage, current: () => searchCurrent() && pageCurrent() }
+  return {
+    scope: JSON.stringify([section, owner]),
+    search,
+    setSearch,
+    page,
+    setPage,
+    current: () => searchCurrent() && pageCurrent(),
+  }
 }
 export type ConsultationPicker = ReturnType<typeof useConsultationPicker>

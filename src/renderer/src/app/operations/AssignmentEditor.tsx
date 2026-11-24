@@ -236,6 +236,7 @@ export function AssignmentEditor({
                     kind="customer"
                     context={context}
                     value={draft.specified.customerId}
+                    retainedId={values?.specified.customerId}
                     disabled={busy}
                     onChange={(customerId) => change({ ...draft.specified, customerId })}
                   />
@@ -243,6 +244,7 @@ export function AssignmentEditor({
                     kind="agency"
                     context={context}
                     value={draft.specified.agencyId}
+                    retainedId={values?.specified.agencyId}
                     disabled={busy}
                     onChange={(agencyId) => change({ ...draft.specified, agencyId })}
                   />

@@ -258,7 +258,7 @@ test('PR03 operazioni/permanenze: pagine e dettaglio fuori pagina, nave distinta
     }
   }, ids)
   await navigate('Operazioni nave')
-  await page.getByLabel('Cerca nave', { exact: true }).fill('Stella')
+  await page.getByRole('combobox', { name: 'Nave', exact: true }).fill('Stella')
   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
   await page.getByRole('option', { name: /Stella del mare/ }).click()
   await page.locator('.operations-rows button').first().click()
@@ -272,7 +272,9 @@ test('PR03 operazioni/permanenze: pagine e dettaglio fuori pagina, nave distinta
   await expect(detail).toHaveText(text)
   await navigate('Anagrafiche')
   await navigate('Operazioni nave')
-  await expect(page.getByLabel('Cerca nave', { exact: true })).toHaveValue('Stella')
+  await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
+  await expect(page.getByRole('combobox', { name: 'Nave', exact: true })).toHaveValue('Stella')
+  await page.getByRole('combobox', { name: 'Nave', exact: true }).press('Escape')
   await expect(
     page.locator('.operations-list').getByText('Pagina 2 di 3', { exact: true }),
   ).toBeVisible()
@@ -292,7 +294,7 @@ test('PR03 operazioni/permanenze: pagine e dettaglio fuori pagina, nave distinta
   )
   await expect(page.getByText('Pagina 2 di 2', { exact: true })).toBeVisible()
   await expect(page.locator('.operation-voyage').first()).toHaveText(oldest)
-  await page.getByLabel('Cerca nave', { exact: true }).fill('')
+  await page.getByRole('combobox', { name: 'Nave', exact: true }).fill('')
   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
   await page.getByRole('option', { name: /Aurora/ }).click()
   await expect(page.getByRole('button', { name: 'Operazioni', exact: true })).toHaveAttribute(

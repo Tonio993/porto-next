@@ -505,6 +505,7 @@ export function OperationCompletionEditor({
                       ? original.endpoint.portId === values.portId && original.endpoint.berthId
                         ? {
                             id: original.endpoint.berthId,
+                            portId: original.endpoint.portId,
                             label: original.endpoint.berthName ?? 'Banchina storica',
                           }
                         : null
@@ -526,6 +527,8 @@ export function OperationCompletionEditor({
               <PortPicker
                 context={draftContext}
                 label="Porto di interpretazione"
+                clearable
+                placeholder="Determinato dal contesto"
                 retainedId={original.endpoint.portId}
                 value={values.interpretationPortId}
                 disabled={disabled || missed}
@@ -593,6 +596,7 @@ export function OperationCompletionEditor({
                         original.arrival.berthId
                         ? {
                             id: original.arrival.berthId,
+                            portId: original.arrival.portId,
                             label: original.arrival.berthName ?? 'Banchina storica',
                           }
                         : null

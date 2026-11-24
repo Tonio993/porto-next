@@ -406,6 +406,7 @@ export function Tariffs({
           </Group>
           <PortPicker
             consultation={consultationPicker}
+            historical
             onMissing={() => setPortId((current) => (current === portId ? null : current))}
             context={context}
             value={portId}

@@ -1043,11 +1043,8 @@ footer {
 .tariff-configuration {
   margin-top: 1.25rem;
 }
-.tariff-port-picker {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  gap: 8px;
-  align-items: end;
+.paged-picker {
+  min-width: 0;
 }
 
 .operations-page {

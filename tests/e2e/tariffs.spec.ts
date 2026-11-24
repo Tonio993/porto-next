@@ -185,9 +185,10 @@ test('P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo
       await list.locator('.port-list-results').evaluate((el) => el.getBoundingClientRect().height),
     ).toBeGreaterThanOrEqual(100)
     expect(await page.locator('html').evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true)
-    await list.getByLabel('Cerca porto', { exact: true }).fill('Nessun porto')
+    await list.getByRole('combobox', { name: 'Porto', exact: true }).fill('Nessun porto')
+    await list.getByRole('combobox', { name: 'Porto', exact: true }).press('Escape')
     await expect(list.getByLabel('Porto', { exact: true })).toHaveValue('1 · Genova')
-    await list.getByLabel('Cerca porto', { exact: true }).fill('')
+    await list.getByRole('combobox', { name: 'Porto', exact: true }).fill('')
     const first = await page.evaluate(async (portId) => {
       const s = await window.archives.getState()
       if (!s.ok || !s.value.context) throw new Error('context')
@@ -230,14 +231,18 @@ test('P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo
     await page.getByRole('option', { name: 'Prestazione da catalogo', exact: true }).click()
     await dialog.getByLabel('Tipo di prestazione', { exact: true }).click()
     await page.getByRole('option', { name: 'Assistenza tariffata', exact: true }).click()
-    await dialog.getByLabel('Cerca nave', { exact: true }).fill('Nessuna nave')
+    await dialog.getByRole('combobox', { name: 'Nave', exact: true }).fill('Nessuna nave')
+    await dialog.getByRole('combobox', { name: 'Nave', exact: true }).press('Escape')
     await expect(dialog.getByLabel('Nave', { exact: true })).toHaveValue('1 · Stella del mare')
-    await dialog.getByLabel('Cerca nave', { exact: true }).fill('')
-    await dialog.getByLabel('Cerca tipo di prestazione', { exact: true }).fill('Nessun tipo')
+    await dialog.getByRole('combobox', { name: 'Nave', exact: true }).fill('')
+    await dialog
+      .getByRole('combobox', { name: 'Tipo di prestazione', exact: true })
+      .fill('Nessun tipo')
+    await dialog.getByRole('combobox', { name: 'Tipo di prestazione', exact: true }).press('Escape')
     await expect(dialog.getByLabel('Tipo di prestazione', { exact: true })).toHaveValue(
       'Assistenza tariffata',
     )
-    await dialog.getByLabel('Cerca tipo di prestazione', { exact: true }).fill('')
+    await dialog.getByRole('combobox', { name: 'Tipo di prestazione', exact: true }).fill('')
     await dialog.getByLabel('Momento economico locale').fill('2025-12-31T23:59')
     await dialog.getByRole('button', { name: 'Simula base', exact: true }).click()
     await expect(dialog).toContainText('Nessuna tariffa applicabile')

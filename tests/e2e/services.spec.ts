@@ -301,6 +301,7 @@ test('P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE c
       page.getByRole('button', { name: 'Nuova prestazione da catalogo', exact: true }),
     ).toBeFocused()
     await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).click()
+    await modal.getByRole('combobox', { name: 'Tipo di prestazione', exact: true }).press('Escape')
     await expect(modal.getByRole('combobox', { name: 'Tipo di prestazione' })).toHaveValue(
       'rinforzo ormeggio',
     )
@@ -411,16 +412,20 @@ test('P15 asincrono: selettore catalogo ignora risposte precedenti e conserva la
     await delayOperationResponse(app, 'catalog:list')
     await page.getByRole('button', { name: 'Nuova prestazione da catalogo', exact: true }).click()
     await expect.poll(() => operationHeld(app!)).toBe(true)
-    await modal.getByLabel('Cerca tipo di prestazione', { exact: true }).fill('inesistente')
+    await modal
+      .getByRole('combobox', { name: 'Tipo di prestazione', exact: true })
+      .fill('inesistente')
     await releaseOperation(app)
     await modal.getByRole('combobox', { name: 'Tipo di prestazione' }).click()
     await expect(page.getByRole('option', { name: 'rinforzo ormeggio', exact: true })).toHaveCount(
       0,
     )
-    await modal.getByLabel('Cerca tipo di prestazione', { exact: true }).fill('rinforzo')
+    await modal.getByRole('combobox', { name: 'Tipo di prestazione', exact: true }).fill('rinforzo')
     await modal.getByRole('combobox', { name: 'Tipo di prestazione' }).click()
     await page.getByRole('option', { name: 'rinforzo ormeggio', exact: true }).click()
-    await modal.getByLabel('Cerca tipo di prestazione', { exact: true }).fill('inesistente')
+    await modal
+      .getByRole('combobox', { name: 'Tipo di prestazione', exact: true })
+      .fill('inesistente')
     await expect(modal.getByRole('combobox', { name: 'Tipo di prestazione' })).toHaveValue(
       'rinforzo ormeggio',
     )

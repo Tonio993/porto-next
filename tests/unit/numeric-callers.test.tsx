@@ -1,3 +1,10 @@
+import { BaseCalculator } from '../../src/renderer/src/app/tariffs/BaseCalculator'
+import { PortPicker } from '../../src/renderer/src/app/tariffs/PortPicker'
+import { VesselPicker } from '../../src/renderer/src/app/operations/VesselPicker'
+import { SubjectPicker } from '../../src/renderer/src/app/operations/SubjectPicker'
+import { BerthPicker } from '../../src/renderer/src/app/operations/BerthPicker'
+import { CatalogPicker } from '../../src/renderer/src/app/services/CatalogPicker'
+import { AssignmentEditor } from '../../src/renderer/src/app/operations/AssignmentEditor'
 import { beforeEach, afterEach, expect, it, vi } from 'vitest'
 import type { ReactElement, ReactNode } from 'react'
 vi.mock('react', async (actual) => ({
@@ -531,3 +538,242 @@ it.each([italian, english])(
     expect(trace).toEqual(before)
   },
 )
+
+// PR05 exercises the real reference adapters through editors, with the original PR04 format snapshot.
+function reference(id: string, active = true, portId = 'port-new') {
+  return {
+    id,
+    code: 1,
+    status: active ? 'ACTIVE' : 'INACTIVE',
+    selectable: active,
+    portId,
+    description: 'Tipo ' + id,
+    version: { name: 'Nome ' + id, businessName: 'Nome ' + id, registeredName: 'Nome ' + id },
+  }
+}
+function pickerProps<T extends (...args: never[]) => unknown>(
+  node: ReactNode,
+  type: T,
+  matches: (p: Record<string, unknown>) => boolean = () => true,
+) {
+  const found = nodes(node).find((e) => e.type === (type as unknown) && matches(e.props))
+  if (!found) throw Error('Adapter assente')
+  return found.props as Parameters<T>[0]
+}
+it('PR05 operazioni: ricerca porto non modifica bozza; scelta tramite adapter conserva formato, contesto e DTO', async () => {
+  const pref = await preference(english)
+  vi.mocked(window.ports.list).mockResolvedValue(ok(page([reference('port-new')])) as never)
+  vi.mocked(window.ports.get).mockResolvedValue(ok(reference('port-new')) as never)
+  const r = mount(() => Operations({ archives, onDialogChange: vi.fn() }))
+  await r.until((v) => find(v, (p) => p.children === 'Nuova entrata').disabled === false)
+  click(r.value, 'Nuova entrata')
+  r.flush()
+  localized(r.value, 'Sostituzione manuale della base (EUR, facoltativa)', '1,234.50')
+  r.flush()
+  await pref.value.props.value.save(italian)
+  pref.flush()
+  provide(pref.value)
+  r.dirty = true
+  r.flush()
+  const field = find(
+    r.value,
+    (p) => p.label === 'Sostituzione manuale della base (EUR, facoltativa)',
+  )
+  const picker = mount(
+    () => PortPicker(pickerProps(r.value, PortPicker, (p) => p.label === 'Porto di arrivo')).props,
+  )
+  await picker.until((p) => p.page !== null)
+  picker.value.onSearchChange('nuovo')
+  picker.flush()
+  await picker.until((p) => p.page !== null)
+  expect(window.operations.previewCreate).not.toHaveBeenCalled()
+  picker.value.onChange('port-new')
+  r.flush()
+  expect(find(r.value, (p) => p.label === field.label)).toMatchObject({
+    value: '1234.50',
+    format: english,
+  })
+  click(r.value, 'Verifica e mostra anteprima')
+  await r.until(() => vi.mocked(window.operations.previewCreate).mock.calls.length === 1)
+  expect(vi.mocked(window.operations.previewCreate).mock.calls[0][0]).toMatchObject({
+    context,
+    payload: { portId: 'port-new', manualOverrideAmount: '1234.50' },
+  })
+})
+it('PR05 prestazioni: cliente scelto e clear tramite adapter mantengono ereditarietà, importo e contesto originale', async () => {
+  await preference(english)
+  vi.mocked(window.customers.list).mockResolvedValue(ok(page([reference('customer-new')])) as never)
+  vi.mocked(window.customers.get).mockResolvedValue(ok(reference('customer-new')) as never)
+  const r = mount(() => Services({ archives, onDialogChange: vi.fn() }))
+  await r.until((v) => find(v, (p) => p.children === 'Nuova prestazione libera').disabled === false)
+  click(r.value, 'Nuova prestazione libera')
+  r.flush()
+  localized(r.value, 'Importo base EUR', '1,234.50')
+  r.flush()
+  const picker = mount(
+    () => SubjectPicker(pickerProps(r.value, SubjectPicker, (p) => p.kind === 'customer')).props,
+  )
+  await picker.until((p) => p.page !== null)
+  picker.value.onChange('customer-new')
+  r.flush()
+  picker.dirty = true
+  await picker.until((p) => p.selectedState === 'ready')
+  picker.value.onChange(null)
+  r.flush()
+  picker.dirty = true
+  picker.flush()
+  expect(picker.value.placeholder).toBe('Eredita dal livello superiore')
+  click(r.value, 'Registra prestazione')
+  await r.until(() => vi.mocked(window.services.createFree).mock.calls.length === 1)
+  expect(vi.mocked(window.services.createFree).mock.calls[0][0]).toMatchObject({
+    context,
+    payload: { base: '1234.50', specified: { customerId: null, agencyId: null } },
+  })
+})
+it('PR05 calcolatore: adapter comuni in consultazione storica, ricerche non selezionano e simulazione usa solo ID confermati', async () => {
+  vi.mocked(window.vessels.list).mockResolvedValue(
+    ok(page([reference('historical-vessel', false)])) as never,
+  )
+  vi.mocked(window.vessels.get).mockResolvedValue(
+    ok(reference('historical-vessel', false)) as never,
+  )
+  vi.mocked(window.catalog.list).mockResolvedValue(
+    ok(page([reference('historical-type', false)])) as never,
+  )
+  vi.mocked(window.catalog.get).mockResolvedValue(ok(reference('historical-type', false)) as never)
+  window.tariffs.simulateBase = vi.fn(async () => rejected())
+  const r = mount(() => BaseCalculator({ context, portId: 'port' }))
+  const vessel = mount(() => VesselPicker(pickerProps(r.value, VesselPicker)).props)
+  await vessel.until((p) => p.page !== null)
+  vessel.value.onSearchChange('ricerca')
+  vessel.flush()
+  r.flush()
+  expect(pickerProps(r.value, VesselPicker).value).toBeNull()
+  await vessel.until((p) => p.page !== null)
+  expect(vessel.value.data[0].disabled).toBe(false)
+  vessel.value.onChange('historical-vessel')
+  r.flush()
+  ;(find(r.value, (p) => p.label === 'Tipo di attività').onChange as (v: string) => void)('CATALOG')
+  r.flush()
+  const catalog = mount(() => CatalogPicker(pickerProps(r.value, CatalogPicker)).props)
+  await catalog.until((p) => p.page !== null)
+  expect(catalog.value.data[0].disabled).toBe(false)
+  catalog.value.onChange('historical-type')
+  r.flush()
+  ;(
+    find(r.value, (p) => 'moment' in p).onChange as (m: {
+      localDateTime: string
+      selectedOffset: null
+    }) => void
+  )({ localDateTime: '2026-11-24T09:00', selectedOffset: null })
+  r.flush()
+  click(r.value, 'Simula base')
+  await r.until(() => vi.mocked(window.tariffs.simulateBase).mock.calls.length === 1)
+  expect(window.tariffs.simulateBase).toHaveBeenCalledWith({
+    context: { sessionId: context.sessionId },
+    query: {
+      portId: 'port',
+      vesselId: 'historical-vessel',
+      activity: { kind: 'CATALOG', serviceTypeId: 'historical-type' },
+      moment: { localDateTime: '2026-11-24T09:00', selectedOffset: null },
+    },
+  })
+  expect(window.catalog.list).toHaveBeenLastCalledWith(
+    expect.objectContaining({ query: expect.objectContaining({ status: 'ALL' }) }),
+  )
+})
+it('PR05 assegnazioni: riferimento originale disattivato fuori pagina resta ammesso, un nuovo disattivato è vietato', async () => {
+  const target = { kind: 'VOYAGE' as const, id: 'voyage' }
+  window.assignments = {
+    get: vi.fn(async () =>
+      ok({ specified: { customerId: 'original', agencyId: null }, components: [] }),
+    ),
+  } as never
+  vi.mocked(window.customers.get).mockImplementation(
+    async (request) => ok(reference(request.query.id, false)) as never,
+  )
+  vi.mocked(window.customers.list).mockResolvedValue(ok(page([reference('other', false)])) as never)
+  const r = mount(() =>
+    AssignmentEditor({
+      archives,
+      target,
+      opened: true,
+      onClose: vi.fn(),
+      onResume: vi.fn(),
+      onSaved: vi.fn(),
+      trigger: null,
+    }),
+  )
+  await r.until((v) => nodes(v).some((e) => e.type === SubjectPicker))
+  const picker = mount(
+    () => SubjectPicker(pickerProps(r.value, SubjectPicker, (p) => p.kind === 'customer')).props,
+  )
+  await picker.until((p) => p.selectedState === 'ready' && p.page !== null)
+  expect(picker.value.data.find((o: { value: string }) => o.value === 'original')?.disabled).toBe(
+    false,
+  )
+  expect(picker.value.data.find((o: { value: string }) => o.value === 'other')?.disabled).toBe(true)
+  picker.value.onChange(null)
+  r.flush()
+  expect(pickerProps(r.value, SubjectPicker, (p) => p.kind === 'customer').value).toBeNull()
+})
+it('PR05 correzione: retained banchina conserva nome storico e proprietario; cambio porto riesamina offset e conserva locale, formato e contesto', async () => {
+  await preference(english)
+  const operation = {
+    id: 'op',
+    vesselId: 'vessel',
+    operationType: 'ENTRY',
+    executionStatus: 'PLANNED',
+    notes: null,
+    endpoint: {
+      portId: 'port-old',
+      berthId: 'berth-old',
+      berthName: 'Nome storico salvato',
+      moment: { localDateTime: '2026-11-24T09:00', offset: '+01:00' },
+    },
+    arrival: null,
+    charges: [{ economicEndpointRole: 'PRIMARY', manualOverrideAmount: '1234.50' }],
+  } as unknown as VesselOperationDto
+  vi.mocked(window.berths.history).mockResolvedValue(
+    ok({ berth: reference('berth-old', false, 'port-old'), versions: page() }) as never,
+  )
+  const r = mount(() =>
+    OperationCompletionEditor({
+      operation,
+      opened: true,
+      correction: true,
+      originalContext: context,
+      archives,
+      onClose: vi.fn(),
+      onResume: vi.fn(),
+      onApplied: vi.fn(),
+      trigger: null,
+    }),
+  )
+  const berth = mount(() => BerthPicker(pickerProps(r.value, BerthPicker)).props)
+  await berth.until((p) => p.selectedState === 'ready')
+  expect(berth.value.chosen.label).toBe('Nome storico salvato')
+  expect(berth.value.chosen.disabled).toBe(false)
+  vi.mocked(window.ports.list).mockResolvedValue(ok(page([reference('port-new')])) as never)
+  const port = mount(
+    () => PortPicker(pickerProps(r.value, PortPicker, (p) => p.label === 'Porto')).props,
+  )
+  await port.until((p) => p.page !== null)
+  port.value.onChange('port-new')
+  r.flush()
+  expect(pickerProps(r.value, BerthPicker).retained).toBeNull()
+  expect(pickerProps(r.value, BerthPicker).portId).toBe('port-new')
+  click(r.value, 'Verifica e mostra anteprima')
+  await r.until(() => vi.mocked(window.operations.previewCorrect).mock.calls.length === 1)
+  expect(vi.mocked(window.operations.previewCorrect).mock.calls[0][0]).toMatchObject({
+    context,
+    payload: {
+      values: {
+        portId: 'port-new',
+        berthId: null,
+        manualOverrideAmount: '1234.50',
+        moment: { localDateTime: '2026-11-24T09:00', selectedOffset: null },
+      },
+    },
+  })
+})

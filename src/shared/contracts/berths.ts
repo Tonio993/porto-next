@@ -18,6 +18,7 @@ export interface BerthDto {
 
 export interface BerthListQuery {
   portId: string
+  search?: string
   page: number
   pageSize: number
   selectableOnly: boolean

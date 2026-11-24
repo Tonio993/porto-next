@@ -564,6 +564,7 @@ export function Operations({
       </Group>
       <VesselPicker
         consultation={consultationPicker}
+        historical
         onMissing={() => setVesselId((current) => (current === vesselId ? null : current))}
         context={context}
         value={vesselId}
@@ -1171,6 +1172,8 @@ export function Operations({
                     <PortPicker
                       context={context}
                       label="Porto di interpretazione"
+                      clearable
+                      placeholder="Determinato dal contesto"
                       value={draft.values.interpretationPortId}
                       onChange={(id) =>
                         change({

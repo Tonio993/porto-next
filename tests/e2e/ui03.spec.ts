@@ -273,7 +273,9 @@ test('UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle
       const stays = page.getByRole('region', { name: 'Permanenze derivate' })
       await stays.getByRole('button', { name: 'Assegna soggetti all’ormeggio' }).click()
       const modal = page.getByRole('dialog')
-      await expect(modal.getByRole('textbox', { name: 'Cerca cliente', exact: true })).toBeFocused()
+      await expect(
+        modal.getByRole('combobox', { name: 'Cliente esplicito', exact: true }),
+      ).toBeFocused()
       await expect(modal).toContainText('Ereditato · Fonte: Viaggio')
       await page.keyboard.press('Escape')
       await expect(

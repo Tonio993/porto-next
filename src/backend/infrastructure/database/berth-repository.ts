@@ -81,8 +81,14 @@ export class BerthRepository {
     const { portId, page, pageSize, selectableOnly } = query
     const sql = this.database.sqlite
     const filter = `WHERE b.port_id = @portId AND
-      (@allStatuses = 1 OR (b.status = 'ACTIVE' AND p.status = 'ACTIVE'))`
-    const parameters = { portId, allStatuses: Number(!selectableOnly) }
+      (@allStatuses = 1 OR (b.status = 'ACTIVE' AND p.status = 'ACTIVE')) AND
+      EXISTS (SELECT 1 FROM berth_identifier_reservations r WHERE r.berth_id = b.id
+        AND r.port_id = b.port_id AND instr(r.normalized_name, @search) > 0)`
+    const parameters = {
+      portId,
+      allStatuses: Number(!selectableOnly),
+      search: normalizedIdentifier(query.search ?? ''),
+    }
     const total = sql
       .prepare(`SELECT count(*) FROM berths b JOIN ports p ON p.id = b.port_id ${filter}`)
       .pluck()

@@ -690,10 +690,7 @@ it.each([
     r.unmount()
     r = mount(render)
     expect(
-      find(
-        r.value,
-        (p) => 'label' in p && p.label === (apiName === 'vessels' ? 'Cerca nave' : 'Cerca porto'),
-      ).value,
+      find(r.value, (p) => p.label === (apiName === 'vessels' ? 'Nave' : 'Porto')).search,
     ).toBe('filtrato')
     value = 'old'
     r.dirty = true
@@ -919,17 +916,15 @@ it.each([
           (e.props.data as { value: string }[]).some((o) => o.value === 'chosen'),
       ),
     )
-    const search = find(r.value, (p) => p.value === 'query')
-    ;(search.onChange as (event: { currentTarget: { value: string } }) => void)({
-      currentTarget: { value: 'edited' },
-    })
+    const search = find(r.value, (p) => p.search === 'query')
+    ;(search.onSearchChange as (text: string) => void)('edited')
     r.flush()
     await r.until((v) => elements(v).some((e) => 'onPage' in e.props))
     ;(find(r.value, (p) => 'onPage' in p).onPage as (page: number) => void)(2)
     r.flush()
     r.unmount()
     r = mount(render)
-    expect(find(r.value, (p) => p.value === 'edited')).toBeDefined()
+    expect(find(r.value, (p) => p.search === 'edited')).toBeDefined()
     expect(store.read(section, 'nave-A', 'page')).toBe(2)
     owner = 'nave-B'
     r.dirty = true
@@ -977,7 +972,7 @@ it('PR03 filtro banchina: ripristino per nave/porto e dettaglio storico fuori pa
   expect(store.read('serviceBerths', JSON.stringify(['nave-A', 'porto-B']), 'page')).toBe(1)
   expect(window.berths.list).toHaveBeenLastCalledWith({
     context: { sessionId: context.sessionId },
-    query: { portId: 'porto-A', page: 2, pageSize: 25, selectableOnly: false },
+    query: { portId: 'porto-A', search: '', page: 2, pageSize: 25, selectableOnly: false },
   })
 })
 
@@ -1017,4 +1012,86 @@ it('PR03 un errore nella rilettura di un riferimento non viene trattato come eli
   await r.until((v) => v.error !== null)
   expect(patch).not.toHaveBeenCalled()
   expect(filters.customerId).toBe('customer-A')
+})
+
+it('PR05 tariffe: adapter porto storico reale, scelta esplicita e richieste tariffarie per il porto confermato', async () => {
+  const port = {
+    id: 'historical-port',
+    code: 4,
+    status: 'INACTIVE',
+    version: { name: 'Porto storico' },
+  }
+  vi.mocked(window.ports.list).mockResolvedValue(ok(page([port])) as never)
+  vi.mocked(window.ports.get).mockResolvedValue(ok(port) as never)
+  const r = mount(() => Tariffs({ archives: archives(), onDialogChange: vi.fn() }))
+  const child = mount(
+    () =>
+      PortPicker(find(r.value, (p) => 'consultation' in p) as Parameters<typeof PortPicker>[0])
+        .props,
+  )
+  await child.until((p) => p.page !== null)
+  expect(child.value.data[0].disabled).toBe(false)
+  child.value.onSearchChange('storico')
+  r.flush()
+  child.dirty = true
+  child.flush()
+  await child.until((p) => p.page !== null)
+  expect(window.tariffs.list).not.toHaveBeenCalled()
+  child.value.onChange('historical-port')
+  r.flush()
+  await r.until(() => vi.mocked(window.tariffs.list).mock.calls.length === 1)
+  expect(window.tariffs.list).toHaveBeenLastCalledWith({
+    context: { sessionId: context.sessionId },
+    query: { portId: 'historical-port', page: 1, pageSize: 25 },
+  })
+})
+it('PR05 filtri prestazioni: clear porto rimuove il figlio banchina; ricerca e stato degli altri filtri restano indipendenti', async () => {
+  store.write('services', 'vessel', 'expanded', true)
+  let value = {
+    portId: 'port-A',
+    berthId: 'berth-A',
+    customerId: 'customer-A',
+    category: 'CATALOG' as const,
+  }
+  const r = mount(() =>
+    ServiceFilters({
+      context,
+      vesselId: 'vessel',
+      value,
+      selectedVoyage: null,
+      referenceError: null,
+      disabled: false,
+      onChange: (next) => {
+        value = next as typeof value
+        r.dirty = true
+      },
+    }),
+  )
+  const port = mount(
+    () =>
+      PortPicker(
+        find(
+          r.value,
+          (p) => 'consultation' in p && p.consultation !== null && 'clearable' in p,
+        ) as Parameters<typeof PortPicker>[0],
+      ).props,
+  )
+  await port.until((p) => p.page !== null)
+  expect(port.value.placeholder).toBe('Tutti i porti')
+  expect(port.value.clearable).toBe(true)
+  port.value.onSearchChange('porto cercato')
+  r.flush()
+  port.dirty = true
+  port.flush()
+  await port.until((p) => p.page !== null)
+  expect(value.portId).toBe('port-A')
+  port.value.onChange(null)
+  r.flush()
+  expect(value).toMatchObject({
+    portId: null,
+    berthId: null,
+    customerId: 'customer-A',
+    category: 'CATALOG',
+  })
+  expect(store.read('servicePorts', 'vessel', 'search')).toBe('porto cercato')
 })

@@ -57,6 +57,12 @@ Dopo il collaudo, archiviare fuori da `win-unpacked` l'eventuale `debug.log` pro
 
 Creazione, salvataggio con nome e backup richiedono un percorso libero. I file esistenti non vengono sovrascritti, anche se il dialogo nativo permette di selezionarli. L’annullamento del dialogo mantiene lo stato corrente. Se l’apertura di un altro file fallisce, l’archivio attivo rimane utilizzabile.
 
+## Notazione numerica
+
+**Notazione numerica**, nella barra e nei campi numerici, permette di scegliere punto o virgola decimale, il separatore complementare delle migliaia e il raggruppamento, con un esempio prima del salvataggio. Il formato italiano è iniziale; la preferenza resta fra i riavvii ed è comune agli archivi dell'utente. Un errore di salvataggio mantiene in uso la preferenza precedente.
+
+Le bozze già iniziate mantengono il formato indicato nel campo, anche dopo chiusura e ripresa. Incolla nello stesso formato: ad esempio, `1.234` significa 1234 con punto migliaia oppure 1.234 con punto decimale. La valuta è esterna al testo editabile; la dimensione nave resta senza unità. [Regole e copertura PR04](doc/pr04/notazione-numerica.md).
+
 ## Operazioni nave
 
 In **Operazioni nave**, scegli una nave e registra un’entrata, un’uscita o uno spostamento. Controlla l’anteprima degli effetti e conferma: l’entrata apre viaggio, visita e ormeggio; l’uscita li chiude; lo spostamento chiude l’ormeggio di origine e apre quello di destinazione. Se cambia porto, chiude e apre anche la visita, conservando il viaggio. La banchina è facoltativa. Le operazioni previste ed effettuate producono la struttura; quelle mancate richiedono un contesto valido e una tariffa ma non aprono né chiudono permanenze. Lo stato non cambia con il trascorrere del tempo.

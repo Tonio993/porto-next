@@ -1,0 +1,204 @@
+{
+  "task": "PR04",
+  "date": "2026-11-24",
+  "base": {
+    "branch": "main",
+    "head": "ea73a57e447fd0008aed01ea2aef7079da11c5e3",
+    "initialWorkingTree": "clean",
+    "commitCreated": true
+  },
+  "schemaVersion": 17,
+  "environment": {
+    "platform": "Windows x64",
+    "hostNode": "24.21.0",
+    "npm": "12.2.1",
+    "electron": "45.2.3",
+    "desktopLaunch": "existing hidden helpers; no startup block requiring external path",
+    "warnings": [
+      "Crashpad CreateFile access denied (0x5), processes started and completed",
+      "Vite native config warning"
+    ]
+  },
+  "verificationPolicy": "Explicit user derogation PR01–PR12: unit tests plus static/documentation only; desktop/package/integrated at K4; K2 coverage review after PR04/PR05/PR06.",
+  "unit": {
+    "command": "npm.cmd test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr04-full.json",
+    "npmExitCode": 0,
+    "electronExitCode": 0,
+    "files": 45,
+    "total": 675,
+    "passed": 675,
+    "failed": 0,
+    "skipped": 0,
+    "newPR04": 65,
+    "newPR04Passed": 65,
+    "report": "test-results/pr04-full.json",
+    "log": "test-results/pr04-full.log",
+    "process": "test-results/pr04-full-process.json",
+    "previouslyLimitedFiles": {
+      "interPortMigration": "3/3 passed this run; historical timeout remains recorded",
+      "weightService": "28/28 passed this run; historical outcomes preserved"
+    }
+  },
+  "development": [
+    {
+      "report": "test-results/pr04-development.json",
+      "passed": 55,
+      "failed": 8,
+      "reason": "Integration exposed missing context default in unit harness and root provider placement; corrected.",
+      "exitCode": 1
+    },
+    {
+      "report": "test-results/pr04-targeted.json",
+      "passed": 94,
+      "failed": 0,
+      "reason": "Core/preference/components plus all PR03 cases.",
+      "exitCode": 0
+    },
+    {
+      "report": "test-results/pr04-callers.json",
+      "passed": 5,
+      "failed": 4,
+      "reason": "New test control/recovery labels did not match actual UI; corrected.",
+      "exitCode": 1
+    },
+    {
+      "report": "test-results/pr04-callers2.json",
+      "passed": 9,
+      "failed": 2,
+      "reason": "Preview fixture missing blockers; completed.",
+      "exitCode": 1
+    },
+    {
+      "report": "test-results/pr04-adapters-final.json",
+      "passed": 43,
+      "failed": 0,
+      "reason": "Calling adapters, numeric editing and archive controller.",
+      "exitCode": 0
+    }
+  ],
+  "static": {
+    "command": "npm.cmd run check",
+    "exitCode": 1,
+    "typeScriptNode": "passed",
+    "typeScriptWeb": "passed",
+    "eslint": "passed",
+    "prettier": "failed only on pre-existing doc/dev/punti-issue.md",
+    "log": "test-results/pr04-check.log",
+    "previousDevelopmentErrors": "Fixed adapter signatures/test fixture type, unused imports/argument and desktop env/DOM type annotations before final checks."
+  },
+  "documentation": {
+    "status": "completed with inherited formatting failure",
+    "documents": [
+      "README.md",
+      "doc/dev/piano-interventi-post-rilascio.md",
+      "doc/piano-implementazione-prestazioni.md",
+      "doc/stato-implementazione-prestazioni.md",
+      "doc/pr04/notazione-numerica.md"
+    ],
+    "command": "npm.cmd run verify -- documentazione --document README.md --document doc/dev/piano-interventi-post-rilascio.md --document doc/piano-implementazione-prestazioni.md --document doc/stato-implementazione-prestazioni.md --document doc/pr04/notazione-numerica.md",
+    "exitCode": 1,
+    "utf8": "passed",
+    "localLinksAndAnchors": "passed",
+    "gitDiff": "passed",
+    "formatting": "only doc/dev/punti-issue.md differs",
+    "summary": "test-results/verification/2026-11-24T11-07-36.556Z-coordinator-LvkCTC/summary.md",
+    "log": "test-results/pr04-documentation-final.log",
+    "previousSummary": "test-results/verification/2026-11-24T11-06-20.055Z-coordinator-SH2LUi/summary.md"
+  },
+  "preservedSource": {
+    "path": "doc/dev/punti-issue.md",
+    "sha256": "8e5b4e0c57c3fea049a8ad3fcf5104a82b42fe4ccd12a68c064595f6767fc185",
+    "gitObject": "8b1d0230e8bbb260a7b8d5c76cbcbb0ebdb282f2",
+    "headObject": "8b1d0230e8bbb260a7b8d5c76cbcbb0ebdb282f2",
+    "diff": "unchanged; no exclusions added"
+  },
+  "deferred": {
+    "checkpoint": "K4",
+    "desktop": "tests/e2e/pr04-numbers.spec.ts: four prepared paths; affected assertions updated; none executed",
+    "integrated": "Final full desktop on build and same package, SQLite/migrations, cross-task flows and human acceptance",
+    "next": "PR05; K2 after PR04/PR05/PR06",
+    "PR08": "Opaque serialized economic changes and original textual traces require structured projections; no regex rewriting of arbitrary text"
+  },
+  "sourceSha256": {
+    "src/main/index.ts": "85304e546cafa54766558b31cf83617ff82bedb247e253efd85e0c6bcdea913d",
+    "src/main/ipc/register.ts": "fd9aaa582cba06ac2d5dcf558b8fb3e29cf86b54195e73f5b0368f41ec7e32ec",
+    "src/preload/index.ts": "6be9c70362460653603fce08ca9d3545fc9ed09c7d655c2ef6e73c392b679d3d",
+    "src/renderer/src/api/numeric-input.ts": "6299a1c272debdbcb1a6c8322d18d13906b7caad3b2621fd966b9254eb54e6bb",
+    "src/renderer/src/api/use-vessels.ts": "dd7d57a624a09d584e574fb3f3e574ca268083fd4caef80b95df741fbf89c11f",
+    "src/renderer/src/app/App.tsx": "386e416078e1b05f9450cacf8b57044b84fdfc9104f2e3e92afe1c76e476c95b",
+    "src/renderer/src/app/Catalog.tsx": "81a3a7285d63864e73b1c35fb01e7f8082dd70d0fbb51453d732f6f557152de8",
+    "src/renderer/src/app/operations/OperationCompletionEditor.tsx": "a1446888ad85ea58b2c67d313efd6502ebc1eec52f6de6c235b726b9762b25bf",
+    "src/renderer/src/app/operations/OperationDetail.tsx": "c3e767ade097922ffe78ac5afd904f7533f13f6f57569bf3cc205c0d8523e79a",
+    "src/renderer/src/app/operations/Operations.tsx": "df8ae44f2972c4772113b4efeda76f0dea8ec8503beff08eab6c8a19bf3516e1",
+    "src/renderer/src/app/ports/PortConfirmation.tsx": "48ddf9ed249456ade9c27c0e6dfc8d73a3a6c46b7db64fa3c39dde97513100d7",
+    "src/renderer/src/app/services/ServicePreview.tsx": "6b015cef214b7aa0080961cc6447dba47610354291ac80277615b8aa34089085",
+    "src/renderer/src/app/services/Services.tsx": "bf3813788807c6cdc4164ae6daa3314ea6c8905ae41da9ad705d2226af5594f9",
+    "src/renderer/src/app/tariffs/BaseCalculator.tsx": "5dd7ac643c701e769876a8b2e0371230c7964be270b738c095cd953656823184",
+    "src/renderer/src/app/tariffs/ConfigurationFields.tsx": "a847e935f690f15f7128f29a14794db7350ec4322e6171a02c711cb533d47bf2",
+    "src/renderer/src/app/tariffs/TariffMaintenanceEditor.tsx": "f83732c38f37ab9383fba71ee262215bddf2f670a78c8470277608500d92f893",
+    "src/renderer/src/app/tariffs/Tariffs.tsx": "ac0c5430268e9130429230afc1e0c39d2922139061ffdb49ef9ebe497ff3af29",
+    "src/renderer/src/app/vessels/VesselFields.tsx": "60fbb44cfc0907ab3e2d298a084200d3f75b1b9289d7797c1fe2bf69341fb9d3",
+    "src/renderer/src/app/vessels/Vessels.tsx": "8afd71764180eee152f843a00a84ea9a26a62f05059b2bc2f7eb23e2767439db",
+    "src/renderer/src/app/weights/WeightHistory.tsx": "6bc13a4bb722a814f693438bbf6b7989e9477d733ed6b2ac474985415bf547a5",
+    "src/renderer/src/env.d.ts": "6cd8a93ec0a88bcbbdba1f9f7b4e4d43b9fb820b7d69edbbd9bf511edfeece71",
+    "src/renderer/src/main.tsx": "057f06e8c7c2cfaa150d97de363b8186d504ed5a677713bdaf4710f7c77ff0b5",
+    "tests/e2e/operation-completion.spec.ts": "6b1a77ce2e814e706a0065f0e9b04bc4c8932da35cdd052ae40f61f14109a7e4",
+    "tests/e2e/services.spec.ts": "54cf80a78feb599f4844a2130d56a668abdc01a2a10f8ea018ca640a2d0821e1",
+    "tests/e2e/ui03-states.spec.ts": "a372c982eed771449336cb2ab190ec0571c99337316ee8ed7872de6b41aaf73f",
+    "tests/e2e/ui03.spec.ts": "8f05c98eb68c27f2edf7569b660cf76c2d9e24cfe1cd0ea00f9bea45a7d43850",
+    "tests/e2e/vessels.spec.ts": "38d2b16d7bd0d99a332f93aeac9cc3cddb91f8576b681ccddfff08a2e3356bd5",
+    "tests/unit/archive-controller.test.ts": "6363f0f2a0035981299d964d1c82003232886a74b76deeac5b48d096b6f982a8",
+    "tests/unit/support/hook-runner.tsx": "c6467e6556daf79b1f36b41c3957803b230d764c1a0005e950ff17a9a2b8f54c",
+    "tests/unit/values.test.ts": "eca78bd65f4a3d2fa34ad5fa58c6532b54d38d0039e83f7a61f8d4680d960aef",
+    "src/backend/application/preferences/numeric-preference.ts": "9d785d38cdee7c47b6d63b7e799ec4b709d90386ced43ff4e7ac722cb11503fc",
+    "src/backend/infrastructure/preferences/numeric-preference-store.ts": "e201a413c713e7c09594b40b73ff761fe55a4b806911f44a61817d899045a0c6",
+    "src/renderer/src/api/use-numeric-preference.tsx": "e64729cf7d94e66f4eb6c7ba33fb3fe8fdca3ad4b2e063f79013258e26a66d44",
+    "src/renderer/src/app/CalculationNumbers.tsx": "a402084bd484ab1821bf740c592ac35284196162a5436c31d9790c60a1a7c321",
+    "src/renderer/src/app/ExactNumericInput.tsx": "4c9a16729267e577f04aaf4775708a3df4a1e97909c0c2115d287448ddedbdb7",
+    "src/renderer/src/app/NumericSettings.tsx": "ebbce0b0c8ebed22683feba6bfb3387798ac0d76a6d0a635dcd237b38b83b0fd",
+    "src/shared/contracts/numeric-preference.ts": "110617c844d74035214dd636663fc645f5d2cffb1e92601f8c00349a853d663e",
+    "tests/e2e/pr04-numbers.spec.ts": "f0c593e03b430cfe3e428c46126a7ce857026f4ba8408746662799df8ad9d9b8",
+    "tests/unit/numeric-callers.test.tsx": "5aaa02e02b21faf0363b1689dce49a8cafdd16ccbff6b04b3028dc1d6a628be9",
+    "tests/unit/numeric-editing.test.tsx": "2a0bac4734cf564fb898839c9a7312ddb0da21eab30003ee679f8747d8666e86",
+    "tests/unit/numeric-input.test.tsx": "9c8b2bf0c5733f3588cfc3dd21c4810c82815293659b7d7020b2d166f0c930af",
+    "tests/unit/numeric-preference.test.ts": "54871e68b11fa8fa334f62311e80fefa1c57284b6849aaf77dc91984d13a180b"
+  },
+  "sourceValidation": "All production and unit-test sources still match the complete unit run. Only the prepared desktop focus direction and documentation changed afterwards; TypeScript and targeted ESLint passed. Full unit results remain valid.",
+  "postFullDesktopPreparation": {
+    "path": "tests/e2e/pr04-numbers.spec.ts",
+    "change": "Use Shift+Tab from amount to the settings control, which is inside the description preceding the input in the installed Mantine InputWrapper.",
+    "previousSha256": "6a661d5b8f85e07391cc10ee36f5620efbf22916e8dad7c881efce1ee69afa4e",
+    "sha256": "f0c593e03b430cfe3e428c46126a7ce857026f4ba8408746662799df8ad9d9b8",
+    "typeScript": {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "log": "test-results/pr04-typecheck-desktop-final.log"
+    },
+    "eslint": {
+      "command": "node node_modules/eslint/bin/eslint.js tests/e2e/pr04-numbers.spec.ts",
+      "exitCode": 0
+    },
+    "executed": false
+  },
+  "runtimeAndUnitFilesModifiedAfterFullStarted": [],
+  "preparedDesktopFilesModifiedAfterFullStarted": ["tests/e2e/pr04-numbers.spec.ts"],
+  "versioning": {
+    "implementationCommit": "bd6f39c201bd5488b8b76a20518d4f4c0f50f4d0",
+    "authorization": "Successiva richiesta esplicita dell’utente: effettua le commit",
+    "initialDeliveryCommitCreated": false,
+    "verifiedSourceFiles": 42,
+    "unitResultsReused": "675/675 nel runtime Electron; sorgenti di prodotto e test unitari immutati. Impronte dei 42 file di codice/test coincidenti con il manifest finale PR04.",
+    "desktopExecuted": false,
+    "packagingExecuted": false,
+    "documentation": {
+      "command": "npm.cmd run verify -- documentazione --document README.md --document doc/dev/piano-interventi-post-rilascio.md --document doc/piano-implementazione-prestazioni.md --document doc/stato-implementazione-prestazioni.md --document doc/pr04/notazione-numerica.md",
+      "exitCode": 1,
+      "utf8": "passed",
+      "localLinksAndAnchors": "passed",
+      "gitDiff": "passed",
+      "formatting": "only pre-existing doc/dev/punti-issue.md differs; source preserved",
+      "summary": "test-results/verification/2026-11-24T11-14-53.966Z-coordinator-QeNmLR/summary.md",
+      "log": "test-results/pr04-documentation-commit.log"
+    }
+  }
+}

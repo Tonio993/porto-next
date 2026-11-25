@@ -1,3 +1,5 @@
+import { describeEffects } from '../presentation/effect-descriptions'
+import { ReadDescriptions } from '../presentation/read-descriptions'
 import { randomUUID } from 'node:crypto'
 import { isDeepStrictEqual } from 'node:util'
 import type {
@@ -14,7 +16,7 @@ import type { MomentInputDto, ResolvedMomentDto } from '../../../shared/contract
 import { ArchiveError } from '../../../shared/errors/archive-error'
 import { Money } from '../../domain/values/numbers'
 import { resolveMoment } from '../../domain/values/moments'
-import { operationReplay, serviceValues } from './operation-replay'
+import { operationReplay, serviceReplayEffects } from './operation-replay'
 import { subjectTimeline } from '../../domain/operations/subject-context'
 import { serviceContext } from '../../domain/services/context'
 import { operationTotal } from '../../domain/operations/charges'
@@ -472,6 +474,7 @@ export class OperationCompletion {
             { kind: 'VESSEL_OPERATION', id: r.before.id, label: 'Origine con banchina completata' },
             operationValues(r.before),
             operationValues(r.after),
+            s.database,
           ),
         ),
         ...subjectEffects(
@@ -482,13 +485,15 @@ export class OperationCompletion {
           },
           operationValues(before),
           operationValues(after),
+          s.database,
         ),
         ...subjects.effects.filter((e) => e.reference.kind !== 'SERVICE_ACTIVITY'),
         ...subjects.serviceUpdates.flatMap((u) =>
-          subjectEffects(
+          serviceReplayEffects(
             { kind: 'SERVICE_ACTIVITY', id: u.before.id, label: u.before.description },
-            serviceValues(u.before),
-            serviceValues(u.after),
+            u.before,
+            u.after,
+            s.database,
           ),
         ),
       )
@@ -515,6 +520,7 @@ export class OperationCompletion {
               { kind: 'OPERATION_CHARGE', id: c.id, label: 'Componente economica' },
               chargeValues(old),
               chargeValues(c),
+              s.database,
             ),
           )
       }
@@ -563,13 +569,14 @@ export class OperationCompletion {
     pageSize = 50,
   ): OperationCompletionPreviewDto {
     const a = this.analyze(s, prepared)
+    const descriptions = new ReadDescriptions(s.database)
     return {
       ...entry,
       context: s.context(),
       operation: this.namespace,
       status: a.blockers.length || prepared.originalBlockers.length ? 'BLOCKED' : 'READY',
-      before: a.before,
-      operationValues: a.after,
+      before: descriptions.operation(a.before),
+      operationValues: descriptions.operation(a.after),
       summary: {
         created: a.effects.filter((e) => e.action === 'CREATE').length,
         updated: a.effects.filter((e) => e.action === 'UPDATE').length,
@@ -578,7 +585,12 @@ export class OperationCompletion {
         recalculated: a.recalculated,
       },
       effects: {
-        items: a.effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          s.database,
+          a.effects.slice((page - 1) * pageSize, page * pageSize),
+          a.after,
+          descriptions.references,
+        ),
         total: a.effects.length,
         page,
         pageSize,

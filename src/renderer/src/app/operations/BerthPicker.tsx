@@ -1,3 +1,4 @@
+import { berthName } from '../../api/master-data-names'
 import type { ConsultationPicker } from '../../api/use-consultation-state'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
 import { usePagedPicker } from '../../api/use-paged-picker'
@@ -49,7 +50,7 @@ export function BerthPicker({
             label:
               b.id === original?.id
                 ? original.label
-                : b.code + ' · ' + b.version.name + (b.selectable ? '' : ' · Disattivata'),
+                : berthName(b) + (b.selectable ? '' : ' · Disattivata'),
             disabled:
               !b.selectable && b.id !== original?.id && !(historical && retained === undefined),
           },

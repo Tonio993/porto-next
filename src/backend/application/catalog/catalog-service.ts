@@ -1,3 +1,4 @@
+import { describeEffects } from '../presentation/effect-descriptions'
 import { WeightService } from './weight-service'
 import { WeightRepository } from '../../infrastructure/database/weight-repository'
 import type { CatalogApi, CatalogChange } from '../../../shared/contracts/catalog'
@@ -193,7 +194,10 @@ export class CatalogService implements CatalogApi {
         recalculated: 0,
       },
       effects: {
-        items: effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          session.database,
+          effects.slice((page - 1) * pageSize, page * pageSize),
+        ),
         total: effects.length,
         page,
         pageSize,

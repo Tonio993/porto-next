@@ -1,3 +1,4 @@
+import { withoutDescriptions } from './support/without-descriptions'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -27,7 +28,7 @@ let folder: string,
   berthId: string
 const value = <T>(r: ApplicationResult<T>): T => {
   if (!r.ok) throw new Error(`${r.error.code}: ${r.error.message}`)
-  return r.value
+  return withoutDescriptions(r.value)
 }
 const context = () => archives.context()!,
   db = () => archives.coordinator.requireSession().database,
@@ -1033,9 +1034,7 @@ it('P11: anagrafiche ai due estremi, nuove versioni durante il trasferimento e e
     }),
   )
   expect(
-    p.effects.items.some(
-      (e) => e.reference.id === move.id && e.reference.label.includes('ARRIVAL'),
-    ),
+    p.effects.items.some((e) => e.reference.id === move.id && e.reference.label.includes('Arrivo')),
   ).toBe(true)
   value(
     await ports.confirmInsertVersion({ context: p.context, payload: { previewId: p.previewId } }),

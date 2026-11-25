@@ -1,3 +1,4 @@
+import { withoutDescriptions } from './support/without-descriptions'
 import * as serviceCalculation from '../../src/backend/application/services/service-calculation'
 import * as subjectResolution from '../../src/backend/application/operations/subject-resolution'
 import { CatalogService } from '../../src/backend/application/catalog/catalog-service'
@@ -43,7 +44,7 @@ let folder: string,
   berthId: string
 const value = <R extends ApplicationResult<unknown>>(r: R): Extract<R, { ok: true }>['value'] => {
   if (!r.ok) throw Error(`${r.error.code}: ${r.error.message}`)
-  return r.value as Extract<R, { ok: true }>['value']
+  return withoutDescriptions(r.value) as Extract<R, { ok: true }>['value']
 }
 const context = () => archives.context()!,
   db = () => archives.coordinator.requireSession().database,
@@ -1371,7 +1372,13 @@ it('post-P16: FK con PK implicita ai soggetti, anche vuote o di altre prestazion
   // Simulate an external reference arriving after preview, without changing the revision.
   sql().prepare('INSERT INTO external_implicit VALUES (?)').run(saved.id)
   expect(value(await previewChange(change)).blockers).toMatchObject([
-    { reference: { label: 'external_implicit: 1 riferimenti' } },
+    {
+      reference: {
+        kind: 'SERVICE_ACTIVITY',
+        id: saved.id,
+        label: 'Assistenza straordinaria · Elementi collegati: 1 riferimento',
+      },
+    },
   ])
   expect(
     await services.confirm({ context: pre.context, payload: { previewId: pre.previewId } }),
@@ -1405,7 +1412,15 @@ it('post-P16: le FK composte implicite rispettano l’ordine della PK, distinto 
     )
   expect(blockers()).toEqual([])
   sql().exec("INSERT INTO external_child VALUES ('slot','target')")
-  expect(blockers()).toMatchObject([{ reference: { label: 'external_child: 1 riferimenti' } }])
+  expect(blockers()).toMatchObject([
+    {
+      reference: {
+        kind: 'SERVICE_ACTIVITY',
+        id: 'target',
+        label: 'Prestazione · Elementi collegati: 1 riferimento',
+      },
+    },
+  ])
   integrity()
 })
 it('P16: no-op, anteprime obsolete, namespace, scadenza, sessione e rollback dopo UPDATE', async () => {

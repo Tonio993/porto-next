@@ -189,9 +189,7 @@ export function Agencies({
               aria-label="Dettaglio agenzia"
               aria-busy={agencies.loadingDetail}
             >
-              <h3>
-                Agenzia {history.agency.code} · {history.agency.version.businessName}
-              </h3>
+              <h3>{history.agency.version.businessName}</h3>
               <Group gap="xs">
                 <Badge
                   variant="outline"

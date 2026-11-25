@@ -6,57 +6,52 @@ import { useEffect, useState } from 'react'
 import { Button, Group, Table } from '@mantine/core'
 import type { ChangePreviewDto } from '../../../../shared/contracts/master-data'
 import { StateMessage } from '../StateMessage'
-const labels: Record<string, string> = {
-  moment: 'Momento (UTC)',
-  startedAt: 'Inizio (UTC)',
-  endedAt: 'Fine (UTC)',
-  calculatedBase: 'Base calcolata (EUR)',
-  manualOverride: 'Sostituzione manuale (EUR)',
-  effectiveBase: 'Base effettiva (EUR)',
-  vesselVersionId: 'Versione nave',
-  portVersionId: 'Versione porto',
-  berthVersionId: 'Versione banchina',
-  versionId: 'Versione applicata',
-  vesselName: 'Nome nave',
-  tariffId: 'Tariffa applicata',
-  tariffEffectiveFrom: 'Decorrenza tariffa (UTC)',
-  configurationId: 'Configurazione tariffaria',
-  bracketId: 'Scaglione',
-  upperLimit: 'Limite ordinario',
-  ordinaryValue: 'Valore ordinario (EUR)',
-  extraWidth: 'Ampiezza extra',
-  extraValue: 'Valore extra (EUR)',
-  extraCount: 'Numero extra',
-  tariffValue: 'Valore tariffario (EUR)',
-  weightSequenceId: 'Sequenza peso',
-  weightVersionId: 'Versione peso',
-  base: 'Base calcolata (EUR)',
-  steps: 'Traccia di calcolo',
-  description: 'Descrizione',
-  weight: 'Peso',
-  name: 'Nome',
-  businessName: 'Ragione sociale',
-  registeredName: 'Nome di registrazione',
-  imoNumber: 'IMO',
-  vesselTypeId: 'Tipologia nave',
-  size: 'Dimensione',
-  locality: 'Località',
-  countryCode: 'Paese',
-  effectiveMoment: 'Decorrenza locale, fuso e offset',
-  configurations: 'Configurazioni tariffarie',
-  calculation: 'Calcolo teorico e riferimenti',
-  effectiveFrom: 'Inizio (UTC)',
-  effectiveTo: 'Fine esclusa (UTC)',
-  status: 'Stato',
-  port: 'Porto',
-  berth: 'Banchina',
-  customerId: 'Cliente esplicito',
-  agencyId: 'Agenzia esplicita',
-  customer: 'Cliente effettivo e fonte',
-  agency: 'Agenzia effettiva e fonte',
-  vessel: 'Nave',
-  selectable: 'Selezionabile',
+import {
+  effectFieldLabel,
+  knownEffectField,
+  executionLabels,
+  vesselTypeLabels,
+} from '../../../../shared/description-labels'
+import { ReferenceValue, referenceText } from '../ReferenceValues'
+import type { ChangeEffectDto } from '../../../../shared/contracts/master-data'
+
+export function effectValue(
+  effect: ChangeEffectDto,
+  change: ChangeEffectDto['changes'][number],
+  side: 'before' | 'after',
+  format: NumericFormat,
+): string {
+  const value = change[side]
+  if (value === null) return '—'
+  const projected = change[side === 'before' ? 'beforeReference' : 'afterReference']
+  if (projected !== undefined) return referenceText(projected, format)
+  if (
+    change.structured ||
+    [
+      'effectiveMoment',
+      'configurations',
+      'calculation',
+      'context',
+      'specified',
+      'subjects',
+      'customer',
+      'agency',
+      'steps',
+      'activity',
+    ].includes(change.field)
+  )
+    return 'Dati presenti · confronto dettagliato non disponibile'
+  if (!knownEffectField(effect.reference.kind, change.field)) {
+    console.warn('Valore di anteprima non presentabile', {
+      kind: effect.reference.kind,
+      field: change.field,
+      value,
+    })
+    return 'Valore non disponibile'
+  }
+  return displayPreviewValue(change.field, value, format)
 }
+
 export function displayPreviewValue(
   field: string,
   value: string | null,
@@ -102,7 +97,9 @@ export function displayPreviewValue(
       MISSED: 'Mancata',
     },
     Tipologia: { ENTRY: 'Entrata', EXIT: 'Uscita', MOVEMENT: 'Spostamento' },
-    vesselTypeId: { STANDARD: 'Nave normale', PASSENGER: 'Nave passeggeri', ADM: 'Nave ADM' },
+    vesselTypeId: vesselTypeLabels,
+    executionStatus: executionLabels,
+    category: { FREE: 'Libera', CATALOG: 'Catalogo' },
     selectable: { true: 'Sì', false: 'No' },
   }
   return values[field]?.[value] ?? value
@@ -167,7 +164,12 @@ export function PortConfirmation({
       ))}
       {preview.blockers.map((blocker, index) => (
         <p role="alert" key={index}>
-          {blocker.reference.label}: {blocker.reason}
+          {blocker.reference.description ? (
+            <ReferenceValue value={blocker.reference.description} />
+          ) : (
+            blocker.reference.label
+          )}
+          : {blocker.reason}
         </p>
       ))}
       <Table.ScrollContainer
@@ -191,7 +193,14 @@ export function PortConfirmation({
               effect.changes.map((change) => (
                 <Table.Tr key={`${index}-${change.field}`}>
                   <Table.Td>
-                    {effect.reference.label} (
+                    {effect.versionReference ? (
+                      <ReferenceValue value={effect.versionReference} />
+                    ) : effect.reference.description ? (
+                      <ReferenceValue value={effect.reference.description} />
+                    ) : (
+                      effect.reference.label
+                    )}{' '}
+                    (
                     {effect.action === 'CREATE'
                       ? 'creazione'
                       : effect.action === 'DELETE'
@@ -199,12 +208,12 @@ export function PortConfirmation({
                         : 'aggiornamento'}
                     )
                   </Table.Td>
-                  <Table.Td>{labels[change.field] ?? change.field}</Table.Td>
-                  <Table.Td title={change.before ?? undefined}>
-                    {displayPreviewValue(change.field, change.before, numericFormat)}
+                  <Table.Td>{effectFieldLabel(effect.reference.kind, change.field)}</Table.Td>
+                  <Table.Td title={effectValue(effect, change, 'before', numericFormat)}>
+                    {effectValue(effect, change, 'before', numericFormat)}
                   </Table.Td>
-                  <Table.Td title={change.after ?? undefined}>
-                    {displayPreviewValue(change.field, change.after, numericFormat)}
+                  <Table.Td title={effectValue(effect, change, 'after', numericFormat)}>
+                    {effectValue(effect, change, 'after', numericFormat)}
                   </Table.Td>
                 </Table.Tr>
               )),

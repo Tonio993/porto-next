@@ -63,6 +63,7 @@ export type EntityKind =
   | 'SERVICE_ACTIVITY'
 
 export interface EntityReferenceDto {
+  description?: import('./descriptive-references').ScalarReferenceDto
   kind: EntityKind
   id: StableId
   label: string

@@ -42,7 +42,7 @@ test.afterEach(async () => {
 async function operations() {
   await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()
   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-  await page.getByRole('option', { name: /^1 · Stella del mare/ }).click()
+  await page.getByRole('option', { name: /^Stella del mare/ }).click()
 }
 const discardDialog = () => page.getByRole('dialog', { name: 'Scartare la bozza?', exact: true })
 test('PR02 operazioni: Annulla conserva, Scarta avvia una volta e ignora la risoluzione tardiva; focus e navigazione', async () => {
@@ -51,7 +51,7 @@ test('PR02 operazioni: Annulla conserva, Scarta avvia una volta e ignora la riso
   const editor = page.getByRole('dialog', { name: 'Nuova entrata', exact: true })
   await editor.getByLabel('Note', { exact: true }).fill('Contesto originale PR02')
   await editor.getByRole('combobox', { name: 'Porto di arrivo', exact: true }).click()
-  await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+  await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
   await editor.getByLabel('Momento economico locale').fill('2026-10-25T02:30')
   await delayOperationResponse(app, 'operations:resolve-moment')
   await editor.getByRole('button', { name: 'Verifica momento', exact: true }).click()
@@ -191,13 +191,13 @@ test('PR02 stesso editor: Scarta ricrea note e tariffa sullo stesso ID; nuova ve
   await discardDialog().getByRole('button', { name: 'Scarta', exact: true }).click()
   await page.getByRole('button', { name: 'Tariffe', exact: true }).click()
   await page.getByRole('combobox', { name: 'Porto', exact: true }).click()
-  await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+  await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
   await page.locator('.port-list-item').first().click()
   await page.getByRole('button', { name: 'Correggi tariffa', exact: true }).click()
   const price = () =>
     page
       .getByRole('dialog')
-      .getByRole('tabpanel', { name: 'STANDARD', exact: true })
+      .getByRole('tabpanel', { name: 'Nave normale', exact: true })
       .getByLabel('Valore EUR 1', { exact: true })
   await price().fill('999')
   await page.getByRole('dialog').press('Escape')

@@ -15,7 +15,7 @@ import {
 } from './operations-support'
 declare const window: { archives: ArchiveApi; operations: OperationApi; tariffs: TariffApi }
 declare const document: { documentElement: { scrollWidth: number; clientWidth: number } }
-async function vessel(page: Page, name = '1 · Stella del mare arrivo') {
+async function vessel(page: Page, name = 'Stella del mare arrivo') {
   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
   await page.getByRole('option', { name, exact: true }).click()
 }
@@ -38,7 +38,7 @@ async function start(
   await modal.getByRole('combobox', { name: 'Stato', exact: true }).click()
   await page.getByRole('option', { name: status, exact: true }).click()
   await modal.getByRole('combobox', { name: 'Porto di destinazione', exact: true }).click()
-  await page.getByRole('option', { name: '2 · Londra', exact: true }).click()
+  await page.getByRole('option', { name: 'Londra · Londra · Regno Unito', exact: true }).click()
   await modal.getByLabel('Partenza locale').fill(departure)
   await modal.getByLabel('Arrivo locale').fill(arrival)
   return modal
@@ -110,14 +110,16 @@ test('P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità
     await expect(page.getByRole('button', { name: 'Riprendi bozza', exact: true })).toBeFocused()
     modal = await start(page)
     await modal.getByRole('combobox', { name: 'Banchina (facoltativa)', exact: true }).click()
-    await page.getByRole('option', { name: '2 · Molo Londra', exact: true }).click()
+    await page
+      .getByRole('option', { name: 'Molo Londra · Londra · Londra · GB', exact: true })
+      .click()
     await modal.getByLabel('Sostituzione manuale della base').fill('0')
     await modal.getByLabel('Sostituzione manuale all’arrivo').fill('7,25')
     await submit(modal)
-    await expect(modal.getByLabel('Componente EXIT', { exact: true })).toContainText(
+    await expect(modal.getByLabel('Componente Uscita', { exact: true })).toContainText(
       'Base calcolata: 230,00 €',
     )
-    await expect(modal.getByLabel('Componente ENTRY', { exact: true })).toContainText(
+    await expect(modal.getByLabel('Componente Entrata', { exact: true })).toContainText(
       'Base calcolata: 200,00 €',
     )
     await expect(modal.getByText('Totale basi effettive: 7,25 €', { exact: true })).toBeVisible()
@@ -129,7 +131,7 @@ test('P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità
         path: testInfo.outputPath('p12-estremi-minimo.png'),
         animations: 'disabled',
       })
-    await modal.getByLabel('Componente ENTRY', { exact: true }).scrollIntoViewIfNeeded()
+    await modal.getByLabel('Componente Entrata', { exact: true }).scrollIntoViewIfNeeded()
     if (!process.env.PORTO_PACKAGED_EXE)
       await page.screenshot({
         path: testInfo.outputPath('p12-componenti-minimo.png'),
@@ -170,7 +172,7 @@ test('P12: v12 popolato, fusi distinti, componenti autonome, contesto, identità
     // A missed return does not create a third visit or provide a new origin.
     modal = await start(page, '2026-05-04T12:00', '2026-05-04T14:30', 'Mancata')
     await modal.getByRole('combobox', { name: 'Porto di destinazione', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+    await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
     await submit(modal)
     await expect(
       modal.getByText('Nessun effetto sulle permanenze.', { exact: false }),
@@ -278,7 +280,7 @@ test('P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardi
     await modal.getByRole('button', { name: 'Verifica estremi', exact: true }).click()
     await expect.poll(() => operationHeld(app!)).toBe(true)
     await modal.getByRole('combobox', { name: 'Porto di destinazione', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+    await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
     await releaseOperation(app)
     await expect(modal.getByText('Scegli l’occorrenza dell’orario.', { exact: true })).toHaveCount(
       0,
@@ -299,14 +301,14 @@ test('P12 asincronia: arrivo in altro fuso, cambio destinazione, anteprima tardi
     })
     await expect(modal.getByText('Bozza obsoleta', { exact: true })).toBeVisible()
     await releaseOperation(app)
-    await expect(modal.getByLabel('Componente EXIT', { exact: true })).toHaveCount(0)
+    await expect(modal.getByLabel('Componente Uscita', { exact: true })).toHaveCount(0)
     await expect(
       modal.getByRole('button', { name: 'Verifica e mostra anteprima', exact: true }),
     ).toBeDisabled()
     await expect(modal.getByText(/cambiati|ricarica|revisione/i).first()).toBeVisible()
     await modal.getByRole('button', { name: 'Ricarica bozza', exact: true }).click()
     await submit(modal)
-    await expect(modal.getByLabel('Componente ENTRY', { exact: true })).toBeVisible()
+    await expect(modal.getByLabel('Componente Entrata', { exact: true })).toBeVisible()
     await app.evaluate(({ dialog }, copy) => {
       dialog.showSaveDialog = async () => ({ canceled: false, filePath: copy })
     }, copy)

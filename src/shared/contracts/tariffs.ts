@@ -47,6 +47,7 @@ export interface CalculateBaseDto {
 }
 /** Same trace is returned by simulation and by the synchronous calculator used in future writes. */
 export interface BaseCalculationDto {
+  references?: import('./descriptive-references').CalculationReferencesDto
   portId: string
   vesselId: string
   vesselVersionId: string

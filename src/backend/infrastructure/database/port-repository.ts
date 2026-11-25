@@ -1,3 +1,4 @@
+import { DescriptiveReferenceRepository } from './descriptive-reference-repository'
 import { randomUUID } from 'node:crypto'
 import type {
   CreatePortDto,
@@ -69,7 +70,14 @@ export class PortRepository {
         [],
         [
           {
-            reference: { kind: 'PORT', id: conflict.id, label: `Porto ${conflict.code}` },
+            reference: {
+              kind: 'PORT',
+              id: conflict.id,
+              label: new DescriptiveReferenceRepository(this.database, this.now()).identity(
+                'PORT',
+                conflict.id,
+              ),
+            },
             reason: 'Chiave identificativa già riservata.',
           },
         ],

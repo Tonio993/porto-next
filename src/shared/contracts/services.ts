@@ -35,6 +35,11 @@ export interface ServiceMomentDto {
   resolution: MomentResolutionDto
 }
 interface ServiceActivityCommonDto {
+  references?: {
+    vessel: import('./descriptive-references').VersionReferenceDto | null
+    port: import('./descriptive-references').VersionReferenceDto | null
+    berth: import('./descriptive-references').VersionReferenceDto | null
+  }
   id: string
   vesselId: string
   vesselVersionId: string

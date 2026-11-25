@@ -356,7 +356,7 @@ it.each(['(id)', ''])(
       await ports.previewDelete({ context: context(), payload: { portId: port.id } }),
     )
     expect(blocked.status).toBe('BLOCKED')
-    expect(blocked.blockers[0].reference.label).toContain('linked_ports')
+    expect(blocked.blockers[0].reference.label).toContain('Elementi collegati: 1 riferimento')
     expect(
       await ports.confirmDelete({
         context: blocked.context,

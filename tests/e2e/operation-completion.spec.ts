@@ -57,7 +57,7 @@ async function current() {
     return r.value.context
   })
 }
-async function refreshWorkspace(vesselName = '1 · Stella del mare') {
+async function refreshWorkspace(vesselName = 'Stella del mare') {
   await page.reload()
   await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()
   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
@@ -374,7 +374,7 @@ test('P17A: spostamento esterno effettuato, fusi distinti, due componenti e iden
     destinationPortId: ids.destinationPortId,
     destinationBerthId: ids.destinationBerthId,
   })
-  await refreshWorkspace('1 · Stella del mare arrivo')
+  await refreshWorkspace('Stella del mare arrivo')
   const before = await page.evaluate(async (vesselId) => {
     const s = await window.archives.getState()
     if (!s.ok || !s.value.context) throw Error('context')

@@ -55,7 +55,7 @@ test('crea e consulta porti offline, li ritrova al riavvio e mantiene le copie i
     await page.getByRole('option', { name: 'Europe/Rome', exact: true }).click()
     await page.getByRole('button', { name: 'Crea porto', exact: true }).click()
     const detail = page.getByRole('region', { name: 'Dettaglio porto' })
-    await expect(detail).toContainText('Porto 1 · Porto A')
+    await expect(detail).toContainText('Porto A')
     await expect(detail).toContainText('Europe/Rome')
     await page.getByRole('button', { name: 'Nuovo porto', exact: true }).click()
     await page.getByLabel('Nome del porto').fill(' PORTO A ')
@@ -64,11 +64,17 @@ test('crea e consulta porti offline, li ritrova al riavvio e mantiene le copie i
     await expect(page.getByRole('alert')).toContainText('Esiste già un porto')
     await page.getByLabel('Località').fill('Savona')
     await page.getByRole('button', { name: 'Crea porto', exact: true }).click()
-    await expect(detail).toContainText('Porto 2 · PORTO A')
+    await expect(detail).toContainText('PORTO A')
     await page.getByLabel('Cerca porto').fill('genova')
-    await expect(page.getByRole('button', { name: 'Apri porto 1', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Apri porto 2', exact: true })).toHaveCount(0)
-    await page.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
+    await expect(
+      page.getByRole('button', { name: 'Apri porto Porto A · Genova · Italia', exact: true }),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Apri porto PORTO A · Savona · Italia', exact: true }),
+    ).toHaveCount(0)
+    await page
+      .getByRole('button', { name: 'Apri porto Porto A · Genova · Italia', exact: true })
+      .click()
     await expect(detail).toContainText('Genova')
     if (!process.env.PORTO_PACKAGED_EXE)
       await page.screenshot({ path: testInfo.outputPath('ports.png') })
@@ -115,9 +121,7 @@ test('crea e consulta porti offline, li ritrova al riavvio e mantiene le copie i
     await page.getByRole('button', { name: 'Ricarica dati', exact: true }).click()
     await expect(page.getByLabel('Nome del porto')).toHaveValue('Solo copia')
     await page.getByRole('button', { name: 'Crea porto', exact: true }).click()
-    await expect(page.getByRole('region', { name: 'Dettaglio porto' })).toContainText(
-      'Porto 3 · Solo copia',
-    )
+    await expect(page.getByRole('region', { name: 'Dettaglio porto' })).toContainText('Solo copia')
     expect(errors).toEqual([])
     await app.close()
     app = await playwright._electron.launch({ ...options, env })
@@ -130,8 +134,12 @@ test('crea e consulta porti offline, li ritrova al riavvio e mantiene le copie i
     await page.getByRole('button', { name: 'Apri archivio', exact: true }).click()
     await page.getByRole('button', { name: 'Anagrafiche', exact: true }).click()
     await expect(page.getByText('2 porti', { exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Apri porto 3', exact: true })).toHaveCount(0)
-    await page.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
+    await expect(
+      page.getByRole('button', { name: 'Apri porto Solo copia · Genova · Italia', exact: true }),
+    ).toHaveCount(0)
+    await page
+      .getByRole('button', { name: 'Apri porto Porto A · Genova · Italia', exact: true })
+      .click()
     await expect(page.getByRole('region', { name: 'Dettaglio porto' })).toContainText('Europe/Rome')
   } finally {
     await app?.close()

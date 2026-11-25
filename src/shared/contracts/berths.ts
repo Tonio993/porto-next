@@ -7,6 +7,7 @@ export interface BerthVersionDto extends VersionIntervalDto {
 }
 
 export interface BerthDto {
+  portLabel?: string
   id: string
   portId: string
   code: number

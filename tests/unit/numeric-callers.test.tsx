@@ -548,7 +548,13 @@ function reference(id: string, active = true, portId = 'port-new') {
     selectable: active,
     portId,
     description: 'Tipo ' + id,
-    version: { name: 'Nome ' + id, businessName: 'Nome ' + id, registeredName: 'Nome ' + id },
+    version: {
+      name: 'Nome ' + id,
+      businessName: 'Nome ' + id,
+      registeredName: 'Nome ' + id,
+      locality: 'Genova',
+      countryCode: 'IT',
+    },
   }
 }
 function pickerProps<T extends (...args: never[]) => unknown>(

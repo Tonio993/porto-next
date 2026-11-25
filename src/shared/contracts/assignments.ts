@@ -16,6 +16,13 @@ export interface EffectiveSubjectDto {
   versionId: string
   businessName: string
   source: AssignmentTarget
+  description?: {
+    version: import('./descriptive-references').VersionReferenceDto | null
+    origin:
+      | import('./descriptive-references').StayReferenceDto
+      | import('./descriptive-references').ActivityReferenceDto
+      | null
+  }
 }
 export interface EffectiveSubjectsDto {
   customer: EffectiveSubjectDto | null

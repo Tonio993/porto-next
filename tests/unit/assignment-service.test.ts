@@ -1,3 +1,4 @@
+import { withoutDescriptions } from './support/without-descriptions'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { WriteAttempt } from '../../src/renderer/src/api/write-attempt'
@@ -36,7 +37,7 @@ let folder: string,
   berthId: string
 const value = <T>(r: ApplicationResult<T>): T => {
   if (!r.ok) throw new Error(`${r.error.code}: ${r.error.message}`)
-  return r.value
+  return withoutDescriptions(r.value)
 }
 const context = () => archives.context()!,
   db = () => archives.coordinator.requireSession().database,
@@ -627,7 +628,7 @@ it('assegnazioni mascherate restano riferimenti e impediscono eliminazione anche
     }),
   )
   expect(p.status).toBe('BLOCKED')
-  expect(p.blockers.some((b) => b.reference.label.includes('voyages'))).toBe(true)
+  expect(p.blockers.some((b) => b.reference.label.includes('Viaggi'))).toBe(true)
 })
 it('MISSED all’arrivo eredita da una destinazione realmente esistente al proprio istante nello stesso viaggio', async () => {
   const dest = await secondPort(),

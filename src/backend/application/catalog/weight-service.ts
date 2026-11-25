@@ -1,3 +1,4 @@
+import { describeEffects } from '../presentation/effect-descriptions'
 import { randomUUID } from 'node:crypto'
 import type {
   CatalogApi,
@@ -138,6 +139,13 @@ export class WeightService {
           label: label + ' · ' + (next?.effectiveFrom ?? old?.effectiveFrom ?? 'Peso iniziale'),
         },
         versionId: id,
+        versionReference: {
+          kind: 'WEIGHT_VERSION',
+          name: label,
+          effectiveFrom: (next ?? old)!.effectiveFrom,
+          effectiveTo: (next ?? old)!.effectiveTo,
+          effectiveMoment: (next ?? old)!.effectiveMoment,
+        },
         action: !old ? 'CREATE' : !next ? 'DELETE' : 'UPDATE',
         changes,
       })
@@ -191,7 +199,10 @@ export class WeightService {
         recalculated: impacts.recalculated,
       },
       effects: {
-        items: effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          session.database,
+          effects.slice((page - 1) * pageSize, page * pageSize),
+        ),
         total: effects.length,
         page,
         pageSize,

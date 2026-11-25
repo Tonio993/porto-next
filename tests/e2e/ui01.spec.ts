@@ -133,7 +133,7 @@ test('UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti rea
     await creation.getByLabel('Nome del porto').fill('Porto di Genova')
     await creation.getByRole('button', { name: 'Crea porto', exact: true }).click()
     const detail = page.getByRole('region', { name: 'Dettaglio porto' })
-    await expect(detail).toContainText('Porto 1 · Porto di Genova')
+    await expect(detail).toContainText('Porto di Genova')
     const portId = await page.evaluate(async () => {
       const state = await window.archives.getState()
       if (!state.ok || !state.value.context) throw new Error('Contesto assente')
@@ -190,17 +190,32 @@ test('UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti rea
     await expect(list).toContainText('28 porti')
     await list.getByRole('button', { name: 'Successiva', exact: true }).click()
     await expect(list).toContainText('Pagina 2')
-    await expect(list.getByRole('button', { name: 'Apri porto 28', exact: true })).toBeVisible()
+    await expect(
+      list.getByRole('button', {
+        name: 'Apri porto Porto 28 · Località di prova · Italia',
+        exact: true,
+      }),
+    ).toBeVisible()
     await shot('pagina2-minimo')
     await list.getByRole('button', { name: 'Precedente', exact: true }).click()
     await list.getByLabel('Cerca porto').fill('Genova')
     await expect(list).toContainText('1 porto')
-    await list.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
+    await list
+      .getByRole('button', {
+        name: 'Apri porto Porto di Genova attuale · Genova · Italia',
+        exact: true,
+      })
+      .click()
     const history = page.getByRole('region', { name: 'Cronologia porto' })
     await expect(history).toContainText('Storica')
     await expect(history).toContainText('Corrente')
     await expect(history).toContainText('Futura')
-    await list.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
+    await list
+      .getByRole('button', {
+        name: 'Apri porto Porto di Genova attuale · Genova · Italia',
+        exact: true,
+      })
+      .click()
     await expect(history).toContainText('Corrente')
     await page.getByRole('button', { name: 'Chiudi messaggio', exact: true }).click()
     await noHorizontalOverflow()
@@ -227,11 +242,21 @@ test('UI01: dimensioni, tastiera, ricerca, pagine e conferme con riferimenti rea
     await expect(page.getByText('Nessun porto trovato.')).toBeVisible()
     await expect(detail).toContainText('Genova attuale')
     await list.getByLabel('Cerca porto').fill('')
-    await list.getByRole('button', { name: 'Apri porto 2', exact: true }).click()
+    await list
+      .getByRole('button', {
+        name: 'Apri porto Porto con denominazione estesa per verificare la leggibilità della selezione e del dettaglio · Località di prova · Italia',
+        exact: true,
+      })
+      .click()
     await expect(detail).toContainText('denominazione estesa')
     await noHorizontalOverflow()
     await shot('testo-lungo-desktop')
-    await list.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
+    await list
+      .getByRole('button', {
+        name: 'Apri porto Porto di Genova attuale · Genova · Italia',
+        exact: true,
+      })
+      .click()
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(960, 700))
     await detail.getByRole('button', { name: 'Nuova versione', exact: true }).click()
     const editor = page.getByRole('region', { name: 'Editor versione' })

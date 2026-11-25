@@ -1,4 +1,5 @@
-﻿import { mkdtempSync, rmSync } from 'node:fs'
+import { withoutDescriptions } from './support/without-descriptions'
+import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -32,7 +33,7 @@ let folder: string,
   berthId: string
 const value = <T>(r: ApplicationResult<T>): T => {
   if (!r.ok) throw new Error(`${r.error.code}: ${r.error.message}`)
-  return r.value
+  return withoutDescriptions(r.value)
 }
 const context = () => archives.context()!,
   db = () => archives.coordinator.requireSession().database,

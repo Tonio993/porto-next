@@ -1,3 +1,9 @@
+import { DescriptiveReferenceRepository } from '../../infrastructure/database/descriptive-reference-repository'
+import {
+  operationLabels,
+  executionLabels,
+  endpointLabels,
+} from '../../../shared/description-labels'
 import type { ConflictDto } from '../../../shared/contracts/application'
 import type { ServiceActivityDto } from '../../../shared/contracts/services'
 import { ServiceRepository } from '../../infrastructure/database/service-repository'
@@ -6,6 +12,7 @@ import type { VesselOperationDto, OperationChargeDto } from '../../../shared/con
 import type { PortVersionDto } from '../../../shared/contracts/ports'
 import type { BerthVersionDto } from '../../../shared/contracts/berths'
 import type { VesselVersionDto } from '../../../shared/contracts/vessels'
+import type { VersionReferenceDto } from '../../../shared/contracts/descriptive-references'
 import type { TariffDto } from '../../../shared/contracts/tariffs'
 import type { DatabaseSession } from '../../infrastructure/database/database-session'
 import { OperationRepository } from '../../infrastructure/database/operation-repository'
@@ -42,7 +49,14 @@ function diff(
     x === null ? null : typeof x === 'object' ? JSON.stringify(x) : String(x)
   const changes = Object.keys(after)
     .filter((k) => text(before[k]) !== text(after[k]))
-    .map((field) => ({ field, before: text(before[field]), after: text(after[field]) }))
+    .map((field) => ({
+      structured:
+        (before[field] !== null && typeof before[field] === 'object') ||
+        (after[field] !== null && typeof after[field] === 'object'),
+      field,
+      before: text(before[field]),
+      after: text(after[field]),
+    }))
   return changes.length ? [{ reference, versionId: null, action: 'UPDATE', changes }] : []
 }
 function recalculate(
@@ -99,6 +113,7 @@ export function economicSequenceImpacts(
     activity: import('../../../shared/contracts/tariffs').TariffActivity,
   ) => Parameters<typeof calculateBase>[2] | null,
 ) {
+  const descriptions = new DescriptiveReferenceRepository(database, new Date().toISOString())
   const effects: ChangeEffectDto[] = []
   const blockers: ConflictDto[] = []
   const updates: { operationId: string; after: OperationChargeDto }[] = []
@@ -107,7 +122,7 @@ export function economicSequenceImpacts(
       reference,
       reason:
         'Nessuna tariffa copre il porto ' +
-        portId +
+        descriptions.identity('PORT', portId, utc) +
         ' al momento ' +
         utc +
         '. Conserva o anticipa la prima decorrenza.',
@@ -119,7 +134,14 @@ export function economicSequenceImpacts(
       const reference = {
         kind: 'OPERATION_CHARGE' as const,
         id: before.id,
-        label: 'Componente ' + before.chargeKind + ' · ' + op.executionStatus + ' · ' + moment.utc,
+        description: simulated === undefined ? undefined : descriptions.charge(before.id),
+        label:
+          'Componente ' +
+          operationLabels[before.chargeKind] +
+          ' · ' +
+          executionLabels[op.executionStatus] +
+          ' · ' +
+          moment.utc,
       }
       if (simulated === undefined) continue
       if (simulated === null) {
@@ -133,6 +155,47 @@ export function economicSequenceImpacts(
         { ...after.calculation, effectiveBase: after.effectiveBase },
       )
       if (changed.length) {
+        const proposedTariff: VersionReferenceDto | null = simulated.tariff
+          ? {
+              kind: 'TARIFF',
+              name: 'Tariffa · ' + descriptions.identity('PORT', portId, moment.utc),
+              effectiveFrom: simulated.tariff.effectiveFrom,
+              effectiveTo: simulated.tariff.effectiveTo,
+              effectiveMoment: simulated.tariff.effectiveMoment,
+            }
+          : null
+        const proposedWeight: VersionReferenceDto | null = simulated.weight
+          ? {
+              kind: 'WEIGHT_VERSION',
+              name: 'Peso · ' + descriptions.weightOwner(simulated.weight.sequenceId),
+              effectiveFrom: simulated.weight.effectiveFrom,
+              effectiveTo: simulated.weight.effectiveTo,
+              effectiveMoment: simulated.weight.effectiveMoment,
+            }
+          : null
+        for (const effect of changed)
+          effect.changes = effect.changes.map((c) => ({
+            ...c,
+            ...(proposedTariff && c.field === 'tariffId' ? { afterReference: proposedTariff } : {}),
+            ...(proposedTariff && ['configurationId', 'bracketId'].includes(c.field)
+              ? {
+                  afterReference: {
+                    configuration: true as const,
+                    vesselTypeId: after.calculation.vesselTypeId,
+                    tariff: proposedTariff,
+                    ...(c.field === 'bracketId'
+                      ? {
+                          upperLimit: after.calculation.upperLimit,
+                          value: after.calculation.ordinaryValue,
+                        }
+                      : {}),
+                  },
+                }
+              : {}),
+            ...(proposedWeight && c.field === 'weightVersionId'
+              ? { afterReference: proposedWeight }
+              : {}),
+          }))
         effects.push(...changed)
         updates.push({ operationId: op.id, after })
       }
@@ -148,7 +211,14 @@ export function economicSequenceImpacts(
     const reference = {
       kind: 'SERVICE_ACTIVITY' as const,
       id: before.id,
-      label: before.description + ' · ' + before.executionStatus + ' · ' + before.moment.utc,
+      description:
+        simulated === undefined ? undefined : descriptions.origin('SERVICE_ACTIVITY', before.id),
+      label:
+        before.description +
+        ' · ' +
+        executionLabels[before.executionStatus] +
+        ' · ' +
+        before.moment.utc,
     }
     if (simulated === undefined) continue
     if (simulated === null) {
@@ -176,6 +246,7 @@ export function economicSequenceImpacts(
 
 /** Simulate with the proposed complete version sequence, without writes or savepoint rollbacks. */
 export function masterOperationImpacts(database: DatabaseSession, change: MasterChange) {
+  const descriptions = new DescriptiveReferenceRepository(database, new Date().toISOString())
   const operations = new OperationRepository(database).all(
     change.kind === 'VESSEL' ? change.id : undefined,
   )
@@ -203,7 +274,7 @@ export function masterOperationImpacts(database: DatabaseSession, change: Master
           {
             kind: 'OPERATION_CHARGE',
             id: c.id,
-            label: 'Componente ' + c.chargeKind + ' · ' + c.calculation.moment.utc,
+            label: 'Componente ' + operationLabels[c.chargeKind] + ' · ' + c.calculation.moment.utc,
           },
           { ...before.calculation, effectiveBase: before.effectiveBase },
           { ...updated.calculation, effectiveBase: updated.effectiveBase },
@@ -232,11 +303,23 @@ export function masterOperationImpacts(database: DatabaseSession, change: Master
           {
             kind: 'VESSEL_OPERATION',
             id: op.id,
+            description: {
+              name:
+                operationLabels[op.operationType] +
+                ' · ' +
+                endpointLabels[endpoint.role] +
+                ' · ' +
+                (descriptions.version('VESSEL', before.vesselVersionId)?.name ??
+                  original.charges[0].calculation.vesselName) +
+                ' · ' +
+                (descriptions.version('PORT', before.portVersionId)?.name ?? before.portName),
+              moment: before.moment,
+            },
             label:
               'Operazione ' +
-              op.operationType +
+              operationLabels[op.operationType] +
               ' · ' +
-              endpoint.role +
+              endpointLabels[endpoint.role] +
               ' · ' +
               endpoint.moment.utc,
           },
@@ -316,6 +399,29 @@ export function masterOperationImpacts(database: DatabaseSession, change: Master
     if (row.versionId !== version.id)
       structures.push({ table, column, id: row.id, versionId: version.id })
   }
+  for (const effect of effects)
+    effect.changes = effect.changes.map((c) => {
+      const relevant =
+        c.field ===
+          (change.kind === 'VESSEL'
+            ? 'vesselVersionId'
+            : change.kind === 'PORT'
+              ? 'portVersionId'
+              : 'berthVersionId') || c.field === 'versionId'
+      const version = relevant ? change.versions.find((v) => v.id === c.after) : undefined
+      return version
+        ? {
+            ...c,
+            afterReference: {
+              kind: change.kind,
+              name: 'registeredName' in version ? version.registeredName : version.name,
+              effectiveFrom: version.effectiveFrom,
+              effectiveTo: version.effectiveTo,
+              effectiveMoment: version.effectiveMoment,
+            },
+          }
+        : c
+    })
   return {
     effects,
     recalculated,

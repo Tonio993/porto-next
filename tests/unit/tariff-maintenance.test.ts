@@ -1,3 +1,4 @@
+import { withoutDescriptions } from './support/without-descriptions'
 import { TimeService } from '../../src/backend/application/time/time-service'
 import { CatalogService } from '../../src/backend/application/catalog/catalog-service'
 import { tariffMaintenanceOutcome } from '../../src/renderer/src/api/tariff-maintenance-outcome'
@@ -29,7 +30,7 @@ let folder: string,
   berthId: string
 const value = <T>(r: ApplicationResult<T>): T => {
   if (!r.ok) throw new Error(`${r.error.code}: ${r.error.message}`)
-  return r.value
+  return withoutDescriptions(r.value)
 }
 const context = () => archives.context()!,
   db = () => archives.coordinator.requireSession().database,

@@ -16,7 +16,21 @@ function fingerprint(operation: VesselOperationDto) {
   return JSON.stringify(
     canonical({
       ...operation,
-      charges: [...operation.charges].sort((a, b) => a.id.localeCompare(b.id)),
+      // Descriptive read projections never decide whether an uncertain write was applied.
+      endpoint: { ...operation.endpoint, references: undefined },
+      arrival: operation.arrival ? { ...operation.arrival, references: undefined } : null,
+      charges: operation.charges
+        .map((c) => ({
+          ...c,
+          calculation: { ...c.calculation, references: undefined },
+          subjects: {
+            customer: c.subjects.customer
+              ? { ...c.subjects.customer, description: undefined }
+              : null,
+            agency: c.subjects.agency ? { ...c.subjects.agency, description: undefined } : null,
+          },
+        }))
+        .sort((a, b) => a.id.localeCompare(b.id)),
     }),
   )
 }

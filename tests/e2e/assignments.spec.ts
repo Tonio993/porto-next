@@ -69,7 +69,7 @@ async function setup(app: ElectronApplication, path: string) {
   })
   await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()
   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-  await page.getByRole('option', { name: '1 · Stella del mare arrivo', exact: true }).click()
+  await page.getByRole('option', { name: 'Stella del mare arrivo', exact: true }).click()
   await expect(page.locator('.operations-rows button')).toHaveCount(1)
   return { page, subjects }
 }
@@ -128,14 +128,14 @@ test('P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, c
     const voyage = page.getByRole('button', { name: 'Assegna soggetti al viaggio', exact: true })
     await voyage.click()
     const modal = page.getByRole('dialog')
-    await pick(page, modal, 'Cliente', '1 · Cliente C')
+    await pick(page, modal, 'Cliente', 'Cliente C')
     await commit(modal)
     await page.getByRole('button', { name: 'Assegna soggetti alla visita', exact: true }).click()
-    await pick(page, modal, 'Agenzia', '1 · Agenzia A')
+    await pick(page, modal, 'Agenzia', 'Agenzia A')
     await commit(modal)
     const stay = page.getByRole('button', { name: 'Assegna soggetti all’ormeggio', exact: true })
     await stay.click()
-    await pick(page, modal, 'Cliente', '2 · Cliente D')
+    await pick(page, modal, 'Cliente', 'Cliente D')
     await commit(modal)
     await stay.click()
     await expect(modal.getByLabel('Soggetti effettivi')).toContainText('Cliente D')
@@ -148,7 +148,7 @@ test('P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, c
       exact: true,
     })
     await opButton.click()
-    await pick(page, modal, 'Agenzia', '2 · Agenzia B')
+    await pick(page, modal, 'Agenzia', 'Agenzia B')
     await commit(modal)
     expect((await current(page))[0].charges[0].subjects).toMatchObject({
       customer: { id: d, source: { kind: 'BERTH_STAY' } },
@@ -166,7 +166,7 @@ test('P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, c
     // Lo spostamento usa il percorso UI P12; le assegnazioni dei nuovi elementi restano indipendenti.
     await page.getByRole('button', { name: 'Nuovo spostamento', exact: true }).click()
     await modal.getByRole('combobox', { name: 'Porto di destinazione', exact: true }).click()
-    await page.getByRole('option', { name: '2 · Londra', exact: true }).click()
+    await page.getByRole('option', { name: 'Londra · Londra · Regno Unito', exact: true }).click()
     await modal.getByLabel('Partenza locale').fill('2026-05-03T12:00')
     await modal.getByLabel('Arrivo locale').fill('2026-05-03T11:30')
     await modal.getByRole('button', { name: 'Verifica e mostra anteprima', exact: true }).click()
@@ -177,8 +177,8 @@ test('P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, c
       .getByRole('button', { name: 'Assegna soggetti alla visita', exact: true })
       .nth(1)
       .click()
-    await pick(page, modal, 'Cliente', '2 · Cliente D')
-    await pick(page, modal, 'Agenzia', '2 · Agenzia B')
+    await pick(page, modal, 'Cliente', 'Cliente D')
+    await pick(page, modal, 'Agenzia', 'Agenzia B')
     await commit(modal)
     const movement = (await current(page)).find((o) => o.operationType === 'MOVEMENT')!
     expect(movement.charges.map((c) => c.subjects)).toMatchObject([
@@ -187,10 +187,10 @@ test('P13: quattro livelli, coppie autonome, rimozione, focus, migrazione v13, c
     ])
     await page.getByRole('button', { name: 'Operazioni', exact: true }).click()
     await page.locator('.operations-rows button').first().click()
-    await expect(page.getByLabel('Componente ENTRY', { exact: true })).toContainText(
+    await expect(page.getByLabel('Componente Entrata', { exact: true })).toContainText(
       'Fonte: Visita',
     )
-    await page.getByLabel('Componente ENTRY', { exact: true }).scrollIntoViewIfNeeded()
+    await page.getByLabel('Componente Entrata', { exact: true }).scrollIntoViewIfNeeded()
     if (!process.env.PORTO_PACKAGED_EXE) {
       await page.screenshot({
         path: testInfo.outputPath('p13-componenti-minimo.png'),
@@ -277,7 +277,7 @@ test('P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricament
     ).toBeVisible()
     await releaseOperation(app)
     await expect(modal.getByText('Assegnazioni · Visita', { exact: true })).toBeVisible()
-    await pick(page, modal, 'Cliente', '1 · Cliente C')
+    await pick(page, modal, 'Cliente', 'Cliente C')
     await delayOperationResponse(app, 'assignments:preview')
     await modal.getByRole('button', { name: 'Verifica assegnazioni', exact: true }).click()
     await expect.poll(() => operationHeld(app)).toBe(true)
@@ -296,17 +296,17 @@ test('P13 asincronia: risposte tardive, bozze originali, conflitto, ricaricament
     )
     await expect(
       modal.getByRole('combobox', { name: 'Cliente esplicito', exact: true }),
-    ).toHaveValue('1 · Cliente C')
+    ).toHaveValue('Cliente C')
     await modal.getByRole('button', { name: 'Ricarica assegnazioni', exact: true }).click()
     await expect(
       modal.getByRole('combobox', { name: 'Cliente esplicito', exact: true }),
     ).toHaveValue('')
-    await pick(page, modal, 'Cliente', '2 · Cliente D')
+    await pick(page, modal, 'Cliente', 'Cliente D')
     await page.keyboard.press('Escape')
     await page.getByRole('button', { name: 'Riprendi assegnazione', exact: true }).click()
     await expect(
       modal.getByRole('combobox', { name: 'Cliente esplicito', exact: true }),
-    ).toHaveValue('2 · Cliente D')
+    ).toHaveValue('Cliente D')
     await page.keyboard.press('Escape')
     await app.evaluate(
       ({ dialog }, filePath) => {

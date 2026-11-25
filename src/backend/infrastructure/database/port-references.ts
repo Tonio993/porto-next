@@ -1,15 +1,53 @@
+import { entityLabels } from '../../../shared/description-labels'
 import type { ConflictDto, EntityReferenceDto } from '../../../shared/contracts/application'
+import { DescriptiveReferenceRepository } from './descriptive-reference-repository'
 import type { DatabaseSession } from './database-session'
 
+const referenceLabels: Record<string, string> = {
+  ports: 'Porti',
+  port_versions: 'Versioni dei porti',
+  berths: 'Banchine',
+  berth_versions: 'Versioni delle banchine',
+  customers: 'Clienti',
+  customer_versions: 'Versioni dei clienti',
+  agencies: 'Agenzie',
+  agency_versions: 'Versioni delle agenzie',
+  vessels: 'Navi',
+  vessel_versions: 'Versioni delle navi',
+  service_types: 'Tipi di prestazione',
+  weight_sequences: 'Sequenze dei pesi',
+  weight_versions: 'Versioni dei pesi',
+  tariffs: 'Tariffe',
+  tariff_configurations: 'Configurazioni tariffarie',
+  tariff_brackets: 'Scaglioni',
+  vessel_operations: 'Operazioni',
+  operation_endpoints: 'Estremi operativi',
+  operation_charges: 'Componenti economiche',
+  operation_charge_subjects: 'Soggetti delle componenti',
+  voyages: 'Viaggi',
+  port_calls: 'Visite',
+  berth_stays: 'Ormeggi',
+  service_activities: 'Prestazioni',
+  service_activity_subjects: 'Soggetti delle prestazioni',
+}
 const quote = (name: string) => `"${name.replaceAll('"', '""')}"`
 
-export function berthReferencesToPort(database: DatabaseSession, portId: string) {
+export function berthReferencesToPort(
+  database: DatabaseSession,
+  portId: string,
+  observedAt = new Date().toISOString(),
+) {
+  const descriptions = new DescriptiveReferenceRepository(database, observedAt)
   const rows = database.sqlite
     .prepare('SELECT id, code, status FROM berths WHERE port_id = ? ORDER BY code')
     .all(portId) as { id: string; code: number; status: 'ACTIVE' | 'INACTIVE' }[]
-  return rows.map(({ id, code, status }) => ({
+  return rows.map(({ id, status }) => ({
     status,
-    reference: { kind: 'BERTH', id, label: `Banchina ${code}` } satisfies EntityReferenceDto,
+    reference: {
+      kind: 'BERTH',
+      id,
+      label: descriptions.identity('BERTH', id),
+    } satisfies EntityReferenceDto,
   }))
 }
 
@@ -102,12 +140,26 @@ export function foreignReferences(
         )
         .pluck()
         .get(JSON.stringify(ids)) as number
-      if (count)
+      if (count) {
+        if (!Object.hasOwn(referenceLabels, name))
+          console.warn('Riferimenti persistenti in tabella non prevista', { table: name, count })
         blockers.push({
-          reference: { ...reference, label: `${name}: ${count} riferimenti` },
+          reference: {
+            ...reference,
+            label:
+              (reference.label || entityLabels[reference.kind]) +
+              ' · ' +
+              (Object.hasOwn(referenceLabels, name)
+                ? referenceLabels[name]
+                : 'Elementi collegati') +
+              ': ' +
+              count +
+              (count === 1 ? ' riferimento' : ' riferimenti'),
+          },
           reason:
             'Il riferimento persistente deve essere gestito prima della modifica; nessun elemento collegato verrà eliminato automaticamente.',
         })
+      }
     }
   }
   return blockers

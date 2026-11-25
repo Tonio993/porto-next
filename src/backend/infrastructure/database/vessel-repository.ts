@@ -1,3 +1,4 @@
+import { DescriptiveReferenceRepository } from './descriptive-reference-repository'
 import { randomUUID } from 'node:crypto'
 import type {
   VesselDto,
@@ -191,7 +192,14 @@ export class VesselRepository {
           ],
           [
             {
-              reference: { kind: 'VESSEL', id: conflict.id, label: `Nave ${conflict.code}` },
+              reference: {
+                kind: 'VESSEL',
+                id: conflict.id,
+                label: new DescriptiveReferenceRepository(this.database, this.now).identity(
+                  'VESSEL',
+                  conflict.id,
+                ),
+              },
               reason: 'Chiave identificativa storica già riservata.',
             },
           ],

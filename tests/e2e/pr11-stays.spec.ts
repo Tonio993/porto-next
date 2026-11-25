@@ -112,7 +112,7 @@ test('PR11: permanenze recenti a ogni livello e azioni sul viaggio corretto, off
     ])
     await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()
     await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Stella del mare arrivo', exact: true }).click()
+    await page.getByRole('option', { name: 'Stella del mare arrivo', exact: true }).click()
     await page.getByRole('button', { name: 'Permanenze', exact: true }).click()
     const voyages = page.locator('article.operation-voyage')
     await expect(voyages).toHaveCount(2)

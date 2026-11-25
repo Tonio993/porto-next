@@ -1,3 +1,4 @@
+import { DescriptiveReferenceRepository } from './descriptive-reference-repository'
 import { randomUUID } from 'node:crypto'
 import type { BerthDto, BerthListQuery, BerthVersionDto } from '../../../shared/contracts/berths'
 import type { PageDto } from '../../../shared/contracts/master-data'
@@ -23,6 +24,7 @@ type BerthRow = Omit<BerthDto, 'selectable' | 'version'> & {
 const momentColumns =
   'v.effective_from AS utc, v.effective_local_date_time AS local_date_time, v.effective_zone_id AS zone_id, v.effective_utc_offset AS utc_offset'
 const selection = `SELECT b.id, b.port_id AS portId, b.code, b.status,
+  (SELECT pv.name || ' · ' || pv.locality || ' · ' || pv.country_code FROM port_versions pv WHERE pv.port_id=b.port_id AND (pv.effective_from IS NULL OR pv.effective_from<=@now) ORDER BY pv.effective_from DESC LIMIT 1) AS portLabel,
   (b.status = 'ACTIVE' AND p.status = 'ACTIVE') AS selectable,
   v.id AS versionId, v.name, ${momentColumns},
   (SELECT min(f.effective_from) FROM berth_versions f
@@ -47,6 +49,7 @@ function berth(row: BerthRow): BerthDto {
   return {
     id: row.id,
     portId: row.portId,
+    portLabel: row.portLabel,
     code: row.code,
     status: row.status,
     selectable: row.selectable === 1,
@@ -157,7 +160,14 @@ export class BerthRepository {
         ],
         [
           {
-            reference: { kind: 'BERTH', id: conflict.id, label: `Banchina ${conflict.code}` },
+            reference: {
+              kind: 'BERTH',
+              id: conflict.id,
+              label: new DescriptiveReferenceRepository(this.database, this.now).identity(
+                'BERTH',
+                conflict.id,
+              ),
+            },
             reason: 'Chiave identificativa storica già riservata.',
           },
         ],

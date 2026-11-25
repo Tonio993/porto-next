@@ -1,3 +1,4 @@
+import { describeEffects } from '../presentation/effect-descriptions'
 import { masterOperationImpacts, operationTables } from '../operations/operation-impacts'
 import { randomUUID } from 'node:crypto'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
@@ -172,13 +173,13 @@ export class BerthService implements BerthApi {
         now,
       )
     } else if (change.operation === 'DELETE_BERTH') after = []
-    const reference = { kind: 'BERTH' as const, id: berth.id, label: `Banchina ${berth.code}` }
+    const reference = { kind: 'BERTH' as const, id: berth.id, label: berth.version.name }
     const effects = versionEffects(
       before,
       after,
       ['name', 'effectiveFrom', 'effectiveTo'],
       (name) => ({ ...reference, label: `${reference.label} · ${name} · versione` }),
-      (version) => version.name,
+      (version) => version.name + ' · ' + berth.portLabel,
     )
     const impacts = ['INSERT_VERSION', 'UPDATE_VERSION', 'DELETE_VERSION'].includes(
       change.operation,
@@ -247,7 +248,12 @@ export class BerthService implements BerthApi {
           recalculated: effects.filter((e) => e.reference.kind === 'OPERATION_CHARGE').length,
           reattributed: 0,
         },
-        effects: { items: effects.slice(0, 50), total: effects.length, page: 1, pageSize: 50 },
+        effects: {
+          items: describeEffects(session.database, effects.slice(0, 50)),
+          total: effects.length,
+          page: 1,
+          pageSize: 50,
+        },
         blockers,
         warnings,
       }
@@ -265,7 +271,10 @@ export class BerthService implements BerthApi {
       )
       const { effects } = this.analyse(session, change as Change, this.now())
       return {
-        items: effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          session.database,
+          effects.slice((page - 1) * pageSize, page * pageSize),
+        ),
         total: effects.length,
         page,
         pageSize,

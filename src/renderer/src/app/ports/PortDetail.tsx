@@ -20,9 +20,7 @@ export function PortDetail({
   return (
     <section className="archive-panel" aria-label="Dettaglio porto">
       <p className="eyebrow">DATI CORRENTI</p>
-      <h2>
-        Porto {port.code} · {port.version.name}
-      </h2>
+      <h2>{port.version.name}</h2>
       <p>
         Località: {port.version.locality} · Paese: {countryName(port.version.countryCode)} (
         {port.version.countryCode})

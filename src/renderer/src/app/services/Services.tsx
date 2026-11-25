@@ -1,3 +1,5 @@
+import { ReferenceValue, CalculationReferences } from '../ReferenceValues'
+import { vesselTypeLabels } from '../../../../shared/description-labels'
 import { MomentDisplay } from '../MomentDisplay'
 import { CalculationNumbers } from '../CalculationNumbers'
 import { formatNumeric } from '../../api/numeric-input'
@@ -728,18 +730,18 @@ export function Services({
             <details className="tariff-long-value">
               <summary>Riferimenti della permanenza</summary>
               <p>
-                Viaggio: {detail.context.voyageId}
+                Viaggio: <ReferenceValue value={detail.context.references?.voyage} />
                 <br />
-                Visita: {detail.context.portCallId}
+                Visita: <ReferenceValue value={detail.context.references?.visit} />
                 <br />
-                Ormeggio: {detail.context.berthStayId}
+                Ormeggio: <ReferenceValue value={detail.context.references?.stay} />
               </p>
             </details>
             {detail.calculation && (
               <section aria-label="Calcolo della prestazione" className="tariff-long-value">
                 <h4>Spiegazione del calcolo</h4>
                 <p>
-                  Tipologia {detail.calculation.vesselTypeId} · dimensione{' '}
+                  Tipologia {vesselTypeLabels[detail.calculation.vesselTypeId]} · dimensione{' '}
                   {formatNumeric(detail.calculation.size, numericFormat)} · Peso:{' '}
                   {formatNumeric(detail.calculation.weight, numericFormat)}
                 </p>
@@ -750,22 +752,25 @@ export function Services({
                 <CalculationNumbers value={detail.calculation} />
                 <details>
                   <summary>Riferimenti del calcolo</summary>
-                  <p>
-                    Tipo: {detail.serviceTypeId}
-                    <br />
-                    Tariffa: {detail.calculation.tariffId}
-                    <br />
-                    Configurazione: {detail.calculation.configurationId}
-                    <br />
-                    Scaglione: {detail.calculation.bracketId}
-                    <br />
-                    Sequenza peso: {detail.calculation.weightSequenceId}
-                    <br />
-                    Versione peso: {detail.calculation.weightVersionId}
-                  </p>
+                  <CalculationReferences value={detail.calculation} />
                 </details>
               </section>
             )}
+            <details>
+              <summary>Versioni applicate</summary>
+              <p>
+                Nave: <ReferenceValue value={detail.references?.vessel} />
+                <br />
+                Porto: <ReferenceValue value={detail.references?.port} />
+                <br />
+                Banchina:{' '}
+                {detail.berthVersionId ? (
+                  <ReferenceValue value={detail.references?.berth} />
+                ) : (
+                  'Banchina non specificata'
+                )}
+              </p>
+            </details>
             <SubjectValues subjects={detail.subjects} ownLevel="SERVICE_ACTIVITY" />
             {detail.notes && <p>Note: {detail.notes}</p>}
             <Group className="detail-actions">

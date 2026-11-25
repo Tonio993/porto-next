@@ -1,3 +1,4 @@
+import { portName } from '../../api/master-data-names'
 import type { ConsultationPicker } from '../../api/use-consultation-state'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
 import { usePagedPicker } from '../../api/use-paged-picker'
@@ -43,7 +44,7 @@ export function PortPicker({
     loadOne: (id) => window.ports.get({ context: { sessionId: context.sessionId }, query: { id } }),
     option: (p) => ({
       value: p.id,
-      label: p.code + ' · ' + p.version.name + (p.status === 'INACTIVE' ? ' · Disattivato' : ''),
+      label: portName(p) + (p.status === 'INACTIVE' ? ' · Disattivato' : ''),
       disabled:
         p.status !== 'ACTIVE' && p.id !== retainedId && !(historical && retainedId === undefined),
     }),

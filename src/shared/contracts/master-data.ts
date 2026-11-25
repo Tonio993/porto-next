@@ -20,7 +20,16 @@ export interface ChangeEffectDto {
   versionId: string | null
   reference: EntityReferenceDto
   action: 'CREATE' | 'UPDATE' | 'DELETE'
-  changes: readonly { field: string; before: string | null; after: string | null }[]
+  changes: readonly {
+    structured?: boolean
+    field: string
+    before: string | null
+    after: string | null
+    /** Descriptive scalar projection; raw values are retained for comparison/confirmation. */
+    beforeReference?: import('./descriptive-references').ScalarReferenceDto
+    afterReference?: import('./descriptive-references').ScalarReferenceDto
+  }[]
+  versionReference?: import('./descriptive-references').VersionReferenceDto
 }
 
 export interface ChangePreviewDto {

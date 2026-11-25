@@ -88,7 +88,7 @@ test('amministra le banchine dal porto e conserva dati e contesto nel percorso E
     await expect(creation.getByLabel('Nome banchina')).toHaveValue('Molo Alfa')
     await creation.getByRole('button', { name: 'Crea banchina' }).click()
     await expect(create).toBeFocused()
-    await expect(detail).toContainText('Banchina 1 · Molo Alfa')
+    await expect(detail).toContainText('Molo Alfa')
     await expect(detail).toContainText('Selezionabile per nuovi riferimenti')
 
     await create.click()
@@ -131,7 +131,7 @@ test('amministra le banchine dal porto e conserva dati e contesto nel percorso E
     await expect(history.getByRole('article')).toHaveCount(1)
 
     await port.getByRole('button', { name: 'Disattiva porto' }).click()
-    await expect(preview.getByRole('row').filter({ hasText: 'Banchina 1' })).toContainText(
+    await expect(preview.getByRole('row').filter({ hasText: 'Molo Alfa' })).toContainText(
       'Selezionabile',
     )
     await confirm.click()
@@ -181,8 +181,10 @@ test('amministra le banchine dal porto e conserva dati e contesto nel percorso E
       previous,
     )
     expect(stale).toMatchObject({ ok: false, error: { code: 'ARCHIVE_SESSION_CHANGED' } })
-    await page.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
-    await list.getByRole('button', { name: /Disattivata.*Molo Alfa/ }).click()
+    await page
+      .getByRole('button', { name: 'Apri porto Porto P05 · Genova · Italia', exact: true })
+      .click()
+    await list.getByRole('button', { name: /Molo Alfa.*Disattivata/ }).click()
     await detail.getByRole('button', { name: 'Elimina banchina' }).click()
     await confirm.click()
     await expect(panel.getByText('Questo porto non ha banchine.')).toBeVisible()

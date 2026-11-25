@@ -2,13 +2,9 @@ import type {
   EffectiveSubjectsDto,
   AssignmentLevel,
 } from '../../../../shared/contracts/assignments'
-export const assignmentLabels: Record<AssignmentLevel, string> = {
-  SERVICE_ACTIVITY: 'Prestazione',
-  VOYAGE: 'Viaggio',
-  PORT_CALL: 'Visita',
-  BERTH_STAY: 'Ormeggio',
-  VESSEL_OPERATION: 'Operazione',
-}
+import { ReferenceValue } from '../ReferenceValues'
+import { assignmentLabels } from '../../../../shared/description-labels'
+export { assignmentLabels } from '../../../../shared/description-labels'
 export function SubjectValues({
   subjects,
   ownLevel,
@@ -51,7 +47,9 @@ export function SubjectValues({
               <details>
                 <summary>Riferimenti {kind === 'customer' ? 'cliente' : 'agenzia'}</summary>
                 <p>
-                  Versione: {s.versionId} · Fonte: {s.source.id}
+                  Versione: <ReferenceValue value={s.description?.version} />
+                  <br />
+                  Fonte: <ReferenceValue value={s.description?.origin} />
                 </p>
               </details>
             )}

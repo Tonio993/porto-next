@@ -120,7 +120,7 @@ test('PR06 visualizzazioni rappresentative e tuple permanenze dal backend con re
   const before = await page.evaluate(() => window.archives.getState())
   await nav('Operazioni nave')
   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-  await page.getByRole('option', { name: '1 · Stella del mare arrivo', exact: true }).click()
+  await page.getByRole('option', { name: 'Stella del mare arrivo', exact: true }).click()
   await page
     .locator('.operations-rows button')
     .filter({ hasText: '02/05/2026 12:00 (+02:00)' })

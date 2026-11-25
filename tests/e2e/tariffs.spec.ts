@@ -177,7 +177,7 @@ test('P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo
     await dialog.getByRole('button', { name: 'Conferma modifica', exact: true }).click()
     await expect(dialog).toHaveCount(0)
     await expect(list.getByRole('button', { name: 'Nuova tariffa', exact: true })).toBeFocused()
-    await expect(detail.getByRole('region', { name: 'Configurazione STANDARD' })).toContainText(
+    await expect(detail.getByRole('region', { name: 'Configurazione Nave normale' })).toContainText(
       '100',
     )
     await shot('dettaglio-minimo.png')
@@ -187,7 +187,7 @@ test('P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo
     expect(await page.locator('html').evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true)
     await list.getByRole('combobox', { name: 'Porto', exact: true }).fill('Nessun porto')
     await list.getByRole('combobox', { name: 'Porto', exact: true }).press('Escape')
-    await expect(list.getByLabel('Porto', { exact: true })).toHaveValue('1 · Genova')
+    await expect(list.getByLabel('Porto', { exact: true })).toHaveValue('Genova · Genova · Italia')
     await list.getByRole('combobox', { name: 'Porto', exact: true }).fill('')
     const first = await page.evaluate(async (portId) => {
       const s = await window.archives.getState()
@@ -201,10 +201,10 @@ test('P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo
     }, ids.port)
     await detail.getByRole('button', { name: 'Copia tariffa', exact: true }).click()
     await dialog.getByLabel('Decorrenza locale').fill('2099-01-01T00:00')
-    await dialog.getByRole('tab', { name: 'STANDARD', exact: true }).click()
+    await dialog.getByRole('tab', { name: 'Nave normale', exact: true }).click()
     await expect(
       dialog
-        .getByRole('tabpanel', { name: 'STANDARD', exact: true })
+        .getByRole('tabpanel', { name: 'Nave normale', exact: true })
         .getByLabel('Valore EUR 1', { exact: true }),
     ).toHaveValue('100')
     await dialog.getByRole('button', { name: 'Mostra anteprima', exact: true }).click()
@@ -213,9 +213,9 @@ test('P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo
     await expect(dialog).toHaveCount(0)
     await detail.getByRole('button', { name: 'Copia tariffa', exact: true }).click()
     await dialog.getByLabel('Decorrenza locale').fill('2026-06-01T00:00')
-    await dialog.getByRole('tab', { name: 'STANDARD', exact: true }).click()
+    await dialog.getByRole('tab', { name: 'Nave normale', exact: true }).click()
     await dialog
-      .getByRole('tabpanel', { name: 'STANDARD', exact: true })
+      .getByRole('tabpanel', { name: 'Nave normale', exact: true })
       .getByLabel('Valore EUR 1', { exact: true })
       .fill('200')
     await dialog.getByRole('button', { name: 'Mostra anteprima', exact: true }).click()
@@ -233,7 +233,7 @@ test('P09 tariffe: migrazione v9, tre configurazioni, copie, intervalli, calcolo
     await page.getByRole('option', { name: 'Assistenza tariffata', exact: true }).click()
     await dialog.getByRole('combobox', { name: 'Nave', exact: true }).fill('Nessuna nave')
     await dialog.getByRole('combobox', { name: 'Nave', exact: true }).press('Escape')
-    await expect(dialog.getByLabel('Nave', { exact: true })).toHaveValue('1 · Stella del mare')
+    await expect(dialog.getByLabel('Nave', { exact: true })).toHaveValue('Stella del mare')
     await dialog.getByRole('combobox', { name: 'Nave', exact: true }).fill('')
     await dialog
       .getByRole('combobox', { name: 'Tipo di prestazione', exact: true })

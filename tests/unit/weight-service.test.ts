@@ -1,3 +1,4 @@
+import { withoutDescriptions } from './support/without-descriptions'
 import { weightChangeOutcome } from '../../src/renderer/src/api/weight-change-outcome'
 import { WeightRepository } from '../../src/backend/infrastructure/database/weight-repository'
 import type { WeightChangeDto, WeightVersionDto } from '../../src/shared/contracts/catalog'
@@ -32,7 +33,7 @@ let folder: string,
   berthId: string
 const value = <T>(r: ApplicationResult<T>): T => {
   if (!r.ok) throw new Error(`${r.error.code}: ${r.error.message}`)
-  return r.value
+  return withoutDescriptions(r.value)
 }
 const context = () => archives.context()!,
   db = () => archives.coordinator.requireSession().database,

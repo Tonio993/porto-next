@@ -1,3 +1,4 @@
+import { DescriptiveReferenceRepository } from './descriptive-reference-repository'
 import { randomUUID } from 'node:crypto'
 import type {
   CustomerDto,
@@ -158,7 +159,14 @@ export class CustomerRepository {
         ],
         [
           {
-            reference: { kind: 'CUSTOMER', id: conflict.id, label: `Cliente ${conflict.code}` },
+            reference: {
+              kind: 'CUSTOMER',
+              id: conflict.id,
+              label: new DescriptiveReferenceRepository(this.database, this.now).identity(
+                'CUSTOMER',
+                conflict.id,
+              ),
+            },
             reason: 'Chiave identificativa storica già riservata.',
           },
         ],

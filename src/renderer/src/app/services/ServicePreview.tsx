@@ -1,3 +1,4 @@
+import { ReferenceValue } from '../ReferenceValues'
 import { MomentDisplay } from '../MomentDisplay'
 import { CalculationNumbers } from '../CalculationNumbers'
 import { formatNumeric } from '../../api/numeric-input'
@@ -8,25 +9,7 @@ import type {
 } from '../../../../shared/contracts/services'
 import { SubjectValues } from '../operations/SubjectValues'
 import { executionLabels } from '../operations/OperationDetail'
-const labels: Record<string, string> = {
-  moment: 'Momento',
-  vesselId: 'Nave',
-  vesselVersionId: 'Versione nave',
-  vesselName: 'Nome nave',
-  executionStatus: 'Stato',
-  description: 'Descrizione',
-  base: 'Importo base',
-  notes: 'Note',
-  context: 'Permanenza',
-  portVersionId: 'Versione porto',
-  portName: 'Porto',
-  berthVersionId: 'Versione banchina',
-  berthName: 'Banchina',
-  specified: 'Soggetti espliciti',
-  subjects: 'Soggetti effettivi',
-  serviceTypeId: 'Tipo',
-  calculation: 'Calcolo',
-}
+import { serviceFieldLabel } from '../../../../shared/description-labels'
 function Values({ value }: { value: ServiceActivityDto }) {
   const numericFormat = useNumericFormat()
   return (
@@ -42,12 +25,27 @@ function Values({ value }: { value: ServiceActivityDto }) {
         <MomentDisplay moment={value.moment} detail />
       </p>
       <p>
-        Viaggio: {value.context.voyageId}
+        Viaggio: <ReferenceValue value={value.context.references?.voyage} />
         <br />
-        Visita: {value.context.portCallId}
+        Visita: <ReferenceValue value={value.context.references?.visit} />
         <br />
-        Ormeggio: {value.context.berthStayId}
+        Ormeggio: <ReferenceValue value={value.context.references?.stay} />
       </p>
+      <details>
+        <summary>Versioni applicate</summary>
+        <p>
+          Nave: <ReferenceValue value={value.references?.vessel} />
+          <br />
+          Porto: <ReferenceValue value={value.references?.port} />
+          <br />
+          Banchina:{' '}
+          {value.berthVersionId ? (
+            <ReferenceValue value={value.references?.berth} />
+          ) : (
+            'Banchina non specificata'
+          )}
+        </p>
+      </details>
       <SubjectValues subjects={value.subjects} ownLevel="SERVICE_ACTIVITY" />
       <p>Note: {value.notes ?? 'Nessuna'}</p>
       {value.calculation && <CalculationNumbers value={value.calculation} />}
@@ -77,9 +75,7 @@ export function ServicePreview({
       </p>
       <p>
         {preview.changedFields.length
-          ? preview.changedFields
-              .map((k) => labels[k] ?? (k === 'deleted' ? 'Eliminazione definitiva' : k))
-              .join(', ')
+          ? preview.changedFields.map(serviceFieldLabel).join(', ')
           : 'Nessuna variazione.'}
       </p>
       <div className="service-comparison">

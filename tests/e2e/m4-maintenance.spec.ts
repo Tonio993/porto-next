@@ -58,7 +58,7 @@ async function confirm() {
 async function operations() {
   await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()
   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-  await page.getByRole('option', { name: /^1 · Stella del mare/ }).click()
+  await page.getByRole('option', { name: /^Stella del mare/ }).click()
 }
 async function selectEntry() {
   await page.getByRole('button', { name: /^Entrata · Effettuata/ }).click()
@@ -128,7 +128,7 @@ async function tariffs() {
   await catalog()
   await page.getByRole('button', { name: 'Tariffe', exact: true }).click()
   await page.getByRole('combobox', { name: 'Porto', exact: true }).click()
-  await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+  await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
   await page.locator('.port-list-item').first().click()
 }
 async function lostReply(channel: string) {
@@ -205,7 +205,7 @@ test('M4 operazioni: inserimento retroattivo, correzione, note e rimozione con s
   await modal().getByLabel('Partenza locale').fill('2026-05-02T12:30')
   await modal().getByLabel('Arrivo locale').fill('2026-05-02T13:00')
   await modal().getByRole('combobox', { name: 'Porto di destinazione', exact: true }).click()
-  await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+  await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
   await modal()
     .getByLabel('Sostituzione manuale della base (EUR, facoltativa)', { exact: true })
     .fill('0')
@@ -258,7 +258,7 @@ test('M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tarif
   await tariffs()
   await page.getByRole('button', { name: 'Correggi tariffa', exact: true }).click()
   await modal()
-    .getByRole('tabpanel', { name: 'STANDARD', exact: true })
+    .getByRole('tabpanel', { name: 'Nave normale', exact: true })
     .getByLabel('Valore EUR 1', { exact: true })
     .fill('200')
   await modal().press('Escape')
@@ -266,7 +266,7 @@ test('M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tarif
   await page.getByRole('button', { name: 'Riprendi bozza', exact: true }).click()
   await expect(
     modal()
-      .getByRole('tabpanel', { name: 'STANDARD', exact: true })
+      .getByRole('tabpanel', { name: 'Nave normale', exact: true })
       .getByLabel('Valore EUR 1', { exact: true }),
   ).toHaveValue('200')
   await page.evaluate(() => window.archives.rename('Conflitto M4'))
@@ -280,7 +280,7 @@ test('M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tarif
   await button('Chiudi anteprima').click()
   await expect(
     modal()
-      .getByRole('tabpanel', { name: 'STANDARD', exact: true })
+      .getByRole('tabpanel', { name: 'Nave normale', exact: true })
       .getByLabel('Valore EUR 1', { exact: true }),
   ).toHaveValue('200')
   await button('Ricarica contesto').click()
@@ -301,7 +301,7 @@ test('M4 tariffe: ricalcolo reale, conflitto e bozza, esito incerto, prima tarif
   await page.getByRole('button', { name: 'Copia tariffa', exact: true }).click()
   await modal().getByLabel('Decorrenza locale').fill('2026-05-02T13:00')
   await modal()
-    .getByRole('tabpanel', { name: 'STANDARD', exact: true })
+    .getByRole('tabpanel', { name: 'Nave normale', exact: true })
     .getByLabel('Valore EUR 1', { exact: true })
     .fill('300')
   await button('Mostra anteprima').click()
@@ -472,7 +472,7 @@ test('M4 operazioni: trasformazione interno/esterno, componenti ricreate e cambi
   await modal().getByLabel('Partenza locale').fill('2026-05-03T12:00')
   await modal().getByLabel('Arrivo locale').fill('2026-05-03T13:00')
   await modal().getByRole('combobox', { name: 'Porto di destinazione', exact: true }).click()
-  await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+  await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
   await button('Verifica e mostra anteprima').click()
   await confirm()
   await expect(modal()).toHaveCount(0)
@@ -489,7 +489,7 @@ test('M4 operazioni: trasformazione interno/esterno, componenti ricreate e cambi
   await page.getByRole('button', { name: /^Spostamento · Prevista/ }).click()
   await page.getByRole('button', { name: 'Correggi operazione', exact: true }).click()
   await modal().getByRole('combobox', { name: 'Porto di destinazione', exact: true }).click()
-  await page.getByRole('option', { name: '2 · Londra', exact: true }).click()
+  await page.getByRole('option', { name: 'Londra · Londra · Regno Unito', exact: true }).click()
   await button('Verifica e mostra anteprima').click()
   await confirm()
   await expect(modal()).toHaveCount(0)
@@ -498,7 +498,7 @@ test('M4 operazioni: trasformazione interno/esterno, componenti ricreate e cambi
   expect(external.charges.every((c) => !initial.charges.some((old) => old.id === c.id))).toBe(true)
   await page.getByRole('button', { name: 'Correggi operazione', exact: true }).click()
   await modal().getByRole('combobox', { name: 'Porto di destinazione', exact: true }).click()
-  await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+  await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
   await button('Verifica e mostra anteprima').click()
   await confirm()
   await expect(modal()).toHaveCount(0)
@@ -512,7 +512,7 @@ test('M4 operazioni: trasformazione interno/esterno, componenti ricreate e cambi
   await selectEntry()
   await page.getByRole('button', { name: 'Correggi operazione', exact: true }).click()
   await modal().getByRole('combobox', { name: 'Nave', exact: true }).click()
-  await page.getByRole('option', { name: '2 · Aurora', exact: true }).click()
+  await page.getByRole('option', { name: 'Aurora', exact: true }).click()
   await button('Verifica e mostra anteprima').click()
   await confirm()
   await expect(modal()).toHaveCount(0)

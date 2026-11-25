@@ -46,7 +46,7 @@ test('P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(960, 700))
     await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()
     await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Stella del mare' }).click()
+    await page.getByRole('option', { name: 'Stella del mare' }).click()
     await expect(page.getByText('Nessuna operazione registrata.')).toBeVisible()
     const modal = page.getByRole('dialog')
     const start = async (
@@ -69,7 +69,7 @@ test('P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia
       await page.getByRole('option', { name: status, exact: true }).click()
       if (type === 'entrata') {
         await modal.getByRole('combobox', { name: 'Porto di arrivo', exact: true }).click()
-        await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+        await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
       }
       await modal.getByLabel('Momento economico locale').fill(at)
       if (override) await modal.getByLabel('Sostituzione manuale della base').fill(override)
@@ -97,7 +97,9 @@ test('P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia
     await expect(page.getByText('Nessuna permanenza.', { exact: false })).toBeVisible()
     await start('entrata', '2026-05-02T12:00', 'Prevista', '0')
     await modal.getByRole('combobox', { name: 'Banchina (facoltativa)', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Molo nord', exact: true }).click()
+    await page
+      .getByRole('option', { name: 'Molo nord · Genova · Genova · IT', exact: true })
+      .click()
     await submit()
     await expect(modal.getByText('Base effettiva: 0,00 €', { exact: true })).toBeVisible()
     if (!process.env.PORTO_PACKAGED_EXE)
@@ -146,7 +148,7 @@ test('P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia
     await page.getByRole('button', { name: 'Catalogo e tariffe', exact: true }).click()
     await page.getByRole('button', { name: 'Tariffe', exact: true }).click()
     await page.getByRole('combobox', { name: 'Porto', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+    await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
     await page.locator('.port-list-item').first().click()
     await page.getByRole('button', { name: 'Copia tariffa', exact: true }).click()
     await modal.getByLabel('Decorrenza locale').fill('2026-05-03T00:00')
@@ -176,7 +178,7 @@ test('P10: migrazione v10, registrazione, MISSED, permanenze, tariffa intermedia
     ).toBe('0.00')
     await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()
     await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Stella del mare' }).click()
+    await page.getByRole('option', { name: 'Stella del mare' }).click()
     await page.locator('.operations-rows button').first().click()
     await expect(page.getByRole('region', { name: 'Dettaglio operazione' })).toBeVisible()
     if (!process.env.PORTO_PACKAGED_EXE) {

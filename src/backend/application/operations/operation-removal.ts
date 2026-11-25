@@ -1,4 +1,6 @@
-﻿import type { ConflictDto } from '../../../shared/contracts/application'
+import { describeEffects } from '../presentation/effect-descriptions'
+import { ReadDescriptions } from '../presentation/read-descriptions'
+import type { ConflictDto } from '../../../shared/contracts/application'
 import type { ChangeEffectDto } from '../../../shared/contracts/master-data'
 import type {
   OperationApi,
@@ -16,8 +18,7 @@ import {
 import type { ArchiveApplicationSession, ArchiveCoordinator } from '../archives/archive-coordinator'
 import { record } from '../archives/context-validation'
 import { entityId, pagination } from '../ports/port-input'
-import { operationReplay, serviceValues } from './operation-replay'
-import { subjectEffects } from './subject-resolution'
+import { operationReplay, serviceReplayEffects } from './operation-replay'
 
 const namespace = 'OPERATION_DELETE'
 type Prepared = { id: string; originalBlockers: ConflictDto[] }
@@ -65,10 +66,11 @@ export class OperationRemoval {
         ...persistence.effects,
         ...subjects.effects.filter((e) => e.reference.kind !== 'SERVICE_ACTIVITY'),
         ...subjects.serviceUpdates.flatMap((u) =>
-          subjectEffects(
+          serviceReplayEffects(
             { kind: 'SERVICE_ACTIVITY', id: u.before.id, label: u.before.description },
-            serviceValues(u.before),
-            serviceValues(u.after),
+            u.before,
+            u.after,
+            s.database,
           ),
         ),
       )
@@ -110,11 +112,12 @@ export class OperationRemoval {
     pageSize = 50,
     a = this.analyze(s, prepared),
   ): OperationDeletionPreviewDto {
+    const descriptions = new ReadDescriptions(s.database)
     return {
       ...entry,
       context: s.context(),
       operation: namespace,
-      before: a.before,
+      before: descriptions.operation(a.before),
       status: a.blockers.length || prepared.originalBlockers.length ? 'BLOCKED' : 'READY',
       summary: {
         created: a.effects.filter((e) => e.action === 'CREATE').length,
@@ -124,7 +127,12 @@ export class OperationRemoval {
         recalculated: a.recalculated,
       },
       effects: {
-        items: a.effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          s.database,
+          a.effects.slice((page - 1) * pageSize, page * pageSize),
+          undefined,
+          descriptions.references,
+        ),
         total: a.effects.length,
         page,
         pageSize,

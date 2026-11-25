@@ -60,7 +60,9 @@ test('scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza se
       return ids
     })
     await page.getByRole('button', { name: 'Anagrafiche', exact: true }).click()
-    await expect(page.getByRole('button', { name: 'Apri porto 2', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Apri porto Porto B · Genova · Italia', exact: true }),
+    ).toBeVisible()
     await app.evaluate(({ ipcMain }, id) => {
       const handlers = (
         ipcMain as unknown as {
@@ -92,7 +94,9 @@ test('scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza se
         return result
       })
     }, ids[0])
-    await page.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
+    await page
+      .getByRole('button', { name: 'Apri porto Porto A · Genova · Italia', exact: true })
+      .click()
     await expect
       .poll(() =>
         app!.evaluate(
@@ -104,9 +108,11 @@ test('scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza se
     await expect(
       page.getByRole('status').filter({ hasText: 'Caricamento dettaglio…' }),
     ).toBeVisible()
-    await page.getByRole('button', { name: 'Apri porto 2', exact: true }).click()
+    await page
+      .getByRole('button', { name: 'Apri porto Porto B · Genova · Italia', exact: true })
+      .click()
     const detail = page.getByRole('region', { name: 'Dettaglio porto' })
-    await expect(detail).toContainText('Porto 2 · Porto B')
+    await expect(detail).toContainText('Porto B')
     await app.evaluate(() =>
       (
         globalThis as unknown as { delayedHistory: { release: () => void } }
@@ -118,7 +124,7 @@ test('scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza se
           window.requestAnimationFrame(() => window.requestAnimationFrame(() => done())),
         ),
     )
-    await expect(detail).toContainText('Porto 2 · Porto B')
+    await expect(detail).toContainText('Porto B')
 
     // Closing an editor for another action must also cancel its moment response.
     await detail.getByRole('button', { name: 'Nuova versione', exact: true }).click()
@@ -208,7 +214,7 @@ test('scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza se
     }, ids[1])
     const history = page.getByRole('region', { name: 'Cronologia porto' })
     await expect(history).toContainText('Versione con decorrenza · Futura')
-    await expect(detail).toContainText('Porto 2 · Porto B')
+    await expect(detail).toContainText('Porto B')
     const before = await page.evaluate(() => window.archives.getState())
     await app.evaluate(() => {
       ;(globalThis as unknown as { p04Clock: { time: number } }).p04Clock.time = Date.parse(
@@ -216,7 +222,7 @@ test('scarta dettagli tardivi e aggiorna la versione corrente alla decorrenza se
       )
     })
     await page.clock.fastForward(11_000)
-    await expect(detail).toContainText('Porto 2 · Porto a mezzogiorno')
+    await expect(detail).toContainText('Porto a mezzogiorno')
     await expect(history).toContainText('Versione con decorrenza · Corrente')
     const after = await page.evaluate(() => window.archives.getState())
     if (!before.ok || !after.ok) throw new Error('Stato assente')

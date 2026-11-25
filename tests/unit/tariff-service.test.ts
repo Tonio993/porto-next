@@ -425,7 +425,7 @@ it('integra FK reali: tariffa blocca eliminazione porto, conservata dalla disatt
   await create()
   const p = value(await ports.previewDelete({ context: context(), payload: { portId } }))
   expect(p.status).toBe('BLOCKED')
-  expect(p.blockers.some((b) => b.reference.label.includes('tariffs'))).toBe(true)
+  expect(p.blockers.some((b) => b.reference.label.includes('Tariffe'))).toBe(true)
   const d = value(await ports.previewDeactivate({ context: context(), payload: { portId } }))
   value(await ports.confirmDeactivate({ context: d.context, payload: { previewId: d.previewId } }))
   expect(value(await list()).total).toBe(1)

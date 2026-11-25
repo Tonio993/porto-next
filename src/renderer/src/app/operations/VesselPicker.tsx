@@ -1,3 +1,4 @@
+import { vesselName } from '../../api/master-data-names'
 import type { ConsultationPicker } from '../../api/use-consultation-state'
 import type { ArchiveContextDto } from '../../../../shared/contracts/application'
 import { usePagedPicker } from '../../api/use-paged-picker'
@@ -38,7 +39,7 @@ export function VesselPicker({
       window.vessels.get({ context: { sessionId: context.sessionId }, query: { id } }),
     option: (v) => ({
       value: v.id,
-      label: v.code + ' · ' + v.version.registeredName + (v.selectable ? '' : ' · Disattivata'),
+      label: vesselName(v) + (v.selectable ? '' : ' · Disattivata'),
       disabled: !v.selectable && v.id !== retainedId && !(historical && retainedId === undefined),
     }),
   })

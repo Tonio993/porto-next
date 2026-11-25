@@ -74,6 +74,14 @@ export function versionEffects<T extends VersionIntervalDto>(
     if (changes.length || !oldValue || !newValue)
       effects.push({
         versionId: id,
+        versionReference: {
+          kind: reference(description((newValue ?? oldValue)!)).kind as
+            'PORT' | 'BERTH' | 'VESSEL' | 'CUSTOMER' | 'AGENCY',
+          name: description((newValue ?? oldValue)!),
+          effectiveFrom: (newValue ?? oldValue)!.effectiveFrom,
+          effectiveTo: (newValue ?? oldValue)!.effectiveTo,
+          effectiveMoment: (newValue ?? oldValue)!.effectiveMoment,
+        },
         reference: reference(description((newValue ?? oldValue)!)),
         action: !oldValue ? 'CREATE' : !newValue ? 'DELETE' : 'UPDATE',
         changes,

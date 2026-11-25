@@ -665,7 +665,12 @@ it.each([
             code: '1',
             status: 'ACTIVE',
             selectable: true,
-            version: { name: 'Nome', registeredName: 'Nome' },
+            version: {
+              name: 'Nome',
+              registeredName: 'Nome',
+              locality: 'Genova',
+              countryCode: 'IT',
+            },
           }) as never),
     )
     const render = () =>
@@ -1019,7 +1024,7 @@ it('PR05 tariffe: adapter porto storico reale, scelta esplicita e richieste tari
     id: 'historical-port',
     code: 4,
     status: 'INACTIVE',
-    version: { name: 'Porto storico' },
+    version: { name: 'Porto storico', locality: 'Genova', countryCode: 'IT' },
   }
   vi.mocked(window.ports.list).mockResolvedValue(ok(page([port])) as never)
   vi.mocked(window.ports.get).mockResolvedValue(ok(port) as never)

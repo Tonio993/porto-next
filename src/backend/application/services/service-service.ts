@@ -1,3 +1,4 @@
+import { ReadDescriptions } from '../presentation/read-descriptions'
 import { isDeepStrictEqual as same } from 'node:util'
 import { recalculateService, type ServiceCalculationInput } from './service-calculation'
 import type { CommandRequest } from '../../../shared/contracts/application'
@@ -131,7 +132,9 @@ export class ServiceService implements ServiceApi {
     this.coordinator.query(request, (s, q) => this.resolve(s, parseMoment(q).target))
   get: ServiceApi['get'] = (request) =>
     this.coordinator.query(request, (s, q) =>
-      new ServiceRepository(s.database).get(entityId(record(q, ['id']).id, 'id')),
+      new ReadDescriptions(s.database).service(
+        new ServiceRepository(s.database).get(entityId(record(q, ['id']).id, 'id')),
+      ),
     )
   list: ServiceApi['list'] = (request) =>
     this.coordinator.query(request, (s, q) => {
@@ -159,7 +162,9 @@ export class ServiceService implements ServiceApi {
       }
       if (query.fromUtc && query.toUtc && query.fromUtc > query.toUtc)
         invalid('toUtc', 'La fine del periodo precede l’inizio.')
-      return new ServiceRepository(s.database).list(query)
+      const result = new ServiceRepository(s.database).list(query)
+      const descriptions = new ReadDescriptions(s.database)
+      return { ...result, items: result.items.map((v) => descriptions.service(v)) }
     })
   createFree: ServiceApi['createFree'] = (request) => this.create(request, 'FREE')
   createCatalog: ServiceApi['createCatalog'] = (request) => this.create(request, 'CATALOG')
@@ -170,7 +175,7 @@ export class ServiceService implements ServiceApi {
       repository.insert(value)
       if (value.category === 'CATALOG')
         new CatalogRepository(s.database).markUsed(value.serviceTypeId)
-      return repository.get(value.id)
+      return new ReadDescriptions(s.database).service(repository.get(value.id))
     })
   }
   private build(
@@ -308,7 +313,7 @@ export class ServiceService implements ServiceApi {
         value = notes(input.notes)
       const repository = new ServiceRepository(s.database)
       repository.updateNotes(id, value)
-      return repository.get(id)
+      return new ReadDescriptions(s.database).service(repository.get(id))
     })
   private analyze(s: ArchiveApplicationSession, change: ServiceChange) {
     const repository = new ServiceRepository(s.database),
@@ -367,11 +372,14 @@ export class ServiceService implements ServiceApi {
       const change = { ...input, id: entityId(input.id, 'id') } as ServiceChange
       const analysis = this.analyze(s, change)
       const entry = s.previews.put(namespace, s.context(), change)
+      const descriptions = new ReadDescriptions(s.database)
       return {
         ...entry,
         context: s.context(),
         operation: change.operation,
         ...analysis,
+        before: descriptions.service(analysis.before),
+        after: analysis.after ? descriptions.service(analysis.after) : null,
         changedFields: analysis.after
           ? Object.keys(analysis.after).filter(
               (key) =>
@@ -406,7 +414,12 @@ export class ServiceService implements ServiceApi {
             new CatalogRepository(s.database).markUsed(after.serviceTypeId)
         }
         consumed = id
-        return { id: before.id, service: after ? repository.get(before.id) : null }
+        return {
+          id: before.id,
+          service: after
+            ? new ReadDescriptions(s.database).service(repository.get(before.id))
+            : null,
+        }
       },
       (s) => s.previews.consume(consumed),
     )

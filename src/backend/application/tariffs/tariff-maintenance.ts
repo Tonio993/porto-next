@@ -1,3 +1,5 @@
+import { DescriptiveReferenceRepository } from '../../infrastructure/database/descriptive-reference-repository'
+import { describeEffects } from '../presentation/effect-descriptions'
 import { randomUUID } from 'node:crypto'
 import type { TariffApi, TariffDto, TariffPreviewDto } from '../../../shared/contracts/tariffs'
 import type { ChangeEffectDto } from '../../../shared/contracts/master-data'
@@ -137,6 +139,16 @@ export class TariffMaintenance {
           label: 'Tariffa · ' + old.effectiveMoment.localDateTime,
         },
         versionId: null,
+        versionReference: {
+          kind: 'TARIFF',
+          name: new DescriptiveReferenceRepository(session.database, old.effectiveFrom).identity(
+            'PORT',
+            old.portId,
+          ),
+          effectiveFrom: (next ?? old).effectiveFrom,
+          effectiveTo: (next ?? old).effectiveTo,
+          effectiveMoment: (next ?? old).effectiveMoment,
+        },
         action: next ? 'UPDATE' : 'DELETE',
         changes,
       })
@@ -183,7 +195,10 @@ export class TariffMaintenance {
         recalculated: impacts.recalculated,
       },
       effects: {
-        items: effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          session.database,
+          effects.slice((page - 1) * pageSize, page * pageSize),
+        ),
         total: effects.length,
         page,
         pageSize,

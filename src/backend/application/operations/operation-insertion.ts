@@ -1,3 +1,5 @@
+import { describeEffects } from '../presentation/effect-descriptions'
+import { ReadDescriptions } from '../presentation/read-descriptions'
 import type { ConflictDto } from '../../../shared/contracts/application'
 import type { ChangeEffectDto } from '../../../shared/contracts/master-data'
 import type {
@@ -16,8 +18,7 @@ import type { ArchiveApplicationSession, ArchiveCoordinator } from '../archives/
 import { record } from '../archives/context-validation'
 import { entityId, pagination } from '../ports/port-input'
 import type { PreparedOperation } from './operation-service'
-import { operationReplay, serviceValues } from './operation-replay'
-import { subjectEffects } from './subject-resolution'
+import { operationReplay, serviceReplayEffects } from './operation-replay'
 
 const namespace = 'OPERATION_INSERT_RETROACTIVE'
 type Prepared = {
@@ -74,10 +75,11 @@ export class OperationInsertion {
             !after.charges.some((c) => c.id === e.reference.id),
         ),
         ...subjects.serviceUpdates.flatMap((u) =>
-          subjectEffects(
+          serviceReplayEffects(
             { kind: 'SERVICE_ACTIVITY', id: u.before.id, label: u.before.description },
-            serviceValues(u.before),
-            serviceValues(u.after),
+            u.before,
+            u.after,
+            s.database,
           ),
         ),
         ...after.charges.map((c): ChangeEffectDto => ({
@@ -143,12 +145,13 @@ export class OperationInsertion {
       charges: a.after.charges,
       totalBase: a.after.totalBase,
     }
+    const descriptions = new ReadDescriptions(s.database)
     return {
       ...entry,
       context: s.context(),
       operation: namespace,
       status: a.blockers.length || prepared.originalBlockers.length ? 'BLOCKED' : 'READY',
-      operationValues,
+      operationValues: descriptions.operation(operationValues),
       summary: {
         created: a.effects.filter((e) => e.action === 'CREATE').length,
         updated: a.effects.filter((e) => e.action === 'UPDATE').length,
@@ -157,7 +160,12 @@ export class OperationInsertion {
         recalculated: a.recalculated,
       },
       effects: {
-        items: a.effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          s.database,
+          a.effects.slice((page - 1) * pageSize, page * pageSize),
+          a.after,
+          descriptions.references,
+        ),
         total: a.effects.length,
         page,
         pageSize,

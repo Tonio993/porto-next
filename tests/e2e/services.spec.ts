@@ -52,7 +52,7 @@ async function setup(app: ElectronApplication, path: string) {
   await expect(page.getByTestId('archive-path')).toHaveText(path)
   await page.getByRole('button', { name: 'Prestazioni', exact: true }).click()
   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-  await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()
+  await page.getByRole('option', { name: 'Stella del mare', exact: true }).click()
   return page
 }
 for (const scenario of ['funzionale', 'asincrono'] as const)
@@ -182,7 +182,7 @@ for (const scenario of ['funzionale', 'asincrono'] as const)
         await expect(page.getByTestId('archive-path')).toHaveText(path)
         await page.getByRole('button', { name: 'Prestazioni', exact: true }).click()
         await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-        await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()
+        await page.getByRole('option', { name: 'Stella del mare', exact: true }).click()
         await expect(
           page.getByRole('cell', { name: 'Assistenza libera P14', exact: true }),
         ).toBeVisible()
@@ -220,7 +220,7 @@ for (const scenario of ['funzionale', 'asincrono'] as const)
         await page.getByRole('button', { name: 'Ricarica consultazione', exact: true }).click()
         await expect.poll(() => operationHeld(app!)).toBe(true)
         await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-        await page.getByRole('option', { name: '2 · Aurora', exact: true }).click()
+        await page.getByRole('option', { name: 'Aurora', exact: true }).click()
         await releaseOperation(app)
         await expect(
           page.getByText('Nessuna prestazione registrata.', { exact: true }),
@@ -274,7 +274,7 @@ test('P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE c
     expect(readdirSync(folder).some((n) => n.includes('.prima-v17-'))).toBe(true)
     await page.getByRole('button', { name: 'Prestazioni', exact: true }).click()
     await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()
+    await page.getByRole('option', { name: 'Stella del mare', exact: true }).click()
     await expect(
       page.getByRole('cell', { name: '92233720368547758.07', exact: true }),
     ).toBeVisible()
@@ -380,7 +380,7 @@ test('P15: migrazione v15 popolata, catalogo, spiegazione, tipo storico e FREE c
     await expect(page.getByTestId('archive-path')).toHaveText(path)
     await page.getByRole('button', { name: 'Prestazioni', exact: true }).click()
     await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()
+    await page.getByRole('option', { name: 'Stella del mare', exact: true }).click()
     await expect(page.getByRole('cell', { name: 'Tipo rinominato P15', exact: true })).toBeVisible()
     await expect(
       page.getByRole('cell', { name: '92233720368547758.07', exact: true }),
@@ -1071,14 +1071,14 @@ test('P16 ricerca: soggetti ereditati, porto e banchina, filtri vuoti e ispezion
       await filters.getByRole('combobox', { name: label, exact: true }).click()
       await page.getByRole('option', { name: option, exact: typeof option === 'string' }).click()
     }
-    await pick('Porto', '1 · Genova')
-    await pick('Banchina (facoltativa)', '1 · Molo nord')
+    await pick('Porto', 'Genova · Genova · Italia')
+    await pick('Banchina (facoltativa)', 'Molo nord · Genova · Genova · IT')
     await expect(page.getByText('Nessuna prestazione registrata.', { exact: true })).toBeVisible()
     await filters.getByRole('button', { name: 'Azzera filtri' }).click()
     await expect(cell).toBeVisible()
     await pick('Categoria', 'Catalogo')
     await pick('Stato prestazione', 'Prevista')
-    await pick('Porto', '1 · Genova')
+    await pick('Porto', 'Genova · Genova · Italia')
     await pick('Cliente effettivo', /Cliente ricerca P16$/)
     await pick('Agenzia effettiva', /Agenzia ricerca P16$/)
     await expect(cell).toBeVisible()

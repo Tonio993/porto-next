@@ -5,8 +5,13 @@ import { useNumericFormat } from '../../api/use-numeric-preference'
 import { SubjectValues } from './SubjectValues'
 import type { VesselOperationDto } from '../../../../shared/contracts/operations'
 import { formatMoney } from '../../api/numeric-input'
-export const operationLabels = { ENTRY: 'Entrata', EXIT: 'Uscita', MOVEMENT: 'Spostamento' }
-export const executionLabels = { PLANNED: 'Prevista', PERFORMED: 'Effettuata', MISSED: 'Mancata' }
+import {
+  operationLabels,
+  executionLabels,
+  vesselTypeLabels,
+} from '../../../../shared/description-labels'
+import { CalculationReferences, ReferenceValue } from '../ReferenceValues'
+export { operationLabels, executionLabels } from '../../../../shared/description-labels'
 export function OperationDetail({ operation: o }: { operation: VesselOperationDto }) {
   const numericFormat = useNumericFormat()
   const e = o.endpoint
@@ -35,11 +40,16 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
           <details>
             <summary>Riferimenti di arrivo</summary>
             <p>
-              Versione nave: {o.arrival.vesselVersionId}
+              Versione nave: <ReferenceValue value={o.arrival.references?.vessel} />
               <br />
-              Versione porto: {o.arrival.portVersionId}
+              Versione porto: <ReferenceValue value={o.arrival.references?.port} />
               <br />
-              Versione banchina: {o.arrival.berthVersionId ?? '—'}
+              Versione banchina:{' '}
+              {o.arrival.berthId ? (
+                <ReferenceValue value={o.arrival.references?.berth} />
+              ) : (
+                'Banchina non specificata'
+              )}
             </p>
           </details>
         </>
@@ -60,7 +70,7 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
         const e = c.economicEndpointRole === 'ARRIVAL' ? o.arrival! : o.endpoint
         const r = c.calculation
         return (
-          <section key={c.id} aria-label={'Componente ' + c.chargeKind}>
+          <section key={c.id} aria-label={'Componente ' + operationLabels[c.chargeKind]}>
             <h4>
               Base economica · EUR · {operationLabels[c.chargeKind]}
               {c.economicEndpointRole === 'ARRIVAL'
@@ -92,27 +102,28 @@ export function OperationDetail({ operation: o }: { operation: VesselOperationDt
             <details>
               <summary>Riferimenti applicati e operandi</summary>
               <p>
-                Operazione: {o.id}
-                <br />
-                Componente: {c.id}
-                <br />
-                Versione nave: {r.vesselVersionId}
-                <br />
-                Versione porto: {e.portVersionId}
-                <br />
-                Versione banchina: {e.berthVersionId ?? '—'}
-                <br />
-                Tariffa: {r.tariffId}
-                <br />
-                Configurazione: {r.configurationId}
-                <br />
-                Scaglione: {r.bracketId}
-                <br />
-                Peso: {r.weightVersionId}
+                Operazione: {operationLabels[o.operationType]} · {r.vesselName} ·{' '}
+                <MomentDisplay moment={o.endpoint.moment} />
               </p>
               <p>
-                Tipologia {r.vesselTypeId}, dimensione {formatNumeric(r.size, numericFormat)},
-                limite {formatNumeric(r.upperLimit, numericFormat)}, valore{' '}
+                Componente: {operationLabels[c.chargeKind]} · {e.portName} ·{' '}
+                <MomentDisplay moment={r.moment} />
+              </p>
+              <p>
+                Versione porto: <ReferenceValue value={e.references?.port} />
+                <br />
+                Versione banchina:{' '}
+                {e.berthId ? (
+                  <ReferenceValue value={e.references?.berth} />
+                ) : (
+                  'Banchina non specificata'
+                )}
+              </p>
+              <CalculationReferences value={r} />
+              <p>
+                Tipologia {vesselTypeLabels[r.vesselTypeId]}, dimensione{' '}
+                {formatNumeric(r.size, numericFormat)}, limite{' '}
+                {formatNumeric(r.upperLimit, numericFormat)}, valore{' '}
                 {formatNumeric(r.ordinaryValue, numericFormat)}, extra{' '}
                 {formatNumeric(r.extraCount, numericFormat)} ×{' '}
                 {formatNumeric(r.extraValue, numericFormat)}, ampiezza{' '}

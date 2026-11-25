@@ -124,7 +124,7 @@ for (const [kind, plural, singular] of [
         page.getByRole('status').filter({ hasText: `Caricamento dettaglio ${singular}` }),
       ).toBeVisible()
       await list.getByRole('button', { name: /Seconda/ }).click()
-      await expect(detail).toContainText('2 · Seconda')
+      await expect(detail).toContainText('Seconda')
       await release(app)
       await page.evaluate(
         () =>
@@ -132,7 +132,7 @@ for (const [kind, plural, singular] of [
             window.requestAnimationFrame(() => window.requestAnimationFrame(done)),
           ),
       )
-      await expect(detail).toContainText('2 · Seconda')
+      await expect(detail).toContainText('Seconda')
       await detail.getByRole('button', { name: `Nuova versione ${singular}`, exact: true }).click()
       const editor = page.getByRole('dialog', { name: `Nuova versione ${singular}` })
       await editor.getByLabel('Ragione sociale').fill('Bozza precedente')

@@ -38,7 +38,7 @@ export function SubjectPicker({
     loadOne: (id) => api.get({ context: { sessionId: context.sessionId }, query: { id } }),
     option: (s) => ({
       value: s.id,
-      label: s.code + ' · ' + s.version.businessName + (s.selectable ? '' : ' · Disattivato'),
+      label: s.version.businessName + (s.selectable ? '' : ' · Disattivato'),
       disabled: !s.selectable && s.id !== retainedId && !(historical && retainedId === undefined),
     }),
   })

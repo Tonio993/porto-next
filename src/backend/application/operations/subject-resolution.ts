@@ -1,3 +1,5 @@
+import { operationLabels } from '../../../shared/description-labels'
+import { describeEffects } from '../presentation/effect-descriptions'
 import { ServiceRepository } from '../../infrastructure/database/service-repository'
 import { serviceContext } from '../../domain/services/context'
 import type { ServiceActivityDto } from '../../../shared/contracts/services'
@@ -33,15 +35,61 @@ export function subjectEffects(
   reference: ChangeEffectDto['reference'],
   before: object,
   after: object,
+  database?: DatabaseSession,
 ): ChangeEffectDto[] {
   const changes = Object.entries(after)
     .filter(([key, value]) => !same((before as Record<string, unknown>)[key], value))
     .map(([field, value]) => ({
       field,
+      structured:
+        (value !== null && typeof value === 'object') ||
+        ((before as Record<string, unknown>)[field] !== null &&
+          typeof (before as Record<string, unknown>)[field] === 'object'),
       before: JSON.stringify((before as Record<string, unknown>)[field]) ?? null,
       after: JSON.stringify(value) ?? null,
     }))
-  return changes.length ? [{ reference, versionId: null, action: 'UPDATE', changes }] : []
+  if (!changes.length) return []
+  if (!database) return [{ reference, versionId: null, action: 'UPDATE', changes }]
+  const scalars = describeEffects(
+    database,
+    [
+      {
+        reference,
+        versionId: null,
+        action: 'UPDATE',
+        changes: changes.map((c) => ({
+          ...c,
+          before:
+            typeof (before as Record<string, unknown>)[c.field] === 'string'
+              ? (before as Record<string, string>)[c.field]
+              : null,
+          after:
+            typeof (after as Record<string, unknown>)[c.field] === 'string'
+              ? (after as Record<string, string>)[c.field]
+              : null,
+        })),
+      },
+    ],
+    undefined,
+    undefined,
+    false,
+  )[0]
+  return [
+    {
+      reference,
+      versionId: null,
+      action: 'UPDATE',
+      changes: changes.map((c, i) => ({
+        ...c,
+        ...(typeof (before as Record<string, unknown>)[c.field] === 'string'
+          ? { beforeReference: scalars.changes[i].beforeReference }
+          : {}),
+        ...(typeof (after as Record<string, unknown>)[c.field] === 'string'
+          ? { afterReference: scalars.changes[i].afterReference }
+          : {}),
+      })),
+    },
+  ]
 }
 /** Simulazione senza scritture, condivisa da assegnazioni, nuove operazioni e anagrafiche. */
 export function subjectPlan(
@@ -111,10 +159,11 @@ export function subjectPlan(
         {
           kind: 'OPERATION_CHARGE',
           id: c.id,
-          label: 'Soggetti ' + c.chargeKind + ' · ' + c.calculation.moment.utc,
+          label: 'Soggetti ' + operationLabels[c.chargeKind] + ' · ' + c.calculation.moment.utc,
         },
         before,
         after,
+        database,
       )
       return effects.length ? [{ chargeId: c.id, operationId: op.id, before, after, effects }] : []
     }),
@@ -145,6 +194,7 @@ export function subjectPlan(
       { kind: 'SERVICE_ACTIVITY', id: before.id, label: before.description },
       before,
       after,
+      database,
     )
     return effects.length ? [{ before, after, effects }] : []
   })
@@ -154,7 +204,7 @@ export function subjectPlan(
     const components =
       op?.charges.map((c) => ({
         id: c.id,
-        label: c.chargeKind + ' · ' + c.calculation.moment.utc,
+        label: operationLabels[c.chargeKind] + ' · ' + c.calculation.moment.utc,
         subjects: resolve(
           economicSubjectTargets(op, c.economicEndpointRole, timelines.get(op.vesselId)!),
           c.calculation.moment.utc,

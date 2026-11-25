@@ -80,7 +80,7 @@ export function ConfigurationFields({
       <Tabs.List aria-label="Configurazioni nave">
         {vesselTypes.map((t) => (
           <Tabs.Tab key={t.id} value={t.id}>
-            {t.id}
+            {t.label}
           </Tabs.Tab>
         ))}
       </Tabs.List>
@@ -183,12 +183,10 @@ export function ConfigurationDetails({
         return (
           <section
             key={c.id}
-            aria-label={`Configurazione ${t.id}`}
+            aria-label={`Configurazione ${t.label}`}
             className="tariff-configuration"
           >
-            <h3>
-              {t.id} · {t.label}
-            </h3>
+            <h3>{t.label}</h3>
             <table className="tariff-table">
               <thead>
                 <tr>

@@ -1,3 +1,4 @@
+import { portName } from '../../api/master-data-names'
 import { Button, Group, TextInput } from '@mantine/core'
 import { IconPlus, IconSearch } from '@tabler/icons-react'
 import type { PortPageDto } from '../../../../shared/contracts/ports'
@@ -55,15 +56,15 @@ export function PortList({
           <button
             key={port.id}
             className="port-list-item"
-            aria-label={`Apri porto ${port.code}`}
+            aria-label={`Apri porto ${portName(port)}`}
             aria-pressed={port.id === selected}
             disabled={disabled || loading}
             onClick={() => onSelect(port.id)}
           >
-            <span className="port-item-code">
-              Porto {port.code} · {port.status === 'ACTIVE' ? 'Attivo' : 'Disattivato'}
-            </span>
             <strong>{port.version.name}</strong>
+            <span className="port-item-code">
+              {port.status === 'ACTIVE' ? 'Attivo' : 'Disattivato'} · Codice {port.code}
+            </span>
             <span>
               {port.version.locality} · {countryName(port.version.countryCode)}
             </span>

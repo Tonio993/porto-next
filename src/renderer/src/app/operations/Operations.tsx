@@ -1,3 +1,4 @@
+import { ReferenceValue } from '../ReferenceValues'
 import { StayInterval } from './StayInterval'
 import { MomentDisplay } from '../MomentDisplay'
 import { ExactNumericInput } from '../ExactNumericInput'
@@ -819,13 +820,14 @@ export function Operations({
                 <details>
                   <summary>Identità del contesto</summary>
                   <p>
-                    Viaggio: {operationalContext.voyageId ?? '—'}
+                    Viaggio: <ReferenceValue value={operationalContext.references?.voyage} />
                     <br />
-                    Visita: {operationalContext.portCallId ?? '—'}
+                    Visita: <ReferenceValue value={operationalContext.references?.visit} />
                     <br />
-                    Ormeggio: {operationalContext.berthStayId ?? '—'}
+                    Ormeggio: <ReferenceValue value={operationalContext.references?.stay} />
                     <br />
-                    Banchina: {operationalContext.berthId ?? 'Non specificata'}
+                    Banchina:{' '}
+                    {operationalContext.references?.stay?.opening.name ?? 'Non specificata'}
                   </p>
                 </details>
               </div>
@@ -847,7 +849,7 @@ export function Operations({
               <details>
                 <summary>Identità del viaggio</summary>
                 <p>
-                  {v.id} · versione nave {v.vesselVersionId}
+                  <ReferenceValue value={v.vesselReference} />
                 </p>
               </details>
               <Group>
@@ -887,7 +889,7 @@ export function Operations({
                   </Button>
                   <h4>Visita · {p.portName}</h4>
                   <p>
-                    {p.id} · <StayInterval interval={p} />
+                    <StayInterval interval={p} />
                   </p>
                   {p.stays.map((b) => (
                     <div key={b.id}>
@@ -900,12 +902,17 @@ export function Operations({
                       </Button>
                       <strong>Ormeggio · {b.berthName ?? 'Banchina non specificata'}</strong>
                       <p>
-                        {b.id} · <StayInterval interval={b} />
+                        <StayInterval interval={b} />
                       </p>
                       <p>
-                        Apertura: {b.openingOperationId}
+                        Apertura: <ReferenceValue value={b.reference?.opening} />
                         <br />
-                        Chiusura: {b.closingOperationId ?? '—'}
+                        Chiusura:{' '}
+                        {b.closingOperationId ? (
+                          <ReferenceValue value={b.reference?.closing} />
+                        ) : (
+                          'Aperta'
+                        )}
                       </p>
                     </div>
                   ))}

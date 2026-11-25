@@ -43,7 +43,7 @@ test('UI03: vuoto, errore per campo, anteprima bloccata e obsoleta, caricamento 
     await page.getByRole('button', { name: 'Prestazioni', exact: true }).click()
     await expect(page.getByText('Nessuna prestazione registrata.', { exact: true })).toBeVisible()
     await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()
+    await page.getByRole('option', { name: 'Stella del mare', exact: true }).click()
     await page.getByRole('button', { name: 'Nuova prestazione libera', exact: true }).click()
     const modal = page.getByRole('dialog')
     await expect(modal.getByLabel('Momento prestazione locale')).toBeFocused()

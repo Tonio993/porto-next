@@ -1,3 +1,6 @@
+import type { ChangeEffectDto } from '../../../shared/contracts/master-data'
+import { ReadDescriptions } from '../presentation/read-descriptions'
+import { subjectEffects } from './subject-resolution'
 import type { ServiceActivityDto } from '../../../shared/contracts/services'
 import type { VesselOperationDto } from '../../../shared/contracts/operations'
 import { replayOperations } from '../../domain/operations/replay'
@@ -39,7 +42,7 @@ export function operationReplay(
         })
   return {
     subjects: subjectPlan(database, { operations, openings }),
-    persistence: replayPersistence(database, vesselIds, voyages),
+    persistence: replayPersistence(database, vesselIds, voyages, operations),
   }
 }
 
@@ -61,3 +64,44 @@ export const serviceValues = (s: ServiceActivityDto) => ({
     ? `${s.subjects.agency.businessName} · ${s.subjects.agency.source.kind} ${s.subjects.agency.source.id}`
     : null,
 })
+
+/** Scalar summaries retain original source IDs for comparison, with a separate typed description. */
+export function serviceReplayEffects(
+  reference: ChangeEffectDto['reference'],
+  before: ServiceActivityDto,
+  after: ServiceActivityDto,
+  database: ConstructorParameters<typeof OperationRepository>[0],
+) {
+  const descriptions = new ReadDescriptions(database)
+  const oldSubjects = descriptions.subjects(before.subjects),
+    newSubjects = descriptions.subjects(after.subjects)
+  const one = (s: typeof oldSubjects.customer) =>
+    s
+      ? {
+          subject: true as const,
+          businessName: s.businessName,
+          version: s.description!.version,
+          origin: s.description!.origin,
+        }
+      : null
+  return subjectEffects(reference, serviceValues(before), serviceValues(after), database).map(
+    (e) => ({
+      ...e,
+      changes: e.changes.map((c) => {
+        const kind =
+          c.field === 'Cliente effettivo e fonte'
+            ? 'customer'
+            : c.field === 'Agenzia effettiva e fonte'
+              ? 'agency'
+              : null
+        return kind
+          ? {
+              ...c,
+              beforeReference: one(oldSubjects[kind]),
+              afterReference: one(newSubjects[kind]),
+            }
+          : c
+      }),
+    }),
+  )
+}

@@ -51,7 +51,7 @@ test('gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del port
     const history = page.getByRole('region', { name: 'Cronologia porto' })
     const editor = page.getByRole('region', { name: 'Editor versione' })
     const preview = page.getByRole('region', { name: 'Anteprima modifica' })
-    await expect(detail).toContainText('Porto 1 · Porto iniziale')
+    await expect(detail).toContainText('Porto iniziale')
     await expect(
       history.getByRole('button', { name: 'Elimina versione', exact: true }),
     ).toBeDisabled()
@@ -147,7 +147,9 @@ test('gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del port
         stale,
       ),
     ).toMatchObject({ ok: false, context: null, error: { code: 'ARCHIVE_SESSION_CHANGED' } })
-    await page.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
+    await page
+      .getByRole('button', { name: 'Apri porto Nome corretto · Genova · Italia', exact: true })
+      .click()
     await expect(detail).toContainText('Nome corretto')
     await detail.getByRole('button', { name: 'Elimina porto', exact: true }).click()
     await preview.getByRole('button', { name: 'Conferma modifica' }).click()
@@ -159,7 +161,7 @@ test('gestisce versioni, anteprime, prenotazioni, stato ed eliminazione del port
     await creation.getByLabel('Nome del porto').fill('Porto iniziale')
     await creation.getByLabel('Località').fill('Genova')
     await creation.getByRole('button', { name: 'Crea porto', exact: true }).click()
-    await expect(detail).toContainText('Porto 2 · Porto iniziale')
+    await expect(detail).toContainText('Porto iniziale')
     expect(errors).toEqual([])
   } finally {
     await app?.close()

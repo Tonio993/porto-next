@@ -1,3 +1,4 @@
+import { withoutDescriptions } from './support/without-descriptions'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -28,7 +29,7 @@ let folder: string,
   berthId: string
 const value = <T>(r: ApplicationResult<T>): T => {
   if (!r.ok) throw new Error(`${r.error.code}: ${r.error.message}`)
-  return r.value
+  return withoutDescriptions(r.value)
 }
 const context = () => archives.context()!,
   db = () => archives.coordinator.requireSession().database,
@@ -464,7 +465,7 @@ it('FK esterne composte/CASCADE su permanenze e componenti posseduti bloccano se
   sql().prepare('INSERT INTO external_voyage VALUES (?,?,?)').run('ext', voyage.id, vesselId)
   const p = value(await completePreview(entry, { executionStatus: 'MISSED' })),
     metadata = db().metadata()
-  expect(p.blockers.some((b) => b.reference.label.includes('external_voyage'))).toBe(true)
+  expect(p.blockers.some((b) => b.reference.label.includes('Elementi collegati'))).toBe(true)
   expect(
     await operations.confirmComplete({ context: p.context, payload: { previewId: p.previewId } }),
   ).toMatchObject(failure('PREVIEW_BLOCKED'))
@@ -484,7 +485,7 @@ it('FK esterne composte/CASCADE su permanenze e componenti posseduti bloccano se
         destinationBerthId: null,
         arrivalMoment: moment('2026-06-02T13:00'),
       }),
-    ).blockers.some((b) => b.reference.label.includes('external_subject')),
+    ).blockers.some((b) => b.reference.label.includes('Elementi collegati')),
   ).toBe(true)
   expect(sql().prepare('SELECT count(*) FROM external_subject').pluck().get()).toBe(1)
 })

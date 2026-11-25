@@ -188,14 +188,14 @@ test('UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notific
     await expect(page.getByText('Nome dell’archivio aggiornato.')).toBeVisible()
     await page.getByRole('button', { name: 'Anagrafiche', exact: true }).click()
     // An open success notification must leave the list and paging usable.
-    await expect(page.getByRole('button', { name: 'Apri porto 1', exact: true })).toBeVisible()
-    await page.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
+    await expect(page.getByRole('button', { name: /^Apri porto 01 · Terminale/ })).toBeVisible()
+    await page.getByRole('button', { name: /^Apri porto 01 · Terminale/ }).click()
     await expect(page.getByRole('region', { name: 'Consultazione porto' })).toContainText('Genova')
     await shot('porti-minimo')
     await fits()
     const berths = page.getByRole('group', { name: 'Elenco banchine', exact: true })
-    await expect(berths.getByRole('button', { name: /^1 ·/ })).toBeVisible()
-    await berths.getByRole('button', { name: /^1 ·/ }).click()
+    await expect(berths.getByRole('button', { name: /^01 ·/ })).toBeVisible()
+    await berths.getByRole('button', { name: /^01 ·/ }).click()
     await expect(page.getByRole('region', { name: 'Dettaglio banchina' })).toBeVisible()
     await page.getByRole('region', { name: 'Dettaglio banchina' }).scrollIntoViewIfNeeded()
     await shot('banchine-minimo')
@@ -208,8 +208,8 @@ test('UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notific
     ] as const) {
       await page.getByRole('button', { name: section, exact: true }).click()
       const list = page.getByRole('group', { name: `Elenco ${section.toLowerCase()}`, exact: true })
-      await expect(list.getByRole('button', { name: /^1 ·/ })).toBeVisible()
-      await list.getByRole('button', { name: /^1 ·/ }).click()
+      await expect(list.getByRole('button', { name: /^01 ·/ })).toBeVisible()
+      await list.getByRole('button', { name: /^01 ·/ }).click()
       await expect(
         page.getByRole('region', { name: `Dettaglio ${noun}`, exact: true }),
       ).toBeVisible()
@@ -267,13 +267,13 @@ test('UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notific
     await expect(list).toContainText('Nessun tipo presente')
     await expect(detail.getByTestId('catalog-weight')).toBeVisible()
     await page.getByRole('button', { name: 'Anagrafiche', exact: true }).click()
-    await page.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
+    await page.getByRole('button', { name: /^Apri porto 01 · Terminale/ }).click()
     await expect(page.getByRole('region', { name: 'Consultazione porto' })).toContainText('Genova')
     await shot('porti-desktop')
     await fits()
     await page
       .getByRole('group', { name: 'Elenco banchine', exact: true })
-      .getByRole('button', { name: /^1 ·/ })
+      .getByRole('button', { name: /^01 ·/ })
       .click()
     await expect(page.getByRole('region', { name: 'Dettaglio banchina' })).toBeVisible()
     await page.getByRole('region', { name: 'Dettaglio banchina' }).scrollIntoViewIfNeeded()
@@ -286,7 +286,7 @@ test('UI02: confronto anagrafiche e catalogo, liste e cronologie lunghe, notific
       await page.getByRole('button', { name: section, exact: true }).click()
       await page
         .getByRole('group', { name: `Elenco ${section.toLowerCase()}`, exact: true })
-        .getByRole('button', { name: /^1 ·/ })
+        .getByRole('button', { name: /^01 ·/ })
         .click()
       await expect(
         page.getByRole('region', { name: `Dettaglio ${noun}`, exact: true }),

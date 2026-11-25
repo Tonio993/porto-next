@@ -1,3 +1,6 @@
+import { describeEffects } from '../presentation/effect-descriptions'
+import { DescriptiveReferenceRepository } from '../../infrastructure/database/descriptive-reference-repository'
+import { ReadDescriptions } from '../presentation/read-descriptions'
 import { TariffMaintenance } from './tariff-maintenance'
 import { tariffOperationImpacts } from '../operations/operation-impacts'
 import { randomUUID } from 'node:crypto'
@@ -139,12 +142,14 @@ export class TariffService implements TariffApi {
           'LOCAL_TIME_AMBIGUOUS',
           'Scegli esplicitamente l’occorrenza del momento economico.',
         )
-      return calculateBase(session.database, {
-        portId,
-        vesselId,
-        activity,
-        moment: resolution.moment,
-      })
+      return new ReadDescriptions(session.database).calculation(
+        calculateBase(session.database, {
+          portId,
+          vesselId,
+          activity,
+          moment: resolution.moment,
+        }),
+      )
     })
   private analyze(session: ArchiveApplicationSession, tariff: TariffDto) {
     const { previous, next } = new TariffRepository(session.database).neighbors(
@@ -157,6 +162,16 @@ export class TariffService implements TariffApi {
         reference,
         versionId: null,
         action: 'CREATE',
+        versionReference: {
+          kind: 'TARIFF',
+          name: new DescriptiveReferenceRepository(session.database, tariff.effectiveFrom).identity(
+            'PORT',
+            tariff.portId,
+          ),
+          effectiveFrom: tariff.effectiveFrom,
+          effectiveTo: next,
+          effectiveMoment: tariff.effectiveMoment,
+        },
         changes: [
           { field: 'effectiveFrom', before: null, after: tariff.effectiveFrom },
           { field: 'effectiveTo', before: null, after: next },
@@ -201,7 +216,10 @@ export class TariffService implements TariffApi {
         recalculated: impacts.recalculated,
       },
       effects: {
-        items: effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          session.database,
+          effects.slice((page - 1) * pageSize, page * pageSize),
+        ),
         total: effects.length,
         page,
         pageSize,

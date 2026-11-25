@@ -1,3 +1,5 @@
+import { describeEffects } from '../presentation/effect-descriptions'
+import { ReadDescriptions } from '../presentation/read-descriptions'
 import type {
   AssignmentApi,
   AssignmentChangeDto,
@@ -29,7 +31,7 @@ export class AssignmentService implements AssignmentApi {
     this.coordinator.query(request, (s, q) => {
       const t = target(q)
       new AssignmentRepository(s.database).specified(t)
-      return subjectPlan(s.database).values(t)
+      return new ReadDescriptions(s.database).assignment(subjectPlan(s.database).values(t))
     })
   private analyse(s: ArchiveApplicationSession, change: AssignmentChangeDto) {
     const repository = new AssignmentRepository(s.database),
@@ -53,7 +55,12 @@ export class AssignmentService implements AssignmentApi {
     }
     const plan = subjectPlan(s.database, { assignment: change })
     const effects = [
-      ...subjectEffects({ ...change.target, label: 'Assegnazione' }, before, change.specified),
+      ...subjectEffects(
+        { ...change.target, label: 'Assegnazione' },
+        before,
+        change.specified,
+        s.database,
+      ),
       ...plan.effects,
     ]
     return { repository, plan, effects }
@@ -82,10 +89,15 @@ export class AssignmentService implements AssignmentApi {
           recalculated: 0,
           reattributed: plan.updates.length,
         },
-        effects: { items: effects.slice(0, 50), total: effects.length, page: 1, pageSize: 50 },
+        effects: {
+          items: describeEffects(s.database, effects.slice(0, 50)),
+          total: effects.length,
+          page: 1,
+          pageSize: 50,
+        },
         blockers: [],
         warnings: [],
-        assignment: plan.values(change.target),
+        assignment: new ReadDescriptions(s.database).assignment(plan.values(change.target)),
       }
     })
   previewEffects: AssignmentApi['previewEffects'] = (request) =>
@@ -96,7 +108,10 @@ export class AssignmentService implements AssignmentApi {
         .input as AssignmentChangeDto
       const { effects } = this.analyse(s, change)
       return {
-        items: effects.slice((p.page - 1) * p.pageSize, p.page * p.pageSize),
+        items: describeEffects(
+          s.database,
+          effects.slice((p.page - 1) * p.pageSize, p.page * p.pageSize),
+        ),
         total: effects.length,
         ...p,
       }
@@ -112,7 +127,7 @@ export class AssignmentService implements AssignmentApi {
         repository.save(change.target, change.specified)
         plan.apply()
         consumed = id
-        return plan.values(change.target)
+        return new ReadDescriptions(s.database).assignment(plan.values(change.target))
       },
       (s) => s.previews.consume(consumed),
     )

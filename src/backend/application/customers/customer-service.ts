@@ -1,3 +1,4 @@
+import { describeEffects } from '../presentation/effect-descriptions'
 import { subjectPlan } from '../operations/subject-resolution'
 import { randomUUID } from 'node:crypto'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
@@ -187,7 +188,7 @@ export class CustomerService implements CustomerApi {
     const reference = {
       kind: 'CUSTOMER' as const,
       id: customer.id,
-      label: `Cliente ${customer.code}`,
+      label: customer.version.businessName,
     }
     const effects = versionEffects(
       before,
@@ -269,7 +270,12 @@ export class CustomerService implements CustomerApi {
           recalculated: 0,
           reattributed: subjects?.updates.length ?? 0,
         },
-        effects: { items: effects.slice(0, 50), total: effects.length, page: 1, pageSize: 50 },
+        effects: {
+          items: describeEffects(session.database, effects.slice(0, 50)),
+          total: effects.length,
+          page: 1,
+          pageSize: 50,
+        },
         blockers,
         warnings,
       }
@@ -287,7 +293,10 @@ export class CustomerService implements CustomerApi {
       )
       const { effects } = this.analyse(session, change as Change, this.now())
       return {
-        items: effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          session.database,
+          effects.slice((page - 1) * pageSize, page * pageSize),
+        ),
         total: effects.length,
         page,
         pageSize,

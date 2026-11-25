@@ -155,6 +155,9 @@ export function Vessels({
                 key={vessel.id}
                 code={vessel.code}
                 name={vessel.version.registeredName}
+                description={
+                  vessel.version.imoNumber ? `IMO ${vessel.version.imoNumber}` : undefined
+                }
                 status={vessel.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
                 selected={vessels.selection === vessel.id}
                 disabled={busy}
@@ -192,9 +195,7 @@ export function Vessels({
               aria-label="Dettaglio nave"
               aria-busy={vessels.loadingDetail}
             >
-              <h3>
-                Nave {history.vessel.code} · {history.vessel.version.registeredName}
-              </h3>
+              <h3>{history.vessel.version.registeredName}</h3>
               <p>{vesselDetails(history.vessel.version, numericFormat)}</p>
               <Group gap="xs">
                 <Badge

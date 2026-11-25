@@ -189,9 +189,7 @@ export function Customers({
               aria-label="Dettaglio cliente"
               aria-busy={customers.loadingDetail}
             >
-              <h3>
-                Cliente {history.customer.code} · {history.customer.version.businessName}
-              </h3>
+              <h3>{history.customer.version.businessName}</h3>
               <Group gap="xs">
                 <Badge
                   variant="outline"

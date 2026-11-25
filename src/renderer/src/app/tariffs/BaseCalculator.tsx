@@ -1,3 +1,4 @@
+import { CalculationReferences } from '../ReferenceValues'
 import { MomentDisplay } from '../MomentDisplay'
 import { VesselPicker } from '../operations/VesselPicker'
 import { CatalogPicker } from '../services/CatalogPicker'
@@ -160,21 +161,7 @@ export function BaseCalculator({
           <CalculationNumbers value={trace} />
           <details>
             <summary>Riferimenti applicati</summary>
-            <dl>
-              {Object.entries({
-                Tariffa: trace.tariffId,
-                Configurazione: trace.configurationId,
-                Scaglione: trace.bracketId,
-                'Versione nave': trace.vesselVersionId,
-                'Sequenza peso': trace.weightSequenceId,
-                'Versione peso': trace.weightVersionId,
-              }).map(([label, id]) => (
-                <div key={label}>
-                  <dt>{label}</dt>
-                  <dd>{id}</dd>
-                </div>
-              ))}
-            </dl>
+            <CalculationReferences value={trace} />
           </details>
         </section>
       )}

@@ -1,3 +1,4 @@
+import { describeEffects } from '../presentation/effect-descriptions'
 import { masterOperationImpacts, operationTables } from '../operations/operation-impacts'
 import { randomUUID } from 'node:crypto'
 import type { CommandRequest, QueryRequest } from '../../../shared/contracts/application'
@@ -120,7 +121,10 @@ export class PortLifecycleService {
         throw new ArchiveError('PREVIEW_EXPIRED', 'L’anteprima non appartiene ai porti.')
       const { effects } = this.analyse(session, entry.input as Change)
       return {
-        items: effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          session.database,
+          effects.slice((page - 1) * pageSize, page * pageSize),
+        ),
         total: effects.length,
         page,
         pageSize,
@@ -192,7 +196,7 @@ export class PortLifecycleService {
             .length,
         },
         effects: {
-          items: analysis.effects.slice(0, 50),
+          items: describeEffects(session.database, analysis.effects.slice(0, 50)),
           total: analysis.effects.length,
           page: 1,
           pageSize: 50,
@@ -228,18 +232,18 @@ export class PortLifecycleService {
       before,
       after,
       ['name', 'locality', 'countryCode', 'effectiveFrom', 'effectiveTo'],
-      (name) => ({ kind: 'PORT', id: port.id, label: `Porto ${port.code} · ${name} · versione` }),
-      (version) => version.name,
+      (name) => ({ kind: 'PORT', id: port.id, label: name + ' · versione' }),
+      (version) => version.name + ' · ' + version.locality + ' · ' + version.countryCode,
     )
     const berths =
       change.operation === 'DELETE_PORT' ||
       (change.operation === 'DEACTIVATE_PORT' && port.status === 'ACTIVE')
-        ? berthReferencesToPort(session.database, port.id)
+        ? berthReferencesToPort(session.database, port.id, this.now())
         : []
     if (change.operation === 'DEACTIVATE_PORT' && port.status === 'ACTIVE') {
       effects.push({
         versionId: null,
-        reference: { kind: 'PORT', id: port.id, label: `Porto ${port.code}` },
+        reference: { kind: 'PORT', id: port.id, label: port.version.name },
         action: 'UPDATE',
         changes: [{ field: 'status', before: port.status, after: 'INACTIVE' }],
       })
@@ -254,7 +258,7 @@ export class PortLifecycleService {
     if (change.operation === 'DELETE_PORT')
       effects.push({
         versionId: null,
-        reference: { kind: 'PORT', id: port.id, label: `Porto ${port.code}` },
+        reference: { kind: 'PORT', id: port.id, label: port.version.name },
         action: 'DELETE',
         changes: [{ field: 'port', before: port.version.name, after: null }],
       })

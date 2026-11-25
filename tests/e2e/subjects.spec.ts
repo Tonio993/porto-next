@@ -120,7 +120,7 @@ for (const [kind, plural, singular, newLabel] of [
       await expect(creation.getByText(/dati.*cambiati|modificat|revision/i).first()).toBeVisible()
       await creation.getByRole('button', { name: 'Ricarica dati' }).click()
       await creation.getByRole('button', { name: `Crea ${singular}`, exact: true }).click()
-      await expect(detail).toContainText('1 · Società Àlfa')
+      await expect(detail).toContainText('Società Àlfa')
       await expect(create).toBeFocused()
       await create.click()
       await creation.getByLabel('Ragione sociale').fill('SOCIETA\u0300 A\u0300LFA')

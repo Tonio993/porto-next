@@ -122,7 +122,7 @@ for (const [kind, plural, singular] of [['vessels', 'Navi', 'nave']] as const) {
         page.getByRole('status').filter({ hasText: `Caricamento dettaglio ${singular}` }),
       ).toBeVisible()
       await list.getByRole('button', { name: /Seconda/ }).click()
-      await expect(detail).toContainText('2 · Seconda')
+      await expect(detail).toContainText('Seconda')
       await release(app)
       await page.evaluate(
         () =>
@@ -130,7 +130,7 @@ for (const [kind, plural, singular] of [['vessels', 'Navi', 'nave']] as const) {
             window.requestAnimationFrame(() => window.requestAnimationFrame(done)),
           ),
       )
-      await expect(detail).toContainText('2 · Seconda')
+      await expect(detail).toContainText('Seconda')
       await detail.getByRole('button', { name: `Nuova versione ${singular}`, exact: true }).click()
       const editor = page.getByRole('dialog', { name: `Nuova versione ${singular}` })
       await editor.getByLabel('Nome di registrazione').fill('Bozza precedente')
@@ -169,7 +169,7 @@ for (const [kind, plural, singular] of [['vessels', 'Navi', 'nave']] as const) {
       await expect(detail).toHaveCount(0)
 
       await list.getByRole('button', { name: /Seconda/ }).click()
-      await expect(detail).toContainText('2 · Seconda')
+      await expect(detail).toContainText('Seconda')
       // Clocks are isolated to this test's main process and renderer.
       const start = Date.parse('2027-01-01T08:59:50.000Z')
       await app.evaluate((_, time) => {
@@ -209,7 +209,7 @@ for (const [kind, plural, singular] of [['vessels', 'Navi', 'nave']] as const) {
       }, ids[1])
       const history = page.getByRole('group', { name: 'Cronologia nave', exact: true })
       await expect(history).toContainText('Versione con decorrenza · Futura')
-      await expect(detail.getByRole('heading').first()).toContainText('2 · Seconda')
+      await expect(detail.getByRole('heading').first()).toContainText('Seconda')
       await detail.getByRole('button', { name: 'Nuova versione nave', exact: true }).click()
       // Modal transitions also use the test clock.
       await page.clock.runFor(500)
@@ -222,7 +222,7 @@ for (const [kind, plural, singular] of [['vessels', 'Navi', 'nave']] as const) {
         )
       })
       await page.clock.fastForward(11_000)
-      await expect(detail.getByRole('heading').first()).toContainText('2 · Seconda futura')
+      await expect(detail.getByRole('heading').first()).toContainText('Seconda futura')
       await expect(history).toContainText('Versione con decorrenza · Corrente')
       await expect(editor.getByLabel('Nome di registrazione')).toHaveValue('Bozza conservata')
       await expect(editor.getByLabel('Dimensione')).toHaveValue('0')

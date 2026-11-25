@@ -1,12 +1,14 @@
 export function MasterDataListEntry({
   code,
   name,
+  description,
   status,
   selected,
   disabled,
   onClick,
 }: {
   code: number
+  description?: string
   name: string
   status: string
   selected: boolean
@@ -20,10 +22,11 @@ export function MasterDataListEntry({
       disabled={disabled}
       onClick={onClick}
     >
-      <span className="port-item-code">
-        {code} · {status}
-      </span>
       <strong>{name}</strong>
+      {description && <span>{description}</span>}
+      <span className="port-item-code">
+        {status} · Codice {code}
+      </span>
       {selected && <span className="selection-label">Selezionato</span>}
     </button>
   )

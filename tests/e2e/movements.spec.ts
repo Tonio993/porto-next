@@ -15,7 +15,7 @@ import {
 } from './operations-support'
 declare const document: { documentElement: { scrollWidth: number; clientWidth: number } }
 declare const window: { archives: ArchiveApi; operations: OperationApi; tariffs: TariffApi }
-async function chooseVessel(page: Page, name = '1 · Stella del mare') {
+async function chooseVessel(page: Page, name = 'Stella del mare') {
   await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
   await page.getByRole('option', { name, exact: true }).click()
 }
@@ -38,7 +38,7 @@ async function start(
   await modal.getByRole('combobox', { name: 'Stato', exact: true }).click()
   await page.getByRole('option', { name: status, exact: true }).click()
   await modal.getByRole('combobox', { name: 'Porto di destinazione', exact: true }).click()
-  await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+  await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
   await modal.getByLabel('Partenza locale').fill(departure)
   await modal.getByLabel('Arrivo locale').fill(arrival)
   return modal
@@ -197,7 +197,9 @@ test('P11: v11 popolato, spostamenti, MISSED, confini, banchina assente, tariffa
     ).toHaveCount(2)
     modal = await start(page, '2026-05-05T12:00', '2026-05-05T13:00', 'Effettuata')
     await modal.getByRole('combobox', { name: 'Banchina (facoltativa)', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Molo nord', exact: true }).click()
+    await page
+      .getByRole('option', { name: 'Molo nord · Genova · Genova · IT', exact: true })
+      .click()
     await submit(modal)
     await confirm(modal)
     await expect(page.getByText('Ormeggio · Molo nord', { exact: true })).toBeVisible()
@@ -312,7 +314,7 @@ test('P11 asincronia: risoluzione arrivo, query di contesto, selezione, revision
     await delayOperationResponse(app, 'operations:context-at')
     await page.getByRole('button', { name: 'Consulta contesto', exact: true }).click()
     await expect.poll(() => operationHeld(app!)).toBe(true)
-    await chooseVessel(page, '2 · Aurora')
+    await chooseVessel(page, 'Aurora')
     await releaseOperation(app)
     await expect(page.getByLabel('Contesto operativo')).toHaveCount(0)
     await page.getByRole('button', { name: 'Consulta contesto', exact: true }).click()

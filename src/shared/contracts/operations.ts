@@ -54,6 +54,11 @@ export interface VesselOperationDto {
   totalBase: string
 }
 export interface OperationEndpointDto {
+  references?: {
+    vessel: import('./descriptive-references').VersionReferenceDto | null
+    port: import('./descriptive-references').VersionReferenceDto | null
+    berth: import('./descriptive-references').VersionReferenceDto | null
+  }
   id: string
   role: 'OCCURRENCE' | 'DEPARTURE' | 'ARRIVAL'
   vesselVersionId: string
@@ -65,7 +70,9 @@ export interface OperationEndpointDto {
   berthVersionId: string | null
   berthName: string | null
 }
-export type OperationalContextDto =
+export type OperationalContextDto = {
+  references?: import('./descriptive-references').ContextReferencesDto
+} & (
   | {
       status: 'OUTSIDE'
       voyageId: null
@@ -90,7 +97,9 @@ export type OperationalContextDto =
       portId: string
       berthId: string | null
     }
+)
 export interface StayIntervalDto {
+  reference?: import('./descriptive-references').StayReferenceDto | null
   id: string
   openingOperationId: string
   closingOperationId: string | null
@@ -100,6 +109,7 @@ export interface StayIntervalDto {
   closingMoment: ResolvedMomentDto | null
 }
 export interface VoyageDto extends StayIntervalDto {
+  vesselReference?: import('./descriptive-references').VersionReferenceDto | null
   vesselId: string
   vesselVersionId: string
   visits: readonly (StayIntervalDto & {

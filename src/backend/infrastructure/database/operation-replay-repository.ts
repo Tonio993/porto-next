@@ -10,6 +10,11 @@ import { ArchiveError } from '../../../shared/errors/archive-error'
 import type { DatabaseSession } from './database-session'
 import { foreignReferences } from './port-references'
 import { momentToColumns } from './moment-storage'
+import { operationLabels } from '../../../shared/description-labels'
+import type {
+  StayReferenceDto,
+  ActivityReferenceDto,
+} from '../../../shared/contracts/descriptive-references'
 import { OperationRepository } from './operation-repository'
 
 type Table = 'voyages' | 'port_calls' | 'berth_stays'
@@ -40,6 +45,7 @@ export function replayPersistence(
   database: DatabaseSession,
   vesselId: string | readonly string[],
   voyages: readonly VoyageDto[],
+  operations: readonly VesselOperationDto[] = [],
 ) {
   const sql = database.sqlite
   const vessels = JSON.stringify(typeof vesselId === 'string' ? [vesselId] : vesselId)
@@ -96,6 +102,53 @@ export function replayPersistence(
         })
     }
   }
+  const operationMap = new Map(operations.map((o) => [o.id, o]))
+  const activity = (id: string | null, utc: string | null): ActivityReferenceDto | null => {
+    if (!id || !utc) return null
+    const o = operationMap.get(id) ?? new OperationRepository(database).get(id)
+    const e = o.arrival?.moment.utc === utc ? o.arrival : o.endpoint
+    return {
+      name:
+        operationLabels[o.operationType] +
+        ' · ' +
+        o.charges[0].calculation.vesselName +
+        ' · ' +
+        e.portName +
+        ' · ' +
+        (e.berthName ?? 'Banchina non specificata'),
+      moment: e.moment,
+    }
+  }
+  const stay = (row: Row | undefined, table: Table): StayReferenceDto | null => {
+    if (!row) return null
+    const opening = activity(row.opening_operation_id, row.started_at)
+    return opening
+      ? {
+          name: names[table] + ' · ' + opening.name,
+          opening,
+          closing: activity(row.closing_operation_id, row.ended_at),
+        }
+      : null
+  }
+  const scalar = (
+    field: string,
+    row: Row | undefined,
+    table: Table,
+    rows: Record<Table, Row[]>,
+  ) => {
+    if (!row || !row[field]) return undefined
+    if (field === 'id') return stay(row, table)
+    if (field === 'opening_operation_id') return activity(row[field], row.started_at)
+    if (field === 'closing_operation_id') return activity(row[field], row.ended_at)
+    const parent =
+      field === 'voyage_id' ? 'voyages' : field === 'port_call_id' ? 'port_calls' : null
+    return parent
+      ? stay(
+          rows[parent].find((p) => p.id === row[field]),
+          parent,
+        )
+      : undefined
+  }
   const effects: ChangeEffectDto[] = [],
     blockers: ConflictDto[] = []
   const changed = (table: Table, row: Row) =>
@@ -108,7 +161,12 @@ export function replayPersistence(
       const before = previous[table].find((r) => r.id === id),
         after = next[table].find((r) => r.id === id)
       if (isDeepStrictEqual(before, after)) continue
-      const reference = { kind: kinds[table], id, label: names[table] }
+      const reference = {
+        kind: kinds[table],
+        id,
+        label: names[table],
+        description: stay(after ?? before, table),
+      }
       effects.push({
         reference,
         versionId: null,
@@ -117,6 +175,8 @@ export function replayPersistence(
           .filter((k) => before?.[k] !== after?.[k])
           .map((field) => ({
             field: fields[field] ?? field,
+            beforeReference: scalar(field, before, table, previous),
+            afterReference: scalar(field, after, table, next),
             before: before?.[field] ?? null,
             after: after?.[field] ?? null,
           })),

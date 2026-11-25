@@ -1,3 +1,6 @@
+import { operationLabels } from '../../../shared/description-labels'
+import { describeEffects } from '../presentation/effect-descriptions'
+import { ReadDescriptions } from '../presentation/read-descriptions'
 import { subjectPlan } from './subject-resolution'
 import { OperationCompletion } from './operation-completion'
 import { OperationInsertion } from './operation-insertion'
@@ -132,7 +135,9 @@ export class OperationService implements OperationApi {
         id = entityId(i.vesselId, 'vesselId'),
         instant = utcInstant(i.instant)
       new VesselRepository(s.database, new Date().toISOString()).get(id)
-      return new OperationRepository(s.database).contextAt(id, instant)
+      return new ReadDescriptions(s.database).context(
+        new OperationRepository(s.database).contextAt(id, instant),
+      )
     })
   list: OperationApi['list'] = (request) =>
     this.coordinator.query(request, (s, q) => {
@@ -140,11 +145,15 @@ export class OperationService implements OperationApi {
         id = entityId(i.vesselId, 'vesselId'),
         p = pagination(i.page, i.pageSize)
       new VesselRepository(s.database, new Date().toISOString()).get(id)
-      return new OperationRepository(s.database).list(id, p.page, p.pageSize)
+      const result = new OperationRepository(s.database).list(id, p.page, p.pageSize)
+      const descriptions = new ReadDescriptions(s.database)
+      return { ...result, items: result.items.map((v) => descriptions.operation(v)) }
     })
   get: OperationApi['get'] = (request) =>
     this.coordinator.query(request, (s, q) =>
-      new OperationRepository(s.database).get(entityId(record(q, ['id']).id, 'id')),
+      new ReadDescriptions(s.database).operation(
+        new OperationRepository(s.database).get(entityId(record(q, ['id']).id, 'id')),
+      ),
     )
   stays: OperationApi['stays'] = (request) =>
     this.coordinator.query(request, (s, q) => {
@@ -152,7 +161,9 @@ export class OperationService implements OperationApi {
         id = entityId(i.vesselId, 'vesselId'),
         p = pagination(i.page, i.pageSize)
       new VesselRepository(s.database, new Date().toISOString()).get(id)
-      return new OperationRepository(s.database).stays(id, p.page, p.pageSize)
+      const result = new OperationRepository(s.database).stays(id, p.page, p.pageSize)
+      const descriptions = new ReadDescriptions(s.database)
+      return { ...result, items: result.items.map((v) => descriptions.voyage(v)) }
     })
   resolveMoment: OperationApi['resolveMoment'] = (request) =>
     this.coordinator.query(request, (s, q) => this.resolve(s, parseMoment(q).target))
@@ -304,12 +315,18 @@ export class OperationService implements OperationApi {
         reference: {
           kind: 'OPERATION_CHARGE',
           id: c.id,
-          label: 'Componente ' + c.chargeKind + ' · ' + c.calculation.moment.utc,
+          label: 'Componente ' + operationLabels[c.chargeKind] + ' · ' + c.calculation.moment.utc,
         },
         versionId: null,
         action: 'CREATE',
         changes: [
-          { field: 'port', before: null, after: c.calculation.portId },
+          {
+            field: 'port',
+            before: null,
+            after: c.calculation.portId,
+            afterReference: (c.economicEndpointRole === 'ARRIVAL' ? op.arrival! : op.endpoint)
+              .portName,
+          },
           { field: 'moment', before: null, after: c.calculation.moment.utc },
           { field: 'calculatedBase', before: null, after: c.calculation.base },
           { field: 'manualOverride', before: null, after: c.manualOverrideAmount },
@@ -596,6 +613,7 @@ export class OperationService implements OperationApi {
   ) {
     this.validate(s, op)
     const effects = this.effects(s, op)
+    const descriptions = new ReadDescriptions(s.database)
     return {
       previewId: entry.previewId,
       generatedAtUtc: entry.generatedAtUtc,
@@ -615,7 +633,11 @@ export class OperationService implements OperationApi {
         ).length,
       },
       effects: {
-        items: effects.slice((page - 1) * pageSize, page * pageSize),
+        items: describeEffects(
+          s.database,
+          effects.slice((page - 1) * pageSize, page * pageSize),
+          op,
+        ),
         total: effects.length,
         page,
         pageSize,
@@ -624,7 +646,7 @@ export class OperationService implements OperationApi {
         'L’importo è una base in EUR. Le correzioni della cronologia richiedono una nuova anteprima.',
       ],
       blockers: [],
-      operationValues: {
+      operationValues: descriptions.operation({
         id: op.id,
         vesselId: op.vesselId,
         vesselVersionId: op.vesselVersionId,
@@ -635,7 +657,7 @@ export class OperationService implements OperationApi {
         arrival: op.arrival,
         charges: op.charges,
         totalBase: operationTotal(op.charges),
-      },
+      }),
     }
   }
   previewEffects: OperationApi['previewEffects'] = (request) =>

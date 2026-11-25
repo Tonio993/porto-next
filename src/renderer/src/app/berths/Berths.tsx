@@ -135,6 +135,7 @@ export function Berths({
               key={berth.id}
               code={berth.code}
               name={berth.version.name}
+              description={berth.portLabel}
               status={berth.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}
               selected={berths.selection === berth.id}
               disabled={busy}
@@ -164,9 +165,7 @@ export function Berths({
             aria-label="Dettaglio banchina"
             aria-busy={berths.loadingDetail}
           >
-            <h3>
-              Banchina {history.berth.code} · {history.berth.version.name}
-            </h3>
+            <h3>{history.berth.version.name}</h3>
             <Group gap="xs">
               <Badge variant="outline" color={history.berth.status === 'ACTIVE' ? 'teal' : 'gray'}>
                 {history.berth.status === 'ACTIVE' ? 'Attiva' : 'Disattivata'}

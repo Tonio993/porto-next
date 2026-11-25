@@ -121,7 +121,12 @@ test('PR03 anagrafiche/banchine: filtri, pagine, proprietari e ritorno tra sotto
       if (!result.ok) throw Error(result.error.message)
       context = result.context
     }
-    return { port, context }
+    const selectedPort = await window.ports.get({
+      context: { sessionId: context.sessionId },
+      query: { id: port.id },
+    })
+    if (!selectedPort.ok) throw Error(selectedPort.error.message)
+    return { port: selectedPort.value, context }
   })
   await navigate('Anagrafiche')
   const ports = page.getByRole('region', { name: 'Elenco porti', exact: true })
@@ -129,7 +134,12 @@ test('PR03 anagrafiche/banchine: filtri, pagine, proprietari e ritorno tra sotto
   await ports.getByRole('button', { name: 'Successiva', exact: true }).click()
   await expect(ports.getByText('Pagina 2', { exact: true })).toBeVisible()
   const chosen = ports.getByRole('button', {
-    name: 'Apri porto ' + selected.port.code,
+    name:
+      'Apri porto ' +
+      selected.port.version.name +
+      ' · ' +
+      selected.port.version.locality +
+      ' · Italia',
     exact: true,
   })
   await chosen.click()
@@ -159,7 +169,9 @@ test('PR03 anagrafiche/banchine: filtri, pagine, proprietari e ritorno tra sotto
   await expect(berthHistory.getByText('Pagina 2 di 2', { exact: true })).toBeVisible()
   await expect(portHistory.getByText('Pagina 2 · 27 versioni', { exact: true })).toBeVisible()
   await ports.getByLabel('Cerca porto', { exact: true }).fill('Genova')
-  await ports.getByRole('button', { name: 'Apri porto 1', exact: true }).click()
+  await ports
+    .getByRole('button', { name: 'Apri porto Genova · Genova · Italia', exact: true })
+    .click()
   await expect(list.getByRole('button', { name: /PR03 Banchina 12/ })).toHaveCount(0)
   await expect(detail).toHaveCount(0)
   await ports.getByLabel('Cerca porto', { exact: true }).fill('PR03')

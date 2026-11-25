@@ -261,7 +261,7 @@ test('UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle
     }
     await page.getByRole('button', { name: 'Operazioni nave', exact: true }).click()
     await page.getByRole('combobox', { name: 'Nave', exact: true }).click()
-    await page.getByRole('option', { name: '1 · Stella del mare', exact: true }).click()
+    await page.getByRole('option', { name: 'Stella del mare', exact: true }).click()
     await page.getByRole('button', { name: 'Entrata · Effettuata', exact: false }).click()
     await expect(page.getByRole('region', { name: 'Dettaglio operazione' })).toBeVisible()
     await shot('operazione-desktop')
@@ -284,7 +284,7 @@ test('UI03: consultazione operativa con filtri, pagine, dettagli e tastiera alle
       await page.getByRole('button', { name: 'Catalogo e tariffe', exact: true }).click()
       await page.getByRole('button', { name: 'Tariffe', exact: true }).click()
       await page.getByRole('combobox', { name: 'Porto', exact: true }).click()
-      await page.getByRole('option', { name: '1 · Genova', exact: true }).click()
+      await page.getByRole('option', { name: 'Genova · Genova · Italia', exact: true }).click()
       await page.getByRole('button', { name: /2026-01-01/ }).click()
       await expect(page.getByRole('region', { name: 'Dettaglio tariffa' })).toContainText(
         'Nave normale',

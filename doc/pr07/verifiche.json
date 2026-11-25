@@ -1,0 +1,981 @@
+{
+  "task": "PR07",
+  "date": "2026-11-25",
+  "started": "2026-11-24",
+  "branch": "main",
+  "head": "1569afc58d8418e6c8575f89255f17caf50eb8bd",
+  "initialWorkingTree": "clean",
+  "delivery": "committed on subsequent explicit user request; initial delivery was uncommitted",
+  "schemaVersion": 17,
+  "policy": "PR01–PR12 unit/static/documentation only; no ordinary step/milestone profiles; K3 review after PR07/08/09/10; integrated execution at K4",
+  "newTests": {
+    "backend": 26,
+    "renderer": 15,
+    "total": 41
+  },
+  "final": {
+    "report": "test-results/pr07-final-full-v4.json",
+    "total": 896,
+    "passed": 896,
+    "failed": 0,
+    "pending": 0,
+    "files": 51
+  },
+  "runs": [
+    {
+      "name": "development-1",
+      "report": "test-results/pr07-development-1.json",
+      "log": "test-results/pr07-development-1.log",
+      "reportSha256": "38df4005b8722abee936803c9e7553b38295ccb07e01a9914287d60730efc8f1",
+      "npmExitCode": 1,
+      "electronExitCode": null,
+      "processReceipt": null,
+      "command": null,
+      "files": 4,
+      "tests": {
+        "total": 231,
+        "passed": 197,
+        "failed": 34,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "tests/unit/numeric-callers.test.tsx",
+          "name": "PR05 operazioni: ricerca porto non modifica bozza; scelta tramite adapter conserva formato, contesto e DTO"
+        },
+        {
+          "file": "tests/unit/numeric-callers.test.tsx",
+          "name": "PR05 correzione: retained banchina conserva nome storico e proprietario; cambio porto riesamina offset e conserva locale, formato e contesto"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "versioni nave: anteprima completa, ricalcolo e versione applicata alle aperture, cancellazione e no-op"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "porti e banchine: versioni applicate alle operazioni e permanenze; eliminazioni identità bloccate"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "ricalcolo tariffario e anagrafico atomici anche dopo scritture parziali"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "P11: partenza origine, arrivo destinazione, intervallo aperto senza ormeggio; identità e persistenza"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "P11: anagrafiche ai due estremi, nuove versioni durante il trasferimento e eliminazione senza riferimenti obsoleti"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "P11: rollback degli impatti di arrivo e cancellazione versioni porto/banchina senza alterare tuple o identità"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "P12: fusi e decorrenze distinti, due calcoli/override autonomi, viaggio conservato e contesto senza visita"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "P12: ricalcoli nave ai rispettivi istanti, correzione ed eliminazione con riferimenti e identità conservati"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "P12: rollback dopo entrambe le componenti e dopo apertura visita; retry della stessa anteprima"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "P12: versioni di porto e banchina di destinazione aggiornano estremo e nuova visita atomicamente"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "P12: correzione descrittiva nave ricalcola entrambe le componenti atomicamente senza perdere override e tuple"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "PR11: consultazione UTC decrescente a tre livelli, pagine globali e letture senza scritture"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "PR11: lista vuota o singola (presente=true), totali e ultima pagina stabili"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "FREE: stati, stesso minuto, banchina assente, soggetti opzionali, importo int64, query e riapertura"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "nuova operazione blocca prestazioni orfane e riattribuisce quelle successive atomicamente"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "versione nave all’istante e non all’apertura; variazione backend propaga senza cambiare denaro o tupla"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "FREE: versioni cliente/agenzia, anteprima, cancellazione e no-op conservano base e tupla"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "CATALOG: versioni cliente/agenzia, anteprima, cancellazione e no-op conservano base e tupla"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "FREE: versioni porto e banchina propagate, eliminazione riporta alla precedente"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "CATALOG: versioni porto e banchina propagate, eliminazione riporta alla precedente"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "CATALOG: calcolo esatto, MISSED, utilizzo storico, descrizione corrente e consultazione dopo disattivazione"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "CATALOG: tariffa intermedia e versione nave ricalcolano atomicamente; FREE int64 conservata"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "CATALOG: CHECK della base int64 non ammette saturazione del cast e categoria protetta anche con forma coerente"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "P16 FREE: consuntivazione esplicita, anteprima senza scritture, esito mancato con base conservata"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "P16 CATALOG: consuntivazione esplicita, anteprima senza scritture, esito mancato con base conservata"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "P16 CATALOG: mantiene tipo storico senza markUsed; sostituzione selezionabile atomica, rinomina corrente, FREE manuale"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "P16 FREE: sole note senza attribuzioni/calcoli, tuple e traccia byte per byte, no-op e rollback"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "P16 CATALOG: sole note senza attribuzioni/calcoli, tuple e traccia byte per byte, no-op e rollback"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "P16: eliminazione fisica ordinata, rollback dei soggetti, utilizzo storico, riferimenti esterni composti/CASCADE bloccanti"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "post-P16: FK con PK implicita ai soggetti, anche vuote o di altre prestazioni, riesaminate alla conferma"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "P16: no-op, anteprime obsolete, namespace, scadenza, sessione e rollback dopo UPDATE"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "P16: cambio nave e istante ridetermina versioni, tariffa zero, soggetti indipendenti; FREE resta manuale"
+        }
+      ],
+      "note": "Initial adapters: session-variable error, incomplete fixtures and additive DTO projection comparisons."
+    },
+    {
+      "name": "development-2",
+      "report": "test-results/pr07-development-2.json",
+      "log": "test-results/pr07-development-2.log",
+      "reportSha256": "4c155659584c7dbfcf9005aa39cfebf3261cd4fff2653b434ed3935a3a48ccc2",
+      "npmExitCode": 1,
+      "electronExitCode": null,
+      "processReceipt": null,
+      "command": null,
+      "files": 4,
+      "tests": {
+        "total": 135,
+        "passed": 132,
+        "failed": 3,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "tests/unit/descriptive-references.test.ts",
+          "name": "PR07 soggetti: versione applicata, eredità dal viaggio e componenti con origine leggibile"
+        },
+        {
+          "file": "tests/unit/descriptive-references.test.ts",
+          "name": "PR07 anteprima reale: ID scalari conservati e proiettati, enum e campi prodotti hanno etichette"
+        },
+        {
+          "file": "tests/unit/operation-service.test.ts",
+          "name": "P11: anagrafiche ai due estremi, nuove versioni durante il trasferimento e eliminazione senza riferimenti obsoleti"
+        }
+      ],
+      "note": "Case/translated endpoint expectations and projection comparisons."
+    },
+    {
+      "name": "development-3",
+      "report": "test-results/pr07-development-3.json",
+      "log": "test-results/pr07-development-3.log",
+      "reportSha256": "1d04672dba4b363550bd9cd5c92e9a7e37ae03ba264d7ca49d95c141a878b8a1",
+      "npmExitCode": null,
+      "electronExitCode": null,
+      "processReceipt": null,
+      "command": null,
+      "files": 2,
+      "tests": {
+        "total": 24,
+        "passed": 24,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "note": "24 initial new tests; process code not separately retained."
+    },
+    {
+      "name": "development-4",
+      "report": "test-results/pr07-development-4.json",
+      "log": "test-results/pr07-development-4.log",
+      "reportSha256": "14aae466d1b017f2a698a7caed454ea02a1a3cfd465db87fe89809f0089392c6",
+      "npmExitCode": null,
+      "electronExitCode": null,
+      "processReceipt": null,
+      "command": null,
+      "files": 4,
+      "tests": {
+        "total": 100,
+        "passed": 100,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "note": "100 tests; process code not separately retained."
+    },
+    {
+      "name": "regression-targeted",
+      "report": "test-results/pr07-regression-targeted.json",
+      "log": "test-results/pr07-regression-targeted.log",
+      "reportSha256": "971f26009b1bae2494f0d5934d0229b73270b608d7156df4b8077ce99fe3c893",
+      "npmExitCode": 1,
+      "electronExitCode": null,
+      "processReceipt": null,
+      "command": null,
+      "files": 9,
+      "tests": {
+        "total": 248,
+        "passed": 194,
+        "failed": 54,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "tests/unit/assignment-service.test.ts",
+          "name": "assegnazioni mascherate restano riferimenti e impediscono eliminazione anche senza soggetti effettivi"
+        },
+        {
+          "file": "tests/unit/operation-completion.test.ts",
+          "name": "cambio interno → esterno → nuovo interno assegna nuove identità soltanto alle aperture nuove"
+        },
+        {
+          "file": "tests/unit/operation-completion.test.ts",
+          "name": "FK esterne composte/CASCADE su permanenze e componenti posseduti bloccano senza eliminare dipendenti"
+        },
+        {
+          "file": "tests/unit/operation-completion.test.ts",
+          "name": "esterno effettuato diventa interno: visita rimossa, ormeggio ancorato, componenti e soggetti rimossi esplicitamente"
+        },
+        {
+          "file": "tests/unit/operation-completion.test.ts",
+          "name": "rollback dopo ricostruzione e riattribuzione ripristina dati, metadati e anteprima"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "corregge uscita PLANNED senza cambiare gli altri record"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "corregge uscita PERFORMED senza cambiare gli altri record"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "corregge uscita MISSED senza cambiare gli altri record"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "corregge spostamento PLANNED e valida entrambi gli estremi"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "corregge spostamento PERFORMED e valida entrambi gli estremi"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "corregge spostamento MISSED e valida entrambi gli estremi"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "cambio nave di entrata: sposta le identità ancorate, assegnazioni e ricalcoli nella stessa transazione"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "cambio nave di uscita valido aggiorna entrambe le cronologie e conserva le entrate"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "trasforma interno/esterno, ricrea componenti non equivalenti e non riusa ID rimossi"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "completa banchina sconosciuta mantenendo ormeggio, prestazioni e origini successive"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "valida operazioni MISSED lontane e collisioni con arrivi mancati"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "riferimenti storici invariati e tupla salvata sopravvivono a disattivazioni"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "rollback dopo sostituzione e ricalcoli, anteprima non consumata e ID ripetibili"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "una correzione identica è no-op per revisione, timestamp e identità"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "ricalcola CATALOG storico disattivato, preserva FREE int64, momenti e assegnazioni compatibili"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "ridetermina versioni ai due estremi e basi conservando le due identità economiche"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "cambio nave di spostamento ricostruisce entrambi gli ormeggi e conserva la destinazione ancorata"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "cambio nave riconosce il nuovo porto di origine senza forzare quello storico"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "gap e overlap richiedono un momento valido e una scelta esplicita"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "rollback dopo riattribuzione CATALOG ripristina le due cronologie e lascia disponibile l’anteprima"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "recupero esito confronta valori e contesto, ignorando ordine delle proprietà e delle componenti"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "un errore dopo l’applicazione delle due cronologie annulla integralmente il cambio nave"
+        },
+        {
+          "file": "tests/unit/operation-correction.test.ts",
+          "name": "una correzione descrittiva conserva la tupla storica anche se cambia il fuso configurato"
+        },
+        {
+          "file": "tests/unit/operation-deletion.test.ts",
+          "name": "risposta persa prima del commit: recupero di sola lettura, revisione coerente e nessuna ripetizione"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "inserisce uno spostamento interno PLANNED tra entrata e uscita senza applicazione incrementale"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "inserisce uno spostamento interno PERFORMED tra entrata e uscita senza applicazione incrementale"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "inserisce uno spostamento interno MISSED tra entrata e uscita senza applicazione incrementale"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "inserisce entrata e uscita PLANNED con identità e componenti stabili"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "inserisce entrata e uscita PERFORMED con identità e componenti stabili"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "inserisce entrata e uscita MISSED con identità e componenti stabili"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "riattribuisce FREE e CATALOG tra ormeggi, conserva assegnazioni esplicite, basi manuali e tuple"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "spostamento esterno PLANNED: componenti, versioni storiche, ricalcoli e FREE int64"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "spostamento esterno PERFORMED: componenti, versioni storiche, ricalcoli e FREE int64"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "spostamento esterno MISSED: componenti, versioni storiche, ricalcoli e FREE int64"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "riesamina FK composte/CASCADE alla conferma e conserva i dipendenti"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "rollback dopo record ed effetti, anteprima riutilizzabile e revisione aggiornata una volta"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "uno spostamento esterno retroattivo considera anche un arrivo MISSED successivo senza alterarne i dati"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "usa gli estremi UTC fra fusi diversi e rifiuta collisioni fra date locali differenti"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "rollback dopo record e componenti posseduti senza generare nuove identità alla riconferma"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "versioni ai due estremi e soggetti ereditati rispettano il proprio momento storico"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "ricalcola il catalogo storico disattivato e conserva utilizzo e operazioni di un’altra nave"
+        },
+        {
+          "file": "tests/unit/operation-insertion.test.ts",
+          "name": "riesamina i nuovi riferimenti selezionabili alla conferma e non consuma l’anteprima respinta"
+        },
+        {
+          "file": "tests/unit/tariff-maintenance.test.ts",
+          "name": "ricalcola confini, CATALOG e override manuali, conserva FREE"
+        },
+        {
+          "file": "tests/unit/weight-service.test.ts",
+          "name": "ricalcola CATALOG PLANNED storico disattivato e conserva FREE byte per byte"
+        },
+        {
+          "file": "tests/unit/weight-service.test.ts",
+          "name": "ricalcola CATALOG PERFORMED storico disattivato e conserva FREE byte per byte"
+        },
+        {
+          "file": "tests/unit/weight-service.test.ts",
+          "name": "ricalcola CATALOG MISSED storico disattivato e conserva FREE byte per byte"
+        },
+        {
+          "file": "tests/unit/weight-service.test.ts",
+          "name": "EXIT ed ENTRY indipendenti ai due istanti di uno spostamento tra porti; MOVEMENT interno autonomo"
+        },
+        {
+          "file": "tests/unit/weight-service.test.ts",
+          "name": "tariffe e versioni nave riusano il peso datato; FREE, identità e soggetti conservati"
+        },
+        {
+          "file": "tests/unit/weight-service.test.ts",
+          "name": "migrazione v16 popolato conserva riferimenti e dipendenti CASCADE, tuple, metadati e copia preventiva"
+        }
+      ],
+      "note": "Legacy persistence comparisons, translated conflict labels and recovery fingerprint identified."
+    },
+    {
+      "name": "regression-corrected",
+      "report": "test-results/pr07-regression-corrected.json",
+      "log": "test-results/pr07-regression-corrected.log",
+      "reportSha256": "20bb7b6a41ece5335c9f621f0d76c2322f662315c330ce5063bce2fcdfbfdcbf",
+      "npmExitCode": 1,
+      "electronExitCode": null,
+      "processReceipt": null,
+      "command": null,
+      "files": 9,
+      "tests": {
+        "total": 251,
+        "passed": 249,
+        "failed": 2,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "tests/unit/descriptive-callers.test.tsx",
+          "name": "PR07 riferimenti mancanti ed effetti inattesi restano visibili con diagnostica tecnica"
+        },
+        {
+          "file": "tests/unit/operation-completion.test.ts",
+          "name": "FK esterne composte/CASCADE su permanenze e componenti posseduti bloccano senza eliminare dipendenti"
+        }
+      ],
+      "note": "Inherited-key fallback and remaining translated external-FK expectation; sources were still evolving."
+    },
+    {
+      "name": "targeted-final",
+      "report": "test-results/pr07-targeted-final.json",
+      "log": "test-results/pr07-targeted-final.log",
+      "reportSha256": "55e95eaf062ef1cbd4054eed0705742007c669824f6d7d539143703585dc7bb9",
+      "npmExitCode": null,
+      "electronExitCode": null,
+      "processReceipt": null,
+      "command": null,
+      "files": 4,
+      "tests": {
+        "total": 77,
+        "passed": 77,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "note": "77 tests on selected families; no process receipt retained."
+    },
+    {
+      "name": "projections-final",
+      "report": "test-results/pr07-projections-final.json",
+      "log": "test-results/pr07-projections-final.log",
+      "reportSha256": "e4f986530656984388d0216541569f2ebda20c5b4d836520a973644051cca6c1",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "processReceipt": "test-results/pr07-projections-final.process.json",
+      "command": "npm.cmd test -- tests/unit/descriptive-references.test.ts tests/unit/descriptive-callers.test.tsx --maxWorkers=1 --reporter=json --outputFile=test-results/pr07-projections-final.json",
+      "files": 2,
+      "tests": {
+        "total": 39,
+        "passed": 39,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "note": "39 new tests on final product sources."
+    },
+    {
+      "name": "fixtures-corrected",
+      "report": "test-results/pr07-fixtures-corrected.json",
+      "log": "test-results/pr07-fixtures-corrected.log",
+      "reportSha256": "674974f25c1f9109bb1e3d70a4bf164e4350e5b38ac6c5f510459addc9307499",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "processReceipt": "test-results/pr07-fixtures-corrected.process.json",
+      "command": "npm.cmd test -- tests/unit/consultation-state.test.tsx tests/unit/service-service.test.ts --maxWorkers=1 --reporter=json --outputFile=test-results/pr07-fixtures-corrected.json",
+      "files": 2,
+      "tests": {
+        "total": 105,
+        "passed": 105,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "note": "105 tests after correcting the four full-suite fixture/label failures."
+    },
+    {
+      "name": "first-complete",
+      "report": "test-results/pr07-final-full.json",
+      "log": "test-results/pr07-final-full.log",
+      "reportSha256": "4e2a052dca1dd3af4c2d137db6d3f04dea01b64e6c09381964d0ebc35a263d87",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "processReceipt": "test-results/pr07-final-full.process.json",
+      "command": "npm.cmd test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr07-final-full.json",
+      "files": 51,
+      "tests": {
+        "total": 894,
+        "passed": 890,
+        "failed": 4,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "name": "PR03 selettore proprietario tariffPorts: ricerca ripristinata, pagina vuota e selezionato fuori filtro, risposte invertite"
+        },
+        {
+          "file": "tests/unit/consultation-state.test.tsx",
+          "name": "PR05 tariffe: adapter porto storico reale, scelta esplicita e richieste tariffarie per il porto confermato"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "post-P16: FK con PK implicita ai soggetti, anche vuote o di altre prestazioni, riesaminate alla conferma"
+        },
+        {
+          "file": "tests/unit/service-service.test.ts",
+          "name": "post-P16: le FK composte implicite rispettano l’ordine della PK, distinto da quello delle colonne"
+        }
+      ],
+      "note": "890/894: two incomplete port fixtures and two expectations of technical SQL table labels. Not a cleanup failure."
+    },
+    {
+      "name": "intermediate-complete",
+      "report": "test-results/pr07-final-full-v2.json",
+      "log": "test-results/pr07-final-full-v2.log",
+      "reportSha256": "8bd304162bd0d9a42e17dcdf54e77e68bd4d05552e9772fef921a58b2757e9e7",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "processReceipt": "test-results/pr07-final-full-v2.process.json",
+      "command": "npm.cmd test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr07-final-full-v2.json",
+      "files": 51,
+      "tests": {
+        "total": 894,
+        "passed": 894,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "note": "894/894 before the subsequent owner-reference review; does not prove the owner-code defect was fixed."
+    },
+    {
+      "name": "owner-red",
+      "report": "test-results/pr07-owner-red.json",
+      "log": "test-results/pr07-owner-red.log",
+      "reportSha256": "2131af8653ed76ec7c1c9bda8894d88ddd5b8ab50fec67785e6448c557c92fef",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "processReceipt": "test-results/pr07-owner-red.process.json",
+      "command": "npm.cmd test -- tests/unit/descriptive-references.test.ts -t 'porto e banchina applicati' --maxWorkers=1 --reporter=json --outputFile=test-results/pr07-owner-red.json",
+      "files": 1,
+      "tests": {
+        "total": 24,
+        "passed": 0,
+        "failed": 1,
+        "pending": 23
+      },
+      "failures": [
+        {
+          "file": "tests/unit/descriptive-references.test.ts",
+          "name": "PR07 porto e banchina applicati mantengono i nomi storici, compreso il proprietario, dopo rinomina"
+        }
+      ],
+      "note": "Targeted regression reproduces incorrect owner code through the full expected reference; other cases not selected."
+    },
+    {
+      "name": "owner-green",
+      "report": "test-results/pr07-owner-green.json",
+      "log": "test-results/pr07-owner-green.log",
+      "reportSha256": "4f5dd8cd37410d3f3a071810f5bd11cc4a1db254259f639e40f2f0dd4e315693",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "processReceipt": "test-results/pr07-owner-green.process.json",
+      "command": "npm.cmd test -- tests/unit/descriptive-references.test.ts tests/unit/descriptive-callers.test.tsx --maxWorkers=1 --reporter=json --outputFile=test-results/pr07-owner-green.json",
+      "files": 2,
+      "tests": {
+        "total": 39,
+        "passed": 39,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "note": "39 new tests after the owner FK lookup correction and coherent tariff-reference fixture."
+    },
+    {
+      "name": "owner-complete",
+      "report": "test-results/pr07-final-full-v3.json",
+      "log": "test-results/pr07-final-full-v3.log",
+      "reportSha256": "a158ad532d9b55a427c2297b5401e78362afa12595eda3631d95ea7cd9bfce06",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "processReceipt": "test-results/pr07-final-full-v3.process.json",
+      "command": "npm.cmd test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr07-final-full-v3.json",
+      "files": 51,
+      "tests": {
+        "total": 894,
+        "passed": 894,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "note": "894/894 after the owner-reference fix, before completing cross-vessel and proposed-moment header contexts."
+    },
+    {
+      "name": "reference-context",
+      "report": "test-results/pr07-reference-context.json",
+      "log": "test-results/pr07-reference-context.log",
+      "reportSha256": "f6bfbc19fb8be47c64ccdcbeb384aa644880eb1620fe2c4f5477ebc7ef8a3730",
+      "npmExitCode": 1,
+      "electronExitCode": 1,
+      "processReceipt": "test-results/pr07-reference-context.process.json",
+      "command": "npm.cmd test -- tests/unit/descriptive-references.test.ts tests/unit/descriptive-callers.test.tsx tests/unit/operation-service.test.ts tests/unit/operation-correction.test.ts --maxWorkers=1 --reporter=json --outputFile=test-results/pr07-reference-context.json",
+      "files": 4,
+      "tests": {
+        "total": 137,
+        "passed": 136,
+        "failed": 1,
+        "pending": 0
+      },
+      "failures": [
+        {
+          "file": "tests/unit/descriptive-callers.test.tsx",
+          "name": "PR07 anteprima comune usa riferimenti proiettati anche nei titoli, preservando valori tecnici e contesto"
+        }
+      ],
+      "note": "136/137: descriptive header metadata missing in one renderer fixture; backend context tests passed."
+    },
+    {
+      "name": "reference-context-green",
+      "report": "test-results/pr07-reference-context-green.json",
+      "log": "test-results/pr07-reference-context-green.log",
+      "reportSha256": "06752aebcabb67c425ee17ed178aadef819d8a27eef5f6ee1a426dad1c9f5dff",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "processReceipt": "test-results/pr07-reference-context-green.process.json",
+      "command": "npm.cmd test -- tests/unit/descriptive-references.test.ts tests/unit/descriptive-callers.test.tsx --maxWorkers=1 --reporter=json --outputFile=test-results/pr07-reference-context-green.json",
+      "files": 2,
+      "tests": {
+        "total": 41,
+        "passed": 41,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "note": "41/41 new tests on the final context projections."
+    },
+    {
+      "name": "delivery-complete",
+      "report": "test-results/pr07-final-full-v4.json",
+      "log": "test-results/pr07-final-full-v4.log",
+      "reportSha256": "50ab7952d80b376ee920c100eb1f3358ac72aa7878fec4301e5ccfd930db8a69",
+      "npmExitCode": 0,
+      "electronExitCode": 0,
+      "processReceipt": "test-results/pr07-final-full-v4.process.json",
+      "command": "npm.cmd test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=test-results/pr07-final-full-v4.json",
+      "files": 51,
+      "tests": {
+        "total": 896,
+        "passed": 896,
+        "failed": 0,
+        "pending": 0
+      },
+      "failures": [],
+      "note": "Definitive complete suite with contextual headers and proposed scalar references."
+    }
+  ],
+  "staticChecks": {
+    "typecheck": {
+      "log": "test-results/pr07-typecheck-context.log",
+      "exitCode": 0
+    },
+    "eslintGlobal": {
+      "log": "test-results/pr07-lint-v2.log",
+      "exitCode": 0
+    },
+    "eslintFinalFixtures": {
+      "log": "test-results/pr07-lint-fixtures.log",
+      "exitCode": 0
+    },
+    "eslintOwner": {
+      "log": "test-results/pr07-lint-owner.log",
+      "exitCode": 0
+    },
+    "eslintContext": {
+      "log": "test-results/pr07-lint-context.log",
+      "exitCode": 0
+    },
+    "documentation": {
+      "profile": "documentazione",
+      "summary": "test-results/verification/2026-11-25T10-58-49.868Z-coordinator-f2UE57/summary.md",
+      "expectedGlobalFormattingFailure": "pre-existing doc/dev/punti-issue.md, preserved with no exclusions",
+      "exitCode": 1,
+      "phases": {
+        "documents": 0,
+        "diff": 0,
+        "formatting": 1
+      },
+      "originalFormattingRegressions": ["doc/dev/punti-issue.md"],
+      "evidence": "UTF-8, links and Git diff passed; global formatting fails only for the unchanged original source; no exclusions added"
+    }
+  },
+  "environment": {
+    "platform": "win32",
+    "architecture": "x64",
+    "node": "v24.21.0",
+    "electron": "45.2.3",
+    "runner": "npm test -> scripts/test.mjs -> ELECTRON_RUN_AS_NODE=1",
+    "startup": "ordinary authorized workspace path; Crashpad/Vite warnings retained; no ACL or sandbox changes"
+  },
+  "preserved": {
+    "pointsIssueSha256": "8e5b4e0c57c3fea049a8ad3fcf5104a82b42fe4ccd12a68c064595f6767fc185",
+    "pr06": "definitive 855/855, first cleanup 854/855 and diagnostic 1/1 remain in doc/pr06; no claim that PR07 resolves cleanup or earlier PR02/PR11/PR03 limits",
+    "previousEvidence": "P20/UI04/M5 and earlier task manifests untouched"
+  },
+  "desktop": {
+    "newFile": "tests/e2e/pr07-descriptions.spec.ts",
+    "newScenarios": 3,
+    "updatedFiles": [
+      "tests/e2e/assignments.spec.ts",
+      "tests/e2e/berths.spec.ts",
+      "tests/e2e/inter-port-movements.spec.ts",
+      "tests/e2e/m4-maintenance.spec.ts",
+      "tests/e2e/movements.spec.ts",
+      "tests/e2e/operation-completion.spec.ts",
+      "tests/e2e/operations-async.spec.ts",
+      "tests/e2e/operations.spec.ts",
+      "tests/e2e/port-async.spec.ts",
+      "tests/e2e/port-lifecycle.spec.ts",
+      "tests/e2e/ports.spec.ts",
+      "tests/e2e/pr02-drafts.spec.ts",
+      "tests/e2e/pr03-navigation.spec.ts",
+      "tests/e2e/pr04-numbers.spec.ts",
+      "tests/e2e/pr06-time-zones.spec.ts",
+      "tests/e2e/pr11-stays.spec.ts",
+      "tests/e2e/services.spec.ts",
+      "tests/e2e/subjects-async.spec.ts",
+      "tests/e2e/subjects.spec.ts",
+      "tests/e2e/tariffs.spec.ts",
+      "tests/e2e/ui01.spec.ts",
+      "tests/e2e/ui02.spec.ts",
+      "tests/e2e/ui03-states.spec.ts",
+      "tests/e2e/ui03.spec.ts",
+      "tests/e2e/ui04.spec.ts",
+      "tests/e2e/vessels-async.spec.ts",
+      "tests/e2e/vessels.spec.ts"
+    ],
+    "executed": false,
+    "planned": "K4 final build and same packaged executable; keyboard/focus/viewport/zoom plus PR08 structured comparisons"
+  },
+  "deferred": {
+    "build": true,
+    "package": true,
+    "desktop": true,
+    "integrated": true,
+    "opaqueComparison": "Rows/actions/counts/raw values retained; detailed comparison unavailable for calculation/configurations/context/specified/subjects/customer/agency/activity/steps/effectiveMoment and aggregated completion moments; PR08 structured contract required"
+  },
+  "verifiedInputs": {
+    "count": 110,
+    "sha256": "a9fd7feefd46303b94d2d969c0393827368a52c018817ee30998645c4e1d8987",
+    "source": ".local/pr07-verified-inputs.json",
+    "hashes": {
+      "package-lock.json": "c80b82df2d9737cb9b3257d5c3fdfbf6fc9ca9100bf9e5806c07cf2147038d96",
+      "package.json": "94f26797316013174eaec4477fc13609afacfc084aee52e109a7834bfc1533ad",
+      "scripts/test.mjs": "1c953c0f60fcae1c343703f46ae61019c1aab0b1b62b9166a67d781f3cd8eec1",
+      "src/backend/application/agencies/agency-service.ts": "13b3c3a3e7802ebe9359425cd1b7972acaeb821dcce9a24d59c2dbf380af1064",
+      "src/backend/application/berths/berth-service.ts": "fce86b523f71b265ddcde7a2983d23050ec16a57f2bad153f13f7768a0d5e80f",
+      "src/backend/application/catalog/catalog-service.ts": "2740b2e722c21abd018b6e9f7d084866509e3018adf8fb6e19763195193268d0",
+      "src/backend/application/catalog/weight-service.ts": "675769bfca2e1402fddd3ae7b11bc5f533304254ef0a07fe0368459354e69db6",
+      "src/backend/application/customers/customer-service.ts": "a891b2ba9ba7db37dc021bd1d06bff6c4dcc848f63daff8bcc81c8113eebab3e",
+      "src/backend/application/operations/assignment-service.ts": "54310d3f07ca9e5203b3212fb148faa0dd72adae81fe2db5549c0d4b5e146a7e",
+      "src/backend/application/operations/operation-completion.ts": "92053004d651ba95183a762b0d863ade4b25185ced217a92cd87aa4cfe628dbd",
+      "src/backend/application/operations/operation-impacts.ts": "d90ad073cd88b56fb83c495609788782dc6d10b9f5cba0b33734302cd862ff56",
+      "src/backend/application/operations/operation-insertion.ts": "4abae3bc8fb1655cac368f51c7c80d301479ffdae48bf376cba029a1e581c44b",
+      "src/backend/application/operations/operation-removal.ts": "6ceedd525144ec8c7360d3d09f6196fb8b06876e93b1c7545010ded216272c8a",
+      "src/backend/application/operations/operation-replay.ts": "2b429df5e220d853d6977c6bbad6d98ca9c8c56a05e6df82e0240511d3cf41e5",
+      "src/backend/application/operations/operation-service.ts": "5b3eff8ea7854cf8ca3021268562eee4c5fed51bdba028bf75d22657f5bf4d17",
+      "src/backend/application/operations/subject-resolution.ts": "af3d766f3c7def5876dfb4e5770c1405ef06a1f053128991b0272e4d9cb52f47",
+      "src/backend/application/ports/port-lifecycle-service.ts": "7dad3ce0d2e6fac6fdf044ad0f3b5908eebbdc240e3359204f349ade5594d410",
+      "src/backend/application/ports/version-change.ts": "0bc6408841b829c918807511feac9868f06079e9c4723a4af01c8ea2e3599f1c",
+      "src/backend/application/presentation/effect-descriptions.ts": "6d3addfb9105008d4af3c3df560a925dc047fc3db684a75477b989701a578718",
+      "src/backend/application/presentation/read-descriptions.ts": "4a18fbee9c5ce3abe18650bad582f577f1c43f19f96676a1eae105efcc8273cf",
+      "src/backend/application/services/service-service.ts": "5611591cf3667a00e1ace6cd61ab18073a8794a3b082a524fa3e04b678870cf8",
+      "src/backend/application/tariffs/tariff-maintenance.ts": "cbd84d46ebd4810870607e914e40aebc02ba7bb46e68232107c6194a59599a55",
+      "src/backend/application/tariffs/tariff-service.ts": "586ac3862c272f823233201e7000804f6833292e566d35874adc48c1d4708b28",
+      "src/backend/application/vessels/vessel-service.ts": "345ec7ca3e40397ddcd5afa91cdeee6c610d35fa33bf4ae8f80d03de217c39f9",
+      "src/backend/infrastructure/database/agency-repository.ts": "cd994f7fd2d2e02c2347a47c801f2b3fd0ea78e4aad551360f4ba560fdcd9c4f",
+      "src/backend/infrastructure/database/berth-repository.ts": "0bf905727dc955d8f757979544fbd79aaf1b848ba1271d4eddd627cf6493bc5d",
+      "src/backend/infrastructure/database/customer-repository.ts": "6da2a79bf627019988bd17b742a355085e1fc709114c719bf5799d21a95451b7",
+      "src/backend/infrastructure/database/descriptive-reference-repository.ts": "9c0445b7d571128b74fa59b626c40e7ced7df67ce5cdc3c6e242e50e1a1f15b3",
+      "src/backend/infrastructure/database/operation-replay-repository.ts": "7b3df2aa9340ff124ff263a5cd50b8a8c16936e9f38150265e8370bee0f005fe",
+      "src/backend/infrastructure/database/port-references.ts": "2902f259ce295b3d869bb9eb113d539f180a4f5c5a524bafd26bbd5738c7aba2",
+      "src/backend/infrastructure/database/port-repository.ts": "37cdec69b5fc05dce04d0e274598f3afc2a28160d7804aeb5444571530f61e95",
+      "src/backend/infrastructure/database/vessel-repository.ts": "415052c981f649fddaa7419550abb2edc706bc933cc3c93d0ea7995836846d94",
+      "src/renderer/src/api/master-data-names.ts": "60d3023e2c2a5ad5ab21a393e8a07e9c30419a58f0c05a0248d7c640e341bf12",
+      "src/renderer/src/api/operation-correction-outcome.ts": "cc260f669d26a2c457c25e1271bad71fa69b3bf3f5461a3c9f76e16d3dc6e54b",
+      "src/renderer/src/app/MasterDataListEntry.tsx": "4ac819bbff441b913882ee5347ca0ede3220c94d2fbccbe57bab7f367e1d4ab4",
+      "src/renderer/src/app/ReferenceValues.tsx": "075d611e447c39b96ffecbb5b2d94ceef1e7fb679d32c7087d60f9b10df6890b",
+      "src/renderer/src/app/agencies/Agencies.tsx": "978bcbe6b339ce32e951d43a2e0f0fc252bc76b06a7c250fdb95d269aa07b345",
+      "src/renderer/src/app/berths/Berths.tsx": "c28d75b751abb41a1ce441d9216b1b930248f9e190b99b334017bbbf2bdbd621",
+      "src/renderer/src/app/customers/Customers.tsx": "22b10b3f3945ad388245eca32b2debf6186c64d7deceeaecbb1053b41729ca64",
+      "src/renderer/src/app/operations/BerthPicker.tsx": "a79c1bfa529d8b921e4e0068ae156e1d9f3b634750c3e3994332bce999c55ab8",
+      "src/renderer/src/app/operations/OperationDetail.tsx": "2416bd175d8568175d26a2a21ed12b9c6e329b796860c89887ceafefd33ebaef",
+      "src/renderer/src/app/operations/Operations.tsx": "4d3f146272a0fc90817b1b578bb653c74e555e01b0caea647b6a745e786d21d2",
+      "src/renderer/src/app/operations/SubjectPicker.tsx": "564537ebb6a43a80b340ef737c5192c08189dddbfad08479570eb508fca18748",
+      "src/renderer/src/app/operations/SubjectValues.tsx": "36c21578f6ecae2f347190cc84b6f08ef8fa2a0df6ead719b7cb110844c30438",
+      "src/renderer/src/app/operations/VesselPicker.tsx": "fd3f416f2d0f7e3bd316d325e07a7f9e5b4589f9bd9f604f6e63200fc8190266",
+      "src/renderer/src/app/ports/PortConfirmation.tsx": "da0bcfe43108481e12803245f9230c5cef8eb19376182564920cdfb2f018985d",
+      "src/renderer/src/app/ports/PortDetail.tsx": "c5d87247ef8f50c0a6a9c0c37eed28f4ce61b4920c2ba7421b41025ec6f9a394",
+      "src/renderer/src/app/ports/PortList.tsx": "8dd3aeb6dedfaa3a64efc65dbc06c3bb9a51cc037e33277a3f939f4bfad28215",
+      "src/renderer/src/app/services/ServicePreview.tsx": "c8de7f0df636aa4c99343ca4b6118ad7284208c4be688d5f8c8385a62199ef22",
+      "src/renderer/src/app/services/Services.tsx": "073f93a2771f1d0237a19e06b2a7ee457ca4f6096737061a4048d23b8db9cd0e",
+      "src/renderer/src/app/tariffs/BaseCalculator.tsx": "bad503c918ef4e899278173f4073e315ef55cac6b012b16164f7575626d906e6",
+      "src/renderer/src/app/tariffs/ConfigurationFields.tsx": "2c4ce0c4ea04d72ef9de7fc4beffd3cb41d3e9a672e93dfa2fa5dbc50908372b",
+      "src/renderer/src/app/tariffs/PortPicker.tsx": "5d75db09cfd54956c7a9df74f168be4b102cb3bf26b5fb581afdd8500b56cbef",
+      "src/renderer/src/app/vessels/Vessels.tsx": "dfaf7779ae0d1392f49e26dcf3eac3bfe013cf65523e4e8edc5622b0136a39c0",
+      "src/shared/contracts/application.ts": "78dbb49ad3d275570e3db30d53f2c58614e498cb9cd9c8026b3a3b652117c223",
+      "src/shared/contracts/assignments.ts": "c96dbd240f13b7073ccb7d6baf6aeb5953fd7570e2852ec6c527f711f5f28a28",
+      "src/shared/contracts/berths.ts": "c49d5302297c8ca6b170f95b8b7d50f2d300a90e3c597ca13b52f526b0a80e17",
+      "src/shared/contracts/descriptive-references.ts": "b053c696929a9ca230060e6ce12c2118305ca6df4d3ff9a0cfa08b60192f550f",
+      "src/shared/contracts/master-data.ts": "6672a559712cc95bb4e97bfe404c70ae96253651cf51b991a1e59722f99dc06a",
+      "src/shared/contracts/operations.ts": "03052742761309bf0594281051f23e888c4bfe4cb4514392cce8101cce0d6e9b",
+      "src/shared/contracts/services.ts": "5ee89da0d95f2d4a8098a78979b7b320de0d3026e5574d0e9f3f93913a41a7e3",
+      "src/shared/contracts/tariffs.ts": "439edb741899bf0e39cca72981cd2881015651deb5f990b57cad6e367865c9ed",
+      "src/shared/description-labels.ts": "fd7d2484d1703e939c608f4156e8e2a7a3b790d7ae4248718eb3466ee57e2433",
+      "tests/e2e/assignments.spec.ts": "0869ffc6f308350a693dc03072e78b04a31a8f2bbfc1996bc90e95979ef111ae",
+      "tests/e2e/berths.spec.ts": "eafa53c77c9e95c0b5d88e2ad5cc835fd1a2f00b3dd43f57ddf35aa88d09b66e",
+      "tests/e2e/inter-port-movements.spec.ts": "6c74fe4cf84f2811cceec7e6b0c2709d369f6498d05af90c3294eeb876631f1f",
+      "tests/e2e/m4-maintenance.spec.ts": "22c8ab019cdbe72d01d58e694346b43a37a087fc6034dc5f21fd4e0a907b8d2f",
+      "tests/e2e/movements.spec.ts": "d1711624670f8bdcdf2c2eeda9dbfe0d75db68a6267e9260ecf66d4d3c5ace22",
+      "tests/e2e/operation-completion.spec.ts": "ebc7d1538608cd21e323b247eff42188d375278dfb9ec3c709ee898677df8d56",
+      "tests/e2e/operations-async.spec.ts": "8ed6c3e336b9be2d0083201991e683930786ca70b7bce04cefb8b932be8573c5",
+      "tests/e2e/operations.spec.ts": "5d51573c9bf2a3084c9ab41043fc22073f36e4945e232a4325d528d64f999771",
+      "tests/e2e/port-async.spec.ts": "482bf5da1d68bed6fa9b83436eb21b329e4f26d2223a84c266253fd1af65c4dd",
+      "tests/e2e/port-lifecycle.spec.ts": "9e6c0fe5e7df21976a0ebd1bc8646d223c4ed83405ef7b02d139198df1df38a7",
+      "tests/e2e/ports.spec.ts": "c33eb03e0d09c3101be0f97aaae365715e3eeec77d0f55b7c4685164604791af",
+      "tests/e2e/pr02-drafts.spec.ts": "38ce2546b72e2ec0aac4151216461d0418af78b1f31ad250ec0a710e951696fc",
+      "tests/e2e/pr03-navigation.spec.ts": "18bd7b895c3ff48941b2c523d08ec3ea6bd50dcfcb8888700e6333f087b1a54a",
+      "tests/e2e/pr04-numbers.spec.ts": "3ebd33c04552c79991e8e2cb786f2181ab3aee673ecdf405cdf7a92763326016",
+      "tests/e2e/pr06-time-zones.spec.ts": "cd0668d3d60ab468a1d45ea61efeee2643706310cb13b1a4698285324e7fdad8",
+      "tests/e2e/pr07-descriptions.spec.ts": "1c7b5d9e724310915495222b594b912b4bd13209ddc4080cc2583fb6579d1286",
+      "tests/e2e/pr11-stays.spec.ts": "2c2c578e9614fc598c2759a0aa051fd96eecb9320f5f2c59a66e942062345069",
+      "tests/e2e/services.spec.ts": "8309312c9289fbc8ddc304e5a4a272e21967c031bf94374de5761b96c9fb9857",
+      "tests/e2e/subjects-async.spec.ts": "0765c3f144f83259e8f859e7ee2016cee5ad150c254abdcead02d9418fee2a84",
+      "tests/e2e/subjects.spec.ts": "66b594058f49e32123e742722b529cee30a85c03c8f9f81128e723608ee23f15",
+      "tests/e2e/tariffs.spec.ts": "844d51346c38006093b2536a671bf72901cd3b74c9e18005b0bd0baec37b1d2c",
+      "tests/e2e/ui01.spec.ts": "2ea3671993cf20ccad4e64c6546fe92861c2284fa6b88f60ad29acec5e9b8252",
+      "tests/e2e/ui02.spec.ts": "372d8f930534d4257f8bf39c46dd0344345676c590e531ff46ce9efcde7dcd0a",
+      "tests/e2e/ui03-states.spec.ts": "803b718fb80fd1f216943266d742289a6cf719b78012bb85ec788f5c5443e7c2",
+      "tests/e2e/ui03.spec.ts": "e0f8f720e9444331eaf5ffaac6c8872cca6963aa49d1192955d70cc8b7488bf9",
+      "tests/e2e/ui04.spec.ts": "8fce19bf242e82db755f6079be3d44f8ee9306dbf4edc8310242163571566a60",
+      "tests/e2e/vessels-async.spec.ts": "e15bcc7d4863583f4a0bbd8c7bc3ef1b78071eb4555304991a3b5ca47dd9fc5e",
+      "tests/e2e/vessels.spec.ts": "f99c4dd4efd7bbc2be028089e4b277608e78defff7d295feaa7a6c594c54e22b",
+      "tests/unit/assignment-service.test.ts": "32e7686112f7c424043989aae2b4e3ebc54710321789cc090f36ebfc438c533d",
+      "tests/unit/consultation-state.test.tsx": "bccf7eab7adf14bb8f8c60d48c922dcc5d13d1a8d92f72dda969dbaa32a8015f",
+      "tests/unit/descriptive-callers.test.tsx": "e95738c5cc152279c9886b11bc17e7127fe9f0e49fdc58198631ed1c4e5ecaf6",
+      "tests/unit/descriptive-references.test.ts": "bc35b763732013e2fcb761b24901a11ce8751c4213f006a52ad30c028a81988f",
+      "tests/unit/numeric-callers.test.tsx": "4a61e435f02930c508b7895c773f68dcb0036669aa4fe9423807651e57b1d1ae",
+      "tests/unit/operation-completion.test.ts": "6494d00e2a2473a2302d2bb4be30f0fe1686d4d9f781c73f901e86ef6c37f55d",
+      "tests/unit/operation-correction.test.ts": "7978fbc70e47b20c3d6da4ef6f5016e414b4f555a232f917e4f26a2733a02491",
+      "tests/unit/operation-deletion.test.ts": "7caf630700029721abb65b8bec6d84048eefcd53b04e0b9322961ddeac269138",
+      "tests/unit/operation-insertion.test.ts": "3d8f53ad6e3581a1228e6909f207938b8c70b8f59738d795dee05dd4e8e27f6d",
+      "tests/unit/operation-service.test.ts": "33fa9a41c94a21a2750635b2eed8c2a76bda69854efd3001b7e63b710348ac85",
+      "tests/unit/port-lifecycle.test.ts": "087e8acf0920ed81cbfedbbebc229a39fb244f7ea016ee1ea74c7a4429820ece",
+      "tests/unit/service-service.test.ts": "ca22389577bbf88f49863ed01db022e53a84acaf93c27f68e1d795d8df121d4f",
+      "tests/unit/support/without-descriptions.ts": "b30ece8411171f6e5d36fa831ddd811bf6795c687c65b58bcf088f4455d8f44a",
+      "tests/unit/tariff-maintenance.test.ts": "a1895a56b952b7999813d17e475ea8904fd39702278c9e552c5ec120a04480e0",
+      "tests/unit/tariff-service.test.ts": "eb6e7f78513acfa087b9de408e730d22d4115088f87d5b6cf4af32aa58166f42",
+      "tests/unit/weight-service.test.ts": "0c77909876b866ad5d6945a4b13d11e3ed3be03b2d6278baa42db3a947eb0ca8",
+      "tsconfig.node.json": "2c8d6a7cdc739ee5be0f0817a946805046a0a5cbba2ce3aec4b23ad4de20a073",
+      "tsconfig.web.json": "522606e63a649cefaf8209e9e4cb4e519aa7d5fc9085ad4f34978027d9e69f38",
+      "vitest.config.ts": "012e91276e4d2bbcc3b6d5727ad3bc5274da1935ce634f6cd6259e6b0bcbae2e"
+    }
+  },
+  "implementationCommit": "3cfd48c2a27782c0669f12833e720a0c764814ea",
+  "commitVerification": {
+    "authorization": "Explicit user request: effettua le commit",
+    "unitResultsReused": "896/896 definitive Electron unit suite; all 110 verified input hashes unchanged",
+    "desktopBuildPackage": "deferred to K4; not executed for versioning",
+    "documentation": {
+      "profile": "documentazione",
+      "summary": "test-results/verification/2026-11-25T11-06-18.567Z-coordinator-oqevzl/summary.md",
+      "exitCode": 1,
+      "phases": {
+        "documents": 0,
+        "diff": 0,
+        "formatting": 1
+      },
+      "unchangedFormattingDifference": "doc/dev/punti-issue.md",
+      "finalSelectiveChecks": [
+        "UTF-8 and Markdown links",
+        "Prettier on the five delivery documents",
+        "git diff --check"
+      ]
+    }
+  }
+}

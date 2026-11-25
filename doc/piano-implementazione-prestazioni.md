@@ -78,6 +78,8 @@ M3 è il primo traguardo dimostrabile della gestione delle prestazioni. M4 compl
 
 Non si anticipano campi fiscali, armatori, personale o unità di misura assenti dalle specifiche iniziali. L'IMO rimane un identificativo testuale facoltativo; eventuali ulteriori vincoli di formato devono avere una decisione esplicita.
 
+Nomi/descrizioni sono i titoli principali e il testo iniziale delle opzioni; nessun prefisso progressivo sistematico. La disambiguazione usa le tuple realmente consentite (porto: località/paese; banchina: proprietario; nave: IMO quando presente), indipendentemente da pagina e filtro. Il codice stabile rimane secondario. I riferimenti applicati descrivono la versione storica salvata, mentre il catalogo usa la descrizione corrente; ID e prenotazioni restano invariati. [Contratti, censimento e confine PR08](pr07/nomi-etichette-riferimenti.md).
+
 Per le cinque anagrafiche operative:
 
 - identità tecnica distinta dal codice progressivo visibile;
